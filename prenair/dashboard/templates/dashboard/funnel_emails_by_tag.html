@@ -1,0 +1,849 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Funnel Emails by Tag{% endblock title %}
+{% load course_filters %}
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    .main-content {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 24px;
+        padding: 40px;
+        margin: 20px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .main-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255, 111, 97, 0.1) 0%, rgba(30, 58, 138, 0.1) 100%);
+        pointer-events: none;
+    }
+    
+    .main-content > * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        letter-spacing: -0.02em;
+    }
+    
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 8px;
+        font-weight: 400;
+    }
+    
+    .tags-section {
+        margin-bottom: 40px;
+    }
+    
+    .tags-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .tags-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 111, 97, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff6f61;
+        font-size: 16px;
+    }
+    
+    .tags-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+    }
+    
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .tag-btn {
+        padding: 12px 24px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        font-size: 0.95rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tag-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .tag-btn:hover::before {
+        left: 100%;
+    }
+
+    .tag-btn:hover {
+        background: rgba(255, 111, 97, 0.3);
+        border-color: #ff6f61;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 111, 97, 0.3);
+    }
+
+    .tag-btn.active {
+        background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%);
+        border-color: #ff6f61;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 111, 97, 0.4);
+    }
+    
+    .emails-section {
+        background: white;
+        border-radius: 20px;
+        padding: 0;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .emails-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 24px 32px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .emails-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1e3a8a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .emails-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+    
+    .email-count {
+        background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .emails-container {
+        padding: 32px;
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .emails-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .emails-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+    
+    .emails-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 3px;
+    }
+
+    .email-item {
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .email-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .email-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .email-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .email-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .email-text {
+        color: #475569;
+        font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .no-emails {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    
+    .no-emails-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 32px;
+        color: #94a3b8;
+    }
+    
+    .no-emails-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #475569;
+    }
+    
+    .no-emails-subtext {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    
+    .stats-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px 24px;
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stat-item {
+        text-align: center;
+        color: white;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #ff6f61;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        font-weight: 500;
+        margin-top: 4px;
+    }
+.email-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.email-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.email-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: auto;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.email-modal.active .email-modal-content {
+    transform: translateY(0);
+}
+
+.email-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+.email-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin: 0;
+}
+
+.email-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.email-modal-close:hover {
+    color: #1e3a8a;
+}
+
+.email-modal-body {
+    padding: 20px;
+}
+
+.email-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #f8fafc;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Form Elements */
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: white;
+    margin-bottom: 15px;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.modal-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    border-radius: 0px 42px 42px 42px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, #ff6f61 0%, #ff6f61 100%);
+    color: white;
+    border: none;
+}
+
+.modal-btn-primary:hover {
+    background: linear-gradient(135deg, #ff6f61 0%, #ff6f61 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+}
+
+.modal-btn-secondary {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+.modal-btn-secondary:hover {
+    background: #f1f5f9;
+    color: #1e3a8a;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+ 
+    .tag-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+ .email-tag-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .email-tag-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+.email-tag-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+    
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 24px 20px;
+            margin: 10px 0;
+            border-radius: 16px;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .tags {
+            gap: 8px;
+        }
+        
+        .tag-btn {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+        }
+        
+        .emails-header {
+            padding: 20px 24px;
+        }
+        
+        .emails-container {
+            padding: 24px;
+        }
+        
+        .stats-bar {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+        
+        .stat-item {
+            width: 100%;
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .email-item {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    
+    .email-item:nth-child(even) {
+        animation-delay: 0.1s;
+    }
+    
+    .email-item:nth-child(odd) {
+        animation-delay: 0.05s;
+    }
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface"
+            style="background: url({% static 'home/images/banner.png' %}); background-size: cover; background-position: center;">
+            <div class="container h-fit lg:px-15 lg:pb-30 max-lg:px-12 max-sm:px-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+                    data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+
+                <div class="main-content">
+                    <div class="page-header">
+                        <h1 class="page-title">Funnel Email Analytics</h1>
+                        <p class="page-subtitle">Organize and manage your leads by tags with powerful insights</p>
+                    </div>
+                    
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span class="stat-number" id="total-tags">0</span>
+                            <div class="stat-label">Active Tags</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="total-emails">0</span>
+                            <div class="stat-label">Total Leads</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="current-tag-count">0</span>
+                            <div class="stat-label">Current Selection</div>
+                        </div>
+                    </div>
+
+                    <div class="tags-section">
+                        <div class="tags-header">
+                            <div class="tags-icon">🏷️</div>
+                            <h3 class="tags-title">Filter by Tags</h3>
+                        </div>
+                        <div class="tags">
+                            {% for tag, emails in tag_emails.items %}
+                            <div class="tag-actions">
+                                <button class="tag-btn" onclick="filterEmails('{{ tag }}')">
+                                    {{ tag_display_names|get_item:tag }}
+                                </button>
+                                <button class="email-tag-btn" title="Email {{ emails|length }} contacts"
+                                    onclick="event.stopPropagation(); openEmailModal('{{ tag }}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ emails|length }}
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="emails-section">
+                        <div class="emails-header">
+                            <div class="emails-title">
+                                <div class="emails-icon">📧</div>
+                                <span id="current-tag-title">Email Leads</span>
+                            </div>
+                            <div class="email-count" id="email-count">0 emails</div>
+                        </div>
+                        <div id="emails" class="emails-container">
+                            <!-- Emails will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Email Modal -->
+<div id="emailModal" class="email-modal">
+    <div class="email-modal-content">
+        <div class="email-modal-header">
+            <h3 class="email-modal-title">Send Email to <span id="modalTagName"></span></h3>
+            <button class="email-modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="email-modal-body">
+            <form id="emailForm" onsubmit="sendEmail(event)">
+                <input type="hidden" id="selectedTag" name="tag">
+                
+                <input type="text" id="subject" name="subject" required 
+                       class="modal-input" placeholder="Email Subject">
+                
+                <textarea id="body" name="body" required
+                          class="modal-input modal-textarea" placeholder="Write your message here..."></textarea>
+            </form>
+        </div>
+        <div class="email-modal-footer">
+            <button type="button" onclick="closeModal()" class="modal-btn modal-btn-secondary">
+                Cancel
+            </button>
+            <button type="submit" form="emailForm" class="modal-btn modal-btn-primary send-email-btn">
+                <span id="sendButtonText">Send Email</span>
+                <span id="spinner" class="spinner" style="display: none;"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+{% include 'work_prenair/partials/mb-menu.html' %}
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+</div>
+
+{% endblock %}
+
+{% block extra_javascript %}
+
+<script>
+    const tagEmails = {{ tag_emails| safe }};
+    let currentTag = '';
+
+    function updateStats() {
+        const totalTags = Object.keys(tagEmails).length;
+        const totalEmails = Object.values(tagEmails).reduce((sum, emails) => sum + emails.length, 0);
+        const currentTagCount = currentTag ? tagEmails[currentTag]?.length || 0 : 0;
+        
+        document.getElementById('total-tags').textContent = totalTags;
+        document.getElementById('total-emails').textContent = totalEmails;
+        document.getElementById('current-tag-count').textContent = currentTagCount;
+    }
+
+    function filterEmails(tag) {
+    currentTag = tag;
+    
+    // Update active button
+    document.querySelectorAll('.tag-btn').forEach(btn => btn.classList.remove('active'));
+    const clickedBtn = [...document.querySelectorAll('.tag-btn')].find(b => b.innerText.toLowerCase() === tag.toLowerCase());
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    // Update header
+    document.getElementById('current-tag-title').textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} Leads`;
+    
+    const container = document.getElementById("emails");
+    container.innerHTML = '';
+
+    if (!tagEmails[tag] || tagEmails[tag].length === 0) {
+        container.innerHTML = `
+            <div class="no-emails">
+                <div class="no-emails-icon">📭</div>
+                <div class="no-emails-text">No emails found</div>
+                <div class="no-emails-subtext">This tag doesn't have any email leads yet</div>
+            </div>
+        `;
+        document.getElementById('email-count').textContent = '0 emails';
+        updateStats();
+        return;
+    }
+
+    // Update email count
+    document.getElementById('email-count').textContent = `${tagEmails[tag].length} email${tagEmails[tag].length !== 1 ? 's' : ''}`;
+
+    tagEmails[tag].forEach((email, index) => {
+        const div = document.createElement("div");
+        div.classList.add("email-item");
+        div.style.animationDelay = `${index * 0.05}s`;
+        div.innerHTML = `<div class="email-text">${email}</div>`;
+        container.appendChild(div);
+    });
+    
+    updateStats();
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const tagsContainer = document.querySelector('.tags');
+    tagsContainer.innerHTML = '';
+    
+    // Add new buttons with email functionality
+    for (const tag in tagEmails) {
+        const tagWrapper = document.createElement('div');
+        tagWrapper.className = 'tag-actions';
+        
+        const tagBtn = document.createElement('button');
+        tagBtn.className = 'tag-btn';
+        tagBtn.textContent = "{{ tag_display_names|get_item:'" + tag + "' }}";
+        tagBtn.onclick = () => filterEmails(tag);
+        
+        const emailBtn = document.createElement('button');
+        emailBtn.className = 'email-tag-btn';
+        emailBtn.title = `Email ${tagEmails[tag].length} contacts`;
+        emailBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            ${tagEmails[tag].length}
+        `;
+        emailBtn.onclick = (e) => {
+            e.stopPropagation();
+            openEmailModal(tag);
+        };
+        
+        tagWrapper.appendChild(tagBtn);
+        tagWrapper.appendChild(emailBtn);
+        tagsContainer.appendChild(tagWrapper);
+    }
+    
+    const firstTag = Object.keys(tagEmails)[0];
+    if (firstTag) {
+        filterEmails(firstTag);
+    }
+    updateStats();
+});
+
+
+function openEmailModal(tag) {
+    document.getElementById('selectedTag').value = tag;
+    document.getElementById('modalTagName').textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+    document.getElementById('emailModal').classList.add('active');
+    document.body.style.overflow = 'hidden'; 
+}
+
+function closeModal() {
+    document.getElementById('emailModal').classList.remove('active');
+    document.body.style.overflow = ''; 
+}
+
+document.getElementById('emailModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+async function sendEmail(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const sendButton = document.querySelector('.send-email-btn');
+    const spinner = document.getElementById('spinner');
+    const sendButtonText = document.getElementById('sendButtonText');
+    
+    sendButton.disabled = true;
+    spinner.style.display = 'inline-block';
+    sendButtonText.textContent = 'Sending';
+    
+    try {
+        const response = await fetch('/dashboard/funnels/send-tag-email/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const successMessage = document.createElement('div');
+            successMessage.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4';
+            successMessage.innerHTML = `
+                <strong class="font-bold">Success!</strong>
+                <span class="block sm:inline">${data.message}</span>
+            `;
+            document.querySelector('.email-modal-body').prepend(successMessage);
+            
+            setTimeout(() => {
+                successMessage.remove();
+            }, 3000);
+            
+            form.reset();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('An error occurred: ' + error.message);
+    } finally {
+        sendButton.disabled = false;
+        spinner.style.display = 'none';
+        sendButtonText.textContent = 'Send Email';
+    }
+}
+
+</script>
+
+{% endblock extra_javascript %}

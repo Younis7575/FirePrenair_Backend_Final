@@ -1,0 +1,84 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Profile - About {% endblock title %}
+{% block content %}
+
+
+
+{% include 'commu_prenair/partials/menu.html' %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        {% include 'commu_prenair/partials/profile_topbar.html' %}
+        <div class="row">
+            <div class="col-xxl-9 col-xl-8 col-lg-7">
+                <div class="single-box p-3 p-sm-5">
+                    <div class="head-area text-start">
+                        <div style="display: flex; justify-content: space-between;">
+                        <h6>Bio</h6>
+                        <div class="input-item d-center text-start">
+                            
+                            <div class="group-btn cus-dropdown dropend">
+                                <button type="button" class="dropdown-btn d-center ps-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="material-symbols-outlined fs-xxl m-0"> more_horiz </i>
+                                </button>
+                                <ul class="dropdown-menu p-4 pt-2">
+                                    <li>
+                                        <a class="droplist d-flex align-items-center gap-2" href="{% url 'profile_settings' %}">
+                                            <i class="material-symbols-outlined mat-icon"> edit </i>
+                                            <span>Edit</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
+                        <p class="mdtxt mt-6">“{{user.commu_bio}}”.</p>
+                    </div>
+                    <ul class="d-grid gap-3 mt-4">
+                        <li class="d-center gap-3 justify-content-between">
+                            <div class="info-area d-flex align-items-center gap-2">
+                                <i class="material-symbols-outlined mat-icon"> flag </i>
+                                <span class="mdtxt link">{{user.email}}</span>
+                            </div>
+                        </li>
+                        <li class="d-center gap-3 justify-content-between">
+                            <div class="info-area d-flex align-items-center gap-2">
+                                <i class="material-symbols-outlined mat-icon"> pin_drop </i>
+                                <span class="mdtxt">{{user.country}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+
+<script src="{% static 'commu_prenair/assets/js/posts.js' %}"></script>
+    
+{% endblock javascript %}

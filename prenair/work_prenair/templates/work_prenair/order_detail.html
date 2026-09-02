@@ -1,0 +1,511 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Dashboard{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+{% include "work_prenair/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+        <section class="jobs_detail">
+            <div class="container flex max-lg:flex-col gap-y-10">
+                <div class="jobs_info w-full lg:pr-15">
+                    <div class="overview">
+                        <h6 class="heading6">Order Overview</h6>
+                        <ul class="list_overview grid sm:grid-cols-3 grid-cols-2 gap-6 w-full mt-4">
+                            <li class="flex items-center gap-3">
+                                <span class="ph ph-calendar-blank flex-shrink-0 text-4xl"></span>
+                                <div>
+                                    <span class="block text-secondary">Date Order Placed:</span>
+                                    <strong style="border-bottom: 2px solid rgb(255, 115, 0);" class="text-button">{{order.created_at.date}}</strong>
+                                </div>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="ph ph-clock-countdown flex-shrink-0 text-4xl"></span>
+                                <div>
+                                    <span class="block text-secondary">Delivery date:</span>
+                                    <strong style="border-bottom: 2px solid rgb(255, 115, 0);" class="text-button">{{order.delivery_date.date}}</strong>
+                                </div>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="ph ph-status flex-shrink-0 text-4xl"></span>
+                                <div>
+                                    <span style="margin-bottom: 5px;" class="block text-secondary">Status:</span>
+                                    {% if order.status == 'pending_requirements' %}
+                                    <strong style="background-color: #ff6f61; color: white; padding: 10px; border-radius: 10px;" class="text-button">{{order.status}}</strong>
+                                    {% elif order.status == 'active' %}
+                                    <strong style="background-color: #1e3a8a; color: white; padding: 10px; border-radius: 10px;" class="text-button">{{order.status}}</strong>
+                                    {% elif order.status == 'delivered' %}
+                                    <strong style="background-color: rgb(239, 188, 6); color: white; padding: 10px; border-radius: 10px;" class="text-button">{{order.status}}</strong>
+                                    {% elif order.status == 'completed' %}
+                                    <strong style="background-color: #06cf1a; color: white; padding: 10px; border-radius: 10px;" class="text-button">{{order.status}}</strong>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="ph ph-price flex-shrink-0 text-4xl">$</span>
+                                <div>
+                                    <span class="block text-secondary">Price:</span>
+                                    <strong class="text-button">${{order.price}}</strong>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="description md:mt-10 mt-7">
+                        <h6 style="border-bottom: 2px solid rgb(255, 115, 0); width: fit-content;" class="heading6">Full Job Description</h6>
+                        <p class="mt-3 body2 text-secondary">{{order.gig.title}}</p>
+                        <div class="mt-5">
+                            <h6 style="border-bottom: 2px solid rgb(255, 115, 0); width: fit-content;" class="heading6">Order Requirements</h6>
+                            <p class="mt-3 body2 text-secondary">{{order.requirements}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Delivered Work Section -->
+                     {% if order.deliveries %}
+                    <div class="related lg:mt-15 mt-8">
+                        <h5 class="heading5">Delivered Work</h5>
+                        <ul class="list_related flex flex-col md:gap-7.5 gap-6 w-full mt-5">
+                            {% for delivery in order.deliveries %}
+                            <li class="jobs_item px-6 py-5 rounded-lg bg-white shadow-md duration-300 hover:shadow-xl">
+                                <div class="jobs_info flex gap-4 w-full pb-4 border-b border-line">
+                                    <a href="{% url 'gig_detail' order.gig.slug %}" class="overflow-hidden flex-shrink-0 w-15 h-15">
+                                        <img src="{{ order.gig.image.url }}" alt="company/3" class="jobs_avatar w-full h-full object-cover" />
+                                    </a>
+                                    <div class="jobs_content flex items-center justify-between gap-2 w-full">
+                                        <a href="#" class="jobs_detail flex flex-col gap-0.5 duration-300 hover:text-primary">
+                                            <span class="jobs_company text-sm font-semibold text-primary">{{ order.gig.user.name }}</span>
+                                            <strong class="jobs_name text-title -style-1">{{ order.gig.title|slice:":100" }}</strong>
+                                            <div class="flex flex-wrap items-center gap-5 gap-y-1">
+                                                <div class="jobs_address -style-1 text-secondary">
+                                                    <span class="ph ph-map-pin text-lg"></span>
+                                                    <span class="address caption1 align-top">{{ order.gig.user.country }}</span>
+                                                </div>
+                                                <div class="jobs_date text-secondary">
+                                                    <span class="ph ph-calendar-blank text-lg"></span>
+                                                    <span class="date caption1 align-top">{{ delivery.created_at.date }}</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <a href="{{ delivery.file.url }}" download class="jobs_tag caption1 tag bg-surface duration-300 hover:bg-primary hover:text-white" style="background-color: #ff6f61;">Download</a>
+                                    {% if request.user == order.user and not order.is_completed %}
+                                    <button class="jobs_tag btn_open_popup btn_delete caption1 tag bg-surface duration-300 hover:bg-primary hover:text-white" style="background-color: #ff6f61;" data-type="modal_delete" data-slug="{{ delivery.slug }}">Request Revision</button>
+                                    {% endif %}
+                                </div>
+                        
+                                <!-- List all revisions -->
+                                {% if delivery.revision_requests.exists %}
+                                <div class="revisions mt-6 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+                                    <h5 class="text-lg font-bold text-gray-800 mb-4">Revisions</h5>
+                                    <ul class="revision_list divide-y divide-gray-200">
+                                        {% for revision in delivery.revision_requests.all %}
+                                        <li class="revision_item py-4">
+                                            <div class="flex justify-between items-center">
+                                                <p class="text-gray-600 text-sm">
+                                                    <strong class="text-gray-800">Message:</strong> {{ revision.message }}
+                                                </p>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                <span class="font-medium">Date:</span> {{ revision.created_at|date:"F j, Y, g:i A" }}
+                                            </p>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% else %}
+                                <div class="no_revisions mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                                    <p class="text-gray-500 font-medium text-sm">No revisions have been requested yet.</p>
+                                </div>
+                                {% endif %}
+                                
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        
+                    </div>
+                    {% endif %}
+
+                    {% if order.is_completed %}
+                    <!-- Review System -->
+                    <div class="review md:mt-15 mt-8">
+                        <div class="heading flex flex-wrap items-center justify-between gap-4">
+                            <h5 class="heading5">Order Reviews</h5>
+                        </div>
+                        {% if request.user == order.user %}
+                        {% if order.has_client_reviewed %}
+                        <div class="list_review flex flex-col gap-10 md:pt-10 pt-7 border-t border-line">
+                            <ul class="list flex flex-col gap-6">
+                                {% for review in order.order_review.all %}
+                                <li class="review_item flex gap-5">
+                                    <img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />
+                                    <div class="review_content w-full">
+                                        <div class="flex flex-wrap justify-between gap-6 gap-y-3 w-full">
+                                            <div class="user_info">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="name heading6">{{review.user.username}}</span>
+                                                </div>
+                                                <span class="date caption1 text-secondary">{{review.created_at.date}}</span>
+                                                <ul class="review_rate flex mt-1">
+                                                    {% for i in rating_range %}
+                                                        <li class="ph-fill ph-star {% if i <= review.rating %}text-yellow{% else %}text-line{% endif %}"></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <p class="desc mt-4">{{review.review}}</p>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        
+                        {% if request.user == order.gig.user %}
+                        {% if order.has_seller_reviewed %}
+                        <div class="list_review flex flex-col gap-10 md:pt-10 pt-7 border-t border-line">
+                            <ul class="list flex flex-col gap-6">
+                                {% for review in order.order_review.all %}
+                                <li class="review_item flex gap-5">
+                                    <img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />
+                                    <div class="review_content w-full">
+                                        <div class="flex flex-wrap justify-between gap-6 gap-y-3 w-full">
+                                            <div class="user_info">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="name heading6">{{review.user.username}}</span>
+                                                </div>
+                                                <span class="date caption1 text-secondary">{{review.created_at.date}}</span>
+                                                <ul class="review_rate flex mt-1">
+                                                    {% for i in rating_range %}
+                                                        <li class="ph-fill ph-star {% if i <= review.rating %}text-yellow{% else %}text-line{% endif %}"></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <p class="desc mt-4">{{review.review}}</p>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        
+                        {% if request.user == order.user and not order.has_client_reviewed %}
+                        <div id="form-review" class="form-review md:pt-10 pt-7">
+                            <h6 class="heading6">Leave A Review</h6>
+                            <form method="POST" action="{% url 'order_review' order.slug %}" class="form grid sm:grid-cols-2 gap-4 gap-y-5 mt-6">
+                                {% csrf_token %}
+                                
+                                <div class="col-span-full message">
+                                    <label for="review">Review</label>
+                                    <textarea class="border w-full mt-2 px-4 py-3 border-line rounded-lg" id="review" name="review" rows="3" placeholder="Write your comment" required></textarea>
+                                </div>
+                                
+                                <div class="user_rating flex items-center gap-3 col-span-full">
+                                    <span>Your Rating:</span>
+                                    <ul class="list_rate flex gap-1">
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="1"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="2"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="3"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="4"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="5"></li>
+                                    </ul>
+                                    <input type="hidden" id="rating" name="rating" required>
+                                </div>
+                                
+                                <div class="col-span-full">
+                                    <button type="submit" class="category-btn-final">Post Review</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% elif request.user == order.gig.user %}
+                        {% if order.has_client_reviewed and not order.has_seller_reviewed %}
+                        <div id="form-review" class="form-review md:pt-10 pt-7">
+                            <h6 class="heading6">Leave A Review</h6>
+                            <form method="POST" action="{% url 'order_review' order.slug %}" class="form grid sm:grid-cols-2 gap-4 gap-y-5 mt-6">
+                                {% csrf_token %}
+                                
+                                <div class="col-span-full message">
+                                    <label for="review">Review</label>
+                                    <textarea class="border w-full mt-2 px-4 py-3 border-line rounded-lg" id="review" name="review" rows="3" placeholder="Write your comment" required></textarea>
+                                </div>
+                                
+                                <div class="user_rating flex items-center gap-3 col-span-full">
+                                    <span>Your Rating:</span>
+                                    <ul class="list_rate flex gap-1">
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="1"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="2"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="3"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="4"></li>
+                                        <li class="ph-fill ph-star star text-2xl text-line cursor-pointer" data-value="5"></li>
+                                    </ul>
+                                    <input type="hidden" id="rating" name="rating" required>
+                                </div>
+                                
+                                <div class="col-span-full">
+                                    <button type="submit" class="category-btn-final">Post Review</button>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+
+
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="jobs_sidebar lg:sticky lg:top-24 flex-shrink-0 lg:w-[380px] w-full h-fit">
+                    <div class="about overflow-hidden rounded-xl bg-white shadow-md duration-300">
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-line">
+                            <h6 class="heading6">About</h6>
+                        </div>
+                        <div class="employer_info p-5">
+                            <a href="{% url 'gig_detail' order.gig.slug %}" class="flex items-center gap-5 w-full">
+                                <img src="{{order.gig.image.url}}" alt="company/1" class="flex-shrink-0 w-20 h-20" />
+                                <div>
+                                    <strong class="employers_name heading6">{{order.gig.title}}</strong>
+                                    <span class="employers_establish text-secondary">Order on {{order.created_at.date}}</span>
+                                </div>
+                            </a>
+                            <div class="industry flex items-center justify-between w-full py-5 border-b border-line">
+                                <span class="text-secondary">Order ID:</span>
+                                <strong class="text-button">#{{order.id}}</strong>
+                            </div>
+                            <div class="industry flex items-center justify-between w-full py-5 border-b border-line">
+                                <span class="text-secondary">Industry:</span>
+                                <strong class="text-button">{{order.gig.category_level_1.name}}</strong>
+                            </div>
+                            <div class="size flex items-center justify-between w-full py-5 border-b border-line">
+                                <span class="text-secondary">Price:</span>
+                                <strong class="text-button">${{order.price}}</strong>
+                            </div>
+                            {% if request.user == order.user %}
+                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.gig.user.slug }}" class="category-btn-final" style="color: white;">Send Message to Seller</a>
+                            {% if order.is_delivered and not order.is_completed %}
+                            <div style="margin-top: 1rem;">
+                            <a href="{% url 'order_complete' order.slug %}" class="button-main w-full text-center category-btn-final" style="background-color: #ff6f61;">Complete Order</a>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                            </div>
+                            {% endif %}
+                            {% if order.status == 'pending_requirements' %}
+                            <div class="size flex items-center justify-between w-full py-5 border-b border-line">
+                                <button class="apply_btn btn_open_popup category-btn-final text-center w-full" data-type="modal_submit">Submit Requirements</button>
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.user.slug }}" class="category-btn-final" style="color: white;">Send Message to Buyer</a>
+                            {% if not order.is_delivered %}
+                            <div class="size flex items-center justify-between w-full py-5 border-b border-line">
+                               <button class="apply_btn btn_open_popup category-btn-final text-center w-full" data-type="modal_apply">Deliver Now</button>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% include "dashboard/partials/footer_cta.html" %}
+    </div>
+    <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+        <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+    </div>
+</div>
+</div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+    <div class="modal_item modal_delete relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_delete">
+        <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+            <h5 class="heading5">Request Revision</h5>
+            <button class="close_popup_btn">
+                <span class="ph ph-x text-2xl"></span>
+            </button>
+        </div>
+        <form method="POST" class="p-7.5" action="">
+            {% csrf_token %}
+            <div class="cover_letter">
+                <label for="message" class="label caption1">Message <span class="text-red">*</span></label>
+                <textarea 
+                    id="message" 
+                    name="message" 
+                    class="w-full h-32 mt-2 px-4 py-3 border border-line rounded" 
+                    placeholder="Enter your message" 
+                    required
+                ></textarea>
+            </div>
+            <button type="submit" class="category-btn-final mt-5">Request Revision</button>
+        </form>
+    </div>
+    <div class="modal_item modal_submit relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_submit">
+        <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+            <h5 class="heading5">Submit Requirements</h5>
+            <button class="close_popup_btn">
+                <span class="ph ph-x text-2xl"></span>
+            </button>
+        </div>
+        <form method="POST" class="p-7.5" action="{% url 'submit_order_requirements' order.id %}">
+            {% csrf_token %}
+            <div class="cover_letter">
+                <label for="message" class="label caption1">Requirements <span class="text-red">*</span></label>
+                <textarea 
+                    id="requirements" 
+                    name="requirements" 
+                    class="w-full h-32 mt-2 px-4 py-3 border border-line rounded" 
+                    placeholder="Enter your requirements" 
+                    required
+                ></textarea>
+            </div>
+            <button type="submit" class="category-btn-final mt-5">Submit</button>
+        </form>
+    </div>
+
+    <div class="modal_item modal_apply overflow-hidden md:w-[660px] w-[90vw] rounded-xl bg-white" data-type="modal_apply">
+        <div class="flex items-center justify-between px-7.5 py-6 border-b border-line">
+            <h6 class="heading6">Submit Work</h6>
+            <button class="close_popup_btn">
+                <span class="ph ph-x text-2xl"></span>
+            </button>
+        </div>
+        <form method="POST" enctype="multipart/form-data" class="p-7.5" id="deliveryForm" action="{% url 'order_delivery' order.slug %}">
+            {% csrf_token %}
+        <!-- Message -->
+        <div class="cover_letter">
+            <label for="message" class="label caption1">Message <span class="text-red">*</span></label>
+            <textarea 
+                id="message" 
+                name="message" 
+                class="w-full h-32 mt-2 px-4 py-3 border border-line rounded" 
+                placeholder="Enter your message" 
+                required
+            ></textarea>
+        </div>
+
+        <!-- File Upload -->
+        <div class="file_upload mt-5">
+            <label for="file" class="label caption1">File (ZIP only) <span class="text-red">*</span></label>
+            <input 
+                type="file" 
+                name="file" 
+                id="file" 
+                accept=".zip" 
+                class="w-full px-4 py-3 border border-line rounded cursor-pointer" 
+                required
+            />
+            <small class="block mt-2 text-sm text-gray-500">Only ZIP files are accepted.</small>
+        </div>
+
+        <!-- Loader (Hidden by Default) -->
+        <div 
+            id="loader" 
+            class="hidden mt-5 text-center text-blue-500 font-medium"
+        >
+            Uploading file, please wait...
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+            type="submit" 
+            id="submitBtn" 
+            class="category-btn-final mt-5"
+        >
+            Deliver Work
+        </button>
+    </form>
+        
+    </div>
+
+</div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("file");
+    const loader = document.getElementById("loader");
+    const submitBtn = document.getElementById("submitBtn");
+    const form = document.getElementById("deliveryForm");
+
+    // Disable the submit button initially
+    submitBtn.disabled = true;
+
+    // Enable submit button only when a file is selected
+    fileInput.addEventListener("change", (e) => {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+
+            // Check if the selected file is a ZIP file
+            if (file.type === "application/zip" || file.name.endsWith(".zip")) {
+                submitBtn.disabled = false;
+            } else {
+                alert("Please upload a valid ZIP file.");
+                fileInput.value = ""; // Clear the input
+                submitBtn.disabled = true;
+            }
+        }
+    });
+
+    form.addEventListener("submit", (e) => {
+        loader.classList.remove("hidden"); 
+        submitBtn.disabled = true; 
+    });
+
+
+    const button = document.querySelector(".btn_delete");
+    console.log(button);
+    const modal = document.querySelector(".modal_item[data-type='modal_delete']");
+    const form_rev = modal.querySelector("form");
+    const closeButtons = modal.querySelectorAll(".close_popup_btn");
+
+            button.addEventListener("click", () => {
+                console.log("click");
+                const slug = button.getAttribute("data-slug");
+                const url = `/workprenair/order/${slug}/revision/`; 
+                form_rev.setAttribute("action", url); 
+                modal.style.display = "block";
+            });
+
+        closeButtons.forEach(closeButton => {
+            closeButton.addEventListener("click", () => {
+                modal.style.display = "none";
+            });
+        });
+});
+
+</script>
+
+{% endblock extra_javascript %}

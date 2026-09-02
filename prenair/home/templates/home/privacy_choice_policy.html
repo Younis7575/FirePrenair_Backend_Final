@@ -1,0 +1,210 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - PrivacyChoice Policy{% endblock %}
+
+{% block content %}
+
+<style>
+    .policy-container {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-header {
+        margin-bottom: 30px;
+    }
+
+    .policy-title {
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+    }
+
+    .policy-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .policy-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    p{
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/Pivacy choice.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="policy-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">PrivacyChoice Policy</h1>
+                    <p class="hero-text">
+                        At FirePrenair, we value your privacy and are committed to giving you control over your personal information. This PrivacyChoice Policy outlines how you can manage your data preferences, including opting out of data sharing and selling in compliance with privacy regulations such as the California Consumer Privacy Act (CCPA) and General Data Protection Regulation (GDPR).
+                    </p>
+                </div>
+            </div>
+
+            <!-- What is PrivacyChoice -->
+            <div class="policy-section">
+                <h3 class="section-title">1. What is PrivacyChoice?</h3>
+                <p>PrivacyChoice is a feature that allows you to:</p>
+                <ul class="policy-list">
+                    <li>Opt-out of having your personal information sold or shared with third parties.</li>
+                    <li>Manage preferences for how your data is used for personalized marketing, analytics, and platform optimization.</li>
+                    <li>Access, modify, or delete your data in accordance with applicable laws.</li>
+                </ul>
+            </div>
+
+            <!-- Your Privacy Rights -->
+            <div class="policy-section">
+                <h3 class="section-title">2. Your Privacy Rights</h3>
+                <ul class="policy-list">
+                    <li><strong>Right to Know:</strong>
+                        <ul class="nested-list">
+                            <li>Request details about the data FirePrenair collects, how it’s used, and with whom it’s shared.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Right to Opt-Out:</strong>
+                        <ul class="nested-list">
+                            <li>Opt-out of the sale or sharing of your personal data at any time using the PrivacyChoice settings in your account.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Right to Delete:</strong>
+                        <ul class="nested-list">
+                            <li>Request the deletion of your personal data, subject to certain exceptions such as legal obligations or ongoing transactions.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Right to Rectify:</strong>
+                        <ul class="nested-list">
+                            <li>Update or correct inaccurate personal information through your account settings.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Right to Data Portability:</strong>
+                        <ul class="nested-list">
+                            <li>Request a copy of your personal data in a portable format.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- How to Use PrivacyChoice -->
+            <div class="policy-section">
+                <h3 class="section-title">3. How to Use PrivacyChoice</h3>
+                <ul class="policy-list">
+                    <li><strong>Access PrivacyChoice Settings:</strong>
+                        <ul class="nested-list">
+                            <li>Log in to your FirePrenair account.</li>
+                            <li>Navigate to the “Privacy Settings” section.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Opt-Out Options:</strong>
+                        <ul class="nested-list">
+                            <li>Select “Do Not Sell/Share My Personal Information” to stop data sharing with third parties.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Manage Preferences:</strong>
+                        <ul class="nested-list">
+                            <li>Choose whether to allow data use for analytics, marketing, or product recommendations.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Submit Data Requests:</strong>
+                        <ul class="nested-list">
+                            <li>Use the PrivacyChoice dashboard to submit access, deletion, or rectification requests.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- How We Handle Your Preferences -->
+            <div class="policy-section">
+                <h3 class="section-title">4. How We Handle Your Preferences</h3>
+                <ul class="policy-list">
+                    <li><strong>Data Usage After Opt-Out:</strong>
+                        <ul class="nested-list">
+                            <li>Your data will no longer be shared with third parties for marketing or sales purposes.</li>
+                            <li>FirePrenair will still use your data for essential services, such as order processing and platform security.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Timeframe for Compliance:</strong>
+                        <ul class="nested-list">
+                            <li>Requests to opt-out, delete, or modify data are typically processed within 10 business days.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Exceptions to Data Opt-Out -->
+            <div class="policy-section">
+                <h3 class="section-title">5. Exceptions to Data Opt-Out</h3>
+                <p>Certain data uses are essential for FirePrenair to function effectively and cannot be opted out of, including:</p>
+                <ul class="policy-list">
+                    <li>Completing user-initiated transactions.</li>
+                    <li>Detecting fraud or security threats.</li>
+                    <li>Ensuring compliance with legal obligations.</li>
+                </ul>
+            </div>
+
+            <!-- How We Protect Your Data -->
+            <div class="policy-section">
+                <h3 class="section-title">6. How We Protect Your Data</h3>
+                <ul class="policy-list">
+                    <li><strong>Encryption:</strong> All personal data is encrypted during storage and transmission.</li>
+                    <li><strong>Restricted Access:</strong> Only authorized personnel have access to sensitive user information.</li>
+                    <li><strong>Regular Audits:</strong> FirePrenair conducts regular privacy and security audits to ensure compliance with global standards.</li>
+                </ul>
+            </div>
+
+            <!-- Updates to PrivacyChoice Policy -->
+            <div class="policy-section">
+                <h3 class="section-title">7. Updates to PrivacyChoice Policy</h3>
+                <p>FirePrenair may update this policy to reflect changes in data protection laws or platform practices. Users will be notified of significant updates via email or platform announcements.</p>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="policy-section">
+                <h3 class="section-title">8. Contact Information</h3>
+                <p>For privacy-related questions or to submit a data request manually, contact us:</p>
+                <ul class="policy-list">
+                    <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

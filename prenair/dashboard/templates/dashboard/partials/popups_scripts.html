@@ -1,0 +1,174 @@
+{% include 'work_prenair/create_gig.html' %}
+{% include 'dashboard/upload_item_digiprenair.html' %}
+{% include 'dashboard/course_create_eduprenair.html' %}
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const openBtns = document.querySelectorAll('.open-gig-popup');
+
+      openBtns.forEach(openBtn => {
+        openBtn.addEventListener('click', async function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const url = this.getAttribute('data-url');
+
+          try {
+            const response = await fetch(url, {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            const html = await response.text();
+
+            // Create a temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // Find the gig popup in the response
+            const gigPopup = tempDiv.querySelector('.gig-creation-popup');
+
+            if (gigPopup) {
+              // Remove any existing popup first
+              const existingPopup = document.querySelector('.gig-creation-popup');
+              if (existingPopup) {
+                existingPopup.remove();
+              }
+
+              // Add the new popup to the body and show it
+              document.body.appendChild(gigPopup);
+              gigPopup.classList.remove('hidden');
+
+              // Initialize the form functionality
+              if (typeof initializeGigCreationForm === 'function') {
+                initializeGigCreationForm();
+              }
+            }
+
+          } catch (error) {
+            console.error('Error loading gig creation form:', error);
+            alert('Error loading gig creation form. Please try again.');
+          }
+        });
+      });
+    });
+
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const openProductBtns = document.querySelectorAll('.open-product-popup');
+
+      openProductBtns.forEach(openBtn => {
+        openBtn.addEventListener('click', async function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const url = this.getAttribute('data-url');
+
+          try {
+            const response = await fetch(url, {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            const html = await response.text();
+
+            // Create a temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // Find the product popup in the response
+            const productPopup = tempDiv.querySelector('.product-creation-popup');
+
+            if (productPopup) {
+              // Remove any existing popup first
+              const existingPopup = document.querySelector('.product-creation-popup');
+              if (existingPopup) {
+                existingPopup.remove();
+              }
+
+              // Add the new popup to the body and show it
+              document.body.appendChild(productPopup);
+              productPopup.classList.remove('product-hidden'); // CHANGED: 'hidden' to 'product-hidden'
+
+              // Initialize the form functionality
+              if (typeof initializeProductCreationForm === 'function') {
+                initializeProductCreationForm();
+              }
+            }
+
+          } catch (error) {
+            console.error('Error loading product creation form:', error);
+            alert('Error loading product creation form. Please try again.');
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const openCourseBtns = document.querySelectorAll('.open-course-popup');
+
+      openCourseBtns.forEach(openBtn => {
+        openBtn.addEventListener('click', async function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const url = this.getAttribute('data-url');
+
+          try {
+            const response = await fetch(url, {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            const html = await response.text();
+
+            // Create a temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // Find the course popup in the response
+            const coursePopup = tempDiv.querySelector('.course-creation-popup');
+
+            if (coursePopup) {
+              // Remove any existing popup first
+              const existingPopup = document.querySelector('.course-creation-popup');
+              if (existingPopup) {
+                existingPopup.remove();
+              }
+
+              // Add the new popup to the body and show it
+              document.body.appendChild(coursePopup);
+              coursePopup.classList.remove('course-hidden');
+
+              // Initialize the form functionality
+              if (typeof initializeCourseCreationForm === 'function') {
+                initializeCourseCreationForm();
+              }
+            }
+
+          } catch (error) {
+            console.error('Error loading course creation form:', error);
+            alert('Error loading course creation form. Please try again.');
+          }
+        });
+      });
+    });
+  </script>

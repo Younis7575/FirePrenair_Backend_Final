@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout - {{ product.name }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .product-info { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .btn { display: inline-block; padding: 12px 30px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Complete Your Purchase</h1>
+    
+    <div class="product-info">
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p><strong>Price: ${{ product.price }}</strong></p>
+    </div>
+
+    <div id="checkout-form">
+        <!-- This will be replaced by Stripe Checkout -->
+        <form action="{% url 'create_checkout_session' funnel.id product.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn">Proceed to Secure Checkout</button>
+        </form>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <p><small>🔒 Secure checkout powered by Stripe</small></p>
+    </div>
+</body>
+</html>

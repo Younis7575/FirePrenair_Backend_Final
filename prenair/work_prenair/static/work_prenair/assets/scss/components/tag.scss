@@ -1,0 +1,28 @@
+.tag {
+    padding: 6px 12px;
+    transition: 0.3s;
+    border-radius: 100px;
+
+    &.-border {
+        border-width: 1px;
+        border-style: solid;
+        border-color: var(--line);
+
+        &.border-opacity-20 {
+            border-color: rgba($color: #fff, $alpha: 0.2);
+        }
+    }
+
+    &.-large {
+        padding: 8.5px 16px;
+    }
+
+    &.-small {
+        padding: 2.5px 12px;
+        border-radius: 4px;
+    }
+
+    &.-rounded-sm {
+        border-radius: 6px;
+    }
+}

@@ -1,0 +1,987 @@
+{% load static %}
+{% load socialaccount %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --login-coral: #eb8361;
+        --login-coral-dark: #d97352;
+        --login-link: #2b6cb0;
+        --login-border: #d9d9d9;
+        --login-placeholder: #a3a3a3;
+    }
+
+    .login-popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .login-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 92%;
+        max-width: 980px;
+        background-color: #fff;
+        border-radius: 28px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        z-index: 1000;
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+        isolation: isolate;
+    }
+
+    .login-popup-inner {
+        display: flex;
+        align-items: stretch;
+        min-height: 460px;
+    }
+
+    .login-left-section {
+        flex: 0 0 44%;
+        max-width: 44%;
+        position: relative;
+        min-height: 420px;
+        background: linear-gradient(170deg, #f5a062 0%, #e8735c 42%, #d4587a 100%);
+        border-radius: 18px 100px 100px 18px;
+    }
+
+    .login-left-gradient {
+        
+    }
+
+    .login-left-blob {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .login-left-blob--pink {
+        width: 120px;
+        height: 120px;
+        background: rgba(214, 72, 115, 0.45);
+        top: 0%;
+        right: 10%;
+    }
+
+    .login-left-blob--yellow {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 214, 98, 0.55);
+        bottom: -2%;
+        right: -5%;
+    }
+
+    .login-left-img-wrap {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 20px 28px 24px;
+        z-index: 1;
+    }
+
+    .login-left-section img {
+        width: 130%;
+        height: 115%;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.2));
+    }
+
+    .login-form-section {
+        flex: 1;
+        padding: 36px 40px 28px 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: #fff;
+    }
+
+    .login-form-section .login-heading {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: 1.65rem;
+        font-weight: 600;
+        color: var(--login-coral);
+        margin: 0 0 8px 0;
+        line-height: 1.25;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-form-section .login-tagline {
+        font-size: 0.95rem;
+        font-weight: 300;
+        color: #111;
+        margin: 0 0 22px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-form-card {
+        border: 1px solid #e8e8e8;
+        border-radius: 18px;
+        padding: 22px 22px 18px;
+        background: #fff;
+    }
+
+    .login-form-section .login-input-block {
+        margin-bottom: 16px;
+    }
+
+    .login-form-section .login-input-block:last-of-type {
+        margin-bottom: 18px;
+    }
+
+    .login-form-section .login-field-label {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #111;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .login-form-section .login-field-label i {
+        color: #888;
+        font-size: 0.9rem;
+        width: 1.1em;
+        text-align: center;
+    }
+
+    .login-form-section .login-field-input {
+        width: 100%;
+        padding: 12px 18px;
+        border: 1px solid var(--login-border);
+        border-radius: 999px;
+        font-size: 14px;
+        color: #222;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .login-form-section .login-field-input::placeholder {
+        color: var(--login-placeholder);
+    }
+
+    .login-form-section .login-field-input:focus {
+        outline: none;
+        border-color: var(--login-coral);
+        box-shadow: 0 0 0 3px rgba(235, 131, 97, 0.2);
+    }
+
+    .login-password-wrap {
+        position: relative;
+    }
+
+    .login-password-wrap .login-field-input {
+        padding-right: 46px;
+    }
+
+    .recovery-panel .login-password-wrap > .login-password-toggle {
+        top: 50%;
+    }
+
+    .login-password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 70%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #777;
+        transition: color 0.2s;
+        background: none;
+        border: none;
+        padding: 4px;
+        line-height: 1;
+    }
+
+    .login-password-toggle:hover {
+        color: var(--login-coral);
+    }
+
+    .login-btn-row {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .login-btn-signin {
+        flex: 1 1 42%;
+        min-width: 0;
+        padding: 12px 16px;
+        background: #ff6f61;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: 22px 0px 22px 22px;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        font-family: inherit;
+    }
+
+    .login-btn-signin:hover {
+        background: var(--login-coral-dark);
+        box-shadow: 0 4px 14px rgba(235, 131, 97, 0.4);
+    }
+
+    .login-google-link {
+        flex: 1 1 58%;
+        min-width: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+        text-decoration: none;
+        border-radius: 22px 0px 22px 22px;
+        border: 1px solid var(--login-border);
+        background: #fff;
+        overflow: hidden;
+        transition: box-shadow 0.2s, background 0.2s;
+    }
+
+    .login-google-link:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        background: #fafafa;
+    }
+
+    .login-google-circle {
+        flex: 0 0 46px;
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border-right: 1px solid #eee;
+    }
+
+    .login-google-circle svg {
+        width: 22px;
+        height: 22px;
+        display: block;
+    }
+
+    .login-google-text {
+        flex: 1;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        padding: 0 12px 0 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .login-forgot-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+    }
+
+    .login-forgot-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+    }
+
+    .login-forgot-links a {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--login-link);
+        text-decoration: none;
+    }
+
+    .login-forgot-links a:hover {
+        text-decoration: underline;
+    }
+
+    .login-brand-badge {
+        width: 44px;
+        height: auto;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+
+    .login-form-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding-top: 4px;
+    }
+
+    .login-form-footer a {
+        font-size: 13px;
+        color: var(--login-link);
+        text-decoration: none;
+    }
+
+    .login-form-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .login-form-footer .login-footer-sep {
+        color: #bbb;
+        font-size: 12px;
+        user-select: none;
+    }
+
+    .login-close-popup {
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: #e74c3c;
+        color: #fff;
+        font-size: 22px;
+        line-height: 1;
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        left: auto;
+        z-index: 5;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .login-close-popup:hover {
+        filter: brightness(1.05);
+    }
+
+    .login-form-section .text-danger {
+        font-size: 13px;
+        margin: 6px 0 0;
+    }
+
+    #recoveryPopupOverlay {
+        display: none;
+        z-index: 1001;
+    }
+
+    #accountRecoveryPopup {
+        display: none;
+        z-index: 1002;
+    }
+
+    .login-forgot-trigger {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--login-link);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .login-forgot-trigger:hover {
+        text-decoration: underline;
+    }
+
+    .recovery-panel {
+        display: none;
+    }
+
+    .recovery-panel.is-active {
+        display: block;
+    }
+
+    .recovery-msg {
+        font-size: 14px;
+        color: #333;
+        line-height: 1.5;
+        margin: 0 0 16px;
+    }
+
+    .recovery-msg.success {
+        color: #1e7e34;
+    }
+
+    .recovery-msg.error {
+        color: #c0392b;
+    }
+
+    .recovery-back-row {
+        margin-top: 16px;
+        text-align: center;
+    }
+
+    .recovery-back-row button {
+        background: none;
+        border: none;
+        color: var(--login-link);
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0;
+        font-family: inherit;
+    }
+
+    .recovery-submit-btn--busy {
+        opacity: 0.88;
+        cursor: wait !important;
+        pointer-events: none;
+    }
+
+    .recovery-submit-btn--busy .recovery-busy-inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .login-btn-row .login-btn-signin:only-child {
+        flex: 1 1 100%;
+    }
+
+    @media (max-width: 991px) {
+        .login-popup-inner {
+            flex-direction: column;
+        }
+
+        .login-left-section {
+            display: none;
+        }
+
+        .login-form-section {
+            padding: 32px 24px 24px;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="login-popup-overlay" id="loginPopupOverlay"></div>
+
+<div class="login-popup" id="loginPopup"
+    data-show-login="{% if show_login_popup %}1{% else %}0{% endif %}"
+    data-has-login-errors="{% if login_values and login_values.has_login_errors %}1{% else %}0{% endif %}">
+    <button type="button" class="login-close-popup" id="loginClosePopup" aria-label="Close">&times;</button>
+    <div class="login-popup-inner">
+        <div class="login-left-section">
+            <div class="login-left-gradient" aria-hidden="true">
+                <div class="login-left-blob login-left-blob--pink"></div>
+                <div class="login-left-blob login-left-blob--yellow"></div>
+            </div>
+            <div class="login-left-img-wrap">
+                <img src="{% static 'home/images/features.png' %}" alt="Welcome to Fireprenair">
+            </div>
+        </div>
+        <div class="login-form-section">
+            <h1 class="login-heading">Welcome Back to Fireprenair!</h1>
+            <p class="login-tagline">Sign in to access your account.</p>
+
+            <form method="post" action="{% url 'login' %}" class="login-form-card">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                <div class="login-input-block">
+                    <label class="login-field-label" for="loginEmailOrUser">
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        <span>Email / User name</span>
+                    </label>
+                    <input class="login-field-input" type="text" name="email" id="loginEmailOrUser"
+                        placeholder="Enter your email or user name" autocomplete="username"
+                        value="{{ login_values.email|default:'' }}">
+                    {% if login_errors.email %}
+                        <p class="text-danger">{{ login_errors.email }}</p>
+                    {% endif %}
+                </div>
+                <div class="login-input-block login-password-wrap">
+                    <label class="login-field-label" for="loginPasswordInput">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        <span>Password</span>
+                    </label>
+                    <input class="login-field-input" type="password" name="password" id="loginPasswordInput"
+                        placeholder="Enter your password" autocomplete="current-password">
+                    <button type="button" class="login-password-toggle" id="loginTogglePassword" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    {% if login_errors.password %}
+                        <p class="text-danger">{{ login_errors.password }}</p>
+                    {% endif %}
+                </div>
+                {% if login_errors.invalid %}
+                    <p class="text-danger">{{ login_errors.invalid }}</p>
+                {% endif %}
+
+                <div class="login-btn-row">
+                    <button class="login-btn-signin" type="submit">Sign in</button>
+                    <a href="{% provider_login_url 'google' %}" class="login-google-link">
+                        <span class="login-google-circle" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+                        </span>
+                        <span class="login-google-text">Sign in with Google</span>
+                    </a>
+                </div>
+
+                <div class="login-forgot-row">
+                    <div class="login-forgot-links">
+                        <button type="button" class="login-forgot-trigger" data-recovery-open="username">Forgot user name?</button>
+                        <button type="button" class="login-forgot-trigger" data-recovery-open="password">Forgot password?</button>
+                    </div>
+                    <img class="login-brand-badge" src="{% static 'images/misc/fireprenair_logo.png' %}" alt="">
+                </div>
+            </form>
+
+            <div class="login-form-footer">
+                <a href="{% url 'help_support' %}">Help</a>
+                <span class="login-footer-sep">|</span>
+                <a href="{% url 'terms_of_use' %}">Terms</a>
+                <span class="login-footer-sep">|</span>
+                <a href="{% url 'privacy_policy' %}">Privacy</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="login-popup-overlay" id="recoveryPopupOverlay"></div>
+<div class="login-popup" id="accountRecoveryPopup"
+    data-initial-mode="{{ recovery_open_mode|default:'' }}"
+    data-reset-uid="{{ password_reset_uid|default:'' }}"
+    data-reset-token="{{ password_reset_token|default:'' }}"
+    data-reset-invalid="{% if password_reset_invalid %}1{% else %}0{% endif %}"
+    data-url-forgot-password="{% url 'forgot_password_api' %}"
+    data-url-forgot-username="{% url 'forgot_username_api' %}"
+    data-url-reset-confirm="{% url 'password_reset_confirm_api' %}">
+    <button type="button" class="login-close-popup" id="recoveryClosePopup" aria-label="Close">&times;</button>
+    <div class="login-popup-inner">
+        <div class="login-left-section">
+            <div class="login-left-gradient" aria-hidden="true">
+                <div class="login-left-blob login-left-blob--pink"></div>
+                <div class="login-left-blob login-left-blob--yellow"></div>
+            </div>
+            <div class="login-left-img-wrap">
+                <img src="{% static 'home/images/features.png' %}" alt="">
+            </div>
+        </div>
+        <div class="login-form-section">
+            <div class="recovery-panel" data-recovery-panel="password" id="recoveryPanelPassword">
+                <h1 class="login-heading">Forgot your password?</h1>
+                <p class="login-tagline">Enter your email and we will send you a reset link.</p>
+                <div class="login-form-card">
+                    <div class="login-input-block">
+                        <label class="login-field-label" for="recoveryEmailPassword">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <span>Email</span>
+                        </label>
+                        <input class="login-field-input" type="email" id="recoveryEmailPassword" name="recovery_email_pwd" autocomplete="email" placeholder="Enter your email address">
+                    </div>
+                    <p class="recovery-msg" id="recoveryMsgPassword" hidden></p>
+                    <div class="login-btn-row">
+                        <button type="button" class="login-btn-signin recovery-submit-btn" id="recoverySubmitPassword" style="flex:1 1 100%;border-radius:22px 0 22px 22px;">Send reset link</button>
+                    </div>
+                    <div class="recovery-back-row">
+                        <button type="button" class="recovery-back-signin">Back to sign in</button>
+                    </div>
+                </div>
+            </div>
+            <div class="recovery-panel" data-recovery-panel="username" id="recoveryPanelUsername">
+                <h1 class="login-heading">Forgot your username?</h1>
+                <p class="login-tagline">Enter the email on your account and we will send your username.</p>
+                <div class="login-form-card">
+                    <div class="login-input-block">
+                        <label class="login-field-label" for="recoveryEmailUsername">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <span>Email</span>
+                        </label>
+                        <input class="login-field-input" type="email" id="recoveryEmailUsername" name="recovery_email_user" autocomplete="email" placeholder="Enter your email address">
+                    </div>
+                    <p class="recovery-msg" id="recoveryMsgUsername" hidden></p>
+                    <div class="login-btn-row">
+                        <button type="button" class="login-btn-signin recovery-submit-btn" id="recoverySubmitUsername" style="flex:1 1 100%;border-radius:22px 0 22px 22px;">Send username</button>
+                    </div>
+                    <div class="recovery-back-row">
+                        <button type="button" class="recovery-back-signin">Back to sign in</button>
+                    </div>
+                </div>
+            </div>
+            <div class="recovery-panel" data-recovery-panel="reset" id="recoveryPanelReset">
+                <h1 class="login-heading">Choose a new password</h1>
+                <p class="login-tagline">Enter and confirm your new password below.</p>
+                <div class="login-form-card">
+                    <input type="hidden" id="recoveryUidField" value="">
+                    <input type="hidden" id="recoveryTokenField" value="">
+                    <div class="login-input-block">
+                        <label class="login-field-label" for="recoveryNewPassword1">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            <span>New password</span>
+                        </label>
+                        <div class="login-password-wrap">
+                            <input class="login-field-input" type="password" id="recoveryNewPassword1" autocomplete="new-password" placeholder="New password">
+                            <button type="button" class="login-password-toggle" data-recovery-toggle="recoveryNewPassword1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="login-input-block">
+                        <label class="login-field-label" for="recoveryNewPassword2">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            <span>Confirm password</span>
+                        </label>
+                        <div class="login-password-wrap">
+                            <input class="login-field-input" type="password" id="recoveryNewPassword2" autocomplete="new-password" placeholder="Confirm new password">
+                            <button type="button" class="login-password-toggle" data-recovery-toggle="recoveryNewPassword2" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <p class="recovery-msg" id="recoveryMsgReset" hidden></p>
+                    <div class="login-btn-row">
+                        <button type="button" class="login-btn-signin recovery-submit-btn" id="recoverySubmitReset" style="flex:1 1 100%;border-radius:22px 0 22px 22px;">Update password</button>
+                    </div>
+                    <div class="recovery-back-row">
+                        <button type="button" class="recovery-back-signin">Back to sign in</button>
+                    </div>
+                </div>
+            </div>
+            <div class="recovery-panel" data-recovery-panel="invalid" id="recoveryPanelInvalid">
+                <h1 class="login-heading">Link expired</h1>
+                <p class="login-tagline">This password reset link is invalid or has expired.</p>
+                <div class="login-form-card">
+                    <p class="recovery-msg">Request a new reset link from the sign-in screen.</p>
+                    <div class="login-btn-row">
+                        <button type="button" class="login-btn-signin" id="recoveryGotoPassword" style="flex:1 1 100%;border-radius:22px 0 22px 22px;">Send new reset link</button>
+                    </div>
+                    <div class="recovery-back-row">
+                        <button type="button" class="recovery-back-signin">Back to sign in</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function getCookie(name) {
+            let v = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach((c) => {
+                    const t = c.trim();
+                    if (t.startsWith(name + '=')) {
+                        v = decodeURIComponent(t.slice(name.length + 1));
+                    }
+                });
+            }
+            return v;
+        }
+
+        const loginBtn = document.querySelector('.login-btn-open');
+        const loginOverlay = document.getElementById('loginPopupOverlay');
+        const loginPopup = document.getElementById('loginPopup');
+        const loginClose = document.getElementById('loginClosePopup');
+        const recoveryOverlay = document.getElementById('recoveryPopupOverlay');
+        const recoveryPopup = document.getElementById('accountRecoveryPopup');
+        const recoveryClose = document.getElementById('recoveryClosePopup');
+
+        function hideRecoveryPanels() {
+            recoveryPopup.querySelectorAll('.recovery-panel').forEach((p) => p.classList.remove('is-active'));
+        }
+
+        function showRecoveryPanel(name) {
+            hideRecoveryPanels();
+            const p = recoveryPopup.querySelector('[data-recovery-panel="' + name + '"]');
+            if (p) {
+                p.classList.add('is-active');
+            }
+        }
+
+        function openRecovery(mode) {
+            if (loginOverlay) {
+                loginOverlay.style.display = 'none';
+            }
+            if (loginPopup) {
+                loginPopup.style.display = 'none';
+            }
+            recoveryOverlay.style.display = 'block';
+            recoveryPopup.style.display = 'block';
+            showRecoveryPanel(mode);
+        }
+
+        function closeRecovery() {
+            recoveryOverlay.style.display = 'none';
+            recoveryPopup.style.display = 'none';
+            ['recoveryMsgPassword', 'recoveryMsgUsername', 'recoveryMsgReset'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.hidden = true;
+                    el.textContent = '';
+                    el.classList.remove('success', 'error');
+                }
+            });
+            if (window.history && window.history.replaceState) {
+                const u = new URL(window.location.href);
+                ['recover', 'uid', 'token', 'login'].forEach((k) => u.searchParams.delete(k));
+                window.history.replaceState({}, '', u.pathname + (u.search || '') + (u.hash || ''));
+            }
+        }
+
+        function openLogin() {
+            closeRecovery();
+            if (loginOverlay) {
+                loginOverlay.style.display = 'block';
+            }
+            if (loginPopup) {
+                loginPopup.style.display = 'block';
+            }
+        }
+
+        async function postJson(url, body) {
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(body),
+            });
+            let data = {};
+            try {
+                data = await r.json();
+            } catch (e) {}
+            return { ok: r.ok, data: data };
+        }
+
+        function setRecoveryBusy(btn, busy, inputs) {
+            if (!btn) {
+                return;
+            }
+            const list = inputs || [];
+            if (busy) {
+                if (!btn.dataset.recoveryHtml) {
+                    btn.dataset.recoveryHtml = btn.innerHTML;
+                }
+                btn.disabled = true;
+                btn.classList.add('recovery-submit-btn--busy');
+                btn.setAttribute('aria-busy', 'true');
+                btn.innerHTML = '<span class="recovery-busy-inner"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i><span>Processing</span></span>';
+                list.forEach((el) => {
+                    if (el) {
+                        el.disabled = true;
+                    }
+                });
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('recovery-submit-btn--busy');
+                btn.removeAttribute('aria-busy');
+                if (btn.dataset.recoveryHtml) {
+                    btn.innerHTML = btn.dataset.recoveryHtml;
+                    delete btn.dataset.recoveryHtml;
+                }
+                list.forEach((el) => {
+                    if (el) {
+                        el.disabled = false;
+                    }
+                });
+            }
+        }
+
+        if (loginPopup && loginPopup.dataset.hasLoginErrors === '1') {
+            loginOverlay.style.display = 'block';
+            loginPopup.style.display = 'block';
+        }
+
+        if (loginPopup && loginPopup.dataset.showLogin === '1') {
+            loginOverlay.style.display = 'block';
+            loginPopup.style.display = 'block';
+        }
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                loginOverlay.style.display = 'block';
+                loginPopup.style.display = 'block';
+            });
+        }
+
+        loginClose.addEventListener('click', () => {
+            loginOverlay.style.display = 'none';
+            loginPopup.style.display = 'none';
+        });
+
+        loginOverlay.addEventListener('click', () => {
+            loginOverlay.style.display = 'none';
+            loginPopup.style.display = 'none';
+        });
+
+        document.querySelectorAll('.login-forgot-trigger').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const m = btn.getAttribute('data-recovery-open');
+                if (m === 'password' || m === 'username') {
+                    openRecovery(m);
+                }
+            });
+        });
+
+        recoveryClose.addEventListener('click', closeRecovery);
+        recoveryOverlay.addEventListener('click', closeRecovery);
+
+        recoveryPopup.querySelectorAll('.recovery-back-signin').forEach((b) => {
+            b.addEventListener('click', () => openLogin());
+        });
+
+        document.getElementById('recoverySubmitPassword').addEventListener('click', async () => {
+            const btn = document.getElementById('recoverySubmitPassword');
+            const msg = document.getElementById('recoveryMsgPassword');
+            const emailInput = document.getElementById('recoveryEmailPassword');
+            const email = (emailInput.value || '').trim();
+            msg.hidden = false;
+            msg.classList.remove('success', 'error');
+            if (!email) {
+                msg.classList.add('error');
+                msg.textContent = 'Please enter your email address.';
+                return;
+            }
+            const url = recoveryPopup.dataset.urlForgotPassword;
+            setRecoveryBusy(btn, true, [emailInput]);
+            try {
+                const res = await postJson(url, { email: email });
+                msg.classList.add(res.ok && res.data.success ? 'success' : 'error');
+                msg.textContent = (res.data && res.data.message) || (res.data && res.data.error) || 'Something went wrong.';
+            } catch (e) {
+                msg.classList.add('error');
+                msg.textContent = 'Something went wrong. Please try again.';
+            } finally {
+                setRecoveryBusy(btn, false, [emailInput]);
+            }
+        });
+
+        document.getElementById('recoverySubmitUsername').addEventListener('click', async () => {
+            const btn = document.getElementById('recoverySubmitUsername');
+            const msg = document.getElementById('recoveryMsgUsername');
+            const emailInput = document.getElementById('recoveryEmailUsername');
+            const email = (emailInput.value || '').trim();
+            msg.hidden = false;
+            msg.classList.remove('success', 'error');
+            if (!email) {
+                msg.classList.add('error');
+                msg.textContent = 'Please enter your email address.';
+                return;
+            }
+            const url = recoveryPopup.dataset.urlForgotUsername;
+            setRecoveryBusy(btn, true, [emailInput]);
+            try {
+                const res = await postJson(url, { email: email });
+                msg.classList.add(res.ok && res.data.success ? 'success' : 'error');
+                msg.textContent = (res.data && res.data.message) || (res.data && res.data.error) || 'Something went wrong.';
+            } catch (e) {
+                msg.classList.add('error');
+                msg.textContent = 'Something went wrong. Please try again.';
+            } finally {
+                setRecoveryBusy(btn, false, [emailInput]);
+            }
+        });
+
+        document.getElementById('recoverySubmitReset').addEventListener('click', async () => {
+            const btn = document.getElementById('recoverySubmitReset');
+            const msg = document.getElementById('recoveryMsgReset');
+            const uid = document.getElementById('recoveryUidField').value;
+            const token = document.getElementById('recoveryTokenField').value;
+            const p1 = document.getElementById('recoveryNewPassword1');
+            const p2 = document.getElementById('recoveryNewPassword2');
+            const password1 = p1.value;
+            const password2 = p2.value;
+            msg.hidden = false;
+            msg.classList.remove('success', 'error');
+            const url = recoveryPopup.dataset.urlResetConfirm;
+            setRecoveryBusy(btn, true, [p1, p2]);
+            try {
+                const res = await postJson(url, { uid: uid, token: token, password1: password1, password2: password2 });
+                if (res.ok && res.data.success) {
+                    msg.classList.add('success');
+                    msg.textContent = res.data.message || 'Password updated.';
+                    p1.value = '';
+                    p2.value = '';
+                } else {
+                    msg.classList.add('error');
+                    msg.textContent = (res.data && res.data.error) || 'Could not update password.';
+                }
+            } catch (e) {
+                msg.classList.add('error');
+                msg.textContent = 'Something went wrong. Please try again.';
+            } finally {
+                setRecoveryBusy(btn, false, [p1, p2]);
+            }
+        });
+
+        document.getElementById('recoveryGotoPassword').addEventListener('click', () => {
+            openRecovery('password');
+        });
+
+        document.querySelectorAll('[data-recovery-toggle]').forEach((btn) => {
+            btn.addEventListener('click', function () {
+                const id = this.getAttribute('data-recovery-toggle');
+                const inp = document.getElementById(id);
+                if (!inp) {
+                    return;
+                }
+                const type = inp.getAttribute('type') === 'password' ? 'text' : 'password';
+                inp.setAttribute('type', type);
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', type === 'password');
+                    icon.classList.toggle('fa-eye-slash', type === 'text');
+                }
+            });
+        });
+
+        const loginTogglePassword = document.getElementById('loginTogglePassword');
+        const loginPasswordInput = document.getElementById('loginPasswordInput');
+        if (loginTogglePassword && loginPasswordInput) {
+            loginTogglePassword.addEventListener('click', function () {
+                const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                loginPasswordInput.setAttribute('type', type);
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', type === 'password');
+                    icon.classList.toggle('fa-eye-slash', type === 'text');
+                }
+            });
+        }
+
+        const initMode = recoveryPopup.dataset.initialMode || '';
+        const inv = recoveryPopup.dataset.resetInvalid === '1';
+        if (initMode === 'reset' && inv) {
+            openRecovery('invalid');
+        } else if (initMode === 'reset' && recoveryPopup.dataset.resetUid && recoveryPopup.dataset.resetToken) {
+            document.getElementById('recoveryUidField').value = recoveryPopup.dataset.resetUid;
+            document.getElementById('recoveryTokenField').value = recoveryPopup.dataset.resetToken;
+            openRecovery('reset');
+        } else if (initMode === 'password') {
+            openRecovery('password');
+        } else if (initMode === 'username') {
+            openRecovery('username');
+        }
+    });
+</script>
+
+{% endblock extra_javascript %}

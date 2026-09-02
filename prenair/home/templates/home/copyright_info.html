@@ -1,0 +1,181 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Copyright Information{% endblock %}
+
+{% block content %}
+
+<style>
+    .terms-content {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.terms-header {
+    margin-bottom: 40px;
+}
+
+.terms-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.terms-subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.section-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #555;
+}
+
+.nested-list {
+    list-style: circle;
+    margin-left: 40px;
+}
+
+.terms-intro {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+p{
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/Copyright.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+
+</style>
+
+<!-- Copyright Information Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="terms-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Copyright Information</h1>
+                            <p class="hero-text">
+                                FirePrenair is committed to respecting intellectual property rights and expects its users to do the same. This Copyright Information policy outlines how FirePrenair protects its own content, the rights of creators using the platform, and the process for reporting copyright infringement.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Ownership of Content -->
+                    <div class="terms-section">
+                        <h3 class="section-title">1. Ownership of Content</h3>
+                        <ul class="section-list">
+                            <li><strong>Platform Content:</strong> All content on the FirePrenair platform, including but not limited to text, graphics, logos, videos, software, and design elements, is the intellectual property of FirePrenair or its licensors and is protected under copyright laws. Unauthorized use or reproduction of this content is strictly prohibited.</li>
+                            <li><strong>User-Generated Content:</strong> Users retain ownership of any original content they create and upload to FirePrenair, including courses, digital products, services, and networking events. By uploading content, users grant FirePrenair a limited license to host, display, and distribute the content as necessary to provide platform services.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Permitted Uses of Content -->
+                    <div class="terms-section">
+                        <h3 class="section-title">2. Permitted Uses of Content</h3>
+                        <ul class="section-list">
+                            <li><strong>Personal and Business Use:</strong> Users may view, download, and utilize platform content solely for personal or business purposes as outlined in the Terms of Use.</li>
+                            <li><strong>Prohibited Uses:</strong> Users may not:
+                                <ul class="nested-list">
+                                    <li>Republish platform content without written consent.</li>
+                                    <li>Modify, distribute, or create derivative works of platform materials.</li>
+                                    <li>Sell or commercially exploit FirePrenair’s content without authorization.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Shared Content:</strong> Users must ensure that any third-party content shared on FirePrenair complies with copyright laws and that they have the right to use and distribute it.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Reporting Copyright Infringement -->
+                    <div class="terms-section">
+                        <h3 class="section-title">3. Reporting Copyright Infringement (DMCA Compliance)</h3>
+                        <p>FirePrenair respects the Digital Millennium Copyright Act (DMCA) and provides a clear process for reporting copyright violations.</p>
+                        <ul class="section-list">
+                            <li><strong>Filing a Complaint:</strong> If you believe your copyrighted work has been used on FirePrenair without your permission, please submit a DMCA Takedown Notice including the following details:
+                                <ul class="nested-list">
+                                    <li>Your full name and contact information (email and phone number).</li>
+                                    <li>A description of the copyrighted material and its unauthorized use.</li>
+                                    <li>The URL or location of the infringing material on FirePrenair.</li>
+                                    <li>A statement affirming your ownership or authorization to act on behalf of the owner.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Where to Submit:</strong> Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                            <li><strong>Response Timeline:</strong> FirePrenair will investigate and respond to DMCA complaints within 5 business days, taking necessary action such as removing infringing content or disabling access.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Repeat Infringers -->
+                    <div class="terms-section">
+                        <h3 class="section-title">4. Repeat Infringers</h3>
+                        <p>Users who repeatedly violate copyright policies may have their accounts suspended or terminated. FirePrenair maintains a zero-tolerance policy for repeated infringement to protect creators and ensure a fair platform for all users.</p>
+                    </div>
+
+                    <!-- Protecting Your Copyrighted Work -->
+                    <div class="terms-section">
+                        <h3 class="section-title">5. Protecting Your Copyrighted Work</h3>
+                        <ul class="section-list">
+                            <li><strong>Creators’ Rights:</strong> FirePrenair encourages creators to watermark their digital products, use licensing agreements, and register their content with copyright offices to protect their intellectual property.</li>
+                            <li><strong>Content Monitoring:</strong> While FirePrenair does not actively monitor all user-uploaded content, it provides tools for reporting and addressing potential violations.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Limitation of Liability -->
+                    <div class="terms-section">
+                        <h3 class="section-title">6. Limitation of Liability</h3>
+                        <p>FirePrenair is a hosting platform and is not liable for user-generated content or potential copyright infringements. The responsibility for ensuring content complies with copyright laws lies with the user.</p>
+                    </div>
+
+                    <!-- Changes to Copyright Policy -->
+                    <div class="terms-section">
+                        <h3 class="section-title">7. Changes to Copyright Policy</h3>
+                        <p>FirePrenair reserves the right to update this Copyright Information policy as needed. Updates will be communicated via email or platform announcements.</p>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="terms-section">
+                        <h3 class="section-title">8. Contact Information</h3>
+                        <p>For copyright-related inquiries or support, contact us at:</p>
+                        <ul class="section-list">
+                            <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Copyright Information Content -->
+
+{% endblock content %}

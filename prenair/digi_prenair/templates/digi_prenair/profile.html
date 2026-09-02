@@ -1,0 +1,336 @@
+{% extends "digi_prenair/base.html" %} {% load static %} {% block content %}
+<!-- Your content goes here -->
+<div class="primary-content-area container bottom-padding-70 profile-page-ds">
+  <div class="profile-header-section">
+    {% comment %} <div class="follow-box">
+      <div class="more-link">
+        <a href="#">
+          <svg class="crumina-icon">
+            <use xlink:href="#dots-icon"></use>
+          </svg>
+        </a>
+      </div>
+      <button class="btn btn-wide gradient-background btn-follow">
+        Follow!
+      </button>
+    </div> {% endcomment %}
+    <div class="cover-image">
+      {% if user.digi_cover_photo %}
+        <img src="{{ user.digi_cover_photo.url }}" alt="{{ user.username }}'s cover photo" />
+      {% else %}
+        <img src="{% static 'digi_prenair/img/content/profile/default-cover.png' %}" alt="Default Cover" />
+      {% endif %}
+    </div>
+    <div class="about-author-section container">
+      <div class="profile-header-user-profile">
+        <div class="avatar box-152">
+          <a href="{% url 'digi_profile' user.slug %}">
+            {% if user.profile_pic %}
+              <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}'s avatar" onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'" />
+            {% else %}
+              <img src="{% static 'digi_prenair/img/default-avatar.png' %}" alt="Default Avatar" />
+            {% endif %}
+          </a>
+          {% if user.digi_is_verified %}
+            <span class="verified">
+              <svg class="crumina-icon">
+                <use xlink:href="#check-icon"></use>
+              </svg>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="author-primary-info">
+        <div class="profile-author-info">
+          <h3 class="author-name">
+            <a href="{% url 'digi_profile' user.slug %}">{{ user.username }}</a> <!-- Dynamic link to the user's profile -->
+          </h3>
+          <div class="author-meta gradient-text">@{{ user.username|lower }}</div> <!-- Dynamic handle -->
+          <div class="item-rating">
+            {% for i in "12345" %}
+              {% if forloop.counter|add:"0" <= user.digi_average_rating %}
+                <span class="filled">
+                  <svg class="crumina-icon">
+                    <use xlink:href="#star2-icon"></use>
+                  </svg>
+                </span>
+              {% else %}
+                <span>
+                  <svg class="crumina-icon">
+                    <use xlink:href="#star2-icon"></use>
+                  </svg>
+                </span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--   profile header mobile -->
+  <div class="profile-header-mobile">
+    <div class="cover-image">
+      <img src="{% static "digi_prenair/img/content/profile/default-cover.png" %}" alt="" />
+    </div>
+    <div class="about-author-section container">
+      <div class="profile-header-user-profile">
+        <div class="avatar box-64 bordered">
+          <a href="{% url 'digi_profile' user.slug %}"><img src="{{ user.profile_pic.url }}" alt="{{ user.username }}'s avatar" onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'" /></a>
+
+          {% if user.digi_is_verified %}
+          <span class="verified"
+            ><svg class="crumina-icon">
+              <use xlink:href="#check-icon"></use></svg
+          ></span>
+          {% endif %}
+        </div>
+        <div class="profile-author-info">
+          <h5 class="author-name">
+            <a href="{% url 'digi_profile' user.slug %}">{{ user.username }}</a>
+          </h5>
+          <div class="author-meta gradient-text">@{{ user.username|lower }}</div>
+          <div class="item-rating">
+            {% for i in "12345" %}
+            {% if forloop.counter|add:"0" <= user.digi_average_rating %}
+              <span class="filled">
+                <svg class="crumina-icon">
+                  <use xlink:href="#star2-icon"></use>
+                </svg>
+              </span>
+            {% else %}
+              <span>
+                <svg class="crumina-icon">
+                  <use xlink:href="#star2-icon"></use>
+                </svg>
+              </span>
+            {% endif %}
+          {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--  profile page body -->
+  <div class="profile-page-container">
+    <div class="tabs-block swiper-container">
+      <div class="swiper-nav">
+        <div class="swiper-button-next">
+          <svg class="crumina-icon next-button">
+            <use xlink:href="#arrow-right2-icon"></use>
+          </svg>
+        </div>
+        <div class="swiper-button-prev">
+          <svg class="crumina-icon prev-button">
+            <use xlink:href="#arrow-left2-icon"></use>
+          </svg>
+        </div>
+      </div>
+      <ul class="tabs-list swiper-wrapper flex-center">
+        <li class="swiper-slide active">
+          {% comment %} <a href="#tab1">Items <span class="count">135</span></a> {% endcomment %}
+          <a href="#tab1">Items</a>
+        </li>
+        <li class="swiper-slide"><a href="#tab5">About</a></li>
+      </ul>
+      <div class="tabs-content-wrapper">
+        <div id="tab1" class="tab active">
+          <div class="tab-content">
+            <div class="featured-box">
+              <div class="featured-box-wrapper grid-4-columns">
+
+                {% comment %} will do for loop here {% endcomment %}
+                {% for product in page_obj %}
+                <div class="featured-item v5">
+                  <div class="featured-item-wrapper">
+                    <div class="featured-item-content">
+                      {% comment %} <div class="fav-counter">
+                        <svg class="crumina-icon">
+                          <use xlink:href="#heart-icon"></use></svg
+                        ><span class="count">{{product.likes}}</span>
+                      </div> {% endcomment %}
+                      <div class="featured-item-image">
+                        <a href="{% url 'digi_product' product.slug %}">
+                          <img
+                            src="{{ product.image.url }}"
+                            alt="{{ product.title }}"
+                        /></a>
+                      </div>
+                      <div class="featured-item-info">
+                        <div class="item-category {{product.category.color}}">
+                          {{product.category.name}}
+                        </div>
+                        <div class="title">
+                          <a href="{% url 'digi_product' product.slug %}"
+                            >{{product.title}}</a
+                          >
+                        </div>
+                        <div class="item-meta">
+                          <span class="avatar box-26"
+                            ><a href="{% url 'digi_profile' product.seller.slug %}">
+                              <img src="{{product.seller.profile_pic.url}}" alt="{{ product.seller.username }}" />
+                              </a><span class="verified"
+                              ><svg class="crumina-icon">
+                                <use
+                                  xlink:href="#check-icon"
+                                ></use></svg></span></span
+                          >@{{ product.seller.username }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="featured-item-post-content">
+                      <div class="item-rating">
+                        {% for i in "12345" %}
+                        {% if forloop.counter|add:"0" <= product.rating %}
+                          <span class="filled">
+                            <svg class="crumina-icon">
+                              <use xlink:href="#star2-icon"></use>
+                            </svg>
+                          </span>
+                        {% else %}
+                          <span>
+                            <svg class="crumina-icon">
+                              <use xlink:href="#star2-icon"></use>
+                            </svg>
+                          </span>
+                        {% endif %}
+                      {% endfor %}
+                      </div>
+                      <div class="item-price">${{product.price}}</div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+                {% comment %} will do for loop here {% endcomment %}
+
+              </div>
+            </div>
+            <div class="pagination-section flex-center">
+              <ul class="pagination-list">
+                {% if page_obj.has_previous %}
+                  <li class="page-item page-nav-prev">
+                    <a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                  </li>
+                {% endif %}
+          
+                {% for num in page_obj.paginator.page_range %}
+                  {% if page_obj.number == num %}
+                    <li class="page-item active"><a href="?page={{ num }}">{{ num }}</a></li>
+                  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a href="?page={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endfor %}
+          
+                {% if page_obj.has_next %}
+                  <li class="page-item page-nav-next">
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="tab2" class="tab"></div>
+        <div id="tab3" class="tab"></div>
+        <div id="tab4" class="tab"></div>
+        <div id="tab5" class="tab">
+          <div class="tab-content">
+            <div class="about-author-wrapper">
+              <div class="author-bio">
+                <div class="small-title">Full Bio</div>
+                <p>{{ user.bio }}</p>
+              </div>
+              <div class="author-details">
+                <div class="small-title">Details</div>
+                <ul class="details-list">
+                  <li>
+                    <svg class="crumina-icon bullet-icon">
+                      <use xlink:href="#circle-icon"></use></svg
+                    ><span class="detail-label">Joined</span
+                    ><span class="bold">{{ joined_date }}</span>
+                  </li> 
+                  <li>
+                    <svg class="crumina-icon bullet-icon">
+                      <use xlink:href="#circle-icon"></use></svg
+                    ><span class="detail-label">Location</span
+                    ><span class="bold">{{ user.country }}</span>
+                  </li>
+                  <li>
+                    <svg class="crumina-icon bullet-icon">
+                      <use xlink:href="#circle-icon"></use></svg
+                    ><span class="detail-label">Email</span
+                    ><span class="bold"
+                      ><a href="mailto:{{ user.email }}"
+                        >{{ user.email }}</a
+                      ></span
+                    >
+                  </li>
+                  <li>
+                    <svg class="crumina-icon bullet-icon">
+                      <use xlink:href="#circle-icon"></use></svg
+                    ><span class="detail-label">Speciality</span
+                    ><span class="bold">{{ user.digi_speciality }}</span>
+                  </li>
+                </ul>
+              </div>
+              {% comment %} <div class="author-social-networks">
+                <div class="small-title">Social Media</div>
+                <ul class="social-styled-list">
+                  <li>
+                    <a href="#">
+                      <span class="marker"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#link-icon"></use></svg></span
+                      >www.dexstarkart.com<span class="verified">
+                        <svg class="crumina-icon">
+                          <use xlink:href="#check-icon"></use>
+                        </svg>
+                      </span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><span class="marker"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#facebook-icon"></use></svg></span
+                      >@dexstarkart</a
+                    >
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><span class="marker"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#twitter-icon"></use></svg></span
+                      >@dexstark_art<span class="verified"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#check-icon"></use></svg></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><span class="marker"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#instagram-icon"></use></svg></span
+                      >@dexstark<span class="verified"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#check-icon"></use></svg></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><span class="marker"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#twitch-icon"></use></svg></span
+                      >@dexstarkstreams</a
+                    >
+                  </li>
+                </ul>
+              </div> {% endcomment %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

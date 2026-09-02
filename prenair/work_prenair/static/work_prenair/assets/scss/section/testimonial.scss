@@ -1,0 +1,101 @@
+/* testimonials */
+.testimonials {
+    &.-style-6 {
+        .testimonials_image {
+            .testimonials_avatar {
+                display: none;
+            }
+        }
+    }
+}
+
+.list-testimonials {
+    .slick-list {
+        overflow: unset;
+        margin-left: -10px;
+        margin-right: -10px;
+        padding-top: 28px !important;
+        padding-bottom: 28px !important;
+        cursor: grab;
+
+        @media (min-width: 768px) {
+            margin-left: -16px;
+            margin-right: -16px;
+            padding-top: 40px !important;
+            padding-bottom: 40px !important;
+        }
+    }
+
+    .testimonials_item {
+        padding: 0 10px;
+
+        @media (min-width: 768px) {
+            padding: 0 16px;
+        }
+
+        &:hover {
+            .icon-slash {
+                opacity: 1;
+            }
+        }
+
+        .testimonials_review {
+            display: block; //ie
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+.slick-dots {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 0;
+    gap: 8px;
+
+    @media (max-width:767.99px) {
+        margin-top: 32px;
+    }
+
+    li {
+        position: relative;
+        border: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        button {
+            display: none;
+        }
+
+        &::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 1px solid #171717;
+            transition: 0.5s;
+        }
+
+        &.slick-active {
+            border: 1px solid var(--black);
+            background-color: #fff;
+
+            &::after {
+                background-color: var(--black);
+                border: 1px solid var(--black);
+            }
+        }
+    }
+}

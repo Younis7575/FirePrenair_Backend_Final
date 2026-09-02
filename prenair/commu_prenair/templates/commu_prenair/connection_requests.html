@@ -1,0 +1,77 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load course_filters %}
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Network {% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xl-9 col-lg-8">
+                <div class="row cus-mar friend-request">
+                    {% if friend_requests %}
+                    {% for connection in friend_requests %}
+                     <div class="col-xl-4 col-sm-6 col-8">
+                         <div class="single-box p-5">
+                             <div class="avatar">
+                                 <img class="avatar-img w-100" src="{{ connection.from_user.profile_pic.url }}" alt="avatar">
+                             </div>
+                             <a href="{% url 'commu_profile' connection.from_user.slug %}">
+                                 <h6 class="m-0 mb-2 mt-3">{{ connection.from_user.name }}</h6>
+                             </a>
+                             <div class="friends-list d-center gap-1 text-center">
+                                 <ul class="d-center">
+                                     {% for friend in request.user|mutual_connections:connection.from_user|slice:":3" %}
+                                         <li><img src="{{ friend.profile_pic.url }}" alt="image"></li>
+                                     {% endfor %}
+                                 </ul>
+                                 <span class="smtxt m-0">{{ request.user|mutual_connections_count:connection.from_user }} mutual friends</span>
+                             </div>
+                             <div class="d-center gap-2 mt-4">
+                                 <!-- Confirm Button -->
+                                 <a href="{% url 'handle_friend_request' connection.from_user.slug 'accept' %}" class="category-btn-final" style="color: white; padding: 10px 20px;">Confirm</a>
+
+                                 <!-- Delete Button -->
+                                 <a href="{% url 'handle_friend_request' connection.from_user.slug 'reject' %}" class="category-btn-final" style="color: white; padding: 10px 20px; background-color: #1e3a8a;">Delete</a>
+                             </div>
+                         </div>
+                     </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-12">
+                        <div class="single-box
+                            p-5 d-center justify-content-center align-items-center" style="height: 100vh;">
+                            <h6 class="m-0">No Connection Requests</h6>
+                        </div>
+                    </div>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+    
+{% endblock javascript %}

@@ -1,0 +1,124 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Add Material{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+   <fieldset class="field-card" style="margin-top: 6rem;">
+    <div class="add-course-info">
+        <div class="add-course-inner-header">
+            <h4>Curriculum</h4>
+        </div>
+
+        <!-- Add Module Section -->
+        <div class="add-course-section">
+            <button type="button" class="btn btn-primary" id="showModuleForm">Add Module</button>
+            
+            <form method="POST" action="{% url 'add_module' course_slug=course.slug %}" id="moduleForm" style="display: none;">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="moduleTitle" class="form-label">Module Title</label>
+                    <input type="text" class="form-control" id="moduleTitle" name="title" placeholder="Module Title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="moduleDescription" class="form-label">Module Description</label>
+                    <textarea class="form-control" id="moduleDescription" name="description" placeholder="Module Description" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="moduleOrder" class="form-label">Module Order</label>
+                    <input type="number" class="form-control" id="moduleOrder" name="order" placeholder="Module Order" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Module</button>
+            </form>
+        </div>
+
+        <fieldset class="field-card">
+            <div class="add-course-info">
+                <div class="add-course-inner-header">
+                    <h4>Added Modules</h4>
+                </div>
+                <div class="add-course-form">
+                    {% for module in modules %}
+                    <div class="curriculum-grid">
+                        <div class="curriculum-head">
+                            <p>{{ module.title }}</p>
+                            <a href="javascript:void(0);" class="btn showLessonForm" data-module="{{ module.id }}">Add Lesson</a>
+                        </div>
+                        <div class="curriculum-info">
+                            <div id="accordion">
+                                {% for lesson in module.lessons.all %}
+                                <div class="faq-grid">
+                                    <div class="faq-header">
+                                        <a class="collapsed faq-collapse" data-bs-toggle="collapse" href="#collapseOne">
+                                             <i class="fas fa-align-justify"></i> {{lesson.title}}
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="add-lesson-form" id="lessonForm-{{ module.id }}" style="display: none;">
+                            <form method="POST" action="{% url 'add_lesson' module_id=module.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="lessonTitle" class="form-label">Lesson Title</label>
+                                    <input type="text" class="form-control" id="lessonTitle" name="title" placeholder="Lesson Title" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="lessonVideo" class="form-label">Lesson Video</label>
+                                    <input type="file" class="form-control" id="lessonVideo" name="video" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="lessonOrder" class="form-label">Lesson Order</label>
+                                    <input type="number" class="form-control" id="lessonOrder" name="order" placeholder="Lesson Order" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Lesson</button>
+                            </form>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="widget-btn">
+            <a href="{% url 'edu_my_courses' %}" class="btn btn-info-light next_btn">Save Changes</a>
+        </div>
+    </div>
+</fieldset>
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+{% endblock content %}
+{% block extra_javascript %} 
+<script>
+    document.getElementById('showModuleForm').addEventListener('click', function() {
+        var moduleForm = document.getElementById('moduleForm');
+        if (moduleForm.style.display === 'none') {
+            moduleForm.style.display = 'block';
+        } else {
+            moduleForm.style.display = 'none';
+        }
+    });
+
+    document.querySelectorAll('.showLessonForm').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var moduleId = this.getAttribute('data-module');
+            var lessonForm = document.getElementById('lessonForm-' + moduleId);
+            if (lessonForm.style.display === 'none') {
+                lessonForm.style.display = 'block';
+            } else {
+                lessonForm.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock extra_javascript %}
+

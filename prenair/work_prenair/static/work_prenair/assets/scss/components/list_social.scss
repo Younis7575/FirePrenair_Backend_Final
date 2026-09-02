@@ -1,0 +1,50 @@
+/* list_social */
+.list_social {
+    .list {
+        >a {
+            &:hover {
+                span {
+                    &::before {
+                        color: var(--black);
+                    }
+                }
+            }
+        }
+
+        label,
+        a.text-black {
+            span {
+                &::before {
+                    color: var(--black);
+                    transition: 0.3s;
+                }
+            }
+
+            &:hover {
+                span {
+                    &::before {
+                        color: var(--white);
+                    }
+                }
+            }
+        }
+    }
+}
+
+[class^="icon-"].text-black,
+[class*=" icon-"].text-black {
+    &::before {
+        color: var(--black);
+        transition: 0.3s;
+    }
+}
+
+.hover\:text-white:hover {
+
+    [class^="icon-"],
+    [class*=" icon-"] {
+        &::before {
+            color: var(--white);
+        }
+    }
+}

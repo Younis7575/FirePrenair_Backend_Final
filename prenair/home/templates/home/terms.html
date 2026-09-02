@@ -1,0 +1,168 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Fireprenair - Terms of Use{% endblock %}
+
+{% block content %}
+
+<style>
+    .terms-content {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.terms-header {
+    margin-bottom: 40px;
+}
+
+.terms-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.terms-subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.section-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #555;
+}
+
+.nested-list {
+    list-style: circle;
+    margin-left: 40px;
+}
+
+.terms-intro {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+p{
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+.hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/terms of use.png' %}');
+        background-size: contain;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<!-- Terms of Use Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="terms-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Terms of Use</h1>
+                            <p class="hero-text">
+                                Welcome to FirePrenair, the all-in-one platform empowering freelancers, educators, digital creators, and business professionals. By accessing or using FirePrenair’s services, tools, or content, you agree to abide by these Terms of Use, which constitute a legally binding agreement between you and FirePrenair.
+                            </p>
+                        </div>
+                    </div>
+        
+
+                    <!-- User Eligibility -->
+                    <div class="terms-section">
+                        <h3 class="section-title">User Eligibility</h3>
+                        <ul class="section-list">
+                            <li><strong>Age Requirement:</strong> You must be at least 18 years of age to use FirePrenair. If under 18, you may access the platform only with parental consent and supervision.</li>
+                            <li><strong>Accurate Information:</strong> Users must provide accurate, current, and complete information during registration. False information may result in account suspension or termination.</li>
+                            <li><strong>Prohibited Users:</strong> FirePrenair services are not available to users who have been previously suspended or removed from the platform.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Acceptable Use -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Acceptable Use</h3>
+                        <ul class="section-list">
+                            <li><strong>Permitted Activities:</strong> Use FirePrenair for selling digital products, enrolling in courses, networking, and professional development.</li>
+                            <li><strong>Prohibited Activities:</strong>
+                                <ul class="nested-list">
+                                    <li>Posting offensive, harmful, or illegal content.</li>
+                                    <li>Attempting to hack or disrupt the platform’s functionality.</li>
+                                    <li>Violating intellectual property rights.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Community Guidelines:</strong> Harassment, discrimination, or abusive behavior is strictly prohibited.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Account Responsibility -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Account Responsibility</h3>
+                        <ul class="section-list">
+                            <li><strong>Confidentiality:</strong> Maintain the confidentiality of your account credentials.</li>
+                            <li><strong>Unauthorized Use:</strong> Notify FirePrenair immediately of any unauthorized account access.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Platform Usage -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Platform Usage</h3>
+                        <ul class="section-list">
+                            <li><strong>Service Modifications:</strong> FirePrenair may modify, suspend, or discontinue services without prior notice.</li>
+                            <li><strong>User Interactions:</strong> FirePrenair facilitates interactions but does not guarantee the quality or legality of user-generated content.</li>
+                            <li><strong>Data Usage:</strong> Use of FirePrenair indicates acceptance of our Privacy Policy.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Fees and Payments -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Fees and Payments</h3>
+                        <ul class="section-list">
+                            <li><strong>Subscription Plans:</strong> Users must pay non-refundable subscription fees based on their chosen plan (Starter, Business, Pro).</li>
+                            <li><strong>Transaction Fees:</strong> Additional fees, such as commissions, may apply.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Limitation of Liability -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Limitation of Liability</h3>
+                        <p>FirePrenair is provided on an "as is" basis and does not guarantee uninterrupted or error-free performance. FirePrenair is not liable for indirect or consequential damages to the extent permitted by law.</p>
+                    </div>
+
+                    <!-- Amendments -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Amendments</h3>
+                        <p>FirePrenair reserves the right to amend these Terms of Use at any time. Changes will be communicated via email or platform announcements. Continued use after amendments indicates acceptance of the new terms.</p>
+                        <p>For any questions, email us at <a href="mailto:support@fireprenair.com">support@fireprenair.com</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Terms of Use Content -->
+
+{% endblock content %}

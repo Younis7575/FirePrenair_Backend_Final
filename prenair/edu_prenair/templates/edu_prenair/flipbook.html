@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+    <link rel="icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'edu_prenair/assets/css/flipbook.min.css' %}">
+    <script src="{% static 'edu_prenair/assets/js/flip/flipbook.min.js' %}"></script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery("#container").flipBook({
+                pdfUrl: '{{ pdf_url }}'
+            });
+            
+            function addGoBackButton() {
+                const goBackUrl = "{% url 'course_detail' material.module.course.slug %}";
+                const goBackButton = `
+                    <span class="flipbook-menu-btn-wrapper flipbook-has-tooltip" data-tooltip="Go Back">
+                        <a href="${goBackUrl}" class="flipbook-icon flipbook-menu-btn skin-color flipbook-color-light" 
+                        style="font-size: 18px; margin: 2px; padding: 12px; border-radius: 2px; background: none; width: 18px; height: 18px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512" aria-hidden="true" 
+                            style="width: 18px; height: 18px;">
+                                <path d="M0 224v64h224v96l128-128L224 128v96H0z"/>
+                            </svg>
+                        </a>
+                    </span>
+                `;
+                jQuery(".flipbook-menuBottom .flipbook-menu-center").append(goBackButton);
+            }
+            const observer = new MutationObserver(function (mutations, observer) {
+                if (jQuery(".flipbook-menuBottom .flipbook-menu-center").length) {
+                    addGoBackButton(); 
+                    observer.disconnect(); 
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
+    <title>Fireprenair - View Material</title>
+</head>
+
+<body>
+    <!-- Flipbook Container -->
+    <div id="container"></div>
+</body>
+
+</html>

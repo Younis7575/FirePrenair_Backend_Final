@@ -1,0 +1,161 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Fees & Commissions{% endblock %}
+
+{% block content %}
+
+<style>
+    .fees-container {
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .fees-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .fees-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .fees-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .section-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .fees-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    li {
+        margin: 10px;
+    }
+
+    .contact-section {
+        margin-top: 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .email-link {
+        color: #007bff;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="fees-container">
+            <!-- Header -->
+            <div class="fees-header">
+                <h1 class="fees-title">Fees & Commissions</h1>
+                <p>
+                    At FirePrenair, we are committed to maintaining transparency in our fee structure, ensuring that both sellers and buyers benefit from a fair and straightforward system.
+                </p>
+            </div>
+
+            <!-- Commission Rates for Sellers -->
+            <div class="fees-section">
+                <h2 class="section-title">For Sellers: Commission Rates</h2>
+                <ul class="fees-list">
+                    <li><span class="highlight">WorkPrenair:</span> 17% commission on successfully completed projects.</li>
+                    <li><span class="highlight">DigiPrenair:</span> 12% commission on each digital product sold.</li>
+                    <li><span class="highlight">EduPrenair:</span> 20% commission on course enrollments or subscriptions.</li>
+                    <li><span class="highlight">CommuPrenair:</span> 15% commission on ticketed events, premium memberships, or networking services.</li>
+                </ul>
+            </div>
+
+            <!-- Additional Seller Fees -->
+            <div class="fees-section">
+                <h2 class="section-title">Additional Seller Fees</h2>
+                <ul class="fees-list">
+                    <li><span class="highlight">Payment Processing Fee:</span> 2.9% + $0.30 per transaction (varies by payment gateway).</li>
+                    <li><span class="highlight">Currency Conversion Fee:</span> 2-3% fee for cross-border sales.</li>
+                </ul>
+            </div>
+
+            <!-- Transaction Fee for Buyers -->
+            <div class="fees-section">
+                <h2 class="section-title">For Buyers: Transaction Fee</h2>
+                <p class="section-content">
+                    Buyers are charged a <span class="highlight">5% transaction fee</span> per purchase, supporting platform maintenance and security.
+                </p>
+            </div>
+
+            <!-- What Fees Cover -->
+            <div class="fees-section">
+                <h2 class="section-title">What These Fees Cover</h2>
+                <ul class="fees-list">
+                    <li><span class="highlight">For Sellers:</span> Access to a global marketplace, AI-powered tools, and analytics to track performance.</li>
+                    <li><span class="highlight">For Buyers:</span> Secure payment gateways, quality assurance, and buyer protection.</li>
+                </ul>
+            </div>
+
+            <!-- Fee Calculation and Display -->
+            <div class="fees-section">
+                <h2 class="section-title">How Fees Are Calculated and Displayed</h2>
+                <ul class="fees-list">
+                    <li><span class="highlight">Sellers:</span> Fees are deducted from earnings and detailed in the "Earnings Summary" dashboard.</li>
+                    <li><span class="highlight">Buyers:</span> Fees are transparently displayed during checkout.</li>
+                </ul>
+            </div>
+
+            <!-- Why Our Fees are Competitive -->
+            <div class="fees-section">
+                <h2 class="section-title">Why FirePrenair Fees are Competitive</h2>
+                <ul class="fees-list">
+                    <li>Global opportunities across 50+ countries.</li>
+                    <li>Value-driven services with premium tools.</li>
+                    <li>Transparent system with no hidden fees.</li>
+                </ul>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="contact-section">
+                <p>
+                    For further assistance or inquiries, reach out to our support team at 
+                    <a href="mailto:support@fireprenair.com" class="email-link">support@fireprenair.com</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

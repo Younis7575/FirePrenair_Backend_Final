@@ -1,0 +1,138 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Settings{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+   		<!-- Breadcrumb -->
+		<div class="breadcrumb-bar breadcrumb-bar-info">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 col-12">
+						<div class="breadcrumb-list">
+							<h2 class="breadcrumb-title">Enrolled Courses</h2>
+							<nav aria-label="breadcrumb" class="page-breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="{% url 'edu_home' %}">Home</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Enrolled Courses</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /Breadcrumb -->	
+        
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    {% if request.user.is_edu_instructor %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+                    {% else %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+                    {% endif %}
+
+                   <!-- Student Courses -->
+					<div class="col-xl-9 col-lg-9">
+
+						<div class="settings-widget card-info">
+							<div class="settings-menu p-0">
+								<div class="profile-heading">
+									<h3>Enrolled Courses</h3>
+								</div>
+								<div class="checkout-form pb-0">
+									<div class="wishlist-tab">
+										<ul class="nav">
+											<li class="nav-item">
+												<a href="javascript:void(0);" class="active" data-bs-toggle="tab"
+													data-bs-target="#enroll-courses">Enrolled Courses ({{enrolled_courses.count}})</a>
+											</li>
+											<li class="nav-item">
+												<a href="javascript:void(0);" data-bs-toggle="tab"
+													data-bs-target="#active-courses">Active Courses ({{active_courses.count}})</a>
+											</li>
+											<li class="nav-item">
+												<a href="javascript:void(0);" data-bs-toggle="tab"
+													data-bs-target="#complete-courses">Completed Courses ({{completed_courses.count}})</a>
+											</li>
+										</ul>
+									</div>
+
+									<div class="tab-content">
+										<div class="tab-pane fade show active" id="enroll-courses">
+											<div class="row">
+												{% if enrolled_courses %}
+													{% for enroll in enrolled_courses %}
+														<!-- Course Grid -->
+														{% include 'edu_prenair/partials/course_card.html' %}
+														<!-- /Course Grid -->
+													{% endfor %}
+												{% else %}
+													<div class="col-12 text-center">
+														<p>No enrolled courses found.</p>
+													</div>
+												{% endif %}
+											</div>
+										</div>
+									
+										<div class="tab-pane fade" id="active-courses">
+											<div class="row">
+												{% if active_courses %}
+													{% for enroll in active_courses %}
+														<!-- Course Grid -->
+														{% include 'edu_prenair/partials/course_card.html' %}
+														<!-- /Course Grid -->
+													{% endfor %}
+												{% else %}
+													<div class="col-12 text-center">
+														<p>No active courses found.</p>
+													</div>
+												{% endif %}
+											</div>
+										</div>
+									
+										<div class="tab-pane fade" id="complete-courses">
+											<div class="row">
+												{% if completed_courses %}
+													{% for enroll in completed_courses %}
+														<!-- Course Grid -->
+														{% include 'edu_prenair/partials/course_card.html' %}
+														<!-- /Course Grid -->
+													{% endfor %}
+												{% else %}
+													<div class="col-12 text-center">
+														<p>No completed courses found.</p>
+													</div>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+									
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+					<!-- /Student Courses -->
+                    
+                </div>
+            </div>
+        </div>	
+        <!-- /Page Content -->
+
+
+
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

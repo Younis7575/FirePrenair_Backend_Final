@@ -1,0 +1,230 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Add Course{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+<!-- New Course -->
+<section class="page-content course-sec" style="margin-top: 5rem;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <div class="add-course-header">
+                    <h2>Add New Course</h2>
+                    <div class="add-course-btns">
+                        <ul class="nav">
+                            <li>
+                                <a href="{% url 'edu_instructor_dashboard' %}" class="btn btn-black">Back to Dashboard</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                   <!-- Course Wizard -->
+								<div class="widget-set">
+									<div class="widget-setcount">
+                                        <ul id="progressbar" style="justify-content: center;">
+                                            <li class="progress-active">
+                                                <p><span></span> Basic Information</p>                                            
+                                            </li>
+                                            <li>
+                                                <p><span></span> Courses Media</p>
+                                            </li>
+                                            <li>
+                                                <p><span></span> Settings</p>                                                
+                                            </li>
+                                        </ul>
+                                    </div>
+									<div class="widget-content multistep-form">
+                                        <form id="course-form" action="{% url 'edu_add_course' %}" method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <fieldset id="first">
+                                                <div class="add-course-info">
+                                                    <div class="add-course-inner-header">
+                                                        <h4>Basic Information</h4>
+                                                    </div>
+                                                    <div class="add-course-form">
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Course Title</label>
+                                                            <input type="text" name="title" class="form-control" placeholder="Course Title" required>
+                                                        </div>
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Duration</label>
+                                                            <input type="text" name="duration" class="form-control" placeholder="In hours e.g, 10" required>
+                                                        </div>
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Courses Category</label>
+                                                            <select name="category" class="form-control select" required>
+                                                                {% for category in categories %}
+                                                                <option value="{{ category.id }}">{{ category.title }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Courses Level</label>
+                                                            <select name="level" class="form-control select" required>
+                                                                <option value="Beginner">Beginner</option>
+                                                                <option value="Intermediate">Intermediate</option>
+                                                                <option value="Advanced">Advanced</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-block mb-0">
+                                                            <label class="add-course-label">Course Description</label>
+                                                            <textarea name="description" class="form-control" rows="3" required></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="widget-btn">
+                                                        <!-- <a class="btn btn-black">Back</a> -->
+                                                        <a class="btn btn-info-light next_btn">Continue</a>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                
+                                            <fieldset class="field-card">
+                                                <div class="add-course-info">
+                                                    <div class="add-course-inner-header">
+                                                        <h4>Courses Media</h4>
+                                                    </div>
+                                                    <div class="add-course-form">
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Course cover image</label>
+                                                            <div class="relative-form">
+                                                                <span>No File Selected</span>
+                                                                <label class="relative-file-upload">Upload File 
+                                                                    <input type="file" name="thumbnail">
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="widget-btn">
+                                                            <!-- <a class="btn btn-black prev_btn">Previous</a> -->
+                                                            <a class="btn btn-info-light next_btn">Continue</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                
+                                            <fieldset class="field-card">
+                                                <div class="add-course-info">
+                                                    <div class="add-course-inner-header">
+                                                        <h4>Requirements</h4>
+                                                    </div>
+                                                    <div class="add-course-form">
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Price</label>
+                                                            <input type="text" name="price" class="form-control" placeholder="10.00" required>
+                                                        </div>
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Requirements</label>
+                                                            <input type="text" name="requirements" class="form-control" placeholder="e.g, Should have basic Knowledge of" required>
+                                                        </div>
+                                                        <div class="input-block">
+                                                            <label class="add-course-label">Language</label>
+                                                            <input type="text" name="language" class="form-control" placeholder="English" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="widget-btn">
+                                                        <!-- <a class="btn btn-black prev_btn">Previous</a> -->
+                                                        <button class="btn btn-info-light next_btn">Submit</button>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                
+                                            <fieldset class="field-card">
+                                                <div class="add-course-info">
+                                                    <div class="add-course-msg">
+                                                        <i class="fas fa-circle-check"></i>
+                                                        <h4>The Course Added Successfully</h4>
+                                                        <p>Now Add Module and Lessons and then Submit for Admin Approval.</p>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+								</div>
+					<!-- /Course Wizard -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /New Course -->
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}
+
+
+{% block extra_javascript %} 
+<script>
+
+$(document).ready(function () {
+    var current_fs, next_fs, prev_fs; // fieldsets
+    var animating = false; // flag to prevent multi-click glitches
+
+    $(".next_btn").click(function () {
+        if (animating) return false;
+        animating = true;
+
+        current_fs = $(this).closest('fieldset');
+        next_fs = current_fs.next();
+
+        // Add show class to next fieldset and hide the current fieldset
+        next_fs.css({ 'display': 'block', 'opacity': 0 });
+
+        current_fs.animate({ opacity: 0 }, {
+            duration: 500,
+            step: function (now) {
+                current_fs.css({
+                    'display': 'none',
+                });
+                next_fs.css({ 'opacity': 1 - now });
+            },
+            complete: function () {
+                current_fs.hide(); // Hide current fieldset once animation is complete
+                animating = false;
+            },
+        });
+    });
+
+    $(".prev_btn").click(function () {
+        if (animating) return false;
+        animating = true;
+
+        current_fs = $(this).closest('fieldset');
+        prev_fs = current_fs.prev();
+
+        // Add show class to previous fieldset and hide the current fieldset
+        prev_fs.css({ 'display': 'block', 'opacity': 0 });
+
+        current_fs.animate({ opacity: 0 }, {
+            duration: 500,
+            step: function (now) {
+                current_fs.css({
+                    'display': 'none',
+                });
+                prev_fs.css({ 'opacity': 1 - now });
+            },
+            complete: function () {
+                current_fs.hide(); // Hide current fieldset once animation is complete
+                animating = false;
+            },
+        });
+    });
+});
+
+
+</script>
+
+
+{% endblock extra_javascript %}

@@ -1,0 +1,501 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Todos{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+        .todo-card {
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        border-left: 4px solid #1e3a8a;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .todo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .todo-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #1e3a8a, #1e3a8a);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    
+    .todo-card:hover::after {
+        opacity: 1;
+    }
+
+    .todo-checkbox {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #cbd5e1;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+
+    .todo-checkbox:checked {
+        background-color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+
+    .todo-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+      transition: opacity 0.3s ease;
+    }
+    
+     .todo-modal {
+        display: none;
+        width: 100%;
+        height: 100%;
+    } 
+    
+    .todo-modal-content {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        transition: border-color 0.2s;
+    }
+
+    .modal-input:focus {
+        border-color: #1e3a8a;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .todo-status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #1e3a8a;
+    }
+
+    .todo-date {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .todo-card.completed {
+        border-left-color: #10b981;  /* Emerald-500 */
+        background: linear-gradient(145deg, #f0fdf4, #ecfdf5);
+    }
+
+    .todo-card.completed:hover::after {
+        background: linear-gradient(90deg, #10b981, #10b981);
+    }
+
+    .todo-card.completed .todo-status-dot {
+        background: #10b981;
+    }
+
+    .todo-card.completed .todo-date {
+        color: #64748b;
+        opacity: 0.8;
+    }
+
+    .todo-card.completed h3 {
+        color: #94a3b8;  /* Slightly lighter gray */
+        position: relative;
+    }
+
+    .todo-card.completed h3:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 2px;
+        background: #94a3b8;
+        transform: translateY(-50%) scaleX(0.95);
+        opacity: 0.7;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .close-modal-todo {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 24px;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: color 0.2s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-modal-todo:hover {
+      color: #4b5563;
+      background-color: #f3f4f6;
+    }
+    
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+            style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:py-4 sm:py-4 ">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+                    data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <div class="container h-full lg:py-4 sm:py-4">
+                    <div class="flex justify-between items-center mb-8" style="margin-bottom: 12px;">
+                        <h1 class="text-3xl font-bold text-gray-800">My Tasks</h1>
+                        <button style="background-color: #ff6f61;" onclick="openTodoModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            + New Task
+                        </button>
+                    </div>
+            
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5" id="todo-container">
+                        {% for todo in todos %}
+                        <div class="todo-card p-5 {% if todo.is_completed %}completed{% endif %}" data-id="{{ todo.id }}">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="relative">
+                                        <input type="checkbox" {% if todo.is_completed %}checked{% endif %} 
+                                               class="todo-checkbox appearance-none cursor-pointer"
+                                               onchange="toggleTodoStatus({{ todo.id }})">
+                                        <svg class="absolute inset-0 w-5 h-5 text-white pointer-events-none checkmark" 
+                                             style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-800 {% if todo.is_completed %}line-through text-gray-400{% endif %}">
+                                            {{ todo.title }}
+                                        </h3>
+                                        {% if todo.description %}
+                                        <p class="text-gray-600 mt-1 text-sm {% if todo.is_completed %}line-through{% endif %}">
+                                            {{ todo.description }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openEditModal({{ todo.id }})" class="text-gray-400 hover:text-blue-600 p-1 rounded-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteTodo({{ todo.id }})" class="text-gray-400 hover:text-red-600 p-1 rounded-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="todo-status-dot {% if todo.is_completed %}bg-emerald-500{% endif %}"></div>
+                                    <span class="todo-date text-sm">
+                                        {{ todo.created_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                                {% if todo.is_completed %}
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full completed-badge">
+                                    Completed
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% include "dashboard/partials/footer_cta.html" %}
+                </div>
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+    {% include 'work_prenair/partials/mb-menu.html' %}
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include 'work_prenair/partials/menu-modal.html' %}
+
+    </div>
+
+
+<!-- Todo Modal -->
+<div id="todoModalOverlay" class="todo-modal-overlay" style="display: none;">
+    <div class="todo-modal fixed inset-0 z-50 flex items-center justify-center p-4" id="todoModal">
+        <div class="todo-modal-content p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">New Task</h3>
+                <button onclick="closeTodoModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="todoForm" onsubmit="handleTodoSubmit(event)">
+                <input type="hidden" id="todoId">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Task Title</label>
+                        <input type="text" id="title" required
+                            class="modal-input w-full focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="description" rows="4"
+                            class="modal-input w-full focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" onclick="closeTodoModal()" style="background-color: chocolate; color: white;"
+                            class="px-5 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" style="background-color: #ff6f61;"
+                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                        Save Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    let currentEditId = null;
+
+    document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkmark = this.parentElement.querySelector('.checkmark');
+            checkmark.style.display = this.checked ? 'block' : 'none';
+        });
+    });
+
+    function createTodoElement(data) {
+        return `
+        <div class="todo-card p-5" data-id="${data.id}">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="relative">
+                        <input type="checkbox" ${data.is_completed ? 'checked' : ''}
+                               class="todo-checkbox appearance-none cursor-pointer"
+                               onchange="toggleTodoStatus(${data.id})">
+                        <svg class="absolute inset-0 w-5 h-5 text-white pointer-events-none checkmark" 
+                             style="${data.is_completed ? 'display: block;' : 'display: none;'}" 
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold ${data.is_completed ? 'line-through text-gray-400' : 'text-gray-800'}">
+                            ${data.title}
+                        </h3>
+                        ${data.description ? `
+                        <p class="text-gray-600 mt-1 text-sm ${data.is_completed ? 'line-through' : ''}">
+                            ${data.description}
+                        </p>` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openEditModal(${data.id})" class="text-gray-400 hover:text-blue-600 p-1 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </button>
+                    <button onclick="deleteTodo(${data.id})" class="text-gray-400 hover:text-red-600 p-1 rounded-lg">
+                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="todo-status-dot ${data.is_completed ? 'bg-emerald-500' : ''}"></div>
+                    <span class="todo-date text-sm">
+                        ${new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                </div>
+                ${data.is_completed ? `
+                <span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full completed-badge">
+                    Completed
+                </span>` : ''}
+            </div>
+        </div>`;
+    }
+
+
+    function openTodoModal() {
+        document.getElementById('todoModalOverlay').style.display = 'flex';
+        document.getElementById('todoModal').style.display = 'flex';
+        document.getElementById('todoModal').style.opacity = '1';
+        document.getElementById('modalTitle').textContent = 'New Task';
+        document.getElementById('todoForm').reset();
+        currentEditId = null;
+    }
+
+    function openEditModal(todoId) {
+    const todo = document.querySelector(`[data-id="${todoId}"]`);
+    currentEditId = todoId;    
+    document.getElementById('title').value = todo.querySelector('h3').textContent.trim();    
+    const descriptionElement = todo.querySelector('p');
+    document.getElementById('description').value = descriptionElement ? descriptionElement.textContent.trim() : '';
+    document.getElementById('modalTitle').textContent = 'Edit Task';
+    document.getElementById('todoModalOverlay').style.display = 'flex';
+    document.getElementById('todoModal').style.display = 'flex';
+    document.getElementById('todoModal').style.opacity = '1';
+    }
+
+    function closeTodoModal() {
+        document.getElementById('todoModalOverlay').style.display = 'none';
+        document.getElementById('todoModal').style.display = 'none';
+        document.getElementById('todoModal').style.opacity = '0';
+    }
+
+    async function handleTodoSubmit(e) {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('description', document.getElementById('description').value);
+
+        try {
+            const response = await fetch('/workprenair/todos/create/', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            
+            if (currentEditId) {
+                const todoElement = document.querySelector(`[data-id="${currentEditId}"]`);
+                todoElement.outerHTML = createTodoElement(data);
+            } else {
+                const container = document.getElementById('todo-container');
+                container.insertAdjacentHTML('afterbegin', createTodoElement(data));
+            }
+            
+            closeTodoModal();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function toggleTodoStatus(todoId) {
+    const todoElement = document.querySelector(`[data-id="${todoId}"]`);
+    const checkbox = todoElement.querySelector('.todo-checkbox');
+    const isCompleted = checkbox.checked;
+    
+    const formData = new FormData();
+    formData.append('is_completed', isCompleted);
+
+    try {
+        const response = await fetch(`/workprenair/todos/update/${todoId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        });
+        const data = await response.json();
+        
+        // Update DOM elements dynamically
+        todoElement.classList.toggle('completed', data.is_completed);
+        
+        const title = todoElement.querySelector('h3');
+        const description = todoElement.querySelector('p');
+        const statusDot = todoElement.querySelector('.todo-status-dot');
+        const completedBadge = todoElement.querySelector('.completed-badge');
+
+        title.classList.toggle('line-through', data.is_completed);
+        title.classList.toggle('text-gray-400', data.is_completed);
+        
+        if (description) {
+            description.classList.toggle('line-through', data.is_completed);
+        }
+        
+        statusDot.classList.toggle('bg-emerald-500', data.is_completed);
+        
+        if (data.is_completed && !completedBadge) {
+            const badge = document.createElement('span');
+            badge.className = 'px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full completed-badge';
+            badge.textContent = 'Completed';
+            todoElement.querySelector('.mt-4').appendChild(badge);
+        } else if (!data.is_completed && completedBadge) {
+            completedBadge.remove();
+        }
+        
+    } catch (error) {
+            console.error('Error:', error);
+            checkbox.checked = !isCompleted;
+        }
+    }
+
+    async function deleteTodo(todoId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        
+        try {
+            await fetch(`/workprenair/todos/delete/${todoId}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            document.querySelector(`[data-id="${todoId}"]`).remove();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('todoModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTodoModal();
+    });
+</script>
+{% endblock extra_javascript %}

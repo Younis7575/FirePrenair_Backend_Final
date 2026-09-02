@@ -1,0 +1,344 @@
+<!-- Footer -->
+
+
+<style>
+
+/* General Footer Styling */
+.site-footer {
+  background-color: white;
+  /* padding: 50px 0; */
+  color: #333;
+  font-size: 14px;
+}
+
+.site-footer .footer-logo img {
+  max-width: 150px;
+}
+
+.site-footer .footer-section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+/* Social Media Icons */
+.footer-social {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-social h5 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333;
+}
+
+.footer-social a {
+  font-size: 20px;
+  color: #555;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social a:hover {
+  color: #007bff;
+}
+
+
+.footer-widget ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-widget ul li {
+  margin-bottom: 10px;
+}
+
+.footer-widget ul li a {
+  color: #555;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-widget ul li a:hover {
+  color: #007bff;
+}
+
+/* Newsletter */
+.footer-newsletter input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  background-color: #e9ecef;
+  padding: 20px 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.footer-bottom .privacy-policy {
+  display: flex;
+  justify-content: flex-start;
+  gap: 15px;
+}
+
+.footer-bottom .privacy-policy a {
+  color: #555;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.footer-bottom .privacy-policy a:hover {
+  color: #007bff;
+}
+
+.footer-bottom .copyright-text {
+  text-align: right;
+  color: #555;
+}
+
+
+.footer-section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333; /* Adjust to your theme */
+}
+
+.footer-widget ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-widget ul li {
+  margin-bottom: 10px;
+}
+
+.footer-widget ul li a {
+  text-decoration: none;
+  color: #555; /* Adjust to your theme */
+  transition: color 0.3s;
+}
+
+.footer-widget ul li a:hover {
+  color: #007bff; /* Adjust hover color */
+}
+
+
+.footer-follow {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.footer-follow h5 {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.social-icon {
+  font-size: 20px;
+  color: #555;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.social-icon:hover {
+  color: #007bff; 
+}
+
+.row-footer{
+    display: flex;
+    justify-content: space-around;
+  }
+.row0-footer{
+    display: flex;
+    justify-content: space-between;
+  }
+  .container-foot{
+    padding: 20px 100px;
+}
+  
+
+  @media (max-width: 992px) {
+    .row-footer {
+      flex-direction: column;
+    }
+    .row0-footer {
+      flex-direction: column;
+    }
+    .container-foot{
+      padding: 20px;
+      
+    }
+  }
+  
+  .download-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.download-buttons img {
+  width: 140px; /* Adjust as needed */
+  height: auto;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.download-buttons img:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+
+
+</style>
+
+
+ {% load static %}
+  <div style="padding: 20px 0;">
+ {% include 'home/partials/subscribe.html' %}
+ </div>
+ <footer class="site-footer">
+
+    <!-- Footer Top -->
+    <div class="footer-top" style="padding-top: 10px;">
+      <div class="container-foot">
+        <div class="row0-footer">
+          <!-- Left Column: Footer Logo -->
+          <div class="col-lg-6 col-md-6">
+            <div class="footer-widget footer-logo">
+              <a href="{% url 'home' %}"><img src="{% static 'images/navbar/fireprenair_logo_no_bg.png' %}" alt="logo"></a>
+            </div>
+          </div>
+  
+          <!-- Right Column: Follow Us Section -->
+          <div class="col-lg-6 col-md-6 text-right" style="display: flex; justify-content: end; align-items: center;">
+            <div class="footer-social">
+              <h5>Follow Us:</h5>
+              <a href="https://www.linkedin.com" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+              </a>
+              <a href="https://www.facebook.com" target="_blank" title="Facebook">
+                <i class="fab fa-facebook"></i>
+              </a>
+              <a href="https://www.instagram.com" target="_blank" title="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="divider-line" style="width: 100%; height: 1px; background-color: #dfdada; margin: 20px 0;"></div>
+        <div class="row-footer">
+            <!-- Legal Section -->
+            <div class="col-lg-3 col-md-6">
+              <div class="footer-widget">
+                <h2 class="footer-section-title">Legal</h2>
+                <ul>
+                  <li><a target="_blank" href="{% url 'terms_of_use' %}">Terms of Use</a></li>
+                  <li><a target="_blank" href="{% url 'license_agreement' %}">License Agreement</a></li>
+                  <li><a target="_blank" href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+                  <li><a target="_blank" href="{% url 'copyright_info' %}">Copyright Information</a></li>
+                  <li><a target="_blank" href="{% url 'cookie_policy' %}">Cookies Policy</a></li>
+                  <li><a target="_blank" href="{% url 'dmca_policy' %}">DMCA</a></li>
+                  <li><a target="_blank" href="{% url 'privacy_choice_policy' %}">PrivacyChoice</a></li>
+                  <li><a target="_blank" href="{% url 'refund_policy' %}">Refund Policy</a></li>
+                </ul>
+              </div>
+            </div>
+          
+            <!-- Company Section -->
+            <div class="col-lg-3 col-md-6">
+              <div class="footer-widget">
+                <h2 class="footer-section-title">Company</h2>
+                <ul>
+                  <li><a target="_blank" href="{% url 'about_us' %}">About Fireprenair</a></li>
+                  <li><a target="_blank" href="{% url 'contact_support' %}">Contact Support</a></li>
+                  <li><a target="_blank" href="{% url 'help_support' %}">Help & Support</a></li>
+                  <li><a target="_blank" href="{% url 'how_it_works' %}">How It Works</a></li>
+                  <li><a target="_blank" href="{% url 'pricing' %}">Pricing</a></li>
+                  {% if request.user.is_authenticated %}
+                  <li><a href="{% url 'fees_and_commissions' %}">Fees & Commissions</a></li>
+                  {% endif %}
+                  <li><a href="{% url 'faq' %}">FAQ</a></li>
+                </ul>
+              </div>
+            </div>
+          
+            <!-- Resources Section -->
+            <div class="col-lg-3 col-md-6">
+              <div class="footer-widget">
+                <h2 class="footer-section-title">Resources</h2>
+                <ul>
+                  <li><a target="_blank" href="{% url 'training' %}">Training</a></li>
+                  <li><a target="_blank" href="{% url 'digital_products' %}">Digital Products</a></li>
+                  <li><a target="_blank" href="{% url 'affiliate_program' %}">Affiliates</a></li>
+                  <li><a target="_blank" href="{% url 'partners' %}">Partnership</a></li>
+                  <li><a target="_blank" href="{% url 'community' %}">Community</a></li>
+                  <li><a target="_blank" href="{% url 'blog_list' %}">Blogs</a></li>
+                </ul>
+              </div>
+            </div>
+          
+            <!-- On Fire Counter Section -->
+            <div class="col-lg-3 col-md-6">
+              <div class="footer-widget">
+                <h2 class="footer-section-title">On Fire Counter</h2>
+                <ul>
+                  <li>200K+ Entrepreneurs</li>
+                  <li>70K+ Projects Completed</li>
+                  <li>120K+ Products Sold</li>
+                  <li>$50K+ Monthly Users</li>
+                  <li>75K+ AI Tasks Automated</li>
+                  <li>50+ Countries Served</li>
+                  <a class="category-btn-final" style="color: white; width: fit-content;" href="{% url 'home' %}?register=true">Start For Free</a>
+                </ul>
+
+                <!-- Download Buttons -->
+                <div class="download-buttons">
+                  <a href="#" target="_blank">
+                    <img src="{% static 'home/images/ios_icon.png' %}" alt="Download on the App Store">
+                  </a>
+                  <a href="#" target="_blank">
+                    <img src="{% static 'home/images/apple_icon.png' %}" alt="Get it on Google Play">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+      </div>
+    </div>
+  
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="container-footer">
+        <div class="row">
+            <div class="copyright-text" style="display: flex; justify-content: center;">
+              <p>&copy; 2025 Fireprenair. All rights reserved.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+<!-- /Footer -->

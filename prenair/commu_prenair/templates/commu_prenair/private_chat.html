@@ -1,0 +1,445 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Chat{% endblock title %}
+{% block content %}
+<style>
+    .file-message {
+        background: #293f6c;
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 5px;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .file-icon {
+        font-size: 24px;
+        color: #6c757d;
+    }
+
+    .file-details .file-name {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .download-link {
+        font-size: 12px;
+        color: white;
+        text-decoration: none;
+    }
+
+    .download-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-xxl-3 col-xl-4 col-lg-4 pe-0">
+                <div class="d-block d-lg-none">
+                    <button class="button profile-active mb-4 mb-lg-0 d-flex align-items-center gap-2">
+                        <i class="material-symbols-outlined mat-icon"> tune </i>
+                        <span>Chat List</span>
+                    </button>
+                </div>
+                <div class="profile-sidebar">
+                    <div class="d-block d-lg-none position-absolute end-0 top-0">
+                        <button class="button profile-close">
+                            <i class="material-symbols-outlined mat-icon fs-xl"> close </i>
+                        </button>
+                    </div>
+                    <div class="chat-area">
+                        <aside>
+                            <div class="chat-top p-5">
+                                <div class="profile-area d-center justify-content-between">
+                                    <div class="avatar-item d-flex mb-4 gap-3 align-items-center">
+                                        <div class="avatar-item">
+                                            <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{request.user.profile_pic.url}}"
+                                                alt="avatar">
+                                        </div>
+                                        <div class="info-area">
+                                            <h6 class="m-0">Your Chats</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form action="#" class="input-area py-2 d-flex align-items-center">
+                                    <i class="material-symbols-outlined mat-icon">search</i>
+                                    <input type="text" placeholder="Search" autocomplete="off">
+                                </form>
+                            </div>
+                            <div class="header-menu cus-scrollbar">
+                                <!--  -->
+                                {% for chat, last_message, unread_count in user_chats %}
+                                <div class="single-item messages-area pb-5">
+                                    <div class="text-start d-flex justify-content-between chat-single active p-4 mb-2">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <div class="avatar position-relative">
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% if chat.user1 == request.user %} {{ chat.user2.profile_pic.url }} {% else %} {{ chat.user1.profile_pic.url }} {% endif %}"
+                                                     alt="avatar">
+                                                     {% if chat.user1 == request.user %}
+                                                     {% if chat.user2.is_online %}
+                                                     <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+                                                     {% else %}
+                                                     <div class="position-absolute bottom-0 end-0 bg-secondary rounded-circle border border-2 border-white" style="width: 12px; height: 12px;"></div>
+                                                     {% endif %}
+                                                     {% else %}
+                                                     {% if chat.user1.is_online %}
+                                                     <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+                                                     {% else %}
+                                                     <div class="position-absolute bottom-0 end-0 bg-secondary rounded-circle border border-2 border-white" style="width: 12px; height: 12px;"></div>
+                                                     {% endif %}
+                                                     {% endif %}
+                                            </div>
+                                            <div class="text-area">
+                                                <div class="title-area position-relative d-inline-flex align-items-center">
+                                                   <a href="{% url 'private_chat' chat.slug %}"><h6 class="m-0 d-inline-flex">{% if chat.user1 == request.user %} {{ chat.user2.name }} {% else %} {{ chat.user1.name }} {% endif %}</h6></a>
+                                                   {% if unread_count == 0 %}
+                                                   <span></span>
+                                                   {% else %}
+                                                   <span class="abs-area position-absolute d-center mdtxt">{{unread_count}}</span>
+                                                   {% endif %}
+                                                </div>
+                                                <p class="mdtxt sms">
+                                                    {% if last_message %}
+                                                    {% if last_message.content %}
+                                                        {{ last_message.content }}
+
+                                                    {% elif last_message.file %}
+                                                    {{last_message.file_name}}
+                                                    
+                                                    {% endif %}
+                                                    {% else %}
+                                                        No messages yet.
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-9 col-xl-8 col-lg-8 ps-4 ps-lg-0 d-flex flex-column gap-7">
+                <div class="chat-area">
+                    <div class="main">
+                        <div class="chat-head py-4 px-5 d-center justify-content-between">
+                            <div class="d-flex gap-4 align-items-center">
+                                <img src="{{chat_with.profile_pic.url}}" style="width: 48px; height: 48px;"
+                                    class="rounded" alt="image">
+                                <div class="profile-status">
+                                    <h5 class="m-0">
+                                        <a href="{% url 'commu_profile' chat_with.slug %}" class="m-0">{{ chat_with.name}}</a>
+                                    </h5>
+                                    {% if chat_with.is_online %}
+                                    <span class="profile-online mdtxt">Online</span>
+                                    {% else %}
+                                    <span class="profile-online mdtxt"><strong> Last seen:</strong> {{chat_with.time_since_last_seen}}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <ul id="chat-message-list" class="py-4 px-5 cus-scrollbar bottom-0 main-chat-box">
+                            <!-- Existing chat messages will be rendered here -->
+                            {% for msg in chat_messages %}
+                            <li class="{% if msg.sender == request.user %}me{% else %}you{% endif %}">
+                                {% if not msg.file %}
+                                {% if msg.sender == request.user %}
+                                <div class="message" style="background-color: #ff6f61;">
+                                    <p>{{ msg.content }}</p>
+                                    <span class="mdtxt">{{ msg.timestamp|date:"H:i" }}</span>
+                                </div>
+                                <div class="entete">
+                                    <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                </div>
+                                {% else %}
+                                <div class="entete">
+                                    <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                </div>
+                                <div class="message">
+                                    <p>{{ msg.content }}</p>
+                                    <span class="mdtxt">{{ msg.timestamp|date:"H:i" }}</span>
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                                <!-- File Attachments UI -->
+                                {% if msg.file %}
+                                {% if msg.sender != request.user %}
+                                <div class="entete">
+                                    <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                </div>
+                                {% endif %}
+                                <div class="file-message" style="background:#ff6f61;">
+                                    <div class="file-info d-flex align-items-center">
+                                        <i class="material-symbols-outlined mat-icon file-icon">description</i>
+                                        <div class="file-details">
+                                            <p class="file-name">{{ msg.file_name }}</p>
+                                            <a href="{{ msg.file.url }}" class="download-link" target="_blank" download>
+                                                Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if msg.sender == request.user %}
+                                <div class="entete">
+                                    <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                            </li>
+                            {% empty %}
+                            <li>
+                                <p>No messages yet.</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                        <div class="m-4 text-end chat-footer">
+                            <form id="chat-form" action="#" class="py-2 pt-1 px-5" enctype="multipart/form-data">
+                                <div
+                                    class="d-flex align-items-sm-center align-items-end flex-column flex-sm-row mt-2 gap-3">
+                                    <div class="form-content p-0 d-flex gap-2 align-items-center w-100">
+                                        <div class="file-input d-flex gap-1 gap-md-2">
+                                            <div class="file-upload">
+                                                <label class="file">
+                                                    <input type="file" id="attachment-input" multiple>
+                                                    <span class="file-custom border-0 d-grid text-center">
+                                                        <span
+                                                            class="material-symbols-outlined rotateInDownLeft mat-icon fs-xxl">
+                                                            attachment </span>
+                                                    </span>
+                                                </label>
+                                                <ul id="attachment-preview"></ul>
+                                            </div>
+                                            <div class="file-upload">
+                                                <label class="file">
+                                                    <input type="file" id="media-input" multiple
+                                                        accept="image/*,video/*">
+                                                    <span class="file-custom border-0 d-grid text-center">
+                                                        <span class="material-symbols-outlined mat-icon fs-xxl">
+                                                            perm_media </span>
+                                                    </span>
+                                                </label>
+                                                <ul id="media-preview"></ul>
+                                            </div>
+                                            <div class="file-upload">
+                                                <label class="file">
+                                                    <input type="file" id="gif-input" accept=".gif">
+                                                    <span class="file-custom border-0 d-grid text-center">
+                                                        <span class="material-symbols-outlined mat-icon fs-xxl"> gif_box
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                                <ul id="gif-preview"></ul>
+                                            </div>
+                                        </div>
+                                        <input id="chat-message-input" class="py-2"
+                                            placeholder="Type your message here...">
+                                    </div>
+                                    <div class="btn-area">
+                                        <button type="button" id="chat-message-submit"
+                                            class="category-btn-final px-2 px-sm-5 px-lg-6">
+                                            Send
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+
+<script>
+    const username = "{{ request.user.username }}";
+    const chatSlug = "{{ chatSlug }}";
+    const otherUser = "{{ chat_with.username }}";
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const chatSocket = new WebSocket(
+        `${wsProtocol}${window.location.host}/ws/chat/${chatSlug}/`
+    );
+
+    document.getElementById('chat-message-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('chat-message-submit').click();
+        }
+    });
+
+    document.getElementById('chat-message-submit').onclick = function (e) {
+        e.preventDefault();
+
+        const messageInputDom = document.getElementById('chat-message-input');
+        const message = messageInputDom.value.trim();
+
+        const attachmentInput = document.getElementById('attachment-input').files;
+        const mediaInput = document.getElementById('media-input').files;
+        const gifInput = document.getElementById('gif-input').files;
+
+        if (chatSocket.readyState === WebSocket.OPEN) {
+            if (message) {
+                chatSocket.send(JSON.stringify({
+                    'type': 'chat_message',
+                    'message': message,
+                    'sender': username
+                }));
+                messageInputDom.value = '';
+            }
+
+            [attachmentInput, mediaInput, gifInput].forEach((inputFiles, index) => {
+                for (let file of inputFiles) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        chatSocket.send(JSON.stringify({
+                            'type': 'file_message',
+                            'sender': username,
+                            'file_name': file.name,
+                            'file_data': event.target.result,
+                        }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('attachment-preview').innerHTML = '';
+            document.getElementById('media-preview').innerHTML = '';
+            document.getElementById('gif-preview').innerHTML = '';
+        } else {
+            console.error("WebSocket is not open");
+        }
+    };
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.message) {
+            displayMessage(data.message, data.sender);
+        } else if (data.file_name) {
+            displayFile(data.file_name, data.sender, data.file_name);
+        }
+
+        if (data.status && data.user === otherUser) {
+            const onlineSt = document.querySelector(".profile-online");
+            onlineSt.innerHTML = data.status === "online" ? "Online" : "Offline";
+        }
+    };
+
+    function displayMessage(message, sender) {
+        const isCurrentUser = sender === username;
+        const messageElement = `
+        <li class="${isCurrentUser ? 'me' : 'you'}">
+            ${isCurrentUser ? `
+            <div class="message" style="background-color: #ff6f61">
+                <p>${message}</p>
+                <span class="mdtxt">${new Date().toLocaleTimeString()}</span>
+            </div>
+            <div class="entete">
+                <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+            </div>` : `
+            <div class="entete">
+                <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+            </div>
+            <div class="message">
+                <p>${message}</p>
+                <span class="mdtxt">${new Date().toLocaleTimeString()}</span>
+            </div>`}
+        </li>
+    `;
+        document.querySelector('.main-chat-box').insertAdjacentHTML('beforeend', messageElement);
+    }
+
+    function displayFile(filePath, sender, fileUrl) {
+        const isCurrentUser = sender === username;
+        const fileName = filePath.split('/').pop();
+
+        const fileMessageElement = `
+        <li class="${isCurrentUser ? 'me' : 'you'}">
+            ${!isCurrentUser ? `
+            <div class="entete">
+                <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+            </div>` : ''}
+            <div class="file-message" style="background: #293f6c;">
+                <div class="file-info d-flex align-items-center">
+                    <i class="material-symbols-outlined mat-icon file-icon">description</i>
+                    <div class="file-details">
+                        <p class="file-name">${fileName}</p>
+                        <a href="${fileUrl}" class="download-link" target="_blank" download="${fileName}">
+                            Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            ${isCurrentUser ? `
+            <div class="entete">
+                <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+            </div>` : ''}
+        </li>
+    `;
+        document.querySelector('.main-chat-box').insertAdjacentHTML('beforeend', fileMessageElement);
+    }
+
+    function previewSelectedFiles(inputId, previewElementId) {
+        const input = document.getElementById(inputId);
+        const previewElement = document.getElementById(previewElementId);
+
+        input.addEventListener('change', function () {
+            previewElement.innerHTML = '';
+
+            for (let file of input.files) {
+                const listItem = document.createElement('li');
+                listItem.textContent = file.name;
+                previewElement.appendChild(listItem);
+            }
+        });
+    }
+
+    previewSelectedFiles('attachment-input', 'attachment-preview');
+    previewSelectedFiles('media-input', 'media-preview');
+    previewSelectedFiles('gif-input', 'gif-preview');
+
+    chatSocket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    chatSocket.onerror = function (error) {
+        console.error('WebSocket Error:', error);
+    };
+
+</script>
+{% endblock javascript %}

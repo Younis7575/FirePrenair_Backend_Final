@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Your Free eBook - Embrace the Battle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a4d6d 0%, #2d7a9f 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10 L90 90 L10 90 Z" fill="rgba(255,255,255,0.03)"/></svg>') repeat;
+            opacity: 0.5;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Download Section */
+        .download-section {
+            background: white;
+            padding: 60px 20px;
+            margin: 40px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .download-section h2 {
+            font-size: 2.2em;
+            color: #1a4d6d;
+            margin-bottom: 20px;
+        }
+
+        .download-section p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .download-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 15px 35px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.6);
+        }
+
+        /* Premium Section */
+        .premium-section {
+            background: white;
+            padding: 60px 20px;
+            margin: 40px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            border: 3px solid #ffd700;
+            position: relative;
+        }
+
+        .premium-section::before {
+            content: '🚀 PREMIUM UPGRADE';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffd700;
+            color: #1a4d6d;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .premium-section h2 {
+            font-size: 2.2em;
+            color: #1a4d6d;
+            margin-bottom: 20px;
+        }
+
+        .premium-section p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .premium-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, #1a4d6d 0%, #2d7a9f 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .feature-text h3 {
+            font-size: 1.2em;
+            color: #1a4d6d;
+            margin-bottom: 5px;
+        }
+
+        .feature-text p {
+            font-size: 1em;
+            color: #666;
+            margin: 0;
+        }
+
+        .product-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: #ff6b35;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card h3 {
+            font-size: 1.8em;
+            color: #1a4d6d;
+            margin-bottom: 15px;
+        }
+
+        .product-card p {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .product-price {
+            font-size: 2em;
+            font-weight: 700;
+            color: #ff6b35;
+            margin-bottom: 20px;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #1a4d6d 0%, #2d7a9f 100%);
+            color: white;
+            padding: 15px 35px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(26, 77, 109, 0.4);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(26, 77, 109, 0.6);
+        }
+
+        /* Next Step Section */
+        .next-step-section {
+            background: white;
+            padding: 40px 20px;
+            margin: 40px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .next-step-section p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn-next {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(40, 167, 69, 0.6);
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer p {
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .download-section h2,
+            .premium-section h2 {
+                font-size: 1.8em;
+            }
+
+            .btn,
+            .btn-premium {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+
+            .premium-features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content animate-in">
+                <h1>🎉 Thank You! Here's Your Free eBook</h1>
+                <p>Your journey to transformation begins now. Download your free copy and start your 3-day challenge today.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Download Section -->
+    <section class="download-section animate-in">
+        <div class="container">
+            <div class="download-icon">📘</div>
+            <h2>Download Your Free Copy</h2>
+            <p>Your FREE 3-Day Challenge eBook is ready. Click the button below to download it instantly.</p>
+            <a href="{{ free_product_download_url }}" class="btn">Download Free eBook</a>
+        </div>
+    </section>
+
+    <!-- Premium Section -->
+    <section class="premium-section animate-in">
+        <div class="container">
+            <h2>🚀 Ready for the Complete Transformation?</h2>
+            <p>Upgrade to the premium version and get the full "Embrace the Battle" experience with exclusive bonuses.</p>
+            
+            <div class="premium-features">
+                <div class="feature-item">
+                    <div class="feature-icon">📖</div>
+                    <div class="feature-text">
+                        <h3>Full eBook</h3>
+                        <p>Complete "Embrace the Battle" eBook with all chapters</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">
+                        <h3>Bonus Worksheets</h3>
+                        <p>Interactive worksheets and exercises for deeper transformation</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎧</div>
+                    <div class="feature-text">
+                        <h3>Audio Version</h3>
+                        <p>Listen on the go with professionally narrated audio</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-text">
+                        <h3>Lifetime Updates</h3>
+                        <p>Receive all future updates and additions at no extra cost</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.description }}</p>
+                <div class="product-price">${{ product.price }}</div>
+                <form action="{% url 'create_checkout_session' funnel.id product.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-premium">Buy Now - ${{ product.price }}</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Next Step Section -->
+    {% if next_step %}
+    <section class="next-step-section animate-in">
+        <div class="container">
+            <p>Continue your journey with the next step in your transformation process</p>
+            <a href="{% url 'funnel_step' step_order=next_step.step_order %}" class="btn-next">Continue to Next Step</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Embrace the Battle. All rights reserved.</p>
+            <p>Empowering individuals to overcome life's greatest challenges.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe sections for animation
+        document.querySelectorAll('.download-section, .premium-section, .next-step-section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

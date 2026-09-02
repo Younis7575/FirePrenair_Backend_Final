@@ -1,0 +1,104 @@
+{% load course_filters %}
+{% load static %}
+
+<div class="col-xxl-3 col-xl-4 col-lg-4 col-6 mt-5 mt-xl-0">
+    <div class="cus-overflow cus-scrollbar sidebar-head">
+        <div class="d-flex justify-content-end">
+            <div class="d-block d-xl-none me-4">
+                <button class="button toggler-btn mb-4 mb-lg-0 d-flex align-items-center gap-2">
+                    <span>My List</span>
+                    <i class="material-symbols-outlined mat-icon"> tune </i>
+                </button>
+            </div>
+        </div>
+        <div class="cus-scrollbar side-wrapper">
+            <div class="sidebar-wrapper d-flex flex-column gap-6">
+                <div class="sidebar-area p-5">
+                    <div class=" mb-4">
+                        <h6 class="d-inline-flex position-relative">
+                            Request
+                            <span class="mdtxt abs-area d-center position-absolute">{{request.user.friend_requests_received.count}}</span>
+                        </h6>
+                    </div>
+                    <div class="d-grid gap-6">
+                        {% if request.user.friend_requests_received.all %}
+                        {% for f_request in request.user.friend_requests_received.all|slice:":3" %}
+                        <div class="single-single">
+                            <div class="profile-pic d-flex gap-3 align-items-center">
+                                <div class="avatar">
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{f_request.from_user.profile_pic.url}}" alt="avatar">
+                                </div>
+                                <div class="text-area">
+                                    <a href="{% url 'commu_profile' f_request.from_user.slug %}"><h6 class="m-0">{{f_request.from_user.name}}</h6></a>
+                                    <div class="friends-list d-flex gap-3 align-items-center text-center">
+                                        <ul class="d-flex align-items-center justify-content-center">
+                                            {% for connection in request.user|mutual_connections:f_request.from_user|slice:":3" %}
+                                            <li><img src="{{ friend.profile_pic.url }}" alt="image"></li>
+                                            {% endfor %}
+                                        </ul>
+                                        <span class="mdtxt d-center">{{request.user|mutual_connections_count:f_request.from_user}} mutual friends</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="{% url 'handle_friend_request' f_request.from_user.slug 'accept' %}" class="cmn-btn">Confirm</a>
+                                <a href="{% url 'handle_friend_request' f_request.from_user.slug 'reject' %}" class="cmn-btn alt">Delete</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="single-single">
+                            <div class="profile-pic d-flex gap-3 align-items-center" style="display: flex; justify-content: center;">
+                                <p>No friend request</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="sidebar-area p-5">
+                    <div class="mb-4">
+                        <h6 class="d-inline-flex">
+                            Contact
+                        </h6>
+                    </div>
+                    <div class="d-flex flex-column gap-6">
+                        {% if user_contacts %}
+                        {% for contact in user_contacts %}
+                        <div class="profile-area d-center justify-content-between">
+                            <div class="avatar-item d-flex gap-3 align-items-center">
+                                <div class="avatar-item">
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                    src="{% if contact.user1 == request.user %} {{ contact.user2.profile_pic.url }} {% else %} {{ contact.user1.profile_pic.url }} {% endif %}" alt="avatar">
+                                </div>
+                                <div class="info-area">
+                                    <h6 class="m-0"><a href="#" class="mdtxt">{% if contact.user1 == request.user %} {{ contact.user2.name }} {% else %} {{ contact.user1.name }} {% endif %}</a></h6>
+                                </div>
+                            </div>
+                            <div class="btn-group cus-dropdown dropend">
+                                <button type="button" class="dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="material-symbols-outlined fs-xxl m-0"> more_horiz </i>
+                                </button>
+                                <ul class="dropdown-menu p-4 pt-2">
+                                    <li>
+                                        <a class="droplist d-flex align-items-center gap-2" href="{% url 'private_chat' contact.slug %}">
+                                            <i class="material-symbols-outlined mat-icon"> person_remove </i>
+                                            <span>Chat</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="single-single">
+                            <div class="profile-pic d-flex gap-3 align-items-center" style="display: flex; justify-content: center;">
+                                <p>No Contacts!</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

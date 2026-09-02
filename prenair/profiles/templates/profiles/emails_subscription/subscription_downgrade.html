@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Changed to {{ plan_name }} Plan</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Your subscription has been updated to the {{ plan_name }} plan. Your new features are now active.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">View Dashboard</a>
+    </div>
+{% endblock %}

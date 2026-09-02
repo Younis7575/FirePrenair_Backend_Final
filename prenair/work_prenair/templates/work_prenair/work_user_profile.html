@@ -1,0 +1,532 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Professional Profile{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+    .profile-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .profile-header {
+        background: #1a1a2e;
+        color: #fff;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        transform: rotate(30deg);
+    }
+    .avatar-container {
+        border: 4px solid #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+    .avatar-container:hover {
+        transform: scale(1.05);
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .btn-professional {
+        background: #ff6f61;
+        color: #fff;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    .btn-professional:hover {
+        background: #e65b50;
+        transform: translateY(-2px);
+    }
+    .gig-card, .review-card {
+        border: none;
+        border-left: 4px solid #ff6f61;
+        transition: all 0.3s ease;
+    }
+    .gig-card:hover, .review-card:hover {
+        border-left: 4px solid #e65b50;
+        transform: translateX(5px);
+    }
+    .content_dashboard {
+        overflow-y: auto;
+        max-height: 100vh; 
+    }
+    .dashboard_main {
+        height: 100vh; 
+        overflow: hidden; 
+    }
+    
+    /* Modal Overlay */
+    .popup-overlay-analysis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+      transition: opacity 0.3s ease;
+    }
+
+    /* Modal Content */
+    .popup-content-analysis {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      transition: transform 0.3s ease;
+      animation: modalAppear 0.3s ease-out forwards;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Close Button */
+    .close-modal-analysis {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 24px;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: color 0.2s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-modal-analysis:hover {
+      color: #4b5563;
+      background-color: #f3f4f6;
+    }
+
+    /* Modal Header */
+    .popup-content-analysis h4 {
+      color: #111827;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      border: 0.25rem solid #1e3a8a;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner 0.75s linear infinite;
+    }
+
+    @keyframes spinner {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-spinner p {
+      margin-top: 1rem;
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    /* Analysis Result */
+    #analysisResult {
+      padding: 0.5rem 0;
+    }
+
+    #analysisResult h5 {
+      color: #111827;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    #analysisResult p {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    #analysisResult ul {
+      margin: 0.75rem 0 1.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    #analysisResult li {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+
+    #analysisResult li::before {
+      content: '';
+      position: absolute;
+      left: -1.25rem;
+      top: 0.5rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #1e3a8a;
+      border-radius: 50%;
+    }
+
+    /* Error Message */
+    #analysisError {
+      padding: 1rem;
+      background-color: #fee2e2;
+      border-radius: 8px;
+      color: #b91c1c;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #analysisResult, #analysisError {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Sentiment Badges */
+    .sentiment-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    .sentiment-badge.positive {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .sentiment-badge.negative {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .sentiment-badge.neutral {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+
+    /* Section styling */
+    .sentiment-section,
+    .key-points-section,
+    .suggestions-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .key-points-section ul {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 1rem 1rem 1rem 2.5rem;
+    }
+
+    .suggestions-section p {
+      background-color: #f0f9ff;
+      border-left: 4px solid #1e3a8a;
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden font-sans">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main flex lg:w-screen">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom w-full bg-gray-100">
+            <div class="container mx-auto px-6 py-12 lg:py-20">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button uppercase">Menu</strong>
+                </button>
+
+                <div class="profile-container max-w-5xl mx-auto">
+                    <!-- Profile Header -->
+                    <div class="profile-header flex flex-col lg:flex-row items-center gap-6">
+                        <div class="avatar-container relative w-32 h-32 rounded-full overflow-hidden">
+                            <img src="{{user.profile_pic.url}}" alt="Profile" class="w-full h-full object-cover" />
+                            <span class="absolute bottom-2 right-2 w-4 h-4 rounded-full border-2 border-white" 
+                                  style="background-color: {{ user.is_online|yesno:'green,gray' }};"></span>
+                        </div>
+                        <div class="text-center lg:text-left z-10">
+                            <h1 class="text-3xl font-bold tracking-tight">{{ user.username }}</h1>
+                            <p class="text-lg text-gray-300 mt-1">{{ user.work_bio|truncatewords:10 }}</p>
+                            {% if request.user == user %}
+                            <a href="{% url 'edit_work_profile' %}" class="category-btn-final inline-block mt-4" style="width: fit-content; display: inline-block;">Edit Profile</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="p-8">
+                        <!-- About Section -->
+                        <div class="section-card">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-4">About Me</h2>
+                            <p class="text-gray-600 leading-relaxed">{{ user.work_bio }}</p>
+                        </div>
+
+                        <!-- Level/Badge Section -->
+                        {% if user.is_work_profile_approved %}
+                        <div class="section-card flex items-center gap-6">
+                            <div class="w-20 h-20 rounded-full overflow-hidden">
+                                <img src="{{ user.user_badge.get_badge_image }}" alt="Badge" class="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800">Level</h3>
+                                <p class="text-gray-600">{{ user.user_badge.get_level_display }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Gigs/Orders Section -->
+                        {% if user.is_work_freelancer %}
+                        <div class="section-card">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Active Gigs</h2>
+                            {% if user_gigs %}
+                            {% for gig in user_gigs %}
+                            <div class="gig-card p-6 mb-4 bg-gray-50 rounded-lg">
+                                <a href="{% url 'gig_detail' gig.slug %}" class="flex gap-4">
+                                    <img src="{{ gig.image.url }}" alt="Gig" class="w-16 h-16 object-cover rounded" />
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-800">{{ gig.title }}</h4>
+                                        <p class="text-sm text-gray-500">{{ gig.category_level_1.name }} • {{ gig.created_at.date }}</p>
+                                        <p class="text-gray-600 mt-1">${{ gig.basic_price }} <span class="text-sm">Starting from</span></p>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-center text-gray-500 py-8">No active gigs at the moment.</p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {% if request.user == user %}
+                        <div class="section-card">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-6">My Orders</h2>
+                            {% if user_orders %}
+                            {% for order in user_orders %}
+                            <div class="gig-card p-6 mb-4 bg-gray-50 rounded-lg">
+                                <a href="{% url 'gig_detail' order.gig.slug %}" class="flex gap-4">
+                                    <img src="{{ order.gig.image.url }}" alt="Order" class="w-16 h-16 object-cover rounded" />
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-800">{{ order.gig.title }}</h4>
+                                        <p class="text-sm text-gray-500">{{ order.gig.category_level_1.name }} • {{ order.created_at.date }}</p>
+                                        <p class="text-gray-600 mt-1">${{ order.price }} <span class="text-sm">Order Total</span></p>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-center text-gray-500 py-8">No orders yet.</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endif %}
+
+                        <!-- Reviews Section -->
+                        <div class="section-card">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Reviews</h2>
+                            {% if user.is_work_freelancer and user_reviews_as_seller or user_reviews_as_client %}
+                            {% for review in user_reviews_as_seller|default:user_reviews_as_client %}
+                            <div class="review-card p-6 mb-4 bg-gray-50 rounded-lg flex gap-4">
+                                <img src="{{ review.user.profile_pic.url }}" alt="Reviewer" class="w-12 h-12 rounded-full" />
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800">{{ review.user.username }}</h4>
+                                    <p class="text-sm text-gray-500">{{ review.created_at.date }}</p>
+                                    <div class="flex mt-1">
+                                        {% for i in rating_range %}
+                                        <span class="ph-fill ph-star {% if i <= review.rating %}text-yellow-400{% else %}text-gray-300{% endif %}"></span>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-gray-600 mt-2">{{ review.review }}</p>
+                                    {% if request.user == user and user.is_work_freelancer %}
+                                    <button class="category-btn-final mt-3" onclick="analyzeReview('{{ review.review|escapejs }}', this, true)">
+                                        <i class="fas fa-chart-line mr-2"></i> Analyze Review
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-center text-gray-500 py-8">No reviews available.</p>
+                            {% endif %}
+                        </div>                        
+                    </div>
+                </div>
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+    <div id="analysisModal" class="popup-overlay-analysis" style="display: none;">
+        <div class="popup-content-analysis">
+            <span class="close-modal-analysis" onclick="closeAnalysisModal()">&times;</span>
+            <h4>Review Analysis</h4>
+            <div id="analysisContent">
+                <div class="loading-spinner">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden"></span>
+                    </div>
+                    <p>Analyzing review sentiment...</p>
+                </div>
+                <div id="analysisResult" style="display: none;"></div>
+                <div id="analysisError" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+    <div class="modal">
+        {% include 'work_prenair/partials/menu-modal.html' %}
+    </div>
+
+
+<script>
+    function analyzeReview(reviewText, button, isWorkReview = true) {
+        const seller = '{{ user.slug }}';
+        const modal = document.getElementById('analysisModal');
+        const resultDiv = document.getElementById('analysisResult');
+        const errorDiv = document.getElementById('analysisError');
+        const loading = modal.querySelector('.loading-spinner');
+        modal.style.display = 'flex';
+        loading.style.display = 'flex';
+        resultDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+        document.body.style.overflow = 'hidden';
+        fetch('/eduprenair/course/analyze-review/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ review: reviewText, target_slug: seller, work_review: isWorkReview})
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                } else {
+                    let sentimentClass = 'neutral';
+                    if (data.analysis.sentiment.toLowerCase().includes('positive')) {
+                        sentimentClass = 'positive';
+                    } else if (data.analysis.sentiment.toLowerCase().includes('negative')) {
+                        sentimentClass = 'negative';
+                    }
+                    resultDiv.innerHTML = `
+                <div class="sentiment-section">
+                    <h5>Sentiment Analysis</h5>
+                    <span class="sentiment-badge ${sentimentClass}">${data.analysis.sentiment}</span>
+                </div>
+                
+                <div class="key-points-section">
+                    <h5>Key Points</h5>
+                    <ul>
+                        ${data.analysis.key_points.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="suggestions-section">
+                    <h5>Suggestions</h5>
+                    <p>${data.analysis.suggestions}</p>
+                </div>
+            `;
+                    resultDiv.style.display = 'block';
+                }
+                loading.style.display = 'none';
+            })
+            .catch(error => {
+                errorDiv.textContent = 'Error analyzing review. Please try again.';
+                errorDiv.style.display = 'block';
+                loading.style.display = 'none';
+            });
+    }
+    function closeAnalysisModal() {
+        document.getElementById('analysisModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    document.getElementById('analysisModal').addEventListener('click', function (event) {
+        if (event.target === this) {
+            closeAnalysisModal();
+        }
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && document.getElementById('analysisModal').style.display === 'flex') {
+            closeAnalysisModal();
+        }
+    });
+</script>
+
+{% endblock content %}

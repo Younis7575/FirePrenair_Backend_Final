@@ -1,0 +1,350 @@
+<style>
+  .product-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  html.modal-open {
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1e3a8ab5;
+  }
+
+  .modal-container {
+    position: fixed;
+    top: 7vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    width: 1350px;
+    max-width: 90%;
+    max-height: 90vh;
+    border-radius: 12px;
+    padding: 30px;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 1001;
+    color: #666;
+    transition: color 0.3s ease;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+
+  .modal-navigation {
+    position: absolute;
+    width: 95%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 1001;
+  }
+
+  .nav-arrow {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .nav-arrow:hover {
+    background: #fff;
+    transform: scale(1.1);
+  }
+
+  .nav-arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #333;
+  }
+
+  .prev-product {
+    margin-left: -20px;
+  }
+
+  .next-product {
+    margin-right: -20px;
+  }
+
+
+  @media (max-width: 768px) {
+    .modal-container {
+      width: 95%;
+      padding: 20px;
+      margin: 1rem auto;
+    }
+
+    .modal-close {
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+    }
+
+    .nav-arrow {
+      width: 30px;
+      height: 30px;
+    }
+
+    .prev-product {
+      margin-left: -10px;
+    }
+
+    .next-product {
+      margin-right: -10px;
+    }
+  }
+</style>
+
+<div id="productModal" class="product-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container">
+    <button class="modal-close">&times;</button>
+    <div class="modal-navigation">
+      <button class="nav-arrow prev-product">
+        <svg class="crumina-icon">
+          <use xlink:href="#arrow-left2-icon"></use>
+        </svg>
+      </button>
+      <button class="nav-arrow next-product">
+        <svg class="crumina-icon">
+          <use xlink:href="#arrow-right2-icon"></use>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-content" id="productModalContent"></div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.updateProductSlugs = function () {
+      window.productSlugs = Array.from(
+        document.querySelectorAll('.featured-item[data-slug]')
+      ).map(item => item.dataset.slug);
+    };
+    window.updateProductSlugs();
+  });
+</script>
+
+<script>
+  document.addEventListener('click', function(e) {
+    const productLink = e.target.closest('.product-link');
+    if (productLink) {
+        e.preventDefault();
+        const productUrl = productLink.href;
+        loadProductModal(productUrl);
+    }
+
+    document.querySelector('.modal-close').addEventListener('click', closeModal);
+    document.querySelector('.modal-overlay').addEventListener('click', closeModal);
+  });
+
+  let currentProductIndex = -1;
+  let scrollPosition = 0;
+  function loadProductModal(url) {
+    const fullUrl = new URL(url, window.location.origin);
+
+    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    // document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.style.width = '100%';
+    document.body.style.touchAction = 'none';
+    window.addEventListener('keydown', preventScrollKeys);
+    document.body.style.overflow = 'hidden';
+    document.querySelector("html").style.overflow = 'hidden';
+
+    fetch(fullUrl.href, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(response => {
+        if (response.ok) {
+          // history.replaceState(null, null, fullUrl.href);
+          return response.text();
+        }
+        throw new Error('Network response was not ok');
+      })
+      .then(html => {
+        const path = new URL(url).pathname.replace(/\/$/, '');
+        const slug = path.split('/').pop();
+        window.updateProductSlugs();
+        currentProductIndex = window.productSlugs.indexOf(slug);
+
+        if (currentProductIndex === -1) {
+          console.warn('Product not found in current page slugs');
+          window.productSlugs = [slug];
+          currentProductIndex = 0;
+        }
+
+        updateModalContent(html);
+        const modalContainer = document.querySelector('.modal-container');
+        if (modalContainer) {
+            modalContainer.scrollTop = 0;
+        }
+      })
+      .catch(error => {
+        console.error('Error loading product modal:', error);
+      });
+
+    document.getElementById('productModal').style.display = 'block';
+  }
+
+  function preventScrollKeys(e) {
+    // Prevent spacebar, arrow keys, page up/down
+    const keys = [32, 33, 34, 35, 36, 37, 38, 39, 40];
+    if (keys.includes(e.keyCode)) {
+      e.preventDefault();
+      return false;
+    }
+  }
+
+  document.addEventListener('touchmove', function (e) {
+    if (document.getElementById('productModal').style.display === 'block') {
+      if (!e.target.closest('.modal-container')) {
+        e.preventDefault();
+      }
+    }
+  }, { passive: false });
+
+  function updateModalContent(html) {
+    document.getElementById('productModalContent').innerHTML = html;
+    initializeModalComponents();
+
+    const modal = document.getElementById('productModal');
+    modal.style.display = 'flex';
+    const modalContainer = document.querySelector('.modal-container');
+    modalContainer.style.top = `${Math.max(10, window.scrollY + 20)}px`;
+    modalContainer.style.transform = 'translateX(-50%)';
+
+    updateNavigationArrows();
+  }
+
+
+
+  function closeModal() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.touchAction = '';
+    window.scrollTo(0, scrollPosition);
+    window.removeEventListener('keydown', preventScrollKeys);
+    document.getElementById('productModal').style.display = 'none';
+    document.body.style.overflow = '';
+    document.querySelector("html").style.overflow = '';
+    // window.location.href = "{% url 'digi_explore' %}";
+  }
+
+  function updateNavigationArrows() {
+    const prevSlug = currentProductIndex > 0 ? window.productSlugs[currentProductIndex - 1] : null;
+    const nextSlug = currentProductIndex < window.productSlugs.length - 1 ?
+      window.productSlugs[currentProductIndex + 1] : null;
+    document.querySelectorAll('.nav-arrow').forEach(arrow => {
+      const isPrev = arrow.classList.contains('prev-product');
+      const slug = isPrev ? prevSlug : nextSlug;
+
+      arrow.style.display = slug ? 'flex' : 'none';
+      arrow.dataset.slug = slug || '';
+    });
+  }
+  document.addEventListener('click', function (e) {
+    const arrow = e.target.closest('.nav-arrow');
+    if (arrow && arrow.dataset.slug) {
+      const newUrl = new URL(window.location.origin +
+        "{% url 'digi_product' slug='SLUG' %}".replace('SLUG', arrow.dataset.slug));
+      loadProductModal(newUrl.href);
+    }
+  });
+
+  function initializeModalComponents() {
+    if (document.querySelector('.tabs-block.swiper-container')) {
+      new Swiper('.tabs-block.swiper-container', {
+        slidesPerView: 'auto',
+        spaceBetween: 20,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      });
+    }
+
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          });
+
+          if (response.ok) {
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            document.getElementById('productModalContent').innerHTML =
+              doc.getElementById('productModalContent').innerHTML;
+            initializeModalComponents();
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
+    });
+
+    window.addEventListener('popstate', function (event) {
+      if (window.location.pathname.includes('/products/')) {
+        loadProductModal(window.location.href);
+      }
+    });
+    updateNavigationArrows();
+
+    document.addEventListener('click', function (e) {
+      const productLink = e.target.closest('.product-link');
+      if (productLink) {
+        e.preventDefault();
+        loadProductModal(productLink.href);
+      }
+    });
+  }
+</script>

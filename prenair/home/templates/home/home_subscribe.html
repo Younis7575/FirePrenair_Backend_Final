@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="{% static 'images/misc/fireprenair_logo.png' %}"
+    />
+    <title>Fireprenair - Coming Soon</title>
+    <style>
+      /* Resetting default styles */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+      .fireprenair-main-body {
+          font-family: 'Roboto', sans-serif;
+          background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+              url('{% static 'images/misc/home_bg.jpg' %}') no-repeat center center fixed;
+          background-size: cover;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          color: white;
+      }
+      .fireprenair-form-box {
+          background: rgba(181, 189, 199, 1);
+          backdrop-filter: blur(12px);
+          border-radius: 15px;
+          padding: 40px 25px;
+          width: 100%;
+          max-width: 400px;
+          text-align: center;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          animation: fireprenair-fadeIn 0.6s ease-out forwards;
+      }
+      .fireprenair-form-logo {
+          width: 70px;
+          margin-bottom: 20px;
+      }
+      .fireprenair-heading {
+          font-size: 1.8em;
+          margin-bottom: 10px;
+          font-weight: bold;
+      }
+      .fireprenair-description {
+          font-size: 1em;
+          margin-bottom: 25px;
+          color: rgba(0, 0, 0, 1);
+      }
+      .fireprenair-input {
+          width: 100%;
+          padding: 15px;
+          margin-bottom: 15px;
+          border: none;
+          border-radius: 8px;
+          outline: none;
+          font-size: 0.9em;
+      }
+      .fireprenair-input::placeholder {
+          color: #aaa;
+      }
+      .fireprenair-button {
+          width: 100%;
+          padding: 15px;
+          background: orange;
+          border: none;
+          border-radius: 8px;
+          color: white;
+          font-weight: bold;
+          font-size: 1em;
+          cursor: pointer;
+          transition: background 0.3s ease, transform 0.2s;
+      }
+      .fireprenair-button:hover {
+          background: linear-gradient(45deg, #E04957, #FFB347);
+          transform: translateY(-2px);
+      }
+      .fireprenair-error {
+          color: #FF0000;  /* Red color for error messages */
+          font-size: 0.8em;
+          margin-top: -10px;
+          margin-bottom: 10px;
+          text-align: left;
+      }
+      @keyframes fireprenair-fadeIn {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+      }
+      /* Responsive Styles */
+      @media (max-width: 768px) {
+          .fireprenair-form-box {
+              padding: 30px 20px;
+          }
+          .fireprenair-heading {
+              font-size: 1.5em;
+          }
+      }
+
+      .fireprenair-alert-success {
+          background-color: #d4edda;
+          color: #155724;
+          padding: 10px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    {% include "home/partials/new_header.html" %}
+    <div class="fireprenair-main-body">
+      <div style="margin-top: 50px" class="fireprenair-form-container">
+        <div class="fireprenair-form-box">
+          <img
+            src="{% static 'images/misc/fireprenair_logo.png' %}"
+            alt="Logo"
+            class="fireprenair-form-logo"
+          />
+          <p class="fireprenair-description">
+            The Future of Business is Almost Here – AI, Freelancing, Digital
+            Products, E-Learning & Networking in One Place! Subscribe Today for
+            an Exclusive Offer!
+          </p>
+          {% if messages %}
+          <div class="fireprenair-success-message">
+            {% for message in messages %}
+            <div class="fireprenair-alert-success">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <form method="POST">
+            {% csrf_token %}
+
+            <input
+              type="text"
+              name="name"
+              value="{{ values.name }}"
+              placeholder="Enter your name"
+              class="fireprenair-input"
+              required
+            />
+            {% if errors.name %}
+            <div class="fireprenair-error">{{ errors.name }}</div>
+            {% endif %}
+
+            <input
+              type="email"
+              name="email"
+              value="{{ values.email }}"
+              placeholder="Enter your email"
+              class="fireprenair-input"
+              required
+            />
+            {% if errors.email %}
+            <div class="fireprenair-error">{{ errors.email }}</div>
+            {% endif %}
+
+            <button type="submit" class="fireprenair-button">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

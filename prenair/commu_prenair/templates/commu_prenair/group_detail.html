@@ -1,0 +1,401 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load course_filters %}
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Profile{% endblock title %}
+
+{% block extra_css %} 
+<link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+<link
+  href="https://unpkg.com/video.js@7/dist/video-js.min.css"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://unpkg.com/@videojs/themes@1/dist/city/index.css"
+  rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+
+
+
+{% include 'commu_prenair/partials/menu.html' %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xl-9 col-lg-8">
+                <div class="banner-area pages-create mb-5">
+                    <div class="single-box p-5">
+                        <div class="avatar-area">
+                            <img class="avatar-img w-100" src="{{group.bg_img.url}}" style="width: 926px; height: 250px;" alt="image">
+                        </div>
+                        <div class="top-area py-4 d-center flex-wrap gap-3 justify-content-between">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="abs-avatar-item m-0">
+                                    <img class="avatar-img max-un" src="{{group.profile_img.url}}" style="width: 80px; height: 80px;" alt="avatar">
+                                </div>
+                                <div class="text-area text-start">
+                                    <h5 class="m-0 mb-1">{{group.name}}</h5>
+                                    {% if group.is_public %}
+                                    <p class="mdtxt">Public Group - {{group.members.count}} Member</p>
+                                    {% else %}
+                                    <p class="mdtxt">Private Group - {{group.members.count}} Member</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="btn-item d-center gap-3">
+                                {% if group|is_member:request.user %}
+                                <a href="{% url "leave_group" group.slug %}" class="category-btn-final" style="color: white; padding: 10px 20px; background-color: #1e3a8a;">
+                                    Leave
+                                </a>
+                                {% endif %}
+                                {% if group|is_admin:request.user %}
+                                <a href="{% url 'manage_group' group.slug %}" class="category-btn-final" style="color: white; padding: 10px 20px;">
+                                    Manage Group
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if friends_in_group  %}
+                        <div class="friends-list d-flex flex-wrap gap-2 align-items-center text-center">
+                            <ul class="d-flex align-items-center justify-content-center">
+                                {% for friend in friends_in_group|slice:":6" %}
+                                <li><img src="{{friend.profile_pic.url}}" alt="image" class="rounded" style="width: 21px; height: 21px;"></li>
+                                {% endfor %}
+                            </ul>
+                            <span class="mdtxt d-center">{{friends_count}} Connections Have Joined</span>
+                        </div>
+                        {% endif %}
+                        <div class="page-details">
+                            <ul class="nav mt-5 pt-4 flex-wrap gap-2 tab-area" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link d-center active" id="feed-tab" data-bs-toggle="tab" data-bs-target="#feed-tab-pane"
+                                        type="button" role="tab" aria-controls="feed-tab-pane" aria-selected="true">feed</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link d-center" id="connections-tab" data-bs-toggle="tab" data-bs-target="#connections-tab-pane"
+                                        type="button" role="tab" aria-controls="connections-tab-pane" aria-selected="false">connections</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="feed-tab-pane" role="tabpanel" aria-labelledby="feed-tab" tabindex="0">
+                        <div class="row">
+                            <div class="col-xxl-8 col-xl-8 col-lg-12 d-flex flex-column gap-7">
+                                <div class="share-post d-flex gap-3 gap-sm-5 p-3 p-sm-5">
+                                    <div class="profile-box">
+                                        <a href="#"><img src="{{request.user.profile_pic.url}}" style="width: 48px; height: 48px;"
+                                                class="max-un rounded" alt="icon"></a>
+                                    </div>
+                                    <form action="{% url 'make_group_post' group.slug %}" method="post" enctype="multipart/form-data"
+                                        class="w-100 position-relative">
+                                        {% csrf_token %}
+                                        <textarea name="content" required cols="10" rows="2"
+                                            placeholder="Write something to Lerio.."></textarea>
+                
+                                        <div class="abs-area position-absolute d-none d-sm-block">
+                                            <button type="submit" class="category-btn-final" style="padding: 10px 20px;">Post</button>
+                                        </div>
+                                        <ul class="d-flex justify-content-between flex-wrap mt-3 gap-3">
+                                            <li class="d-flex align-items-center gap-2" data-bs-toggle="modal"
+                                                data-bs-target="#photoVideoMod">
+                                                <img src="{% static 'commu_prenair/assets/images/icon/vgallery.png' %}" class="max-un"
+                                                    alt="icon">
+                                                <span>Have Photo/Video to Share?</span>
+                                            </li>
+                                        </ul>
+                                        <!-- Add Submit Button -->
+                                    </form>
+                                </div>
+                                <div class="post-item d-flex flex-column gap-5 gap-md-7">
+                                    <!-- Posts -->
+                                     {% if posts %}
+                                     {% for post in posts %}
+                                    {% include 'commu_prenair/partials/post_card.html' %}
+                                    {% endfor %}
+                                    {% else %}
+                                    <div class="single-box p-5">
+                                        <p>No Posts in the group</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    
+                                </div>
+                            </div>
+                            <div class="col-xxl-4 col-xl-4 col-lg-10 mt-5 mt-xl-0">
+                                <div class="cus-scrollbar">
+                                    <div class="sidebar-wrapper d-flex al-item flex-wrap justify-content-end justify-content-xl-center flex-column flex-md-row flex-xl-column flex gap-6">
+                                        <div class="sidebar-area p-5">
+                                            <div class="mb-3">
+                                                <h6 class="d-inline-flex">
+                                                    About
+                                                </h6>
+                                            </div>
+                                            <p class="mdtxt descript">{{group.desc}}</p>
+                                            <ul class="d-grid gap-2 mt-5">
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> schedule </i>
+                                                    <span class="mdtxt">Always</span>
+                                                </li>
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> flag </i>
+                                                    <span class="mdtxt">{{group.members.count}} Member</span>
+                                                </li>
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> language </i>
+                                                    {% if group.is_public %}
+                                                    <span class="mdtxt">Public Group</span>
+                                                    {% else %}
+                                                    <span class="mdtxt">Private Group</span>
+                                                    {% endif %}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="tab-pane fade" id="connections-tab-pane" role="tabpanel" aria-labelledby="connections-tab" tabindex="0">
+                        <div class="row">
+                            <div class="col-xxl-8">
+                                <div class="single-box p-5">
+                                    <ul class="nav flex-wrap gap-2 tab-area" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link d-center active" id="followers-tab" data-bs-toggle="tab" data-bs-target="#followers-tab-pane" type="button" role="tab" aria-controls="followers-tab-pane" aria-selected="true">followers</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="followers-tab-pane" role="tabpanel" aria-labelledby="followers-tab" tabindex="0">
+                                        <div class="search-area d-center my-7 flex-wrap gap-2 justify-content-between">
+                                            <div class="total-followers">
+                                                <h6>{{friends_count}} Connections in this group</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            {% for connection in friends_in_group %}
+                                            <div class="col-md-6">
+                                                <div class="single-box member-single p-3">
+                                                    <div class="profile-area d-center justify-content-between">
+                                                        <div class="avatar-item d-flex gap-3 align-items-center">
+                                                            <div class="avatar-item">
+                                                                <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{{connection.profile_pic.url}}" alt="avatar">
+                                                            </div>
+                                                            <div class="info-area text-start">
+                                                                <h6 class="m-0"><a href="{% url 'commu_profile' connection.slug %}">{{connection.name}}</a></h6>
+                                                                <p class="mdtxt status">{{request.user|mutual_connections_count:connection}} Mutual Friends</p>
+                                                            </div>
+                                                        </div>
+                                                        {% if request.user == user %}
+                                                        <div class="group-btn cus-dropdown">
+                                                            <button type="button" class="dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                <i class="material-symbols-outlined fs-xxl m-0"> more_horiz </i>
+                                                            </button>
+                                                            <ul class="dropdown-menu p-4 pt-2">
+                                                                <li>
+                                                                    <a class="droplist d-flex align-items-center gap-2" href="{% url 'remove_connection' connection.slug %}">
+                                                                        <i class="material-symbols-outlined mat-icon"> person_remove </i>
+                                                                        <span>Unfollow</span>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xxl-4 col-lg-10 mt-5 mt-xl-0">
+                                <div class="cus-scrollbar">
+                                    <div class="sidebar-wrapper d-flex al-item flex-wrap justify-content-end justify-content-xl-center flex-column flex-md-row flex-xl-column flex gap-6">
+                                        <div class="sidebar-area p-5">
+                                            <div class="mb-3">
+                                                <h6 class="d-inline-flex">
+                                                    About
+                                                </h6>
+                                            </div>
+                                            <p class="mdtxt">{{group.desc}}</p>
+                                            <ul class="d-grid gap-2 mt-5">
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> schedule </i>
+                                                    <span class="mdtxt">Always</span>
+                                                </li>
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> flag </i>
+                                                    <span class="mdtxt">{{group.members.count}} Member</span>
+                                                </li>
+                                                <li class="d-flex align-items-center gap-2">
+                                                    <i class="material-symbols-outlined mat-icon"> language </i>
+                                                    {% if group.is_public %}
+                                                    <span class="mdtxt">Public Group</span>
+                                                    {% else %}
+                                                    <span class="mdtxt">Private Group</span>
+                                                    {% endif %}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div class="go-live-popup video-popup">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="modal cmn-modal fade" id="photoVideoMod">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content p-5">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'make_post' %}">
+                                {% csrf_token %}
+                                <div class="modal-header justify-content-center">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <i class="material-symbols-outlined mat-icon xxltxt"> close </i>
+                                    </button>
+                                </div>
+                                <div class="top-content pb-5">
+                                    <h5>Add post photo/video</h5>
+                                </div>
+                                <div class="mid-area">
+                                <input type="hidden" name="group_slug" value="{{ group.slug }}">
+                                    <div class="d-flex mb-5 gap-3">
+                                        <div class="profile-box">
+                                            <a href="#"><img src="{{request.user.profile_pic.url}}"
+                                                    style="width: 50px; height: 50px;" class="max-un rounded"
+                                                    alt="icon"></a>
+                                        </div>
+                                        <textarea name="content" cols="10" required rows="2"
+                                            placeholder="Write something to Lerio.."></textarea>
+                                    </div>
+                                    <div>
+                                        <label>Title</label>
+                                        <input type="text" name="title" required placeholder="Title of your Post">
+                                    </div>
+                                    <div class="file-upload mt-2">
+                                        <label>Upload attachment</label>
+                                        <label class="file mt-1">
+                                            <input type="file" name="media" accept="image/*,video/*" onchange="handleFilePreview(event)">
+                                            <span class="file-custom pt-8 pb-8 d-grid text-center">
+                                                <i class="material-symbols-outlined mat-icon"> perm_media </i>
+                                                <span>Drag here or click to upload photo/video.</span>
+                                            </span>
+                                        </label>
+                                        <!-- Preview container -->
+                                        <div id="previewContainer" class="mt-3">
+                                            <img id="imagePreview" style="max-width: 100%; display: none;" alt="Image Preview">
+                                            <video id="videoPreview" controls style="max-width: 100%; display: none;"></video>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="footer-area pt-5">
+                                    <div class="btn-area d-flex justify-content-end gap-2">
+                                        <button type="button" class="category-btn-final" style="padding: 10px 20px; background-color: #1e3a8a;" data-bs-dismiss="modal"
+                                            aria-label="Close">Cancel</button>
+                                        <button type="submit" class="category-btn-final" style="padding: 10px 20px;">Post</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const videoElements = document.querySelectorAll('.video-js');
+        videoElements.forEach(videoElement => {
+            videojs(videoElement, {
+                controls: true,
+                preload: 'auto',
+                playbackRates: [0.5, 1, 1.5, 2],
+                fluid: true // Makes the video player responsive
+        });
+    });
+});
+
+    function handleFilePreview(event) {
+    const file = event.target.files[0]; // Get the selected file
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const videoPreview = document.getElementById('videoPreview');
+
+    if (file) {
+        const fileReader = new FileReader();
+
+        fileReader.onload = function(e) {
+            const mimeType = file.type;
+
+            if (mimeType.startsWith('image/')) {
+                // It's an image
+                imagePreview.src = e.target.result; // Set image source
+                imagePreview.style.display = 'block'; // Show image preview
+                videoPreview.style.display = 'none'; // Hide video preview
+            } else if (mimeType.startsWith('video/')) {
+                // It's a video
+                videoPreview.src = e.target.result; // Set video source
+                videoPreview.style.display = 'block'; // Show video preview
+                imagePreview.style.display = 'none'; // Hide image preview
+            } else {
+                alert("Unsupported file type. Please upload an image or video.");
+                imagePreview.style.display = 'none';
+                videoPreview.style.display = 'none';
+            }
+        };
+
+        fileReader.readAsDataURL(file); // Read the file as a data URL
+    } else {
+        // If no file is selected
+        imagePreview.style.display = 'none';
+        videoPreview.style.display = 'none';
+    }
+}
+</script>
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/posts.js' %}"></script>
+    
+{% endblock javascript %}

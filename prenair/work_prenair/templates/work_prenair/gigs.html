@@ -1,0 +1,531 @@
+{% extends "work_prenair/base.html" %}
+{% block title %}Fireprenair | Workprenair{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'work_prenair/dist/output-scss.css' %}" />
+
+<style>
+.modal {
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.filter_section {
+    margin-bottom: 1.5rem;
+}
+
+.text-button {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Enhanced Dropdowns */
+.select_block {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.select_block:hover {
+    border-color: #94a3b8;
+}
+
+.select_block .selected {
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.list_option {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.list_result li {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #475569;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.list_result li:hover {
+    background: #f1f5f9;
+}
+
+.list_result li label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.list_result input[type="radio"] {
+    margin-right: 0.75rem;
+    accent-color: #3b82f6;
+}
+
+/* Modern Range Slider */
+.range-slider {
+    position: relative;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    margin: 1.5rem 0;
+}
+
+.range-slider .input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+}
+
+.range-slider input[type="range"]::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    pointer-events: auto;
+    -webkit-appearance: none;
+}
+
+/* Price Input Group */
+.price-input-group {
+    display: flex;
+    margin-top: 1rem;
+    gap: 1rem;
+    flex-direction: column;
+}
+
+.price-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.price-input:focus {
+    outline: 2px solid #bfdbfe;
+}
+
+/* Enhanced Button */
+.block_btn {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem;
+}
+
+
+.category-btn-final:hover {
+    background: #2563eb;
+}
+
+/* Search Input Enhancement */
+.input_search {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.input_search:focus {
+    border-color: #94a3b8;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.icon_search {
+    color: #94a3b8;
+}
+</style>
+
+{% endblock extra_css %}
+
+
+{% block content %}
+<body class="lg:overflow-unset">
+    {% include "work_prenair/partials/header.html" %}
+
+     <!-- Breadcrumb -->
+     <section class="breadcrumb">
+        <div class="breadcrumb_inner relative lg:py-20 py-14">
+            <div class="breadcrumb_bg absolute top-0 left-0 w-full h-full">
+                <img src="{% static 'work_prenair/assets/images/service_page_img.avif' %}" alt="breadcrumb_service" class="w-full h-full object-cover" />
+            </div>
+            <div class="container relative h-full">
+                <div class="breadcrumb_content flex flex-col items-start justify-center xl:w-[1000px] lg:w-[848px] md:w-5/6 w-full h-full">
+                    <div class="list_breadcrumb flex items-center gap-2 animate animate_top" style="--i: 1">
+                        <a href="{% url 'work_home' %}" class="caption1 text-white">Home</a>
+                        <span class="caption1 text-white opacity-40">/</span>
+                        <span class="caption1 text-white opacity-60">Services</span>
+                    </div>
+                    <h3 class="heading3 text-white mt-2 animate animate_top" style="--i: 2">Services</h3>
+                    <div class="form_search z-[1] w-full mt-5 animate animate_top" style="--i: 3">
+                        <form class="form_inner flex items-center justify-between max-sm:flex-wrap gap-6 gap-y-4 relative w-full p-3 rounded-lg bg-white" method="get" style="border-radius: 0px 35px 35px 35px;">
+                            <!-- Keyword Input -->
+                            <div class="form_input relative w-full">
+                                <span class="icon_search ph-bold ph-magnifying-glass absolute top-1/2 -translate-y-1/2 left-2 text-xl"></span>
+                                <input
+                                    type="text"
+                                    name="keyword"
+                                    class="input_search w-full h-full pl-10"
+                                    placeholder="Job title, key words or company"
+                                    value="{{ keyword|default:'' }}"
+                                />
+                            </div>
+                        
+                            <!-- Category Selector -->
+                            <div class="select_block flex-shrink-0 max-sm:w-full sm:pr-16 pr-7 sm:pl-6 pl-3 sm:border-l border-line" style="border: none; background: none;">
+                                <div class="select">
+                                    <span class="selected capitalize" data-title="Select category">{{ selected_category|default:"Select category" }}</span>
+                                    <ul class="list_option bg-white max-sm:w-full" style="right: auto;">
+                                        
+                                        {% for category in categories %}
+                                        <li class="capitalize" data-item="{{ category.name }}">
+                                            <label>
+                                                <input type="radio" name="category" value="{{ category.id }}" {% if category.id == selected_category %}checked{% endif %}>
+                                                {{ category.name }}
+                                            </label>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <span class="icon_down ph ph-caret-down sm:text-2xl text-xl sm:right-0 right-3"></span>
+                            </div>
+                        
+                            <!-- Submit Button -->
+                            <button type="submit" class="category-btn-final max-sm:w-1/3 text-center flex-shrink-0 bg-custom" style="padding: 10px 20px;">Search</button>
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- List services -->
+    <div class="services lg:py-20 sm:py-14 py-10">
+        <div class="container flex flex-col items-center">
+            <div class="filter flex flex-wrap items-center justify-between gap-8 gap-y-3 relative w-full">
+                <button id="filter_btn" class="filter_btn inline-flex items-center gap-1.5 py-1.5 px-2.5 border border-line rounded-md duration-300 bg-custom">
+                    <span class="ph ph-sliders-horizontal text-xl"></span>
+                    <span>Filters</span>
+                </button>
+                <!-- <div class="select_filter flex items-center gap-3">
+                    <span class="caption1">Sort by:</span>
+                    <div class="select_block sm:pr-16 pr-10 pl-3 py-1 border border-line rounded">
+                        <div class="select">
+                            <span class="selected caption1 capitalize" data-title="sort default">default</span>
+                            <ul class="list_option p-0 bg-white">
+                                <li class="capitalize" data-item="default">sort by (default)</li>
+                                <li class="capitalize" data-item="newest">newest</li>
+                                <li class="capitalize" data-item="oldest">oldest</li>
+                                <li class="capitalize" data-item="random">random</li>
+                            </ul>
+                        </div>
+                        <span class="icon_down ph ph-caret-down right-3"></span>
+                    </div>
+                </div> -->
+            </div>
+            <div class="list_filtered flex flex-wrap items-center gap-3 w-full mt-5">
+                <div class="list flex flex-wrap items-center gap-3"></div>
+                <button class="clear_all_btn inline-flex items-center gap-1 py-1 px-2 border border-red text-red rounded-full duration-300 hover:bg-red hover:text-white">
+                    <span class="ph ph-x text-sm"></span>
+                    <span class="caption1">Clear All</span>
+                </button>
+            </div>
+            {% if gigs %}
+            <ul class="list_layout_cols list_services grid xl:grid-cols-4 sm:grid-cols-2 md:gap-7.5 gap-5 w-full md:mt-10 mt-7">
+                {% for gig in gigs %}
+                <li class="item h-full featured-item" data-slug="{{gig.slug}}">
+                    <div class="service_item overflow-hidden relative h-full rounded-lg bg-white shadow-md duration-300 hover:shadow-xl">
+                        <a href="{% url 'gig_detail' gig.slug %}" class="service_thumb product-link">
+                            <img src="{{gig.image.url}}" alt="1" class="w-full" />
+                        </a>
+                        <div class="service_info py-5 px-4">
+                            <div class="flex items-center justify-between">
+                                <a href="#" class="tag caption2 bg-custom">{{gig.category_level_1.name}}</a>
+                                <div class="rate flex items-center gap-1">
+                                    <span class="ph-fill ph-star text-yellow text-xs"></span>
+                                    <strong class="service_rate text-button-sm">5.0</strong>
+                                    <span class="service_rate_quantity caption1 text-secondary">({{gig.gig_fivestar_reviews.count}})</span>
+                                </div>
+                            </div>
+                            <a href="{% url 'gig_detail' gig.slug %}" class="product-link service_title text-title pt-2 duration-300 gig-link" onmouseover="this.style.color='#ff6f61';" onmouseout="this.style.color='black';">
+                                {{gig.title}}</a>
+                            <div class="service_more_info flex items-center justify-between gap-1 mt-4 pt-4 border-t border-line">
+                                <a href="{% url 'work_user_profile' gig.user.username %}" class="service_author flex items-center gap-2">
+                                    <div class="avat relative flex-shrink-0 w-9 h-9">
+                                        <img src="{{gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-9 h-9 rounded-full object-cover" />
+                                        {% if gig.user.is_online %}
+                                        <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                        {% else %}
+                                        <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                        {% endif %}
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <span class="tag w-fit caption1 bg-background text-success">{{gig.user.user_badge.get_level_display}}</span>
+                                        <span class="service_author_name -style-1">{{gig.user.username}}</span>
+                                    </div>
+                                </a>
+                                <div class="service_price whitespace-nowrap">
+                                    <span class="price text-title">${{gig.basic_price}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty_data flex items-center justify-center w-full h-[300px]">
+                <span class="ph ph-folder-open text-3xl text-secondary"></span>
+                <span class="caption1 text-secondary" style="margin-left: 10px; font-size: 20px;">No gigs found</span>
+            </div>
+            {% endif %}
+            <ul class="list_pagination menu_tab flex items-center justify-center gap-2 w-full md:mt-10 mt-7" role="tablist">
+                {% if gigs.has_previous %}
+                <li role="presentation">
+                    <a href="?page={{ gigs.previous_page_number }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}" class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded border border-line text-title duration-300 hover:border-black" role="tab" aria-selected="false">
+                        &lt;
+                    </a>
+                </li>
+                {% endif %}
+            
+                {% for num in gigs.paginator.page_range %}
+                <li role="presentation">
+                    <a style="background-color: #ff6f61;" href="?page={{ num }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}" 
+                       class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded text-title duration-300 {% if num == gigs.number %}active{% endif %}" 
+                       role="tab" 
+                       aria-selected="{% if num == gigs.number %}true{% else %}false{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endfor %}
+            
+                {% if gigs.has_next %}
+                <li role="presentation">
+                    <a style="background-color: #ff6f61;" href="?page={{ gigs.next_page_number }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}" class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded text-title duration-300" role="tab" aria-selected="false">
+                        &gt;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+<!-- Scroll to top -->
+<button class="scroll-to-top-btn"><span class="ph-bold ph-caret-up"></span></button>
+
+{% include 'home/partials/footer.html' %}
+
+{% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <div class="sidebar min-[390px]:w-[348px] w-[80vw] h-full bg-white">
+        <form class="h-full" method="get" action="{% url 'gigs' %}">
+            <div class="block_filter h-full py-4 px-6">
+                <!-- Search -->
+                <div class="filter_section search">
+                    <strong class="text-button">search</strong>
+                    <div class="form_input relative w-full h-12 mt-2">
+                        <span class="icon_search ph-bold ph-magnifying-glass absolute top-1/2 -translate-y-1/2 left-3 text-xl"></span>
+                        <input type="text" name="keyword" class="input_search w-full h-full pl-10 pr-3 border border-line rounded-lg" placeholder="Job title, key words or company" value="{{ keyword }}" />
+                    </div>
+                </div>
+                
+                <!-- Category -->
+                <div class="filter_section category relative z-[2] mt-6">
+                    <strong class="text-button">category</strong>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-3 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="Select category">{{ selected_category|default:"Select category" }}</span>
+                            <div class="list_option w-full bg-white">
+                                <ul class="list_result mt-3">
+                                    {% for category in categories %}
+                                        <li class="capitalize" data-item="{{ category.name }}">
+                                            <label>
+                                                <input type="radio" name="category" value="{{ category.id }}" {% if category.id == selected_category %}checked{% endif %}>
+                                                {{ category.name }}
+                                            </label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <span class="icon_down ph ph-caret-down right-3"></span>
+                    </div>
+                </div>
+                
+                <!-- Budget -->
+                <div class="filter_section filter_price mt-6">
+                    <strong class="text-button">Budget Range</strong>
+                    <div class="price-input-group">
+                        <input type="number" class="price-input" name="min_price" id="minPriceInput" placeholder="Min $" value="{{ request.GET.min_price|default:0 }}">
+                        <input type="number" class="price-input" name="max_price" id="maxPriceInput" placeholder="Max $" value="{{ request.GET.max_price|default:3000 }}">
+                    </div>
+                    <div class="range-slider">
+                        <input type="range" class="input" name="min_price" id="minPrice" min="0" max="3000" value="{{ request.GET.min_price|default:0 }}">
+                        <input type="range" class="input" name="max_price" id="maxPrice" min="0" max="3000" value="{{ request.GET.max_price|default:3000 }}">
+                    </div>
+                </div>
+                
+
+                
+                <!-- Delivery -->
+                <div class="filter_section delivery mt-6">
+                    <strong class="text-button">Delivery</strong>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-3 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="Select delivery">{{ request.GET.delivery_time|default:"Select delivery" }}</span>
+                            <div class="list_option w-full bg-white">
+                                <ul class="list_result mt-3">
+                                    <li data-item="1-Day">
+                                        <input type="radio" name="delivery_time" value="1 Day" id="delivery_1" 
+                                               {% if request.GET.delivery_time == "1 Day" %}checked{% endif %}>
+                                        <label for="delivery_1">1 Day</label>
+                                    </li>
+                                    <li data-item="2-4 Day">
+                                        <input type="radio" name="delivery_time" value="2-4 Days" id="delivery_2" 
+                                               {% if request.GET.delivery_time == "2-4 Days" %}checked{% endif %}>
+                                        <label for="delivery_2">2-4 Days</label>
+                                    </li>
+                                    <li data-item="1 Week">
+                                        <input type="radio" name="delivery_time" value="1 Week" id="delivery_3" 
+                                               {% if request.GET.delivery_time == "1 Week" %}checked{% endif %}>
+                                        <label for="delivery_3">1 Week</label>
+                                    </li>
+                                        <li data-item="1+ Month">
+                                        <input type="radio" name="delivery_time" value="Above One Month" id="delivery_4" 
+                                               {% if request.GET.delivery_time == "Above One Month" %}checked{% endif %}>
+                                        <label for="delivery_4">Above One Month</label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location -->
+                <div class="filter_section location mt-6">
+                    <strong class="text-button">Location</strong>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-3 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="Select location">{{ request.GET.location|default:"Select location" }}</span>
+                            <div class="list_option w-full bg-white">
+                                <ul class="list_result mt-3">
+                                    <li data-item="Pakistan"><input type="radio" name="location" value="Pakistan" {% if request.GET.location == "Pakistan" %}checked{% endif %}>Pakistan</li>
+                                    <li data-item="United States"><input type="radio" name="location" value="United States" {% if request.GET.location == "United States" %}checked{% endif %}> United States</li>
+                                    <li data-item="Canada"><input type="radio" name="location" value="Canada" {% if request.GET.location == "Canada" %}checked{% endif %}>Canada</li>
+                                    <li data-item="United Kingdom"><input type="radio" name="location" value="United Kingdom" {% if request.GET.location == "United Kingdom" %}checked{% endif %}>United Kingdom</li>
+                                    <li data-item="India"><input type="radio" name="location" value="India" {% if request.GET.location == "India" %}checked{% endif %}>India</li>
+                                    <li data-item="Bangladesh"><input type="radio" name="location" value="Bangladesh" {% if request.GET.location == "Bangladesh" %}checked{% endif %}>Bangladesh</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block_btn absolute right-0 bottom-0 left-0 z-[1] bg-white h-[68px] py-2.5 px-6">
+                <button type="submit" class="category-btn-final w-full text-center">Find Services</button>
+            </div>
+        </form>
+        
+    </div>
+</div>
+
+{% include 'work_prenair/gig_modal.html' %}
+
+{% endblock content %}
+
+{% block extra_javascript %} 
+
+<script>
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+    const minPriceInput = document.getElementById('minPriceInput');
+    const maxPriceInput = document.getElementById('maxPriceInput');
+
+    function updatePriceValues() {
+        minPriceInput.value = minPrice.value;
+        maxPriceInput.value = maxPrice.value;
+    }
+
+    [minPrice, maxPrice, minPriceInput, maxPriceInput].forEach(element => {
+        element.addEventListener('input', () => {
+            // Ensure min doesn't exceed max and vice versa
+            let minVal = parseInt(minPrice.value);
+            let maxVal = parseInt(maxPrice.value);
+
+            if (minVal > maxVal) {
+                minPrice.value = maxVal;
+                minPriceInput.value = maxVal;
+            }
+            if (maxVal < minVal) {
+                maxPrice.value = minVal;
+                maxPriceInput.value = minVal;
+            }
+
+            updatePriceValues();
+        });
+    });
+
+    document.querySelectorAll('.select_block').forEach(block => {
+    const select = block.querySelector('.select');
+    const selected = select.querySelector('.selected');
+    const options = select.querySelectorAll('li');
+    
+    // Open/close dropdown
+    block.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = select.classList.contains('open');
+        document.querySelectorAll('.select').forEach(s => s.classList.remove('open'));
+        if (!isOpen) select.classList.add('open');
+    });
+    
+    // Handle option selection
+    options.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const radio = option.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                selected.textContent = radio.value;
+                selected.dataset.title = radio.value;
+            }
+            select.classList.remove('open');
+        });
+    });
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    document.querySelectorAll('.select').forEach(s => s.classList.remove('open'));
+});
+</script>
+
+
+{% endblock extra_javascript %}

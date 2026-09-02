@@ -1,0 +1,171 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Affiliates{% endblock %}
+
+{% block content %}
+
+<style>
+    .affiliate-container {
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .affiliate-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .affiliate-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .affiliate-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .section-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    li{
+        margin: 10px;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/Affilate program.png' %}');
+        background-size: contain;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="affiliate-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Affiliates</h1>
+                    <p class="hero-text">
+                        FirePrenair’s Affiliate Program is designed to empower you to earn passive income by promoting our platform and its services. Whether you're a seasoned marketer or new to affiliate programs, partnering with FirePrenair is simple and rewarding.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Why Join the FirePrenair Affiliate Program? -->
+            <div class="affiliate-section">
+                <h2 class="section-title">Why Join the FirePrenair Affiliate Program?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Generous Commissions:</span> Earn up to 20% commission on every successful referral. The more you refer, the more you earn!</li>
+                    <li><span class="highlight">High Conversion Rates:</span> FirePrenair’s tools and services attract a broad audience, making it easy to convert referrals into paying customers.</li>
+                    <li><span class="highlight">Recurring Earnings:</span> Enjoy ongoing commissions for recurring subscriptions from your referrals.</li>
+                    <li><span class="highlight">Free to Join:</span> No upfront costs or commitments—start earning right away.</li>
+                </ul>
+            </div>
+
+            <!-- How It Works -->
+            <div class="affiliate-section">
+                <h2 class="section-title">How It Works</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Sign Up:</span> Register for the affiliate program through your FirePrenair dashboard.</li>
+                    <li><span class="highlight">Get Your Unique Link:</span> Receive a personalized referral link to share with your network.</li>
+                    <li><span class="highlight">Promote:</span> Use FirePrenair’s marketing materials, including banners, emails, and social media templates, to attract potential users.</li>
+                    <li><span class="highlight">Earn Commissions:</span> Track your referrals and earnings in real-time through the Affiliate Dashboard.</li>
+                </ul>
+            </div>
+
+            <!-- Affiliate Tools and Features -->
+            <div class="affiliate-section">
+                <h2 class="section-title">Affiliate Tools and Features</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">AI-Driven Insights:</span> Use analytics powered by AI to identify the best-performing campaigns and refine your strategies.</li>
+                    <li><span class="highlight">Marketing Support:</span> Access pre-designed ads, emails, and social media posts to promote FirePrenair effectively.</li>
+                    <li><span class="highlight">Performance Tracking:</span> Monitor clicks, sign-ups, and conversions with detailed analytics in your dashboard.</li>
+                    <li><span class="highlight">Global Reach:</span> Promote to a global audience, with multi-currency support for your referrals.</li>
+                    <li><span class="highlight">Tiered Rewards:</span> Earn bonuses and higher commissions as you refer more users.</li>
+                </ul>
+            </div>
+
+            <!-- Who Can Join? -->
+            <div class="affiliate-section">
+                <h2 class="section-title">Who Can Join?</h2>
+                <ul class="section-list">
+                    <li>Freelancers, creators, and educators already using FirePrenair.</li>
+                    <li>Influencers and bloggers looking to monetize their audience.</li>
+                    <li>Digital marketers and affiliate professionals seeking high-converting programs.</li>
+                </ul>
+            </div>
+
+            <!-- Getting Started -->
+            <div class="affiliate-section">
+                <h2 class="section-title">Getting Started</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Register:</span> Sign up for the affiliate program directly on the FirePrenair platform.</li>
+                    <li><span class="highlight">Start Promoting:</span> Share your affiliate link and utilize the provided marketing tools.</li>
+                    <li><span class="highlight">Track and Earn:</span> Monitor your performance and earnings in the Affiliate Dashboard.</li>
+                </ul>
+            </div>
+
+            <!-- Why FirePrenair Affiliates? -->
+            <div class="affiliate-section">
+                <h2 class="section-title">Why FirePrenair Affiliates?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">High Earning Potential:</span> Competitive commissions and recurring earnings.</li>
+                    <li><span class="highlight">Ease of Use:</span> Simple onboarding and user-friendly affiliate tools.</li>
+                    <li><span class="highlight">Credible Brand:</span> Partner with a trusted, growing platform that users love.</li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="affiliate-section">
+                <p class="section-content">
+                    Start your affiliate journey with FirePrenair today and turn your network into a source of income. Join now and make every connection count!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

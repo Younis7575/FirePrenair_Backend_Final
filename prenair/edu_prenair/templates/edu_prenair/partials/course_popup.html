@@ -1,0 +1,333 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+
+<link
+  href="https://unpkg.com/@videojs/themes@1/dist/city/index.css"
+  rel="stylesheet"
+/>
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+
+<style>
+    .gig-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1e3a8ab5;
+    }
+
+    .modal-container {
+        position: fixed;
+        top: 7vh;
+        left: 50%;
+        transform: translateX(-50%);
+        max-height: 80vh;
+        background: #fff;
+        max-width: 90%;
+        width: 1300px;
+        max-height: 90vh;
+        margin: 0;
+        border-radius: 12px;
+        padding: 30px;
+        overflow-y: auto;
+        touch-action: pan-y;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 1001;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+        color: #333;
+    }
+
+
+    .modal-navigation {
+        position: absolute;
+        width: 95%;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 1001;
+    }
+
+    .nav-arrow {
+        background: #1e3a8a;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        pointer-events: all;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .nav-arrow:hover {
+        background: #113fc0;
+        transform: scale(1.1);
+    }
+
+    .nav-arrow svg {
+        width: 24px;
+        height: 24px;
+        fill: #333;
+    }
+
+    .prev-gig {
+        margin-left: -20px;
+    }
+
+    .next-gig {
+        margin-right: -20px;
+    }
+
+
+    @media (max-width: 768px) {
+        .modal-container {
+            width: 95%;
+            padding: 20px;
+            margin: 1rem auto;
+        }
+
+        .modal-close {
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+        }
+
+        .nav-arrow {
+            width: 30px;
+            height: 30px;
+        }
+
+        .prevgig {
+            margin-left: -10px;
+        }
+
+        .next-gig {
+            margin-right: -10px;
+        }
+    }
+</style>
+
+<div id="courseModal" class="gig-modal course-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <button class="modal-close">&times;</button>
+        <div class="modal-navigation">
+            <button class="nav-arrow prev-course">
+                <i style="color: white;" class="fas fa-arrow-left"></i>
+            </button>
+            <button class="nav-arrow next-course">
+                <i style="color: white;" class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        <div class="modal-content" id="courseModalContent"></div>
+    </div>
+</div>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script>
+    let player = null; 
+
+function handlePreviewClick(lessonId, videoUrl) {
+    const videoModal = document.getElementById('videoPlayer');
+    const videoElement = document.getElementById('mainVideoPlayer');
+    if (player) {
+        player.destroy();
+        player = null;
+    }
+    videoElement.src = videoUrl;
+    videoModal.style.display = 'block';
+    player = new Plyr(videoElement);
+    player.once('canplay', () => {
+        player.play();
+    });
+}
+
+function closeVideoPlayer() {
+    const videoModal = document.getElementById('videoPlayer');
+    videoModal.style.display = 'none';
+    if (player) {
+        player.pause();
+        player.destroy(); 
+        player = null;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize product slugs for courses
+    window.updateCourseSlugs = function() {
+        window.courseSlugs = Array.from(
+            document.querySelectorAll('.course-item[data-slug]')
+        ).map(item => item.dataset.slug);
+    };
+
+    // Course modal handling
+    document.querySelectorAll('.course-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const courseUrl = this.href;
+            loadCourseModal(courseUrl);
+        });
+    });
+
+    function loadCourseModal(url) {
+        fetch(url, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => response.text())
+        .then(html => {
+            const path = new URL(url).pathname.replace(/\/$/, '');
+            const slug = path.split('/').pop();
+            
+            window.updateCourseSlugs();
+            currentCourseIndex = window.courseSlugs.indexOf(slug);
+            
+            updateCourseModalContent(html);
+            updateCourseNavigation();
+
+            const modalContainer = document.querySelector('.modal-container');
+            if (modalContainer) {
+                modalContainer.scrollTop = 0;
+            }
+        })
+        .catch(error => console.error('Error loading course modal:', error));
+        
+        document.body.style.overflow = 'hidden';
+        document.getElementById('courseModal').style.display = 'block';
+    }
+
+    function updateCourseModalContent(html) {
+        document.getElementById('courseModalContent').innerHTML = html;
+        initializeCourseModalComponents();
+    }
+
+    function initializeCourseModalComponents() {
+        // Initialize any course-specific components
+        const enrollButtons = document.querySelectorAll('.buy-now-btn');
+        enrollButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const courseSlug = this.dataset.courseSlug;
+                openCourseCheckoutPopup(courseSlug);
+            });
+        });
+
+        const closeEnroll = document.querySelectorAll('checkout-popup-close');
+        closeEnroll.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeCheckoutPopup();
+            });
+        });
+
+        // related course click
+        document.addEventListener('click', function (e) {
+            const productLink = e.target.closest('.course-link');
+            if (productLink) {
+                e.preventDefault();
+                loadCourseModal(productLink.href);
+            }
+        });
+
+        // related course swiper
+        if (document.querySelector('.related-gigs-swiper')) {
+            new Swiper('.related-gigs-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                    }
+                }
+            });
+        }
+    }
+    
+
+    function updateCourseNavigation() {
+        const prevSlug = currentCourseIndex > 0 ? window.courseSlugs[currentCourseIndex - 1] : null;
+        const nextSlug = currentCourseIndex < window.courseSlugs.length - 1 ? 
+            window.courseSlugs[currentCourseIndex + 1] : null;
+        
+        document.querySelectorAll('.nav-arrow').forEach(arrow => {
+            const isPrev = arrow.classList.contains('prev-course');
+            const slug = isPrev ? prevSlug : nextSlug;
+            
+            arrow.style.display = slug ? 'flex' : 'none';
+            arrow.dataset.slug = slug || '';
+        });
+    }
+
+    // Navigation between courses
+    document.addEventListener('click', function(e) {
+        const arrow = e.target.closest('.nav-arrow');
+        if (arrow && arrow.dataset.slug) {
+            const newUrl = new URL(window.location.origin + 
+                "{% url 'course_detail' slug='SLUG' %}".replace('SLUG', arrow.dataset.slug));
+            loadCourseModal(newUrl.href);
+        }
+    });
+
+
+    function openCourseCheckoutPopup(courseSlug, courseTitle, coursePrice) {
+    const stripeCheckoutUrl = `/eduprenair/course/${courseSlug}/checkout/`;
+    const paypalCheckoutUrl = `/eduprenair/paypal-checkout/${courseSlug}/`;
+
+    document.getElementById('stripeCheckoutButton').setAttribute('href', stripeCheckoutUrl);
+    document.getElementById('paypalCheckoutButton').setAttribute('href', paypalCheckoutUrl);
+
+	document.getElementById("customOfferPopupOverlay").style.display = "block";
+    const popup = document.getElementById('paymentPopup');
+    popup.style.display = 'block';
+
+	}
+
+    function closeCheckoutPopup() {
+        document.getElementById('paymentPopup').style.display = 'none';
+        document.getElementById('customOfferPopupOverlay').style.display = 'none';
+    }
+    document.querySelector('#courseModal .modal-close').addEventListener('click', closeModal);
+    document.querySelector('#courseModal .modal-overlay').addEventListener('click', closeModal);
+
+    function closeModal() {
+        document.getElementById('courseModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+</script>

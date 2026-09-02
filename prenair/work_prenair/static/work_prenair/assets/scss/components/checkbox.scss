@@ -1,0 +1,40 @@
+.checkbox_block {
+    position: relative;
+
+    .checkbox {
+        display: none;
+    }
+
+    .check_icon {
+        visibility: hidden;
+        position: absolute;
+        top: 50%;
+        left: -1px;
+        z-index: 1;
+        transform: translateY(-50%);
+        opacity: 0;
+    }
+
+    .label {
+        position: relative;
+        z-index: 1;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 1px;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--secondary);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            transition: 0.4s;
+        }
+    }
+
+    .checkbox:checked+.check_icon {
+        visibility: visible;
+        opacity: 1;
+    }
+}

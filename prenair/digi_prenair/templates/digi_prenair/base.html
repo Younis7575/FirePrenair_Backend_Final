@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Fireprenair - Digiprenair{% endblock %}</title>
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta property="og:title" content="" />
+  <meta property="og:type" content="" />
+  <meta property="og:url" content="" />
+  <meta property="og:image" content="" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'digi_prenair/img/apple-touch-icon.png' %}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/misc/fireprenair_logo.png' %}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/misc/fireprenair_logo.png' %}" />
+
+  <!-- Include CSS files using static -->
+  <link rel="stylesheet" href="{% static 'digi_prenair/css/normalize.css' %}" />
+  <link rel="stylesheet" href="{% static 'digi_prenair/css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'digi_prenair/css/fonts.css' %}" />
+  <link rel="stylesheet" href="{% static 'digi_prenair/css/swiper-bundle.css' %}" />
+  <link rel="stylesheet" href="{% static 'digi_prenair/css/nice-select2.css' %}" />
+
+  {% block extra_css %}
+
+  {% endblock extra_css %}
+
+  <meta name="theme-color" content="#fafafa" />
+  {% comment %}
+  <meta name="theme-color" content="#FFFFFF" />
+  {% endcomment %}
+
+</head>
+
+<body class="loading">
+  {% include "digi_prenair/partials/chatbot.html" %}
+  <div class="main digital-store">
+
+    <!-- Header -->
+    {% include 'digi_prenair/partials/header.html' %}
+
+    <!-- Messages -->
+
+    {% include 'digi_prenair/partials/messages.html' %}
+
+    <!-- Main content block where child templates can inject content -->
+    {% block content %} {% endblock %}
+
+    <!-- Footer -->
+    {% include 'digi_prenair/partials/footer.html' %}
+  </div>
+
+  <!-- Include JS files using static -->
+  <script defer src="{% static 'digi_prenair/js/swiper-bundle.min.js' %}"></script>
+  <script defer src="{% static 'digi_prenair/js/main.js' %}"></script>
+  <script defer src="{% static 'digi_prenair/js/countdown.js' %}"></script>
+  <script defer src="{% static 'digi_prenair/js/waves.min.js' %}"></script>
+  <script async src="{% static 'digi_prenair/js/svg-loader.js' %}"></script>
+  <script defer src="{% static 'digi_prenair/js/nice-select2.js' %}"></script>
+  <script defer src="{% static 'digi_prenair/js/custom.js' %}"></script>
+  <script src="{% static " home/js/notify.js" %}"></script>
+
+  {% block extra_js %}{% endblock extra_js %}
+
+  {% block extra_javascript %} {% endblock extra_javascript %}
+
+</body>
+
+</html>

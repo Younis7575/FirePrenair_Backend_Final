@@ -1,0 +1,10 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Welcome to Your {{ plan_name }} Plan!</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Congratulations on starting your {{ plan_name }} subscription! You're now part of the FirePrenair family with access to all premium features.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Go to Dashboard</a>
+    </div>
+    <p>Get started today and make the most of your subscription!</p>
+{% endblock %}

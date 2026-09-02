@@ -1,0 +1,442 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Choose Template{% endblock title %}
+
+{% block extra_css %}
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        margin-right: 0.5rem;
+        z-index: 2;
+        position: relative;
+    }
+    
+    .step-active .step-number {
+        background-color: #1e3a8a;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.2);
+    }
+    
+    .step-inactive .step-number {
+        background-color: #d1d5db;
+        color: #6b7280;
+    }
+    
+    .step-completed .step-number {
+        background-color: #ff6f61;
+    }
+    
+    .step-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    
+    .step-active .step-text {
+        color: #1e3a8a;
+    }
+    
+    .step-inactive .step-text {
+        color: #6b7280;
+    }
+    
+    .step-completed .step-text {
+        color: #ff6f61;
+    }
+    
+    .step-connector {
+        width: 80px;
+        height: 2px;
+        background-color: #ff6f61;
+        margin: 0 1rem;
+    }
+    
+    .step-connector.inactive {
+        background-color: #d1d5db;
+    }
+    
+    .template-card {
+        position: relative;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    
+    .template-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border-color: #1e3a8a;
+    }
+    
+    .template-card.selected {
+        border-color: #ff6f61;
+        box-shadow: 0 20px 40px rgba(255, 111, 97, 0.2);
+    }
+    
+    .template-image {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+    }
+    
+    .template-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .template-card:hover .template-image img {
+        transform: scale(1.05);
+    }
+    
+    .template-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(255, 111, 97, 0.9) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .template-card:hover .template-overlay {
+        opacity: 1;
+    }
+    
+    .select-btn {
+        background: white;
+        color: #1e3a8a;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .template-card:hover .select-btn {
+        transform: translateY(0);
+    }
+    
+    .select-btn:hover {
+        background: #ff6f61;
+        color: white;
+        transform: scale(1.05);
+    }
+    
+    .template-info {
+        padding: 1.5rem;
+    }
+    
+    .template-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    
+    .template-description {
+        color: #6b7280;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    
+    .template-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-tag {
+        background: #f3f4f6;
+        color: #374151;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .selected-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 32px;
+        height: 32px;
+        background: #ff6f61;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.3s ease;
+    }
+    
+    .template-card.selected .selected-indicator {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    .continue-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(100px);
+        z-index: 1000;
+    }
+    
+    .continue-btn.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .continue-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(30, 58, 138, 0.4);
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color:  #ff6f61;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 1.125rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .template-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .template-grid {
+            grid-template-columns: 1fr;
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .step-connector {
+            width: 60px;
+        }
+        
+        .step-text {
+            display: none;
+        }
+        
+        .continue-btn {
+            bottom: 1rem;
+            right: 1rem;
+            left: 1rem;
+            width: auto;
+        }
+    }
+    
+    .no-templates {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+    
+    .no-templates-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex"
+    style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit">
+      <div class="container h-full lg:py-15 sm:py-12 py-8">
+        <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        
+        <div class="min-h-screen px-4 py-8">
+          <div class="max-w-7xl mx-auto">
+            
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step step-completed">
+                    <div class="step-number">✓</div>
+                    <div class="step-text">Choose Name</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step step-active">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Select Template</div>
+                </div>
+                <div class="step-connector inactive"></div>
+                <div class="step step-inactive">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Edit & Customize</div>
+                </div>
+            </div>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+              <h1 class="page-title">Choose Your Template</h1>
+              <p class="page-subtitle">
+                Select a beautiful starting point for your website. You can customize everything later.
+              </p>
+            </div>
+
+            <!-- Templates Grid -->
+            {% if templates %}
+            <div class="template-grid">
+              {% for template in templates %}
+              <div class="template-card" data-template-id="{{ template.id }}">
+                <div class="selected-indicator">✓</div>
+                
+                <div class="template-image">
+                  <img src="{{ template.thumbnail.url }}" alt="{{ template.name }}">
+                  <div class="template-overlay">
+                    <button class="select-btn" onclick="selectTemplate({{ template.id }})">
+                      Select Template
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="template-info">
+                  <h3 class="template-name">{{ template.name }}</h3>
+                  <p class="template-description">
+                    {{ template.description|default:"Perfect for modern businesses and startups" }}
+                  </p>
+                  
+                  <div class="template-features">
+                    {% if template.features %}
+                      {% for feature in template.features %}
+                      <span class="feature-tag">{{ feature }}</span>
+                      {% endfor %}
+                    {% endif %}
+                      <span class="feature-tag">{{template.category.name}}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-templates">
+              <div class="no-templates-icon">🎨</div>
+              <h3 class="text-xl font-semibold text-gray-700 mb-2">No Templates Available</h3>
+              <p class="text-gray-500">Templates are being prepared. Please check back later.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+  <!-- Modal -->
+  <div class="modal">
+    {% include 'work_prenair/partials/menu-modal.html' %}
+  </div>
+
+  <script>
+    let selectedTemplateId = null;
+    
+    function selectTemplate(templateId) {
+      // Remove previous selection
+      document.querySelectorAll('.template-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      
+      // Add selection to clicked template
+      const selectedCard = document.querySelector(`[data-template-id="${templateId}"]`);
+      selectedCard.classList.add('selected');
+      
+      // Store selected template ID
+      selectedTemplateId = templateId;
+      
+      window.location.href = "{% url 'create_from_template' 0 %}".replace('0', selectedTemplateId);
+    }
+    
+    // Add click event to template cards
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          // Don't trigger if clicking the select button directly
+          if (!e.target.classList.contains('select-btn')) {
+            const templateId = this.dataset.templateId;
+            selectTemplate(parseInt(templateId));
+          }
+        });
+      });
+    });
+  </script>
+</body>
+{% endblock %}

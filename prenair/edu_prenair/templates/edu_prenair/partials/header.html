@@ -1,0 +1,678 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navbar</title>
+    <link rel="stylesheet" href="{% static "edu_prenair/assets/css/navbar.css" %}">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+    <style>
+
+      .red-dot {
+        width: 8px;
+        height: 8px;
+        background-color: red;
+        border-radius: 50%;
+        position: absolute;
+        top: 8px;
+        right: 1px;
+        transform: translate(50%, -50%);
+        z-index: 1;
+      }
+
+            /* Scoped Notification Dropdown Styling */
+        .notification-dropdown-container {
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+        }
+
+        /* Dropdown Menu Styling */
+        .notification-dropdown-menu {
+          display: none;
+          position: absolute;
+          right: 0;
+          top: 35px;
+          background-color: #fff;
+          border: none;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 32, 63, 0.15);
+          z-index: 1000;
+          min-width: 320px;
+          max-width: 360px;
+          overflow: hidden;
+          padding: 6px 0;
+        }
+
+        /* Show Dropdown */
+        .notification-dropdown-menu.show {
+          display: block;
+          animation: notificationFadeIn 0.3s ease-in-out;
+        }
+
+        /* Specific Styling for <a> Tags inside Notification Dropdown */
+        .notification-dropdown-menu a {
+          font-size: 13px;
+          padding: 12px 18px;
+          transition: background-color 0.2s ease;
+          color: #333;
+          text-decoration: none;
+          display: block;
+        }
+
+        /* Specific Styling for <li> Tags inside Notification Dropdown */
+        .notification-dropdown-menu li {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Styling for the notification message */
+        .notification-dropdown-item-msg {
+          font-size: 13.5px;
+          line-height: 1.45;
+          padding: 0;
+          color: #1c2b3a;
+          font-weight: 500;
+          text-decoration: none;
+          display: block;
+        }
+
+        /* Hover Effect on Dropdown Items */
+        .notification-flex:hover {
+          background-color: #f7f9fc;
+        }
+
+        .notification-dropdown-item-msg:hover {
+          background-color: transparent;
+        }
+
+        /* Divider Styling */
+        .notification-dropdown-divider {
+          margin: 4px 0 0;
+          border: none;
+          border-top: 1px solid #eee;
+        }
+
+        /* Text center for "See More" item */
+        .notification-dropdown-item.text-center {
+          font-weight: 600;
+          color: #ff6f61;
+          text-align: center;
+        }
+
+        /* Hover effect on "See More" item */
+        .notification-dropdown-item.text-center:hover {
+          background-color: #fff1ef;
+        }
+
+        /* Muted styling for the non-clickable empty state */
+        .notification-dropdown-item.text-center:not([href]) {
+          color: #8a94a6;
+          font-weight: 500;
+          cursor: default;
+        }
+
+        .notification-dropdown-item.text-center:not([href]):hover {
+          background-color: transparent;
+        }
+
+        /* Mark as read button */
+        .notification-mark-read-btn {
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #28a745;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .notification-mark-read-btn:hover {
+          color: #fff;
+          background-color: #28a745;
+        }
+
+        /* Flex container for styling notification items */
+        .notification-flex {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 18px;
+          border-bottom: 1px solid #f2f2f2;
+          transition: background-color 0.2s ease;
+        }
+
+        /* Smooth Dropdown Animation */
+        @keyframes notificationFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        a.cat-item {
+        position: relative;
+        text-decoration: none;
+        display: inline-block;
+        width: fit-content;
+      }
+
+      a.cat-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background-color: #000;
+        transition: width 0.3s ease-in-out;
+        display: table;
+      }
+
+      a.cat-item:hover:after {
+        width: 100%; 
+      }
+
+      .select-style {
+        position: relative;
+        display: inline-block;
+        width: 100px;
+      }
+      
+      .select-style select {
+        appearance: none;
+        padding: 8.5px 20px;
+        border: 1px solid #ddd;
+        color: white;
+        border-radius: 44px;
+        background: #1e3a8a;
+        cursor: pointer;
+        width: 100%;
+      }      
+
+      
+    .has-submenu {
+        position: relative;
+    }   
+
+    .submenu {
+        display: none;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        z-index: 1001;
+        animation: fadeIn 0.2s ease;
+    }   
+
+    .submenu-caret {
+        margin-left: auto;
+        font-size: 0.8em;
+        transition: transform 0.2s ease;
+    }   
+
+
+    .submenu .dropdown-item-user {
+        padding: 10px 20px;
+        font-size: 0.95em;
+        border-radius: 0;
+    }   
+
+    .submenu .dropdown-item-user i {
+        font-size: 1.1em;
+    }   
+
+    .has-submenu.active + .submenu {
+        display: block;
+    }   
+
+    .has-submenu.active .submenu-caret {
+        transform: rotate(90deg);
+        color: #ff6f61;
+    }
+
+
+    </style>
+
+  <body>
+    <div class='The-great-navbar'>
+      <header class="navbar-final">
+        <a href="{% url 'home' %}"><div class="logo-final">
+          <img src="{% static "images/navbar/fireprenair_logo_no_bg.png" %}"
+          alt="Prenair Logo">
+        </div></a>
+
+        <div class="partition-vertical"></div>
+
+        <!-- Toggle button for mobile view -->
+        <button class="menu-toggle-final">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        {% include 'home/partials/home-head-top-cat.html' %}
+        <div class="options options-flex">
+          <div>
+            <form action="{% url 'change_language' %}" method="post" class="language-form">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ request.path }}">
+              <div class="select-style">
+                  <select name="language" onchange="this.form.submit()">
+                      {% get_current_language as CURRENT_LANGUAGE_CODE %}
+                      {% get_available_languages as LANGUAGES %}
+                      {% for code, name in LANGUAGES %}
+                          <option value="{{ code }}" 
+                              {% if code == CURRENT_LANGUAGE_CODE %}selected{% endif %}>
+                              {{ name }}
+                          </option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </form>
+        </div>
+          <button style="margin-left: 0;" class="the-button currency-btn">US$ USD</button>
+          {% if request.user.is_authenticated %}
+          {% if request.user.role != 'admin' %}
+              <div class="user-dropdown">
+                  {% if request.user.profile_pic %}
+                      <img
+                        src="{{ request.user.profile_pic.url }}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% else %}
+                      <img
+                        src="{% static 'digi_prenair/img/avatar.png' %}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% endif %}
+                  <div class="dropdown-menu-user">
+                      <div class="dropdown-header">
+                          {% if request.user.profile_pic %}
+                              <img
+                                src="{{ request.user.profile_pic.url }}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% else %}
+                              <img
+                                src="{% static 'digi_prenair/img/avatar.png' %}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% endif %}
+                          <p class="user-name">{{ request.user.name }}</p>
+                          <small class="user-email">{{ request.user.email }}</small>
+                      </div>
+                      <hr>
+                      <a href="{% url 'dashboard_home' %}" class="dropdown-item-user">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                      </a>
+                      <a href="{% url 'edu_instructor_dashboard' %}" class="dropdown-item-user">
+                        <i class="fas fa-tachometer-alt"></i> Eduprenair Dashboard
+                      </a>
+                      <a href="{% url 'user_orders' %}" class="dropdown-item-user">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                      </a>
+                      <a href="{% url 'payout_request' %}" class="dropdown-item-user">
+                        <i class="fas fa-money-bill"></i> Get Paid Now
+                      </a>
+                      <a href="#" class="dropdown-item-user has-submenu">
+                        <i class="fas fa-plus-circle"></i> Create Content
+                        <i class="fas fa-chevron-right submenu-caret"></i>
+                      </a>
+                      <div class="submenu">
+                        <a href="{% url 'create_gig' %}" data-url="{% url 'create_gig' %}" class="dropdown-item-user open-gig-popup">
+                          <i class="fas fa-cube"></i> New Gig
+                        </a>
+                        <a href="{% url 'course_create_eduprenair' %}" data-url="{% url 'course_create_eduprenair' %}" class="dropdown-item-user open-course-popup">
+                          <i class="fas fa-graduation-cap"></i> Create Course
+                        </a>
+                        <a href="{% url 'upload_item_digiprenair' %}" data-url="{% url 'upload_item_digiprenair' %}" class="dropdown-item-user open-product-popup">
+                          <i class="fas fa-project-diagram"></i> New Product
+                        </a>
+                      </div>
+                      <a href="{% url 'dashboard_edit_profile' %}" class="dropdown-item-user">
+                        <i class="fas fa-cog"></i> Settings
+                      </a>
+                      <a href="{% url 'logout' %}" class="dropdown-item-user logout">
+                          <i class="fas fa-sign-out-alt"></i> Logout
+                      </a>
+                  </div>
+              </div>
+          {% else %}
+              <div class="user-dropdown">
+                  {% if request.user.profile_pic %}
+                      <img
+                        src="{{ request.user.profile_pic.url }}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% else %}
+                      <img
+                        src="{% static 'digi_prenair/img/avatar.png' %}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% endif %}
+                  <div class="dropdown-menu-user">
+                      <div class="dropdown-header">
+                          {% if request.user.profile_pic %}
+                              <img
+                                src="{{ request.user.profile_pic.url }}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% else %}
+                              <img
+                                src="{% static 'digi_prenair/img/avatar.png' %}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% endif %}
+                          <p class="user-name">{{ request.user.name }}</p>
+                          <small class="user-email">{{ request.user.email }}</small>
+                      </div>
+                      <hr>
+                      <a href="{% url 'admin_dashboard' %}" class="dropdown-item-user">
+                          <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                      </a>
+                      <a href="{% url 'dashboard_edit_profile' %}" class="dropdown-item-user">
+                          <i class="fas fa-cog"></i> Settings
+                      </a>
+                      <a href="{% url 'logout' %}" class="dropdown-item-user logout">
+                          <i class="fas fa-sign-out-alt"></i> Logout
+                      </a>
+                  </div>
+              </div>
+          {% endif %}
+      {% else %}
+          <div>
+              <a href="{% url 'home' %}?register=true"><button class="the-button start-btn">Start for Free</button></a>
+              <a href="{% url 'home' %}?login=true"><button class="sign-btn">Sign In</button></a>
+          </div>
+      {% endif %}
+      
+        </div>     
+      </header>
+
+      <!-- Sidebar menu for mobile view -->
+      <div class="sidebar">
+        <button class="close-btn-final">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Polished Search Bar -->
+        <form action="{% url 'courses' %}" class="">
+          <div class="mobile-search">
+            <input type="text" name="search" placeholder="Search services, Products, Networking, etc" class="search-input"/>
+            <button class="search-btn-final"><i class="fa-solid fa-search"></i></button>
+          </div>
+        </form>
+
+        <!-- Second Navbar Links (as list items) Mobile -->
+        <ul class="sidebar-links-second">
+          <li><a href="{% url 'work_home' %}">Workprenair</a></li>
+          <li><a href="{% url 'edu_home' %}">Eduprenair</a></li>
+          <li><a href="{% url 'digi_home' %}">Digiprenair</a></li>
+          <li><a href="{% url 'commu_home' %}">Commuprenair</a></li>
+          <li><a href="{% url 'courses' %}">Courses</a></li>
+          <li><a href="{% url 'edu_instructors' %}">Instructors</a></li>
+          {% if user.is_authenticated %}
+          {% if request.user.is_edu_instructor %}
+          <li><a href="{% url 'edu_instructor_dashboard' %}">Instructor Dashboard</a></li>
+          {% else %}
+          <li><a href="{% url 'edu_student_dashboard' %}">Student Dashboard</a></li>
+          {% endif %}
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+          {% endif %}
+        </ul>
+
+        <!-- Start and Sign Buttons -->
+        {% if not user.is_authenticated %}
+        <button onclick="location.href='/?register=true'" class="sidebar-start-btn">Start for Free</button>
+        <button onclick="location.href='/?login=true'" class="sidebar-sign-btn">Sign In</button>
+        {% endif %}
+      </div>
+      
+ 
+    <div class="partition-horizontal"></div>
+
+    <div class="second-main">
+      <nav class="navbar-second">
+        <div class="navbar-left-second">
+          <div class="navbar-feature-second">
+            <a href="{% url "edu_home" %}" class="feature-button-second ">Eduprenair</a>
+          </div>
+          <ul id="top-categories" class="navbar-links-second">
+            <!-- Top-level categories will be dynamically rendered here -->
+          </ul>
+          <div class="category_nav flex" style="display: none;">
+            <!-- This is populated dynamically -->
+          </div>
+
+        </div>
+        <div class="navbar-right-second">
+          <div class="dropdown-second">
+            <a class="navbar-products-second flex items-center">
+              <span class="icon-span"><img src="{% static "images/navbar/icons.png" %}" alt="Category
+                Icon"></span>
+              Our Products &nbsp;&nbsp;<i class="fa-solid fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu-second">
+              <li><a href="{% url "work_home" %}">Workprenair</a></li>
+              <li><a href="{% url "digi_home" %}">Digiprenair</a></li>
+              <li><a href="{% url "commu_home" %}">Commuprenair</a></li>
+              <li><a href="{% url "courses" %}">Courses</a></li>
+              <li><a href="{% url "edu_instructors" %}">Instructors</a></li>
+              
+            </ul>
+          </div>
+
+          {% if user.is_authenticated %}
+          <div class="navbar-icons-second">
+            <div class="notification-dropdown-container dropdown">
+              <a class="notification-dropdown-toggle" id="customNotificationDropdown" role="button">
+                <i class="fas fa-bell"></i>
+                {% if unread_count > 0 %}
+                <div class="red-dot"></div>
+                {% endif %}
+              </a>
+              <ul class="notification-dropdown-menu" id="customNotificationMenu">
+                {% if recent_unread_notifications %}
+                {% for notification in recent_unread_notifications %}
+                <div class="notification-flex">
+                  <li><a class="notification-dropdown-item-msg">{{ notification.message }}</a></li>
+                  <li>
+                    <a href="{% url 'mark_notification_as_read' notification.id %}" class="notification-mark-read-btn" title="Mark as Read">
+                      <i class="fa-regular fa-circle-check"></i>
+                    </a>
+                  </li>
+                </div>
+                {% endfor %}
+                {% else %}
+                <li>
+                  <a class="notification-dropdown-item text-center">No new notifications</a>
+                </li>
+                {% endif %}
+                <li><hr class="notification-dropdown-divider"></li>
+                <li><a class="notification-dropdown-item text-center" href="{% url "dashboard_notifications" %}">See More</a></li>
+              </ul>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  {% include 'dashboard/partials/popups_scripts.html' %}
+
+  <script>
+            // Toggle the sidebar on mobile view
+            const menuToggle = document.querySelector(".menu-toggle-final");
+            const sidebar = document.querySelector(".sidebar");
+            const closeBtn = document.querySelector(".close-btn-final");
+
+            menuToggle.addEventListener("click", () => {
+              sidebar.classList.toggle("show");
+            });
+          
+            // Close the sidebar when the close button is clicked
+            closeBtn.addEventListener("click", () => {
+              sidebar.classList.remove("show");
+            });
+        
+      async function fetchTopCategories() {
+        const response = await fetch('/edu-parent-categories/');
+        const data = await response.json();
+        const topCategories = data;
+
+        const topCategoryList = document.querySelector('#top-categories');
+        topCategoryList.innerHTML = ''; // Clear existing content   
+
+        topCategories.forEach((category) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="#" data-category-id="${category.id}">${category.name}</a>`;
+
+          // Fetch and show the dropdown on mouseover
+          li.addEventListener('mouseover', () => fetchCategories(category.id));
+        
+          topCategoryList.appendChild(li);
+        });
+      }
+
+      fetchTopCategories();
+
+      async function fetchCategories(categoryId) {
+      const response = await fetch(`/eduprenair/get-child-categories/${categoryId}/`);
+      const data = await response.json(); // Get level_2 and level_3 categories
+      const level2Categories = data.level_2_categories;
+      
+      // Access the dropdown container
+      const dropdown = document.querySelector('.category_nav');
+      const categoryListDetail = document.createElement('div');
+      categoryListDetail.classList.add('category_list_detail', 'grid', 'grid-cols-4', 'gap-y-10', 'w-full', 'h-fit', 'py-8', 'px-10');
+      
+      // Clear previous dropdown content
+      dropdown.innerHTML = '';
+      
+      // Populate level_2 categories
+      level2Categories.forEach((category) => {
+      const item = document.createElement('div');
+      item.classList.add('item', 'flex', 'flex-col', 'gap-2.5');
+      
+      // Add level_2 category as strong
+      const strongTag = document.createElement('strong');
+      strongTag.classList.add('text-button');
+      strongTag.textContent = category.name;
+      
+      // Add level_3 categories as links
+      const childLinks = category.children.map((child) => {
+  const aTag = document.createElement('a');
+  const childUrl = `/eduprenair/courses/?category_id=${child.id}`;
+  aTag.href = childUrl;
+  aTag.target = '_blank';
+  aTag.classList.add(
+    'w-fit',
+    'caption1',
+    'line-before',
+    'line-black',
+    'cat-item',
+    'hover-underline'
+  );
+  aTag.textContent = child.name;
+  return aTag;
+});
+
+      // Append strong and links to the item
+      item.appendChild(strongTag);
+      childLinks.forEach((link) => item.appendChild(link));
+      categoryListDetail.appendChild(item);
+      });
+
+      // Append the new content to the dropdown
+      dropdown.appendChild(categoryListDetail);
+      dropdown.style.display = 'block'; // Make dropdown visible
+
+      // Hide the dropdown when mouse leaves it
+      dropdown.addEventListener('mouseleave', () => {
+      dropdown.style.display = 'none';
+      });
+      }
+
+  </script>
+        
+        
+  <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const customDropdownToggle = document.getElementById("customNotificationDropdown");
+        const customDropdownMenu = document.getElementById("customNotificationMenu");
+      
+        // Toggle dropdown visibility on click
+        customDropdownToggle.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent bubbling up
+          customDropdownMenu.classList.toggle("show");
+        });
+      
+        // Close dropdown when clicking outside
+        document.addEventListener("click", () => {
+          if (customDropdownMenu.classList.contains("show")) {
+            customDropdownMenu.classList.remove("show");
+          }
+        });
+      
+        // Keep dropdown open when clicking inside
+        customDropdownMenu.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+      const hasSubmenus = document.querySelectorAll('.has-submenu');
+      
+      hasSubmenus.forEach(hasSubmenu => {
+          hasSubmenu.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              hasSubmenus.forEach(sub => {
+                  if (sub !== this) sub.classList.remove('active');
+              });
+              this.classList.toggle('active');
+          });
+      });
+      document.addEventListener('click', function(e) {
+          const isClickInside = Array.from(hasSubmenus).some(hasSubmenu => {
+              const submenu = hasSubmenu.nextElementSibling;
+              return hasSubmenu.contains(e.target) || 
+                     (submenu && submenu.contains(e.target));
+          });
+
+          if (!isClickInside) {
+              hasSubmenus.forEach(sub => sub.classList.remove('active'));
+          }
+      });
+      document.querySelectorAll('.submenu a').forEach(link => {
+          link.addEventListener('click', () => {
+              link.closest('.submenu')
+                  .previousElementSibling
+                  .classList.remove('active');
+          });
+      });
+  });
+      
+  </script>
+</body>
+</html>

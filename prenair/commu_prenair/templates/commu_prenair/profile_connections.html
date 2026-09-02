@@ -1,0 +1,103 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load course_filters %}
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Profile - Connections {% endblock title %}
+{% block content %}
+
+
+
+{% include 'commu_prenair/partials/menu.html' %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        {% include 'commu_prenair/partials/profile_topbar.html' %}
+        <div class="row">
+            <div class="col-xxl-9 col-xl-8">
+                <div class="single-box p-5">
+                    <ul class="nav flex-wrap gap-2 tab-area" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link d-center active" id="followers-tab" data-bs-toggle="tab" data-bs-target="#followers-tab-pane" type="button" role="tab" aria-controls="followers-tab-pane" aria-selected="true">Connections</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="followers-tab-pane" role="tabpanel" aria-labelledby="followers-tab" tabindex="0">
+                        <div class="search-area d-center my-7 flex-wrap gap-2 justify-content-between">
+                            <div class="total-followers">
+                                <h6>{{connections.count}} Connections</h6>
+                            </div>
+                            <form action="{% url 'commu_connections' user.slug %}" method="get" class="d-flex align-items-stretch justify-content-between gap-4">
+                                <div class="input-area py-2 w-100 gap-2 d-flex align-items-center">
+                                    <i class="material-symbols-outlined mat-icon">search</i>
+                                    <input type="text" name="q" placeholder="Search" value="{{ query }}" autocomplete="off">
+                                </div>
+                            </form>
+                            
+                        </div>
+                        <div class="row">
+                            {% for connection in connections %}
+                            <div class="col-md-6">
+                                <div class="single-box member-single p-3">
+                                    <div class="profile-area d-center justify-content-between">
+                                        <div class="avatar-item d-flex gap-3 align-items-center">
+                                            <div class="avatar-item">
+                                                <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{{connection.profile_pic.url}}" alt="avatar">
+                                            </div>
+                                            <div class="info-area text-start">
+                                                <h6 class="m-0"><a href="{% url 'commu_profile' connection.slug %}">{{connection.name}}</a></h6>
+                                                <p class="mdtxt status">{{request.user|mutual_connections_count:connection}} Mutual Friends</p>
+                                            </div>
+                                        </div>
+                                        {% if request.user == user %}
+                                        <div class="group-btn cus-dropdown">
+                                            <button type="button" class="dropdown-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="material-symbols-outlined fs-xxl m-0"> more_horiz </i>
+                                            </button>
+                                            <ul class="dropdown-menu p-4 pt-2">
+                                                <li>
+                                                    <a class="droplist d-flex align-items-center gap-2" href="{% url 'remove_connection' connection.slug %}">
+                                                        <i class="material-symbols-outlined mat-icon"> person_remove </i>
+                                                        <span>Unfollow</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <!-- <div class="col-12 my-5 text-center">
+                                <button class="cmn-btn alt third fw-600">Load More</button>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+    
+{% endblock javascript %}

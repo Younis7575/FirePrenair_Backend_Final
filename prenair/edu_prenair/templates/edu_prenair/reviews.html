@@ -1,0 +1,206 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Settings{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+   		<!-- Breadcrumb -->
+			<div class="breadcrumb-bar breadcrumb-bar-info">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-12 col-12">
+							<div class="breadcrumb-list">
+								<h2 class="breadcrumb-title">Reviews</h2>
+								<nav aria-label="breadcrumb" class="page-breadcrumb">
+									<ol class="breadcrumb">
+										<li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+										<li class="breadcrumb-item active" aria-current="page">Reviews</li>
+									</ol>
+								</nav>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Breadcrumb -->	
+        
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    {% if request.user.is_edu_instructor %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+                    {% else %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+                    {% endif %}
+
+                    <!-- Instructor Reviews -->
+						<div class="col-xl-9 col-lg-9">	
+
+							<div class="settings-widget card-details">
+								<div class="settings-menu p-0">
+									<div class="profile-heading">
+										<h3>Reviews</h3>
+									</div>
+									<div class="checkout-form">
+										<div class="wishlist-tab">
+											<ul class="nav">
+												<li class="nav-item">
+													<a href="javascript:void(0);" class="active" data-bs-toggle="tab" data-bs-target="#received-_review">Received</a>
+												</li>
+												<li class="nav-item">
+													<a href="javascript:void(0);" data-bs-toggle="tab" data-bs-target="#given_review">Given</a>
+												</li>
+											</ul>
+										</div>
+										<div class="tab-content">
+											<div class="tab-pane fade show active" id="received-_review">
+												{% if reviews_received %}
+                                                {% for review in reviews_received %}
+												<!-- Review -->
+												<div class="review-wrap">
+													<div class="review-user-info">
+														<div class="reviewer">
+															<div class="review-img">
+																<a href="javascript:void(0);"><img src="{{review.user.profile_pic.url}}" alt="img"></a>
+															</div>
+															<div class="reviewer-info">
+																<h6><a href="javascript:void(0);">{{review.user.name}}</a></h6>
+																<p>{{review.created_at.date}}</p>									
+															</div>
+														</div>
+														<div class="reviewer-rating">
+															{% if review.rating > 1 and review.rating <= 2 %}						
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 2 and review.rating <= 3 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star"></i>
+                                                             <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 3 and review.rating <= 4 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 4 and review.rating <= 5 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+
+                                                           {% endif %}
+														</div>
+													</div>
+													<div class="review-content">
+														<p>
+															{{review.review}}
+														</p>
+													</div>
+												</div>
+												<!-- /Review -->
+                                                {% endfor %}
+
+												{% else %}
+												<div class="col-12 text-center">
+													<p>No reviews found.</p>
+												</div>
+
+												{% endif %}
+
+											</div>
+											<div class="tab-pane fade" id="given_review">
+												{% if reviews_given %}
+												{% for review in reviews_given %}
+												<!-- Review -->
+												<div class="review-wrap">
+													<div class="review-user-info">
+														<div class="reviewer">
+															<div class="review-img">
+																<a href="javascript:void(0);"><img src="{{review.user.profile_pic.url}}" alt="img"></a>
+															</div>
+															<div class="reviewer-info">
+																<h6><a href="javascript:void(0);">{{review.user.name}}</a></h6>
+																<p>{{review.created_at.date}}</p>									
+															</div>
+														</div>
+														<div class="reviewer-rating">
+															{% if review.rating > 1 and review.rating <= 2 %}						
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star filled"></i>
+                                                            <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 2 and review.rating <= 3 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star"></i>
+                                                             <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 3 and review.rating <= 4 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star"></i>
+
+                                                             {% elif review.rating > 4 and review.rating <= 5 %}
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+                                                             <i class="fas fa-star filled"></i>
+
+                                                           {% endif %}
+														</div>
+													</div>
+													<div class="review-content">
+														<p>
+															{{review.review}}
+														</p>
+													</div>
+												</div>
+												<!-- /Review -->
+                                                {% endfor %}
+												{% else %}
+												<div class="col-12 text-center">
+													<p>No reviews found.</p>
+												</div>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>	
+						<!-- Instructor Reviews -->
+                  
+                </div>
+            </div>
+        </div>	
+        <!-- /Page Content -->
+
+
+
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

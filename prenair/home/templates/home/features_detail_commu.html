@@ -1,0 +1,239 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Features{% endblock title %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/swiper/css/swiper.min.css' %}">
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="home-two">
+    {% include 'home/partials/new_header.html' %}
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+   <!-- Eduprenair Section -->
+		<section class="about-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 wow fadeInLeft order-lg-1 order-xs-2 order-sm-2">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Build Connections with Commuprenair</p>
+							<h2 class="mb-0" style="color: #ff6f61;">Empowering Communities & Professional Networks Worldwide</h2>
+						</div>
+						<div class="header-two-title">
+							<p class="about-text">
+								Commuprenair is your platform for connecting with like-minded professionals, building a powerful network, and engaging in meaningful discussions. Whether you're seeking collaboration, mentorship, or knowledge-sharing, our platform is designed to foster growth through community-driven opportunities. Join a global network of professionals and expand your reach, knowledge, and career prospects.
+							</p>
+							<div class="about-button more-details">
+								<a href="{% url 'commu_home' %}" class="category-btn-final" style="color: white; width: fit-content;">Learn more</a>
+							</div>
+						</div>
+					</div>
+					
+					
+
+					<div class="col-lg-6 order-lg-2 order-xs-1 order-sm-1">
+						<div class="stylist-gallery">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-one d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-team-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">50</span>K</h4>
+												<p class="mb-0">Members</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-two d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-projector-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">1.2</span>K</h4>
+												<p class="mb-0">Collaborative Projects</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-three d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-earth-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">15</span>+</h4>
+												<p class="mb-0">Countries Connected</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-four d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-shield-user-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">500</span>+</h4>
+												<p class="mb-0">Verified Professionals</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</section>
+		<!-- /About us -->
+
+        <section class="growup-section">
+			<div class="home-two-shapes">
+				<img src="{% static 'home/images/home-right-bottom.png' %}" alt="Img">
+			</div>
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-xl-6 col-lg-6 col-md-5 col-12">
+						<div class="growup-images-two">
+							<div class="growup-skills-img">
+								<img style="border-radius: 8px;" class="" src="{% static 'home/images/commu_4.png' %}" alt="image-banner" title="image-banner">
+							</div>
+						</div>
+					</div>
+		
+					<div class="col-xl-6 col-lg-6 col-md-7 col-12 wow fadeInLeft">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Expand Your Connections</p>
+							<h2 class="" style="color: #ff6f61;">Collaborate, Learn, and Grow with Commuprenair</h2>
+							<div class="header-two-text">
+								<p class="mb-0">Commuprenair is your gateway to a thriving professional network. Whether you're a freelancer, entrepreneur, or professional, we provide the tools and resources to help you succeed. Connect with like-minded individuals, engage in collaborative projects, and explore growth opportunities designed for real-world impact. Join our dynamic community and start achieving your goals today.</p>
+							</div>
+						</div>
+						
+						<div class="about-button more-details">
+							<a href="{% url 'home' %}?register=true" class="category-btn-final"  style="color: white; width: fit-content;">Join Today</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+
+
+        <!-- digiprenair -->
+		<section class="master-skills-sec">
+			<div class="container">
+				<div class="header-two-title text-center">
+					<p class="tagline" style="color: #1e3a8a;">Explore the Power of Networking</p>
+					<h2 style="color: #ff6f61;">Build Connections, Collaborate, and Grow Your Career</h2>
+					<div class="header-two-text">
+						<p class="mb-0">At Commuprenair, we empower individuals to connect, collaborate, and thrive in a professional network designed for success. Whether you're just starting your journey or looking to expand your reach, our community-driven approach fosters meaningful relationships that open doors to new opportunities. Join the thousands of professionals who have elevated their careers through our platform’s networking and collaboration tools.</p>
+					</div>
+				</div>
+				<!-- Community Info -->
+				<div class="course-info-two">
+					<div class="row align-items-center">
+			
+						<!-- Community Building Content -->
+						<div class="col-lg-6 col-md-12 order-lg-0 order-md-0 order-0">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">A Thriving Community of Professionals</h2>
+								<p>Commuprenair brings together a diverse network of freelancers, entrepreneurs, and professionals. Our platform provides the tools and opportunities to engage with like-minded individuals, fostering collaboration, mentorship, and shared growth. Become part of a global network that supports your personal and professional journey.</p>
+							</div>
+						</div>
+						<!-- /Community Building Content -->
+			
+						<!-- Community Image -->
+						<div class="col-lg-6 col-md-12 order-lg-1 order-md-1 order-1">
+							<div class="join-mentor-img">
+								<div class="winning-two-one">
+									<img style="border-radius: 8px;" src="{% static 'home/images/comu_2.png' %}" alt="Thriving Community" class="img-fluid">
+								</div>
+								<div class="joing-icon-award">
+									<i class="ri-community-line" style="font-size: 3rem; color: #ff6f61;"></i>
+								</div>
+							</div>
+						</div>
+						<!-- /Community Image -->
+			
+						<!-- Networking Opportunities -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-2 order-md-3 order-3">
+							<div class="join-mentor-img">
+								<div class="winning-two-two">
+									<img style="border-radius: 8px;" src="{% static 'home/images/commu_3.png' %}" alt="Networking Opportunities" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-link-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Networking Opportunities -->
+			
+						<!-- Community Collaboration -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-3 order-md-2 order-2">
+							<div class="join-title-middle">
+								<h2 style="color: #ff6f61;">Collaborate with Experts and Peers</h2>
+								<p>Our platform offers a space to collaborate on projects, share insights, and work alongside industry leaders. Whether you’re seeking a mentor or a partner for your next venture, Commuprenair’s community-based approach ensures you connect with individuals who are as passionate about growth and success as you are.</p>
+							</div>
+						</div>
+						<!-- /Community Collaboration -->
+			
+						<!-- Mentorship and Guidance -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-4 order-md-4 order-4">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Mentorship to Guide Your Journey</h2>
+								<p>Commuprenair offers mentorship programs that connect you with experienced professionals. Gain valuable insights, learn from others' experiences, and accelerate your career through personalized guidance from industry experts.</p>
+							</div>
+						</div>
+						<!-- /Mentorship Content -->
+			
+						<!-- Mentorship Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-5 order-md-5 order-5">
+							<div class="join-mentor-img mb-0">
+								<div class="winning-two-three">
+									<img style="border-radius: 8px;" src="{% static 'home/images/comu_1.png' %}" alt="Mentorship Programs" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-user-follow-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Mentorship Image -->
+			
+					</div>
+				</div>
+				<!-- /Community Info -->
+			</div>
+			
+		</section>
+		
+    
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+</body>
+{% endblock content %}
+
+{% block extra_javascript %} 
+
+<script src="{% static 'edu_prenair/assets/plugins/swiper/js/swiper.min.js' %}"></script>
+
+{% endblock extra_javascript %}

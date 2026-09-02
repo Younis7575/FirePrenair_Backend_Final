@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html >
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Circlehub">
+    <meta name="description" content="Circlehub HTML5 Template">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+    {% block title %}Eduprenair{% endblock title %}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+
+    {% block css %}
+    {% block extra_css %} {% endblock extra_css %}
+    <link rel="stylesheet" href="{% static 'commu_prenair/assets/css/style.css' %}">
+
+
+    {% endblock css %}
+
+</head>
+<body>
+
+    <!-- Scroll To Top Start-->
+<button class="scrollToTop d-none d-lg-block" style="background-color: #ff6f61;"><i class="mat-icon fas fa-angle-double-up"></i></button>
+    <!-- Scroll To Top End -->
+{% include "commu_prenair/partials/chatbot.html" %}
+{% include 'digi_prenair/partials/messages.html' %}
+
+{% block content %}{% endblock content %}
+
+{% block javascript %}
+
+{% endblock javascript %}
+
+</body>
+<script src="{% static "home/js/notify.js" %}"></script>
+</html>

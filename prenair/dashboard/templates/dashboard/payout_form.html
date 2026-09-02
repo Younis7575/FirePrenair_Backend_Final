@@ -1,0 +1,1169 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Withdraw Money{% endblock title %}
+
+{% block extra_css %}
+
+<style>
+    /* Custom Select Styles - from edit profile */
+    .custom-select-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    
+    .custom-select-trigger {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e1e5eb;
+        border-radius: 12px;
+        font-size: 15px;
+        color: #333;
+        background: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .custom-select-trigger:hover,
+    .custom-select-trigger.active {
+        border-color: #ff6f61;
+        box-shadow: 0 4px 15px rgba(255, 111, 97, 0.15);
+    }
+    
+    .custom-select-trigger .selected-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+    
+    .custom-select-trigger .flag {
+        font-size: 20px;
+    }
+    
+    .custom-select-trigger .arrow {
+        transition: transform 0.3s ease;
+        color: #666;
+    }
+    
+    .custom-select-trigger.active .arrow {
+        transform: rotate(180deg);
+    }
+    
+    .custom-select-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid #e1e5eb;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        max-height: 320px;
+        overflow: hidden;
+        display: none;
+        animation: slideDown 0.3s ease;
+    }
+    
+    .custom-select-dropdown.active {
+        display: block;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .custom-select-search {
+        padding: 12px;
+        border-bottom: 2px solid #f0f2f5;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+    
+    .custom-select-search input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e1e5eb;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-select-search input:focus {
+        border-color: #ff6f61;
+    }
+    
+    .custom-select-options {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    
+    .custom-select-option {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .custom-select-option:hover {
+        background: linear-gradient(90deg, rgba(255, 111, 97, 0.05) 0%, transparent 100%);
+    }
+    
+    .custom-select-option.selected {
+        background: linear-gradient(90deg, rgba(255, 111, 97, 0.1) 0%, transparent 100%);
+        font-weight: 600;
+        color: #ff6f61;
+    }
+    
+    .custom-select-option .flag {
+        font-size: 20px;
+        width: 28px;
+        text-align: center;
+    }
+    
+    .custom-select-option .name {
+        flex: 1;
+        font-size: 14px;
+    }
+    
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+    }
+    
+    .custom-select-options::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .custom-select-options::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .custom-select-options::-webkit-scrollbar-thumb {
+        background: #ff6f61;
+        border-radius: 10px;
+    }
+    
+    .custom-select-options::-webkit-scrollbar-thumb:hover {
+        background: #ff8e53;
+    }
+    
+    .autocomplete-list {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        background: #fff;
+        position: absolute;
+        z-index: 10;
+        /* width: 74.5%; */
+        width: 73.4%;
+    }
+    
+    .autocomplete-list li {
+        padding: 10px;
+        cursor: pointer;
+    }
+    
+    .autocomplete-list li:hover {
+        background-color: #f0f0f0;
+    }
+    
+    /* Identity Verification Modal Styles */
+    .kyc-modal {
+        display: none !important;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .kyc-modal.active {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .kyc-modal-content {
+        background-color: #fff;
+        margin: auto;
+        padding: 30px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .kyc-modal-header {
+        margin-bottom: 20px;
+    }
+    
+    .kyc-modal-header h3 {
+        margin: 0 0 10px 0;
+        color: #1e3a8a;
+        font-size: 24px;
+    }
+    
+    .kyc-modal-header p {
+        margin: 0;
+        color: #666;
+    }
+    
+    .kyc-modal-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 20px;
+    }
+    
+    .kyc-modal-close:hover {
+        color: #000;
+    }
+    
+    .kyc-form-group {
+        margin-bottom: 20px;
+    }
+    
+    .kyc-form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .kyc-form-group input,
+    .kyc-form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .kyc-form-group input:focus,
+    .kyc-form-group select:focus {
+        outline: none;
+        border-color: #1e3a8a;
+    }
+    
+    .kyc-error {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    .kyc-modal-footer {
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 2000;
+        display: none;
+    }
+    
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    .toast.error {
+        background-color: #dc3545;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    </style>
+
+{% endblock extra_css %}
+
+
+    
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                <span class="ph ph-squares-four text-xl"></span>
+                <strong class="text-button">Menu</strong>
+            </button>
+            <div class="dashboard_profile scrollbar_custom w-full bg-surface" style="margin: 10px; background: url({% static 'home/images/banner.png' %});">
+                <form action="{% url 'payout_request' %}" method="post" class="container h-fit" style="padding-left: 0px;">
+                    {% csrf_token %}
+                    <div class="heading flex items-center justify-between">
+                        <h4>Payout Request</h4>
+                    </div>
+                
+                    {% if not can_request_payout %}
+                    <div class="p-5 mt-4 mb-4 rounded-xl bg-gradient-to-r from-orange-50 via-red-50 to-blue-50 border-2 border-orange-200 shadow-md" id="kyc-alert">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 mt-1">
+                                <span class="ph ph-warning-circle text-3xl text-orange-600"></span>
+                            </div>
+                            <div class="flex-1">
+                                <h5 class="text-lg font-bold text-gray-800 mb-2">Identity Verification Required</h5>
+                                <p class="text-gray-700 text-sm leading-relaxed">Please complete your identity verification to request a payout. The verification form will appear in a popup when you click "Submit Request".</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                
+                    <div class="payout-details p-8 mt-7 rounded-lg bg-white shadow-sm">
+                        <h5>Request Your Earnings</h5>
+                        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+                            
+                            <!-- Available Balance -->
+                            <div class="col-span-full">
+                                <label for="available_balance">Available Balance:</label>
+                                <input type="text" id="available_balance" value="{{ user.available_earnings }}" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" readonly>
+                            </div>
+                            
+                            <!-- Payout Amount -->
+                            <div class="col-span-full">
+                                <label for="amount">Payout Amount:<span class="text-red">*</span></label>
+                                <input type="number" id="amount" name="amount" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Enter the amount to withdraw">
+                            </div>
+                            <!-- Account type -->
+                            <div class="col-span-full">
+                                <label for="account_type">Account Type:<span class="text-red">*</span></label>
+                                <select name="account_type" id="account_type" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required>
+                                    <option value="">Select Account Type</option>
+                                    <option value="Payoneer">Payoneer</option>
+                                    <option value="Paypal">Paypal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" id="submit-payout-btn" class="category-btn-final" style="padding: 10px 20px; margin-top: 20px;">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+        </div>
+</div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+</div>
+
+<!-- Identity Verification Modal -->
+<div id="kyc-modal" class="kyc-modal">
+    <div class="kyc-modal-content">
+        <div class="kyc-modal-header">
+            <span class="kyc-modal-close" id="kyc-modal-close">&times;</span>
+            <h3>Complete Identity Verification</h3>
+            <p>To request a payout, please complete the required verification details.</p>
+        </div>
+        <form id="kyc-form">
+            {% csrf_token %}
+            <div id="kyc-form-fields">
+                <!-- Fields will be dynamically inserted here -->
+            </div>
+            <div id="kyc-form-errors" class="kyc-error"></div>
+            <div class="kyc-modal-footer">
+                <button type="button" class="category-btn-final" id="kyc-cancel-btn" style="background: #6c757d; padding: 10px 20px;">Cancel</button>
+                <button type="submit" class="category-btn-final" id="kyc-submit-btn" style="padding: 10px 20px;">Save & Continue</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+{% endblock content %}
+
+
+{% block extra_javascript %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    // Store missing fields from server-side validation
+    let missingFields = [];
+    try {
+        missingFields = {{ missing_fields|safe }} || [];
+    } catch (e) {
+        console.error('Error parsing missing fields:', e);
+        missingFields = [];
+    }
+    const canRequestPayout = {% if can_request_payout %}true{% else %}false{% endif %};
+    
+    // Debug logging
+    console.log('Payout validation:', { canRequestPayout, missingFields });
+    
+    // Payout form and modal elements
+    const payoutForm = document.querySelector('form[action="{% url 'payout_request' %}"]');
+    const submitBtn = document.getElementById('submit-payout-btn');
+    const kycModal = document.getElementById('kyc-modal');
+    const kycModalClose = document.getElementById('kyc-modal-close');
+    const kycCancelBtn = document.getElementById('kyc-cancel-btn');
+    const kycForm = document.getElementById('kyc-form');
+    const kycFormFields = document.getElementById('kyc-form-fields');
+    const kycFormErrors = document.getElementById('kyc-form-errors');
+    const toast = document.getElementById('toast');
+    
+    // Store pending payout data
+    let pendingPayoutData = null;
+    
+    // Show toast notification
+    function showToast(message, isError = false) {
+        toast.textContent = message;
+        toast.className = `toast ${isError ? 'error' : ''} show`;
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Complete countries data with flags - from edit profile page
+    const countriesData = [
+      { code: "AF", name: "Afghanistan", flag: "🇦🇫" },
+      { code: "AL", name: "Albania", flag: "🇦🇱" },
+      { code: "DZ", name: "Algeria", flag: "🇩🇿" },
+      { code: "AD", name: "Andorra", flag: "🇦🇩" },
+      { code: "AO", name: "Angola", flag: "🇦🇴" },
+      { code: "AG", name: "Antigua and Barbuda", flag: "🇦🇬" },
+      { code: "AR", name: "Argentina", flag: "🇦🇷" },
+      { code: "AM", name: "Armenia", flag: "🇦🇲" },
+      { code: "AU", name: "Australia", flag: "🇦🇺" },
+      { code: "AT", name: "Austria", flag: "🇦🇹" },
+      { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
+      { code: "BS", name: "Bahamas", flag: "🇧🇸" },
+      { code: "BH", name: "Bahrain", flag: "🇧🇭" },
+      { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
+      { code: "BB", name: "Barbados", flag: "🇧🇧" },
+      { code: "BY", name: "Belarus", flag: "🇧🇾" },
+      { code: "BE", name: "Belgium", flag: "🇧🇪" },
+      { code: "BZ", name: "Belize", flag: "🇧🇿" },
+      { code: "BJ", name: "Benin", flag: "🇧🇯" },
+      { code: "BT", name: "Bhutan", flag: "🇧🇹" },
+      { code: "BO", name: "Bolivia", flag: "🇧🇴" },
+      { code: "BA", name: "Bosnia and Herzegovina", flag: "🇧🇦" },
+      { code: "BW", name: "Botswana", flag: "🇧🇼" },
+      { code: "BR", name: "Brazil", flag: "🇧🇷" },
+      { code: "BN", name: "Brunei", flag: "🇧🇳" },
+      { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
+      { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
+      { code: "BI", name: "Burundi", flag: "🇧🇮" },
+      { code: "CV", name: "Cabo Verde", flag: "🇨🇻" },
+      { code: "KH", name: "Cambodia", flag: "🇰🇭" },
+      { code: "CM", name: "Cameroon", flag: "🇨🇲" },
+      { code: "CA", name: "Canada", flag: "🇨🇦" },
+      { code: "CF", name: "Central African Republic", flag: "🇨🇫" },
+      { code: "TD", name: "Chad", flag: "🇹🇩" },
+      { code: "CL", name: "Chile", flag: "🇨🇱" },
+      { code: "CN", name: "China", flag: "🇨🇳" },
+      { code: "CO", name: "Colombia", flag: "🇨🇴" },
+      { code: "KM", name: "Comoros", flag: "🇰🇲" },
+      { code: "CG", name: "Congo", flag: "🇨🇬" },
+      { code: "CD", name: "Congo, Democratic Republic", flag: "🇨🇩" },
+      { code: "CR", name: "Costa Rica", flag: "🇨🇷" },
+      { code: "CI", name: "Côte d'Ivoire", flag: "🇨🇮" },
+      { code: "HR", name: "Croatia", flag: "🇭🇷" },
+      { code: "CU", name: "Cuba", flag: "🇨🇺" },
+      { code: "CY", name: "Cyprus", flag: "🇨🇾" },
+      { code: "CZ", name: "Czech Republic", flag: "🇨🇿" },
+      { code: "DK", name: "Denmark", flag: "🇩🇰" },
+      { code: "DJ", name: "Djibouti", flag: "🇩🇯" },
+      { code: "DM", name: "Dominica", flag: "🇩🇲" },
+      { code: "DO", name: "Dominican Republic", flag: "🇩🇴" },
+      { code: "EC", name: "Ecuador", flag: "🇪🇨" },
+      { code: "EG", name: "Egypt", flag: "🇪🇬" },
+      { code: "SV", name: "El Salvador", flag: "🇸🇻" },
+      { code: "GQ", name: "Equatorial Guinea", flag: "🇬🇶" },
+      { code: "ER", name: "Eritrea", flag: "🇪🇷" },
+      { code: "EE", name: "Estonia", flag: "🇪🇪" },
+      { code: "SZ", name: "Eswatini", flag: "🇸🇿" },
+      { code: "ET", name: "Ethiopia", flag: "🇪🇹" },
+      { code: "FJ", name: "Fiji", flag: "🇫🇯" },
+      { code: "FI", name: "Finland", flag: "🇫🇮" },
+      { code: "FR", name: "France", flag: "🇫🇷" },
+      { code: "GA", name: "Gabon", flag: "🇬🇦" },
+      { code: "GM", name: "Gambia", flag: "🇬🇲" },
+      { code: "GE", name: "Georgia", flag: "🇬🇪" },
+      { code: "DE", name: "Germany", flag: "🇩🇪" },
+      { code: "GH", name: "Ghana", flag: "🇬🇭" },
+      { code: "GR", name: "Greece", flag: "🇬🇷" },
+      { code: "GD", name: "Grenada", flag: "🇬🇩" },
+      { code: "GT", name: "Guatemala", flag: "🇬🇹" },
+      { code: "GN", name: "Guinea", flag: "🇬🇳" },
+      { code: "GW", name: "Guinea-Bissau", flag: "🇬🇼" },
+      { code: "GY", name: "Guyana", flag: "🇬🇾" },
+      { code: "HT", name: "Haiti", flag: "🇭🇹" },
+      { code: "HN", name: "Honduras", flag: "🇭🇳" },
+      { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
+      { code: "HU", name: "Hungary", flag: "🇭🇺" },
+      { code: "IS", name: "Iceland", flag: "🇮🇸" },
+      { code: "IN", name: "India", flag: "🇮🇳" },
+      { code: "ID", name: "Indonesia", flag: "🇮🇩" },
+      { code: "IR", name: "Iran", flag: "🇮🇷" },
+      { code: "IQ", name: "Iraq", flag: "🇮🇶" },
+      { code: "IE", name: "Ireland", flag: "🇮🇪" },
+      { code: "IL", name: "Israel", flag: "🇮🇱" },
+      { code: "IT", name: "Italy", flag: "🇮🇹" },
+      { code: "JM", name: "Jamaica", flag: "🇯🇲" },
+      { code: "JP", name: "Japan", flag: "🇯🇵" },
+      { code: "JO", name: "Jordan", flag: "🇯🇴" },
+      { code: "KZ", name: "Kazakhstan", flag: "🇰🇿" },
+      { code: "KE", name: "Kenya", flag: "🇰🇪" },
+      { code: "KI", name: "Kiribati", flag: "🇰🇮" },
+      { code: "KP", name: "North Korea", flag: "🇰🇵" },
+      { code: "KR", name: "South Korea", flag: "🇰🇷" },
+      { code: "KW", name: "Kuwait", flag: "🇰🇼" },
+      { code: "KG", name: "Kyrgyzstan", flag: "🇰🇬" },
+      { code: "LA", name: "Laos", flag: "🇱🇦" },
+      { code: "LV", name: "Latvia", flag: "🇱🇻" },
+      { code: "LB", name: "Lebanon", flag: "🇱🇧" },
+      { code: "LS", name: "Lesotho", flag: "🇱🇸" },
+      { code: "LR", name: "Liberia", flag: "🇱🇷" },
+      { code: "LY", name: "Libya", flag: "🇱🇾" },
+      { code: "LI", name: "Liechtenstein", flag: "🇱🇮" },
+      { code: "LT", name: "Lithuania", flag: "🇱🇹" },
+      { code: "LU", name: "Luxembourg", flag: "🇱🇺" },
+      { code: "MG", name: "Madagascar", flag: "🇲🇬" },
+      { code: "MW", name: "Malawi", flag: "🇲🇼" },
+      { code: "MY", name: "Malaysia", flag: "🇲🇾" },
+      { code: "MV", name: "Maldives", flag: "🇲🇻" },
+      { code: "ML", name: "Mali", flag: "🇲🇱" },
+      { code: "MT", name: "Malta", flag: "🇲🇹" },
+      { code: "MH", name: "Marshall Islands", flag: "🇲🇭" },
+      { code: "MR", name: "Mauritania", flag: "🇲🇷" },
+      { code: "MU", name: "Mauritius", flag: "🇲🇺" },
+      { code: "MX", name: "Mexico", flag: "🇲🇽" },
+      { code: "FM", name: "Micronesia", flag: "🇫🇲" },
+      { code: "MD", name: "Moldova", flag: "🇲🇩" },
+      { code: "MC", name: "Monaco", flag: "🇲🇨" },
+      { code: "MN", name: "Mongolia", flag: "🇲🇳" },
+      { code: "ME", name: "Montenegro", flag: "🇲🇪" },
+      { code: "MA", name: "Morocco", flag: "🇲🇦" },
+      { code: "MZ", name: "Mozambique", flag: "🇲🇿" },
+      { code: "MM", name: "Myanmar", flag: "🇲🇲" },
+      { code: "NA", name: "Namibia", flag: "🇳🇦" },
+      { code: "NR", name: "Nauru", flag: "🇳🇷" },
+      { code: "NP", name: "Nepal", flag: "🇳🇵" },
+      { code: "NL", name: "Netherlands", flag: "🇳🇱" },
+      { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
+      { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
+      { code: "NE", name: "Niger", flag: "🇳🇪" },
+      { code: "NG", name: "Nigeria", flag: "🇳🇬" },
+      { code: "MK", name: "North Macedonia", flag: "🇲🇰" },
+      { code: "NO", name: "Norway", flag: "🇳🇴" },
+      { code: "OM", name: "Oman", flag: "🇴🇲" },
+      { code: "PK", name: "Pakistan", flag: "🇵🇰" },
+      { code: "PW", name: "Palau", flag: "🇵🇼" },
+      { code: "PS", name: "Palestine", flag: "🇵🇸" },
+      { code: "PA", name: "Panama", flag: "🇵🇦" },
+      { code: "PG", name: "Papua New Guinea", flag: "🇵🇬" },
+      { code: "PY", name: "Paraguay", flag: "🇵🇾" },
+      { code: "PE", name: "Peru", flag: "🇵🇪" },
+      { code: "PH", name: "Philippines", flag: "🇵🇭" },
+      { code: "PL", name: "Poland", flag: "🇵🇱" },
+      { code: "PT", name: "Portugal", flag: "🇵🇹" },
+      { code: "QA", name: "Qatar", flag: "🇶🇦" },
+      { code: "RO", name: "Romania", flag: "🇷🇴" },
+      { code: "RU", name: "Russia", flag: "🇷🇺" },
+      { code: "RW", name: "Rwanda", flag: "🇷🇼" },
+      { code: "KN", name: "Saint Kitts and Nevis", flag: "🇰🇳" },
+      { code: "LC", name: "Saint Lucia", flag: "🇱🇨" },
+      { code: "VC", name: "Saint Vincent and the Grenadines", flag: "🇻🇨" },
+      { code: "WS", name: "Samoa", flag: "🇼🇸" },
+      { code: "SM", name: "San Marino", flag: "🇸🇲" },
+      { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
+      { code: "SA", name: "Saudi Arabia", flag: "🇸🇦" },
+      { code: "SN", name: "Senegal", flag: "🇸🇳" },
+      { code: "RS", name: "Serbia", flag: "🇷🇸" },
+      { code: "SC", name: "Seychelles", flag: "🇸🇨" },
+      { code: "SL", name: "Sierra Leone", flag: "🇸🇱" },
+      { code: "SG", name: "Singapore", flag: "🇸🇬" },
+      { code: "SK", name: "Slovakia", flag: "🇸🇰" },
+      { code: "SI", name: "Slovenia", flag: "🇸🇮" },
+      { code: "SB", name: "Solomon Islands", flag: "🇸🇧" },
+      { code: "SO", name: "Somalia", flag: "🇸🇴" },
+      { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+      { code: "SS", name: "South Sudan", flag: "🇸🇸" },
+      { code: "ES", name: "Spain", flag: "🇪🇸" },
+      { code: "LK", name: "Sri Lanka", flag: "🇱🇰" },
+      { code: "SD", name: "Sudan", flag: "🇸🇩" },
+      { code: "SR", name: "Suriname", flag: "🇸🇷" },
+      { code: "SE", name: "Sweden", flag: "🇸🇪" },
+      { code: "CH", name: "Switzerland", flag: "🇨🇭" },
+      { code: "SY", name: "Syria", flag: "🇸🇾" },
+      { code: "TW", name: "Taiwan", flag: "🇹🇼" },
+      { code: "TJ", name: "Tajikistan", flag: "🇹🇯" },
+      { code: "TZ", name: "Tanzania", flag: "🇹🇿" },
+      { code: "TH", name: "Thailand", flag: "🇹🇭" },
+      { code: "TL", name: "Timor-Leste", flag: "🇹🇱" },
+      { code: "TG", name: "Togo", flag: "🇹🇬" },
+      { code: "TO", name: "Tonga", flag: "🇹🇴" },
+      { code: "TT", name: "Trinidad and Tobago", flag: "🇹🇹" },
+      { code: "TN", name: "Tunisia", flag: "🇹🇳" },
+      { code: "TR", name: "Turkey", flag: "🇹🇷" },
+      { code: "TM", name: "Turkmenistan", flag: "🇹🇲" },
+      { code: "TV", name: "Tuvalu", flag: "🇹🇻" },
+      { code: "UG", name: "Uganda", flag: "🇺🇬" },
+      { code: "UA", name: "Ukraine", flag: "🇺🇦" },
+      { code: "AE", name: "United Arab Emirates", flag: "🇦🇪" },
+      { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+      { code: "US", name: "United States", flag: "🇺🇸" },
+      { code: "UY", name: "Uruguay", flag: "🇺🇾" },
+      { code: "UZ", name: "Uzbekistan", flag: "🇺🇿" },
+      { code: "VU", name: "Vanuatu", flag: "🇻🇺" },
+      { code: "VA", name: "Vatican City", flag: "🇻🇦" },
+      { code: "VE", name: "Venezuela", flag: "🇻🇪" },
+      { code: "VN", name: "Vietnam", flag: "🇻🇳" },
+      { code: "YE", name: "Yemen", flag: "🇾🇪" },
+      { code: "ZM", name: "Zambia", flag: "🇿🇲" },
+      { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" },
+    ];
+    
+    // Custom Select Component - from edit profile page
+    class CustomSelect {
+      constructor(elementId, data, options = {}) {
+        this.elementId = elementId;
+        this.data = data;
+        this.options = options;
+        this.selectedValue = null;
+        this.isOpen = false;
+        this.filteredData = [...data];
+        
+        this.init();
+      }
+      
+      init() {
+        const container = document.getElementById(this.elementId);
+        if (!container) return;
+        
+        // Create custom select HTML
+        const html = `
+          <div class="custom-select-wrapper">
+            <div class="custom-select-trigger">
+              <div class="selected-option">
+                <span class="placeholder">${this.options.placeholder || 'Select an option'}</span>
+              </div>
+              <i class="fas fa-chevron-down arrow"></i>
+            </div>
+            <div class="custom-select-dropdown">
+              <div class="custom-select-search">
+                <input type="text" placeholder="${this.options.searchPlaceholder || 'Search...'}" autocomplete="off">
+              </div>
+              <div class="custom-select-options"></div>
+            </div>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        this.trigger = container.querySelector('.custom-select-trigger');
+        this.dropdown = container.querySelector('.custom-select-dropdown');
+        this.searchInput = container.querySelector('.custom-select-search input');
+        this.optionsContainer = container.querySelector('.custom-select-options');
+        
+        this.renderOptions();
+        this.attachEvents();
+      }
+      
+      renderOptions() {
+        if (this.filteredData.length === 0) {
+          this.optionsContainer.innerHTML = '<div class="no-results">No results found</div>';
+          return;
+        }
+        
+        const optionsHTML = this.filteredData.map(item => `
+          <div class="custom-select-option ${this.selectedValue === item.code ? 'selected' : ''}" data-value="${item.code}">
+            ${item.flag ? `<span class="flag">${item.flag}</span>` : ''}
+            <span class="name">${item.name}</span>
+          </div>
+        `).join('');
+        
+        this.optionsContainer.innerHTML = optionsHTML;
+        
+        // Attach click events to options
+        this.optionsContainer.querySelectorAll('.custom-select-option').forEach(option => {
+          option.addEventListener('click', () => {
+            this.selectOption(option.dataset.value);
+          });
+        });
+      }
+      
+      attachEvents() {
+        // Toggle dropdown
+        this.trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.toggle();
+        });
+        
+        // Search functionality
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase();
+          this.filteredData = this.data.filter(item => 
+            item.name.toLowerCase().includes(query) ||
+            item.code.toLowerCase().includes(query)
+          );
+          this.renderOptions();
+        });
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+          if (!this.trigger.contains(e.target) && !this.dropdown.contains(e.target)) {
+            this.close();
+          }
+        });
+        
+        // Prevent dropdown close when clicking search
+        this.searchInput.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+      
+      toggle() {
+        if (this.isOpen) {
+          this.close();
+        } else {
+          this.open();
+        }
+      }
+      
+      open() {
+        this.dropdown.classList.add('active');
+        this.trigger.classList.add('active');
+        this.isOpen = true;
+        this.searchInput.focus();
+      }
+      
+      close() {
+        this.dropdown.classList.remove('active');
+        this.trigger.classList.remove('active');
+        this.isOpen = false;
+        this.searchInput.value = '';
+        this.filteredData = [...this.data];
+        this.renderOptions();
+      }
+      
+      selectOption(value) {
+        this.selectedValue = value;
+        const selectedItem = this.data.find(item => item.code === value);
+        
+        if (selectedItem) {
+          const selectedHTML = `
+            ${selectedItem.flag ? `<span class="flag">${selectedItem.flag}</span>` : ''}
+            <span class="name">${selectedItem.name}</span>
+          `;
+          this.trigger.querySelector('.selected-option').innerHTML = selectedHTML;
+          
+          // Trigger change event
+          if (this.options.onChange) {
+            this.options.onChange(selectedItem);
+          }
+        }
+        
+        this.close();
+      }
+      
+      getValue() {
+        return this.selectedValue;
+      }
+      
+      setValue(value) {
+        // value can be country name or code
+        const selectedItem = this.data.find(item => 
+          item.code === value || item.name === value
+        );
+        if (selectedItem) {
+          this.selectOption(selectedItem.code);
+        }
+      }
+    }
+    
+    // Store country select instances
+    const countrySelectInstances = new Map();
+    
+    // Create country dropdown using CustomSelect component
+    function createCountryInput(fieldName, label, value = '') {
+        const group = document.createElement('div');
+        group.className = 'kyc-form-group';
+        
+        const labelEl = document.createElement('label');
+        labelEl.textContent = label;
+        labelEl.setAttribute('for', fieldName);
+        
+        // Create container for custom select
+        const selectContainer = document.createElement('div');
+        selectContainer.id = `countrySelect_${fieldName}`;
+        selectContainer.style.marginTop = '8px';
+        
+        group.appendChild(labelEl);
+        group.appendChild(selectContainer);
+        
+        // Create hidden input for form submission
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = fieldName;
+        hiddenInput.value = value || '';
+        group.appendChild(hiddenInput);
+        
+        // Initialize CustomSelect after DOM is ready
+        setTimeout(() => {
+            const customSelect = new CustomSelect(`countrySelect_${fieldName}`, countriesData, {
+                placeholder: 'Select country',
+                searchPlaceholder: 'Search countries...',
+                onChange: (country) => {
+                    // Update hidden input for form submission
+                    hiddenInput.value = country.name;
+                }
+            });
+            
+            // Store instance
+            countrySelectInstances.set(fieldName, customSelect);
+            
+            // Set initial value if provided
+            if (value) {
+                customSelect.setValue(value);
+            }
+        }, 100);
+        
+        return group;
+    }
+    
+    // Build KYC form dynamically based on missing fields
+    function buildKYCForm(fields) {
+        kycFormFields.innerHTML = '';
+        kycFormErrors.textContent = '';
+        
+        const fieldConfig = {
+            'identity_type': {
+                type: 'select',
+                label: 'Identity Type',
+                options: [
+                    { value: '', text: 'Select Identity Type' },
+                    { value: 'passport', text: 'Passport' },
+                    { value: 'national_id', text: 'National ID' },
+                    { value: 'drivers_license', text: "Driver's License" },
+                    { value: 'other', text: 'Other' }
+                ]
+            },
+            'identity_number': {
+                type: 'text',
+                label: 'Identity Number',
+                placeholder: 'Enter your identity number'
+            },
+            'identity_country': {
+                type: 'country',
+                label: 'Identity Country'
+            },
+            'country': {
+                type: 'country',
+                label: 'Country'
+            },
+            'phone_no': {
+                type: 'tel',
+                label: 'Phone Number',
+                placeholder: 'Enter your phone number'
+            }
+        };
+        
+        fields.forEach(field => {
+            if (!fieldConfig[field]) return;
+            
+            const config = fieldConfig[field];
+            let group = document.createElement('div');
+            group.className = 'kyc-form-group';
+            
+            const label = document.createElement('label');
+            label.textContent = config.label;
+            label.setAttribute('for', field);
+            
+            let input;
+            if (config.type === 'select') {
+                input = document.createElement('select');
+                input.id = field;
+                input.name = field;
+                input.className = 'w-full h-12 px-4 mt-2 border rounded-lg border-line';
+                input.required = true;
+                config.options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.text;
+                    input.appendChild(option);
+                });
+            } else if (config.type === 'country') {
+                const userCountry = field === 'country' ? '{{ user.country|default:"" }}' : 
+                                   (field === 'identity_country' ? '{{ user.kyc_profile.identity_country|default:"" }}' : '');
+                group = createCountryInput(field, config.label, userCountry);
+                kycFormFields.appendChild(group);
+                return;
+            } else {
+                input = document.createElement('input');
+                input.type = config.type;
+                input.id = field;
+                input.name = field;
+                input.className = 'w-full h-12 px-4 mt-2 border rounded-lg border-line';
+                input.placeholder = config.placeholder || '';
+                input.required = true;
+            }
+            
+            if (config.type !== 'country') {
+                group.appendChild(label);
+                group.appendChild(input);
+                kycFormFields.appendChild(group);
+            }
+        });
+    }
+    
+    // Show KYC modal
+    function showKYCModal(fields) {
+        console.log('showKYCModal called with:', fields);
+        if (!kycModal) {
+            console.error('KYC modal element not found in DOM');
+            alert('Identity verification required. Please refresh the page or contact support.');
+            return;
+        }
+        if (!kycFormFields) {
+            console.error('KYC form fields element not found in DOM');
+            return;
+        }
+        if (!fields || fields.length === 0) {
+            console.warn('No missing fields to show');
+            return;
+        }
+        console.log('Building KYC form with fields:', fields);
+        buildKYCForm(fields);
+        kycModal.classList.add('active');
+        console.log('Modal classList after adding active:', kycModal.classList.toString());
+        console.log('Modal should be visible now. Modal display style:', window.getComputedStyle(kycModal).display);
+    }
+    
+    // Hide KYC modal
+    function hideKYCModal() {
+        kycModal.classList.remove('active');
+        kycFormFields.innerHTML = '';
+        kycFormErrors.textContent = '';
+        pendingPayoutData = null;
+    }
+    
+    // Validate payout eligibility
+    async function validatePayout() {
+        try {
+            const response = await fetch('{% url "validate_payout_api" %}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Validation error:', error);
+            return { can_request_payout: false, missing_fields: [] };
+        }
+    }
+    
+    // Save identity data
+    async function saveIdentity(formData) {
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch('{% url "save_identity_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Save error:', error);
+            return { success: false, errors: ['An error occurred while saving.'] };
+        }
+    }
+    
+    // Handle payout form submission
+    payoutForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Disable submit button to prevent spam
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+        
+        // Validate payout eligibility first
+        const validation = await validatePayout();
+        
+        if (!validation.can_request_payout) {
+            // Show modal with missing fields
+            pendingPayoutData = {
+                amount: document.getElementById('amount').value,
+                account_type: document.getElementById('account_type').value
+            };
+            showKYCModal(validation.missing_fields);
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Request';
+            return;
+        }
+        
+        // If validation passes, submit the form normally
+        payoutForm.submit();
+    });
+    
+    // Handle KYC form submission
+    kycForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('kyc-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+        kycFormErrors.textContent = '';
+        
+        // Collect form data (including hidden inputs from country selects)
+        const formData = {};
+        const formFields = kycForm.querySelectorAll('input, select');
+        formFields.forEach(field => {
+            if (field.name && field.value) {
+                formData[field.name] = field.value;
+            }
+        });
+        
+        // Also get values from country select instances
+        countrySelectInstances.forEach((selectInstance, fieldName) => {
+            const selectedItem = countriesData.find(item => item.code === selectInstance.getValue());
+            if (selectedItem) {
+                formData[fieldName] = selectedItem.name;
+            }
+        });
+        
+        // Save identity data
+        const result = await saveIdentity(formData);
+        
+        if (result.success) {
+            showToast('Verification details saved. You can now request payout.');
+            hideKYCModal();
+            
+            // Re-trigger payout request if we have pending data
+            if (pendingPayoutData) {
+                setTimeout(() => {
+                    document.getElementById('amount').value = pendingPayoutData.amount;
+                    document.getElementById('account_type').value = pendingPayoutData.account_type;
+                    payoutForm.dispatchEvent(new Event('submit'));
+                }, 500);
+            }
+        } else {
+            kycFormErrors.textContent = result.errors ? result.errors.join(', ') : 'Failed to save verification details.';
+            showToast('Failed to save verification details.', true);
+        }
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save & Continue';
+    });
+    
+    // Close modal handlers
+    kycModalClose.addEventListener('click', hideKYCModal);
+    kycCancelBtn.addEventListener('click', hideKYCModal);
+    kycModal.addEventListener('click', (e) => {
+        if (e.target === kycModal) {
+            hideKYCModal();
+        }
+    });
+    
+    // Countries are already loaded in countriesData array - no initialization needed
+    
+    // If page loads with missing fields, show modal immediately
+    if (!canRequestPayout && missingFields && Array.isArray(missingFields) && missingFields.length > 0) {
+        console.log('Page loaded with missing fields:', missingFields);
+        console.log('canRequestPayout:', canRequestPayout);
+        // Small delay to ensure all DOM elements are ready
+        setTimeout(() => {
+            console.log('Attempting to show KYC modal with fields:', missingFields);
+            if (kycModal) {
+                showKYCModal(missingFields);
+            } else {
+                console.error('KYC modal element not found!');
+            }
+        }, 500);
+    } else {
+        console.log('No modal needed. canRequestPayout:', canRequestPayout, 'missingFields:', missingFields);
+    }
+    
+    // Original country autocomplete code (if country input exists)
+    const countryInput = document.getElementById("country");
+    const countryList = document.getElementById("country-list");
+    
+    if (countryInput && countryList) {
+        // Use the already fetched countries list
+        countryInput.addEventListener("input", () => {
+            showCountrySuggestions(countryList, countryInput.value);
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!countryList.contains(e.target) && e.target !== countryInput) {
+                countryList.classList.add("hidden");
+            }
+        });
+    }
+});
+
+    </script>
+    
+
+{% endblock extra_javascript %}

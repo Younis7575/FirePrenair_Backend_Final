@@ -1,0 +1,301 @@
+{% load course_filters %}
+{% load static %}
+
+<style>
+
+.popup-overlay-like {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .popup-content-like {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+    }
+    .popup-header-like {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .popup-header-like h5 {
+        margin: 0;
+    }
+    .popup-body-like ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .popup-body-like ul li {
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+    }
+    .popup-body-like ul li img {
+        border-radius: 50%;
+        margin-right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    .close-btn-like {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .like-count{
+        cursor: pointer;
+    }
+
+
+</style>
+
+<div class="post-single-box p-3 p-sm-5">
+    <div class="top-area pb-5">
+        <div class="profile-area d-center justify-content-between">
+            <div class="avatar-item d-flex gap-3 align-items-center">
+                <div class="position-relative">
+                    <img class="avatar-img max-un rounded" src="{{post.author.profile_pic.url}}" 
+                         style="width: 48px; height: 48px;" alt="avatar">
+                    {% if post.author.is_online %}
+                        <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" 
+                             style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+                    {% else %}
+                        <div class="position-absolute bottom-0 end-0 bg-secondary rounded-circle border border-2 border-white" 
+                             style="width: 12px; height: 12px;"></div>
+                    {% endif %}
+                </div>
+                <div class="info-area">
+                    <h6 class="m-0"><a href="public-profile-post.html">{{post.author.name}}</a></h6>
+                    <span class="mdtxt status">{{post.created_at}}</span>
+                </div>
+            </div>
+            {% if request.user == post.author %}
+            <div class="btn-group cus-dropdown">
+                <button type="button" class="dropdown-btn" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="material-symbols-outlined fs-xxl m-0"> more_horiz </i>
+                </button>
+                <ul class="dropdown-menu p-4 pt-2">
+                    <li>
+                        <a class="droplist d-flex align-items-center gap-2" href="{% url 'delete_post' post.slug %}">
+                            <i class="material-symbols-outlined mat-icon"> delete </i>
+                            <span>Delte Post</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="py-4">
+            <a href="{% url 'post_detail' post.slug %}"><p class="description">{{post.content}}</p></a>
+        </div>
+        {% if post.image %}
+        <div class="post-img">
+            <img src="{{post.image.url}}" class="w-100" alt="image">
+        </div>
+
+        {% elif post.video %}
+        <div class="post-img video-item">
+            <video 
+                id="video-{{ post.slug }}" 
+                class="video-js vjs-theme-city vjs-big-play-centered" 
+                controls 
+                preload="auto" 
+                width="640" 
+                height="264"
+                data-lesson-id="{{ post.slug }}" 
+                data-course-id="{{ post.slug }}">
+                <source src="{{ post.video.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {% endif %}
+    </div>
+    <div class="total-react-share pb-4 d-center gap-2 flex-wrap justify-content-between">
+        <div class="friends-list d-flex gap-3 align-items-center text-center">
+            <ul id="like-list-{{ post.slug }}"
+                onclick="showLikesPopup('{{ post.slug }}')"
+                class="d-flex align-items-center justify-content-center">
+                {% for like in post.likes.all|slice:":3" %}
+                <li class="like-count" id="like-user-{{like.user.slug}}">
+                    <img src="{{ like.user.profile_pic.url }}" alt="image">
+                </li>
+                {% endfor %}
+                <li>
+                    <span id="like-count-{{ post.slug }}" class="like-count mdtxt d-center">{{ post.likes.count}}+</span>
+                </li>
+            </ul>
+
+        </div>
+        <div class="react-list d-flex flex-wrap gap-6 align-items-center text-center">
+            <button class="mdtxt">{{post.comment_count}} Comments</button>
+        </div>
+    </div>
+    <div class="like-comment-share py-5 d-center flex-wrap gap-3 gap-md-0 justify-content-between">
+        <button id="like-btn-{{post.slug}}" class="d-center gap-1 gap-sm-2 mdtxt"
+            onclick="toggleLike('{{post.slug}}', '{{csrf_token}}')">
+            {% if post|is_liked:request.user %}
+            <i id="like-icon-{{post.slug}}" class="material-symbols-outlined mat-icon"
+                style="color: red;">favorite_border</i>
+            <span id="like-text-{{post.slug}}">Liked</span>
+            {% else %}
+            <i id="like-icon-{{post.slug}}" class="material-symbols-outlined mat-icon"
+                style="color: black;">favorite_border</i>
+            <span id="like-text-{{post.slug}}">Like</span>
+            {% endif %}
+        </button>
+
+        <button class="d-center gap-1 gap-sm-2 mdtxt comment-toggle-btn">
+            <i class="material-symbols-outlined mat-icon"> chat </i>
+            Comment
+        </button>
+    </div>
+    <form method="post" action="{% url 'add_comment' post.slug %}">
+        {% csrf_token %}
+        <div class="d-flex mt-5 gap-3">
+            <div class="profile-box d-none d-xxl-block">
+                <a href="#"><img src="{{ request.user.profile_pic.url }}"
+                        style="width: 50px; height: 50px;" class="max-un rounded" alt="icon"></a>
+            </div>
+            <div class="form-content input-area py-1 d-flex gap-2 align-items-center w-100">
+                <input id="commentInput" required name="content" placeholder="Write a comment..">
+            </div>
+            <div class="btn-area d-flex">
+                <button type="submit" id="submitComment" class="cmn-btn px-2 px-sm-5 px-lg-6" style="background-color: #ff6f61;">
+                    <i class="material-symbols-outlined mat-icon m-0 fs-xxl"> near_me </i>
+                </button>
+            </div>
+        </div>
+    </form> 
+    <div class="post-comments" style="display: none;">
+    {% for comment in post.comments_with_replies %}
+    <div class="comments-area mt-5">
+        <div class="single-comment-area ms-1 ms-xxl-15">
+            <div class="parent-comment d-flex gap-2 gap-sm-4">
+                <div class="avatar-item d-center align-items-baseline">
+                    <img class="avatar-img max-un rounded"
+                        src="{{comment.author.profile_pic.url}}" alt="avatar"
+                        style="width: 50px; height: 50px;">
+                </div>
+                <div class="info-item active">
+                    <div class="top-area px-4 py-3 d-flex gap-3 align-items-start justify-content-between">
+                        <div class="title-area">
+                            <h6 class="m-0 mb-3"><a
+                                    href="{% url 'commu_profile' comment.author.slug %}">{{comment.author.name}}</a>
+                            </h6>
+                            <p class="mdtxt">{{comment.content}}</p>
+                        </div>
+                    </div>
+                    <ul class="like-share d-flex gap-6 mt-2">
+                        <li class="d-center flex-column">
+                            <button class="mdtxt reply-btn">Reply</button>
+                        </li>
+                    </ul>
+                    <form method="post" action="{% url 'add_reply1' comment.id %}" class="comment-form mt-3 reply-form">
+                        {% csrf_token %}
+                        <div class="d-flex gap-3">
+                            <input name="content" placeholder="Write a reply..."
+                                class="py-3 reply-input">
+                            <button type="submit" style="background-color: #ff6f61;"
+                                class="cmn-btn px-2 px-sm-5 px-lg-6 submit-reply-btn">
+                                <i class="material-symbols-outlined mat-icon m-0 fs-xxl">
+                                    near_me </i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% for reply in comment.replies.all %}
+            <div class="comment-item-nested single-comment-area mt-7 ms-13 ms-sm-15">
+                <div class="d-flex gap-2 gap-sm-4 align-items-baseline">
+                    <div class="avatar-item d-center align-items-baseline">
+                        <img class="avatar-img max-un rounded"
+                            src="{{reply.author.profile_pic.url}}" alt="avatar"
+                            style="width: 50px; height: 50px;">
+                    </div>
+                    <div class="info-item">
+                        <div class="top-area px-4 py-3 d-flex gap-3 align-items-start justify-content-between">
+                            <div class="title-area">
+                                <h6 class="m-0 mb-3"><a
+                                        href="{% url 'commu_profile' reply.author.slug %}">{{reply.author.name}}</a>
+                                </h6>
+                                <p class="mdtxt">{{reply.content}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for comment in post.comments_with_no_replies %}
+    <div class="comments-area mt-5">
+        <div class="single-comment-area ms-1 ms-xxl-15">
+            <div class="d-flex gap-4">
+                <div class="avatar-item d-center align-items-baseline">
+                    <img class="avatar-img max-un rounded"
+                        src="{{comment.author.profile_pic.url}}" alt="avatar"
+                        style="width: 50px; height: 50px;">
+                </div>
+                <div class="info-item w-100">
+                    <div
+                        class="top-area px-4 py-3 d-flex gap-3 align-items-start justify-content-between">
+                        <div class="title-area">
+                            <h6 class="m-0 mb-3"><a
+                                    href="{% url 'commu_profile' comment.author.slug %}">{{comment.author.name}}</a>
+                            </h6>
+                            <p class="mdtxt">{{comment.content}}</p>
+                        </div>
+                    </div>
+                    <ul class="like-share d-flex gap-6 mt-2">
+                        <li class="d-center flex-column">
+                            <button class="mdtxt reply-btn">Reply</button>
+                        </li>
+                    </ul>
+                    <form method="post" action="{% url 'add_reply1' comment.id %}" class="comment-form mt-3 reply-form">
+                        {% csrf_token %}
+                        <div class="d-flex gap-3">
+                            <input name="content" placeholder="Write a reply..."
+                                class="py-3 reply-input">
+                            <button type="submit" style="background-color: #ff6f61;"
+                                class="cmn-btn px-2 px-sm-5 px-lg-6 submit-reply-btn">
+                                <i class="material-symbols-outlined mat-icon m-0 fs-xxl">
+                                    near_me </i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+
+
+
+<div id="like-popup" class="popup-overlay-like" style="display: none;">
+    <div class="popup-content-like">
+        <div class="popup-header-like">
+            <h5>Post Likes</h5>
+            <button class="close-btn-like" onclick="closePopup()">×</button>
+        </div>
+        <div class="popup-body-like">
+            <ul id="like-users-list"></ul>
+        </div>
+    </div>
+</div>

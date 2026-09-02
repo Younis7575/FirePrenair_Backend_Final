@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>{{ plan_name }} Trial Ending Soon</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Your {{ plan_name }} trial will end in 3 days. Add a payment method to continue without interruption.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Add Payment Method</a>
+    </div>
+{% endblock %}

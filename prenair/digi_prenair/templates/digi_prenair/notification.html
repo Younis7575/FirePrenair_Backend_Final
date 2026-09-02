@@ -1,0 +1,230 @@
+{% extends "digi_prenair/base.html" %}
+{% load static %}
+{% block content %}
+<div
+  class="primary-content-area container content-padding grid-small-sidebar-left"
+>
+<aside>
+  <!-- dahsboard menu -->
+  <div class="user-db-menu">
+    <div class="user-db-header">
+      <div class="user-db-cover-image profile-cover-image">
+        {% if user.digi_cover_photo %}
+        <img src="{{ user.digi_cover_photo.url }}" alt="cover photo" />
+        {% else %}
+        <!-- Default cover image if user hasn't uploaded one -->
+        <img
+          src="{% static "digi_prenair/img/content/profile/default-cover.png" %}"
+          alt="cover photo"
+        />
+        {% endif %}
+      </div>
+      <div class="user-header-user-profile">
+        <div class="avatar box-64">
+          <a href="{% url 'digi_profile' user.slug %}">
+            {% if user.profile_pic %}
+            <img src="{{ user.profile_pic.url }}" alt="avatar" />
+            {% else %}
+            <img
+              src="{% static 'digi_prenair/img/avatar.png' %}"``
+              alt="default avatar"
+            />
+            {% endif %} {% if user.digi_is_verified %}
+            <span class="verified">
+              <svg class="crumina-icon">
+                <use xlink:href="#check-icon"></use>
+              </svg>
+            </span>
+            {% endif %}</a
+          >
+        </div>
+        <div class="title">
+          <a href="{% url 'digi_profile' user.slug %}"
+            >{{ user.name|default:user.username }}</a
+          >
+        </div>
+        <div class="item-meta">
+          <span class="gradient-text">@{{ user.username }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="user-db-body">
+      <ul class="profile-menu">
+        <li>
+          <a href="{% url "digi_profile_info" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#user-icon"></use></svg
+            >Profile Info</a
+          >
+        </li>
+        <li>
+          <a href="{% url "digi_profile_settings" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#settings-icon"></use></svg
+            >Account Settings</a
+          >
+        </li>
+        <li>
+          <a href="{% url "digi_notifications" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#slide-filter-icon"></use></svg
+            >Notification Settings</a
+          >
+        </li>
+        <li>
+          <a href="{% url "digi_purchases" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#wallet-icon"></use></svg
+            >Purchases</a
+          >
+        </li>
+        {% if user.is_digi_seller %}
+        <li>
+          <a href="{% url "digi_dashboard" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#dashboard-icon"></use></svg
+            >Dashboard</a
+          >
+        </li>
+        <li>
+          <a href="{% url "digi_manage_items" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#file-text-icon"></use></svg
+            >Manage Items</a
+          >
+        </li>
+        <li>
+          <a href="{% url "digi_upload_item" %}"
+            ><svg class="crumina-icon">
+              <use xlink:href="#picture-icon"></use></svg
+            >Upload Item</a
+          >
+        </li>
+        {% comment %} <li>
+          <a href="!#"
+            ><svg class="crumina-icon">
+              <use xlink:href="#circle-checked-icon"></use></svg
+            >Get Verified</a
+          >
+        </li> {% endcomment %}
+        {% endif %}
+        {% if user.is_authenticated %}
+          <li class="logout">
+            <a href="{% url 'logout' %}">
+              <svg class="crumina-icon">
+                <use xlink:href="#logout-icon"></use>
+              </svg>
+              Log Out
+            </a>
+          </li>
+          {% endif %}
+      </ul>
+    </div>
+  </div>
+</aside>
+  <div class="main-content-area">
+    <div class="page-title">
+      <h2><span class="gradient-text">Notifications</span></h2>
+    </div>
+    <div class="notifications-list">
+      <div class="command-line">
+        <!-- Mark All as Read Form -->
+        <form action="{% url 'mark_all_notifications_as_read' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="command">Mark All as Read</button>
+        </form>
+      </div>
+    
+      <div class="notifications-list-wrapper">
+        {% for notification in notifications %}
+        <div class="notification">
+          <div class="notification-body">
+            <div class="notification-info">
+              <div class="message">
+                {{ notification.message }}
+              </div>
+              <div class="publish-date">{{ notification.created_at|timesince }} ago</div>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <!-- Mark as Read Form -->
+             {% if notification.is_read == False %}
+            <form action="{% url 'mark_notification_as_read' notification.id %}" method="post" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="command">Mark as Read</button>
+            </form>
+            {% endif %}
+
+            
+            <!-- Delete Form -->
+            <form action="{% url 'delete_notification' notification.id %}" method="post" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="command delete"><svg class="crumina-icon">
+                <use xlink:href="#close-circle-icon"></use>
+            </svg></button>
+            </form>
+            
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    
+    {% comment %} <div class="load-more_bars">
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+      <div class="load-more_bar"></div>
+    </div> {% endcomment %}
+  </div>
+</div>
+{% comment %} 
+<script>
+  // Select All Functionality
+  function selectAllNotifications() {
+    const checkboxes = document.querySelectorAll('.cryptoki-checkbox');
+    checkboxes.forEach(checkbox => checkbox.checked = true);
+  }
+
+  // Mark selected notifications as read
+  function markSelectedAsRead() {
+    const checkboxes = document.querySelectorAll('.cryptoki-checkbox:checked');
+    checkboxes.forEach(checkbox => {
+      const notificationId = checkbox.id.split('-')[1];
+      window.location.href = `/notifications/read/${notificationId}/`;
+    });
+  }
+
+  // Delete selected notifications
+  function deleteSelectedNotifications() {
+    const checkboxes = document.querySelectorAll('.cryptoki-checkbox:checked');
+    checkboxes.forEach(checkbox => {
+      const notificationId = checkbox.id.split('-')[1];
+      deleteNotification(notificationId);
+    });
+  }
+
+  // Function to delete a single notification
+  function deleteNotification(notificationId) {
+    fetch(`/notifications/delete/${notificationId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      if (response.ok) {
+        // Remove the notification from the DOM
+        document.querySelector(`#notif-${notificationId}`).closest('.notification').remove();
+      }
+    }).catch(error => console.error('Error deleting notification:', error));
+  }
+</script> {% endcomment %}
+
+
+{% endblock %}

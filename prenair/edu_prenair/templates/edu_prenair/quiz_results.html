@@ -1,0 +1,354 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #1e3a8a;
+        --success: #10B981;
+        --error: #EF4444;
+        --surface: #F8FAFC;
+        --on-surface: #0F172A;
+    }
+
+    .results-container {
+        max-width: 1200px;
+        margin: 4rem auto;
+        padding: 2.5rem;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 24px 48px -12px rgba(16, 24, 40, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .results-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(90deg, var(--primary) 0%, #1e3a8a 100%);
+    }
+
+    .results-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .results-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--on-surface);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.025em;
+    }
+
+    .score-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        margin: 3rem 0;
+        padding: 2.5rem;
+        background: var(--surface);
+        border-radius: 20px;
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+
+    .score-display:hover {
+        transform: translateY(-2px);
+    }
+
+    .score-circle {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: conic-gradient(var(--primary) {{ attempt.score }}%, #1e3a8a {{ attempt.score }}% 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.15);
+    }
+
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        background: white;
+        border-radius: 50%;
+    }
+
+    .score-circle span {
+        position: relative;
+        z-index: 1;
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .score-details h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--on-surface);
+        margin-bottom: 0.5rem;
+    }
+
+    .score-details p {
+        color: #64748B;
+        font-size: 0.975rem;
+    }
+
+    .result-card {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        border-radius: 16px;
+        background: white;
+        border: 1px solid #F1F5F9;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px -6px rgba(16, 24, 40, 0.08);
+    }
+
+    .result-card.correct {
+        border-left: 4px solid var(--success);
+    }
+
+    .result-card.incorrect {
+        border-left: 4px solid var(--error);
+    }
+
+    .result-status {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .result-card.correct .result-status {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .result-card.incorrect .result-status {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+    }
+
+    .result-content {
+        flex-grow: 1;
+    }
+
+    .result-content h3 {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: var(--on-surface);
+        margin-bottom: 1rem;
+    }
+
+    .answer-comparison {
+        display: grid;
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .user-answer, .correct-answer {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-answer::before, .correct-answer::before {
+        content: '';
+        width: 8px;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 8px 0 0 8px;
+    }
+
+    .user-answer {
+        background: #FFF1F2;
+    }
+
+    .user-answer::before {
+        background: var(--error);
+    }
+
+    .correct-answer {
+        background: #ECFDF5;
+    }
+
+    .correct-answer::before {
+        background: var(--success);
+    }
+
+    .explanation {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #F1F5F9;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .explanation::before {
+        content: '💡';
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        opacity: 0.1;
+        font-size: 3rem;
+    }
+
+    .explanation label {
+        display: block;
+        font-weight: 500;
+        color: var(--on-surface);
+        margin-bottom: 0.75rem;
+    }
+
+    .return-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: #ff6f61;
+        color: white;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid #ff6f61;
+        font-weight: 500;
+        margin-top: 2rem;
+    }
+
+    .return-btn:hover {
+        background: white;
+        color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px -6px rgba(79, 70, 229, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .results-container {
+            margin: 2rem;
+            padding: 1.5rem;
+        }
+
+        .score-display {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .result-card {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+    }
+</style>
+
+<div class="main-wrapper">
+    {% include 'edu_prenair/partials/header.html' %}
+    <div class="results-container">
+        <div class="results-header">
+            <h1>Performance Analysis</h1>
+            <div class="score-display">
+                <div class="score-circle">
+                    <span>{{ attempt.score|floatformat:0 }}%</span>
+                </div>
+                <div class="score-details">
+                    <h2>{{ attempt.quiz.title }}</h2>
+                    <p>Completed on {{ attempt.completed_at|date:"F j, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-breakdown">
+            {% for response in attempt.quizquestionresponse_set.all %}
+            <div class="result-card {% if response.is_correct %}correct{% else %}incorrect{% endif %}" onclick="this.classList.toggle('expanded')">
+                <div class="result-status">
+                    {% if response.is_correct %}
+                    <i class="fas fa-check fa-lg"></i>
+                    {% else %}
+                    <i class="fas fa-times fa-lg"></i>
+                    {% endif %}
+                </div>
+                <div class="result-content">
+                    <h3>{{ response.question.question_text }}</h3>
+                    <div class="answer-comparison">
+                        <div class="user-answer">
+                            <label>Your Answer</label>
+                            <span>{{ response.selected_answer }}</span>
+                        </div>
+                        {% if not response.is_correct %}
+                        <div class="correct-answer">
+                            <label>Correct Answer</label>
+                            <span>{{ response.question.correct_answer }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if response.question.explanation %}
+                    <div class="explanation">
+                        <label>Expert Insight</label>
+                        <p>{{ response.question.explanation }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <a href="{% url 'course_content' attempt.quiz.course.slug %}" class="return-btn">
+                <i class="fas fa-arrow-left"></i>
+                Continue Learning
+            </a>
+        </div>
+    </div>
+    {% include 'home/partials/footer.html' %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        const cards = document.querySelectorAll('.result-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+
+    document.querySelectorAll('.result-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+</script>
+{% endblock %}

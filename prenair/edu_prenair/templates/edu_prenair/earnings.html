@@ -1,0 +1,141 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - My Earnings{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar breadcrumb-bar-info">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="breadcrumb-list">
+                    <h2 class="breadcrumb-title">Earnings</h2>
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Earnings</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->
+
+<!-- Page Content -->
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            
+            {% if request.user.is_edu_instructor %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+            {% else %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+            {% endif %}
+           
+            <div class="col-xl-9 col-lg-8 col-md-12">	
+                <div class="settings-widget card-details">
+                    <div class="settings-menu p-0">
+                        <div class="profile-heading">
+                            <h3>Earnings</h3>
+                        </div>
+                        <div class="checkout-form instructor-earnings-card">
+                            <!-- Dashboard Grid -->
+                            <div class="row justify-content-center">
+                                <div class="col-lg-4 col-md-6 d-flex">
+                                    <div class="card dash-info flex-fill">
+                                        <div class="card-body">
+                                            <h5>Revenue</h5>
+                                            <h2>${{instructor.edu_total_earnings}}</h2>
+                                            <p>Earning till Date</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6 d-flex">
+                                    <div class="card dash-info flex-fill">
+                                        <div class="card-body">
+                                            <h5>Students Enrollments</h5>
+                                            <h2>{{instructor.edu_instructor_total_students}}</h2>
+                                            <p>Enrollment till date</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6 d-flex">
+                                    <div class="card dash-info flex-fill">
+                                        <div class="card-body">
+                                            <h5>Courses Ratings</h5>
+                                            <h2>{{instructor.instructor_courses_rating}}</h2>
+                                            <p>Rating till date</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /Dashboard Grid -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-widget card-details">
+                    <div class="settings-menu p-0">
+                        <div class="profile-heading">
+                            <h3>Best Selling Courses</h3>
+                        </div>
+                        <div class="checkout-form">
+                            <div class="table-responsive custom-table">
+
+                                <!-- Referred Users-->
+                                <table class="table table-nowrap mb-0">
+                                    <thead>
+                                      <tr>
+                                        <th>Courses</th>
+                                        <th>Sales</th>
+                                        <th>Amount</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for course in courses %}
+                                        <tr>
+                                            <td>
+                                                <div class="sell-table-group d-flex align-items-center">
+                                                    <div class="sell-group-img">
+                                                        <a href="{% url 'course_detail' course.slug %}">
+                                                            <img style="width: 100px;" src="{{course.thumbnail.url}}" class="img-fluid " alt="Img">
+                                                        </a>
+                                                    </div>
+                                                    <div class="sell-tabel-info">
+                                                        <p><a href="{% url 'course_detail' course.slug %}">{{course.title}}</a></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{course.enrolled_students.count}}</td>
+                                            <td>${{course.sales_amount}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>	
+
+        </div>
+    </div>
+</div>	
+<!-- /Page Content -->
+
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

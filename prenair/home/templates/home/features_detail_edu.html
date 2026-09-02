@@ -1,0 +1,238 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Features{% endblock title %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/swiper/css/swiper.min.css' %}">
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="home-two">
+    {% include 'home/partials/new_header.html' %}
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+   <!-- Eduprenair Section -->
+		<section class="about-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 wow fadeInLeft order-lg-1 order-xs-2 order-sm-2">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Shape Minds with EduPrenair</p>
+							<h2 class="mb-0" style="color: #ff6f61;">Empowering Educators & Learners Globally</h2>
+						</div>
+						<div class="header-two-title">
+							<p class="about-text">
+								EduPrenair is your ultimate platform for creating, sharing, and monetizing knowledge. Whether you're an educator looking to build engaging courses or a learner eager to expand your skills, our platform offers AI-driven tools for content creation, progress tracking, and certification. Join a global community committed to learning and teaching excellence.
+							</p>
+							<div class="about-button more-details">
+								<a href="{% url 'edu_home' %}" class="category-btn-final" style="color: white; width: fit-content;">Learn more</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 order-lg-2 order-xs-1 order-sm-1">
+						<div class="stylist-gallery">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-one d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-book-read-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">100</span>K</h4>
+												<p class="mb-0">Learners</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-two d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-pencil-ruler-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">5</span>K</h4>
+												<p class="mb-0">Courses Created</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-three d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-global-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">20</span>+</h4>
+												<p class="mb-0">Countries Reached</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-four d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-award-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">10</span>K+</h4>
+												<p class="mb-0">Certifications Issued</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</section>
+		<!-- /About us -->
+
+        <section class="growup-section">
+			<div class="home-two-shapes">
+				<img src="{% static 'home/images/home-right-bottom.png' %}" alt="Img">
+			</div>
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-xl-6 col-lg-6 col-md-5 col-12">
+						<div class="growup-images-two">
+							<div class="growup-skills-img">
+								<img class="" src="{% static 'home/images/edu_f_1.png' %}" alt="image-banner" title="image-banner">
+							</div>
+						</div>
+					</div>
+		
+					<div class="col-xl-6 col-lg-6 col-md-7 col-12 wow fadeInLeft">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Empower Your Learning Journey</p>
+							<h2 class="" style="color: #ff6f61;">Discover, Teach, and Thrive with EduPrenair</h2>
+							<div class="header-two-text">
+								<p class="mb-0">EduPrenair is your ultimate platform for knowledge sharing and growth. Whether you're an educator, student, or lifelong learner, we provide the tools and resources to make learning impactful and rewarding. Create engaging courses, earn certifications, and connect with a global community passionate about education. Join us to turn your passion for learning into a thriving journey.</p>
+							</div>
+						</div>						
+						<div class="about-button more-details">
+							<a href="{% url 'home' %}?register=true" class="category-btn-final"  style="color: white; width: fit-content;">Join Today</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+
+
+        <!-- digiprenair -->
+		<section class="master-skills-sec">
+			<div class="container">
+				<div class="header-two-title text-center">
+					<p class="tagline" style="color: #1e3a8a;">Unlock Your Potential</p>
+					<h2 style="color: #ff6f61;">Learn, Grow, and Inspire with EduPrenair</h2>
+					<div class="header-two-text">
+						<p class="mb-0">At EduPrenair, we empower learners and educators to create, share, and excel in the world of education. Whether you're building new skills, teaching others, or earning certifications, our innovative platform ensures a meaningful and impactful learning experience. Join thousands of educators and students transforming the future of learning.</p>
+					</div>
+				</div>
+				
+				<!-- Course Info -->
+				<div class="course-info-two">
+					<div class="row align-items-center">
+						<!-- Inspiring Educators Content -->
+						<div class="col-lg-6 col-md-12 order-lg-0 order-md-0 order-0">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Award-Winning Learning Tools</h2>
+								<p>EduPrenair's award-winning tools empower educators and learners to create impactful educational experiences. From interactive courses to AI-powered teaching aids, our platform delivers a seamless and engaging learning journey. Discover resources designed to inspire and empower you in the evolving world of education.</p>
+							</div>
+						</div>
+						<!-- /Inspiring Educators Content -->
+				
+						<!-- Inspiring Educators Image -->
+						<div class="col-lg-6 col-md-12 order-lg-1 order-md-1 order-1">
+							<div class="join-mentor-img">
+								<div class="winning-two-one">
+									<img style="width: 500px;" src="{% static 'home/images/edu_f_2.png' %}" alt="Award-Winning Learning Tools" class="img-fluid">
+								</div>
+								<div class="joing-icon-award">
+									<i class="ri-award-line" style="font-size: 3rem; color: #ff6f61;"></i>
+								</div>
+							</div>
+						</div>
+						<!-- /Inspiring Educators Image -->
+				
+						<!-- Real-World Impact Tools -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-2 order-md-3 order-3">
+							<div class="join-mentor-img">
+								<div class="winning-two-two">
+									<img style="width: 500px;" src="{% static 'home/images/edu_f_3.png' %}" alt="Interactive Tools" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-lightbulb-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Real-World Impact Tools -->
+				
+						<!-- Real-World Learning Content -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-3 order-md-2 order-2">
+							<div class="join-title-middle">
+								<h2 style="color: #ff6f61;">Tools for Real-World Learning</h2>
+								<p>Our tools are tailored to provide real-world learning experiences. From project-based learning to AI-driven insights, EduPrenair equips educators and students to excel in practical applications and achieve measurable educational milestones.</p>
+							</div>
+						</div>
+						<!-- /Real-World Learning Content -->
+				
+						<!-- Globally Recognized Certifications -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-4 order-md-4 order-4">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Certifications for Lifelong Learning</h2>
+								<p>Earn globally recognized certifications that validate your skills and expertise. Whether you're a learner or an educator, our certification programs open pathways to new opportunities in the educational and professional world.</p>
+							</div>
+						</div>
+						<!-- /Globally Recognized Certifications -->
+				
+						<!-- Certifications Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-5 order-md-5 order-5">
+							<div class="join-mentor-img mb-0">
+								<div class="winning-two-three">
+									<img src="{% static 'home/images/edu_f_4.png' %}" alt="Globally Recognized Certifications" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-certificate-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Certifications Image -->
+					</div>
+				</div>
+				
+				<!-- /Course Info -->
+			</div>
+		</section>
+		
+    
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+</body>
+{% endblock content %}
+
+{% block extra_javascript %} 
+
+<script src="{% static 'edu_prenair/assets/plugins/swiper/js/swiper.min.js' %}"></script>
+
+{% endblock extra_javascript %}

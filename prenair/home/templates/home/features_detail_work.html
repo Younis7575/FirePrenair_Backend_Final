@@ -1,0 +1,241 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Features{% endblock title %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/swiper/css/swiper.min.css' %}">
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="home-two">
+    {% include 'home/partials/new_header.html' %}
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+   <!-- Eduprenair Section -->
+		<section class="about-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 wow fadeInLeft order-lg-1 order-xs-2 order-sm-2">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Freelance Marketplace</p>
+							<h2 class="mb-0" style="color: #ff6f61;">Join a Thriving Network of Skilled Professionals for Seamless Collaboration</h2>
+						</div>
+						<div class="header-two-title">
+							<p class="about-text">
+								Connect with a global community of freelancers and businesses in an innovative marketplace designed to match talent with opportunities. Workprenair provides a seamless platform where professionals can showcase their expertise, secure projects, and build lasting client relationships while enjoying a frictionless hiring experience.
+							</p>
+							<div class="about-button more-details">
+								<a href="{% url 'work_home' %}" class="category-btn-final" style="color: white; width: fit-content;">Learn more</a>
+							</div>
+						</div>
+					</div>
+					
+
+					<div class="col-lg-6 order-lg-2 order-xs-1 order-sm-1">
+						<div class="stylist-gallery">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-one d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-team-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">50</span>K</h4>
+												<p class="mb-0">Freelancers</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-two d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-projector-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">1.2</span>K</h4>
+												<p class="mb-0">Successful Projects</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-three d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-earth-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">15</span>+</h4>
+												<p class="mb-0">Countries Supported</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div
+										class="about-image count-four d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-shield-user-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">500</span>+</h4>
+												<p class="mb-0">Verified Clients</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /About us -->
+
+        <section class="growup-section">
+			<div class="home-two-shapes">
+				<img src="{% static 'home/images/home-right-bottom.png' %}" alt="Img">
+			</div>
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-xl-6 col-lg-6 col-md-5 col-12">
+						<div class="growup-images-two">
+							<div class="growup-skills-img">
+								<img style="border-radius: 8px;" class="" src="{% static 'home/images/w_f_1.png' %}" alt="image-banner" title="image-banner">
+							</div>
+						</div>
+					</div>
+		
+					<div class="col-xl-6 col-lg-6 col-md-7 col-12 wow fadeInLeft">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Advanced Analytics</p>
+							<h2 class="" style="color: #ff6f61;">Gain Deep Insights to Optimize Your Freelance Earnings and Performance</h2>
+							<div class="header-two-text">
+								<p class="mb-0">Track your projects, analyze income trends, and gain actionable insights to improve your productivity and financial growth. With powerful analytics, freelancers can monitor their success, adjust pricing strategies, and make data-driven decisions that enhance their business outcomes.
+								</p>
+							</div>
+						</div>
+						<div class="about-button more-details">
+							<a href="{% url 'home' %}?register=true" class="category-btn-final"  style="color: white; width: fit-content;">Join Today</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+
+
+        <!-- digiprenair -->
+		<section class="master-skills-sec">
+			<div class="container">
+				<div class="header-two-title text-center">
+					<p class="tagline" style="color: #1e3a8a;">Instant Payments</p>
+					<h2 style="color: #ff6f61;">Secure, Fast, and Hassle-Free Transactions for Your Hard-Earned Work</h2>
+					<div class="header-two-text">
+						<p class="mb-0">Get paid instantly with a reliable and secure payment system that ensures freelancers receive their earnings without unnecessary delays. Workprenair’s payment solutions provide transparency, multiple payout options, and protection against fraudulent transactions, making financial management effortless.</p>
+					</div>
+				</div>
+				<!-- Course Info -->
+				<div class="course-info-two">
+					<div class="row align-items-center">
+		
+						<!-- Master Skills Content -->
+						<div class="col-lg-6 col-md-12 order-lg-0 order-md-0 order-0">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Project Management</h2>
+								<p>Manage your projects efficiently with an all-in-one workspace designed for clarity, collaboration, and ease of use. Workprenair offers intuitive task tracking, milestone setting, and deadline reminders, helping freelancers deliver high-quality work while maintaining a structured workflow.</p>
+							</div>
+						</div>
+						<!-- /Master Skills Content -->
+		
+						<!-- Master Skills Image -->
+						<div class="col-lg-6 col-md-12 order-lg-1 order-md-1 order-1">
+							<div class="join-mentor-img">
+								<div class="winning-two-one">
+									<img src="{% static 'home/images/career.png' %}" alt="Award-Winning Resources" class="img-fluid">
+								</div>
+								<div class="joing-icon-award">
+									<i class="ri-award-line" style="font-size: 3rem; color: #ff6f61;"></i>
+								</div>
+							</div>
+						</div>
+						<!-- /Master Skills Image -->
+		
+						<!-- Master Skills Content -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-2 order-md-3 order-3">
+							<div class="join-mentor-img">
+								<div class="winning-two-two">
+									<img style="border-radius: 8px;" src="{% static 'home/images/feature1.png' %}" alt="Skill Development" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-lightbulb-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Master Skills Content -->
+		
+						<!-- Master Skills Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-3 order-md-2 order-2">
+							<div class="join-title-middle">
+								<h2 style="color: #ff6f61;">Tools for Real-World Success</h2>
+								<p>Our tools are crafted to ensure success in real-world applications. With interactive learning, hands-on projects, and mentorship, Workprenair equips you to tackle challenges confidently and achieve measurable growth in your career.</p>
+							</div>
+						</div>
+						<!-- /Master Skills Image -->
+		
+						<!-- Master Skills Content -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-4 order-md-4 order-4">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Client Support Tools</h2>
+								<p>Deliver a seamless client experience with communication, project tracking, and feedback tools that ensure clarity and satisfaction. Workprenair’s built-in support features help freelancers manage client interactions, streamline proposals, and maintain professional service standards, fostering long-term partnerships.</p>
+							</div>
+						</div>
+						<!-- /Master Skills Content -->
+		
+						<!-- Master Skills Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-5 order-md-5 order-5">
+							<div class="join-mentor-img mb-0">
+								<div class="winning-two-two">
+									<img style="border-radius: 8px;" src="{% static 'home/images/work_f.png' %}" alt="Skill Development" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-certificate-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Master Skills Image -->
+		
+					</div>
+				</div>
+				<!-- /Course Info -->
+			</div>
+		</section>
+		
+    
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+</body>
+{% endblock content %}
+
+{% block extra_javascript %} 
+
+<script src="{% static 'edu_prenair/assets/plugins/swiper/js/swiper.min.js' %}"></script>
+
+{% endblock extra_javascript %}

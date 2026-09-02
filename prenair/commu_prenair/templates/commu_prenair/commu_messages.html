@@ -1,0 +1,132 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Messages {% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-xxl-3 col-xl-4 col-lg-4 pe-0">
+                <div class="d-block d-lg-none">
+                    <button class="button profile-active mb-4 mb-lg-0 d-flex align-items-center gap-2">
+                        <i class="material-symbols-outlined mat-icon"> tune </i>
+                        <span>Chat List</span>
+                    </button>
+                </div>
+                <div class="profile-sidebar">
+                    <div class="d-block d-lg-none position-absolute end-0 top-0">
+                        <button class="button profile-close">
+                            <i class="material-symbols-outlined mat-icon fs-xl"> close </i>
+                        </button>
+                    </div>
+                    <div class="chat-area">
+                        <aside>
+                            <div class="chat-top p-5">
+                                <div class="profile-area d-center justify-content-between">
+                                    <div class="avatar-item d-flex mb-4 gap-3 align-items-center">
+                                        <div class="avatar-item">
+                                            <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{request.user.profile_pic.url}}"
+                                                alt="avatar">
+                                        </div>
+                                        <div class="info-area">
+                                            <h6 class="m-0">Your Chats</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form action="#" class="input-area py-2 d-flex align-items-center">
+                                    <i class="material-symbols-outlined mat-icon">search</i>
+                                    <input type="text" placeholder="Search" autocomplete="off">
+                                </form>
+                            </div>
+                            <div class="header-menu cus-scrollbar">
+                                <!--  -->
+                                {% for chat, last_message, unread_count in user_chats %}
+                                <div class="single-item messages-area pb-5">
+                                    <div class="text-start d-flex justify-content-between chat-single active p-4 mb-2">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <div class="avatar position-relative">
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% if chat.user1 == request.user %} {{ chat.user2.profile_pic.url }} {% else %} {{ chat.user1.profile_pic.url }} {% endif %}"
+                                                     alt="avatar">
+                                                     {% if chat.user1 == request.user %}
+                                                     {% if chat.user2.is_online %}
+                                                     <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+                                                     {% else %}
+                                                     <div class="position-absolute bottom-0 end-0 bg-secondary rounded-circle border border-2 border-white" style="width: 12px; height: 12px;"></div>
+                                                     {% endif %}
+                                                     {% else %}
+                                                     {% if chat.user1.is_online %}
+                                                     <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+                                                     {% else %}
+                                                     <div class="position-absolute bottom-0 end-0 bg-secondary rounded-circle border border-2 border-white" style="width: 12px; height: 12px;"></div>
+                                                     {% endif %}
+                                                     {% endif %}
+                                            </div>
+                                            <div class="text-area">
+                                                <div class="title-area position-relative d-inline-flex align-items-center">
+                                                   <a href="{% url 'private_chat' chat.slug %}"><h6 class="m-0 d-inline-flex">{% if chat.user1 == request.user %} {{ chat.user2.name }} {% else %} {{ chat.user1.name }} {% endif %}</h6></a>
+                                                    {% if unread_count == 0 %}
+                                                    <span></span>
+                                                    {% else %}
+                                                    <span class="abs-area position-absolute d-center mdtxt">{{unread_count}}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <p class="mdtxt sms">
+                                                    {% if last_message %}
+                                                    {% if last_message.content %}
+                                                        {{ last_message.content }}
+
+                                                    {% elif last_message.file %}
+                                                    {{last_message.file_name}}
+                                                    
+                                                    {% endif %}
+                                                    {% else %}
+                                                        No messages yet.
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xxl-9 col-xl-8 col-lg-8 ps-4 ps-lg-0 d-flex flex-column gap-7 align-items-center justify-content-center text-center">
+                <div class="welcome-message">
+                    <img src="{% static 'commu_prenair/assets/images/icon/chat_head.png' %}" 
+                         alt="No Chat Selected" 
+                         class="img-fluid mb-4 rounded" 
+                         style="max-width: 300px;">
+                    <h2 class="mb-2">Welcome to Fireprenair Messaging!</h2>
+                    <p class="text-muted mb-4">Select a conversation from the chat list on the left or start a new chat to connect with someone.</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</main>
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+    
+{% endblock javascript %}

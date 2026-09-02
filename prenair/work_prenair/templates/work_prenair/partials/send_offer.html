@@ -1,0 +1,456 @@
+<style>
+    /* Overlay and popup styling */
+    .offer-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(3px);
+        display: none;
+    }
+
+    .offer-popup {
+        overflow: hidden;
+        animation: popup-appear 0.3s ease-out;
+    }
+
+    .offer-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 600px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: none;
+    }
+
+    @keyframes popup-appear {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header styling */
+    .popup-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(to right, #ff6f61, rgb(240, 78, 64));
+        color: white;
+    }
+
+    .popup-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        font-size: 1.25rem;
+        color: white;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Body styling */
+    .popup-body {
+        padding: 24px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    /* Form styling */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #ff6f61;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Gig selection styling */
+    .gig-select-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .gig-option {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .gig-option:hover {
+        border-color: #ff6f61;
+        background-color: #f0f7ff;
+    }
+
+    .gig-option.selected {
+        border-color: #ff6f61;
+        background-color: #f0f7ff;
+        box-shadow: 0 0 0 1px #ff6f61;
+    }
+
+    .gig-option input[type="radio"] {
+        display: none;
+    }
+
+    .gig-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        margin-right: 16px;
+        object-fit: cover;
+        background-color: #e5e7eb;
+    }
+
+    .gig-details {
+        flex: 1;
+    }
+
+    .gig-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #1f2937;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .gig-price {
+        color: #3b82f6;
+        font-weight: 700;
+    }
+
+    /* Button styling */
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(255, 110, 97, 0.3);
+    }
+
+    .submit-btn:hover {
+        background-color: #ff6f61;
+    }
+
+    .submit-btn:active {
+        transform: translateY(1px);
+    }
+
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .ai-generator-container {
+    margin-bottom: 2rem;
+}
+
+.ai-input-group {
+    position: relative;
+}
+
+.ai-generate-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 8px 16px;
+    background: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.ai-generate-btn:hover {
+    background: #e65a50;
+}
+
+.loader {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none;
+}
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .popup-body {
+            padding: 16px;
+        }
+
+        .gig-image {
+            width: 50px;
+            height: 50px;
+        }
+    }
+</style>
+<div class="offer-popup-overlay" id="offerOverlay"></div>
+<div class="offer-popup" id="offerPopup">
+    <div class="popup-header">
+        <h3>Create Custom Offer</h3>
+        <button class="close-btn" onclick="closeOfferPopup()">&times;</button>
+    </div>
+    <div class="popup-body">
+        <form id="offerForm" method="POST" action="{% url 'create_offer' %}">
+            {% csrf_token %}
+            <input type="hidden" name="recipient" id="recipientUsername">
+
+            <div class="form-group">
+                <label class="form-label">Select a Gig</label>
+                <div class="gig-select-container">
+                    {% for gig in user_gigs %}
+                    <label class="gig-option" for="gig-{{ gig.slug }}">
+                        <input type="radio" name="gig" id="gig-{{ gig.slug }}" value="{{ gig.slug }}" required>
+                        <img src="{% if gig.image %}{{ gig.image.url }}{% else %}/api/placeholder/60/60{% endif %}"
+                            alt="{{ gig.title }}" class="gig-image">
+                        <div class="gig-details">
+                            <div class="gig-title">
+                                <span>{{ gig.title }}</span>
+                                <span class="gig-price">${{ gig.price }}</span>
+                            </div>
+                            <div class="gig-description">{{ gig.short_description|truncatechars:60 }}</div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="offerTitle">Offer Title</label>
+                <input type="text" class="form-input" name="title" id="offerTitle"
+                    placeholder="e.g., Premium Website Development Package" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="offerDescription">Offer Details</label>
+                <textarea class="form-input" name="description" id="offerDescription" rows="4"
+                    placeholder="Describe what's included in your offer..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="ai-generator-container">
+                    <label class="form-label" for="aiPrompt">AI Proposal Generator</label>
+                    <div class="ai-input-group">
+                        <textarea class="form-input" id="aiPrompt" 
+                                 placeholder="Enter client requirements or key points you want to highlight..."></textarea>
+                        <button type="button" class="ai-generate-btn" onclick="generateDescription()">
+                            <span class="btn-text">Generate</span>
+                            <div class="loader hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="offerPrice">Price ($)</label>
+                <input type="number" class="form-input" name="price" id="offerPrice" min="5" step="5"
+                    placeholder="Enter offer price" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="deliveryTime">Delivery Time (Days)</label>
+                <input type="number" class="form-input" name="delivery_time" id="deliveryTime" min="1"
+                    placeholder="Estimated delivery time" required>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Send Custom Offer
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function openOfferPopup(username) {
+        document.getElementById('recipientUsername').value = username;
+        document.getElementById('offerOverlay').style.display = 'flex';
+        document.getElementById('offerPopup').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeOfferPopup() {
+        document.getElementById('offerOverlay').style.display = 'none';
+        document.getElementById('offerPopup').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Handle URL parameters
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const recipient = urlParams.get('recipient');
+        if (recipient) {
+            openOfferPopup(recipient);
+        }
+    });
+
+    document.querySelectorAll('.gig-option').forEach(option => {
+        option.addEventListener('click', function () {
+            // Remove selected class from all options
+            document.querySelectorAll('.gig-option').forEach(o => {
+                o.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            this.classList.add('selected');
+
+            // Check the radio button
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+        });
+    });
+
+    // Form validation
+    document.getElementById('offerForm').addEventListener('submit', function (e) {
+        const price = document.getElementById('offerPrice').value;
+        const deliveryTime = document.getElementById('deliveryTime').value;
+
+        if (price < 5) {
+            e.preventDefault();
+            alert('Minimum price is $5');
+            return false;
+        }
+
+        if (deliveryTime < 1) {
+            e.preventDefault();
+            alert('Delivery time must be at least 1 day');
+            return false;
+        }
+        return true;
+    });
+
+    function generateDescription() {
+    const prompt = document.getElementById('aiPrompt').value;
+    const gigSlug = document.querySelector('.gig-option.selected input')?.value;
+    const generateBtn = document.querySelector('.ai-generate-btn');
+    const loader = generateBtn.querySelector('.loader');
+    const btnText = generateBtn.querySelector('.btn-text');
+
+    if (!gigSlug) {
+        alert('Please select a gig first');
+        return;
+    }
+
+    if (!prompt.trim()) {
+        alert('Please enter some requirements for the AI');
+        return;
+    }
+
+    btnText.textContent = 'Generating...';
+    loader.classList.remove('hidden');
+    generateBtn.disabled = true;
+
+    fetch('/workprenair/offer/generate_proposal/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({
+            prompt: prompt,
+            gig_slug: gigSlug
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        document.getElementById('offerDescription').value = data.description;
+    })
+    .catch(error => {
+        alert('Error generating description: ' + error.message);
+    })
+    .finally(() => {
+        btnText.textContent = 'Generate';
+        loader.classList.add('hidden');
+        generateBtn.disabled = false;
+    });
+}
+</script>

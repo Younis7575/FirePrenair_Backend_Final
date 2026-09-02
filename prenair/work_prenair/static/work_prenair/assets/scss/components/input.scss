@@ -1,0 +1,25 @@
+input,
+textarea {
+    outline: none;
+    border: 1px solid transparent;
+    transition: border-color ease 0.3s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--black);
+}
+
+.form_input {
+    input {
+        border: none !important;
+
+        &.border {
+            border: 1px solid var(--line) !important;
+
+            &:focus {
+                border-color: var(--black) !important;
+            }
+        }
+    }
+}

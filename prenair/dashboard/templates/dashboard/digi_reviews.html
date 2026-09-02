@@ -1,0 +1,347 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard - Product Reviews{% endblock title %}
+
+{% block extra_css %}
+<style>
+    .reviews-container {
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+    
+    .review-card {
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        border-left: 4px solid #FF5722;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        min-height: 200px;
+    }
+    
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .product-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .review-date {
+        color: #888;
+        font-size: 12px;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .reviewer-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    
+    .reviewer-name {
+        font-weight: 500;
+        color: #444;
+    }
+    
+    .review-title {
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+    
+    .review-body {
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+    
+    .star-rating {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    
+    .star {
+        color: #FFD700;
+        font-size: 16px;
+        margin-right: 2px;
+    }
+    
+    .star.empty {
+        color: #e0e0e0;
+    }
+    
+    .review-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-box {
+        text-align: center;
+        padding: 0 15px;
+    }
+    
+    .stat-box:not(:last-child) {
+        border-right: 1px solid #e0e0e0;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+        color: #777;
+    }
+    
+    .empty-reviews {
+        text-align: center;
+        padding: 50px 0;
+    }
+    
+    .empty-reviews-icon {
+        font-size: 50px;
+        color: #ccc;
+        margin-bottom: 15px;
+    }
+    
+    .filter-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-dropdown {
+        padding: 8px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: white;
+        font-size: 14px;
+        color: #333;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin: 0 5px;
+        border-radius: 6px;
+        background: white;
+        color: #333;
+        font-weight: 500;
+        text-decoration: none;
+        border: 1px solid #e0e0e0;
+        transition: all 0.2s ease;
+    }
+    
+    .page-link:hover, .page-link.active {
+        background: #FF5722;
+        color: white;
+        border-color: #FF5722;
+    }
+    
+    .page-link.disabled {
+        color: #ccc;
+        pointer-events: none;
+    }
+
+    .reviews-list {
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    }
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:px-15 sm:px-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                
+                <h4 class="heading4 max-lg:mt-3">Product Reviews</h4>
+                
+                <div class="reviews-container mt-6">
+                    <!-- Reviews Statistics -->
+                    <div class="review-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">{{ reviews.count }}</div>
+                            <div class="stat-label">Total Reviews</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ avg_rating|floatformat:1 }}</div>
+                            <div class="stat-label">Average Rating</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ five_star_count }}</div>
+                            <div class="stat-label">5-Star Reviews</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ reviewed_products_count }}</div>
+                            <div class="stat-label">Products Reviewed</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Options -->
+                    <div class="filter-options">
+                        <form method="GET" action="{% url 'digi_reviews' %}" class="flex gap-4">
+                            <!-- Product Filter -->
+                            <select name="product" class="filter-dropdown" onchange="this.form.submit()">
+                                <option value="all">All Products</option>
+                                {% for product in products %}
+                                    <option value="{{ product.id }}" 
+                                        {% if product.id|stringformat:"s" == selected_product %}selected{% endif %}>
+                                        {{ product.title }} ({{ product.review_count }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                    
+                            <!-- Rating Filter -->
+                            <select name="rating" class="filter-dropdown" onchange="this.form.submit()">
+                                <option value="all">All Ratings</option>
+                                {% for i in "54321" %}
+                                    <option value="{{ i }}" {% if selected_rating == i %}selected{% endif %}>
+                                        {{ i }} Star{{ i|pluralize }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                    
+                            <!-- Sort Options -->
+                            <select name="sort" class="filter-dropdown" onchange="this.form.submit()">
+                                <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>
+                                    Newest First
+                                </option>
+                                <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>
+                                    Oldest First
+                                </option>
+                                <option value="highest" {% if selected_sort == 'highest' %}selected{% endif %}>
+                                    Highest Rating
+                                </option>
+                                <option value="lowest" {% if selected_sort == 'lowest' %}selected{% endif %}>
+                                    Lowest Rating
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <div class="reviews-list">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="product-title">{{ review.product.title }}</div>
+                                <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+                            </div>
+                            
+                            <div class="reviewer-info">
+                                <img src="{{ review.user.profile_pic.url }}" alt="{{ review.user.username }}" class="reviewer-avatar">
+                                <span class="reviewer-name">{{ review.user.username }}</span>
+                            </div>
+                            
+                            <div class="star-rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <span class="star">★</span>
+                                    {% else %}
+                                        <span class="star empty">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            
+                            <h5 class="review-title">{{ review.title }}</h5>
+                            <p class="review-body">{{ review.body }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-reviews">
+                            <div class="empty-reviews-icon">📝</div>
+                            <h5>No Reviews Yet</h5>
+                            <p>Your products haven't received any reviews yet. Reviews will appear here when customers leave feedback.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include 'work_prenair/partials/menu-modal.html' %}
+    </div>
+</body>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript for filtering or pagination here
+        const filterDropdowns = document.querySelectorAll('.filter-dropdown');
+        filterDropdowns.forEach(dropdown => {
+            dropdown.addEventListener('change', function() {
+                // Add filter functionality here
+                console.log('Filter changed:', this.value);
+                // You would typically submit a form or update via AJAX
+            });
+        });
+    });
+</script>
+{% endblock extra_javascript %}

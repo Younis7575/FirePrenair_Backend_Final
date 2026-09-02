@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Action Required: {{ plan_name }} Payment Issue</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>There's an issue with your {{ plan_name }} subscription payment. Please update your payment details to avoid service interruption.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Update Payment Now</a>
+    </div>
+{% endblock %}

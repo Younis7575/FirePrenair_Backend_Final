@@ -1,0 +1,541 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Personal Access Token{% endblock title %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced color palette and variables */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6f61 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #ff6f61 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e3a8a 100%);
+        --surface-light: #ffffff;
+        --surface-dark: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-primary: #1a202c;
+        --text-secondary: #718096;
+        --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-elevated: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --shadow-glow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Content container */
+    .token-container {
+        position: relative;
+        z-index: 10;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header section */
+    .token-header {
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+    }
+
+    .token-header::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+        animation: shimmer 2s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    .token-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .token-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Main token card */
+    .token-card {
+        background: var(--surface-light);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: var(--shadow-elevated);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .token-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .token-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        animation: gradientMove 3s ease-in-out infinite;
+    }
+
+    @keyframes gradientMove {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    /* Token display section */
+    .token-section {
+        margin-bottom: 30px;
+    }
+
+    .token-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .token-label::before {
+        content: '🔑';
+        font-size: 1.2em;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .token_display {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s ease;
+        background: var(--surface-dark);
+        border: 2px solid var(--border-color);
+    }
+
+    .token_display:focus-within {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .token_display input {
+        flex: 1;
+        padding: 18px 20px;
+        border: none;
+        font-size: 16px;
+        font-family: 'Monaco', 'Menlo', monospace;
+        background: transparent;
+        color: var(--text-primary);
+        outline: none;
+        letter-spacing: 0.5px;
+    }
+
+    .token_display input::selection {
+        background: rgba(102, 126, 234, 0.2);
+    }
+
+    .copy-button {
+        padding: 18px 25px;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 120px;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .copy-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .copy-button:hover::before {
+        left: 100%;
+    }
+
+    .copy-button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .copy-button:active {
+        transform: scale(0.98);
+    }
+
+    .copy-button.copied {
+        background: var(--success-gradient);
+        animation: successPulse 0.6s ease;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Security notice */
+    .security-notice {
+        margin-top: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border-radius: 12px;
+        border-left: 4px solid #f56565;
+        animation: slideInLeft 0.8s ease-out 0.3s both;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .security-notice h3 {
+        color: #c53030;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .security-notice h3::before {
+        content: '🛡️';
+        font-size: 1.1em;
+    }
+
+    .security-notice p {
+        color: #742a2a;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Usage instructions */
+    .usage-guide {
+        margin-top: 30px;
+        padding: 25px;
+        background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        border-radius: 12px;
+        border-left: 4px solid #48bb78;
+        animation: slideInRight 0.8s ease-out 0.5s both;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .usage-guide h3 {
+        color: #2f855a;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .usage-guide h3::before {
+        content: '💡';
+        font-size: 1.1em;
+    }
+
+    .usage-guide p {
+        color: #276749;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Mobile menu button enhancements */
+    .btn_menu_dashboard {
+        background: var(--surface-light);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin: 20px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn_menu_dashboard:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-elevated);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .token-container {
+            padding: 20px 15px;
+        }
+
+        .token-header h1 {
+            font-size: 2rem;
+        }
+
+        .token-card {
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .token_display {
+            flex-direction: column;
+        }
+
+        .copy-button {
+            border-radius: 0 0 10px 10px;
+        }
+    }
+
+
+
+   
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="dashboard_applied scrollbar_custom w-full bg-surface">
+        <button
+        class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+        data-type="menu_dashboard"
+      >
+        <span class="ph ph-squares-four text-xl"></span>
+        <strong class="text-button">Menu</strong>
+      </button>
+
+            <div class="token-container">
+                <div class="token-header">
+                    <h1>Personal Access Token</h1>
+                    <p>Your secure API authentication key for seamless integration and enhanced security</p>
+                </div>
+
+                <div class="token-card">
+                    <div class="token-section">
+                        <div class="token-label">
+                            API Access Token
+                        </div>
+                        <div class="token_display">
+                            <input type="text" id="referralLink" value="{{ token }}" readonly>
+                            <button class="copy-button" id="copyBtn" onclick="copyReferralLink()">
+                                <span class="ph ph-copy"></span>
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="security-notice">
+                        <h3>Security Important</h3>
+                        <p>Keep this token secure and private. Never share it publicly or commit it to version control. Treat it like a password.</p>
+                    </div>
+
+                    <div class="usage-guide">
+                        <h3>How to Use</h3>
+                        <p>Include this token in your API requests as a Bearer token in the Authorization header: <code>Authorization: Bearer YOUR_TOKEN</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+    <div class="modal">
+        {% include 'work_prenair/partials/menu-modal.html' %}
+    </div>
+
+    <script>
+        // Enhanced copy functionality with beautiful animations
+        function copyReferralLink() {
+            const referralInput = document.getElementById('referralLink');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            if (!referralInput) return;
+            
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(referralInput.value).then(function() {
+                // Success feedback with enhanced animation
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span class="ph ph-check"></span>Copied!';
+                copyBtn.classList.add('copied');
+                
+                // Create success particles effect
+                createSuccessParticles(copyBtn);
+                
+                setTimeout(function() {
+                    copyBtn.innerHTML = originalHTML;
+                    copyBtn.classList.remove('copied');
+                }, 3000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                try {
+                    document.execCommand('copy');
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span class="ph ph-check"></span>Copied!';
+                    copyBtn.classList.add('copied');
+                    
+                    setTimeout(function() {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.classList.remove('copied');
+                    }, 3000);
+                } catch (e) {
+                    console.error('Copy fallback failed: ', e);
+                }
+            });
+        }
+
+        // Create success particles animation
+        function createSuccessParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const particles = 6;
+            
+            for (let i = 0; i < particles; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: fixed;
+                    width: 6px;
+                    height: 6px;
+                    background: #4facfe;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    left: ${rect.left + rect.width / 2}px;
+                    top: ${rect.top + rect.height / 2}px;
+                `;
+                
+                document.body.appendChild(particle);
+                
+                const angle = (i / particles) * Math.PI * 2;
+                const velocity = 100;
+                
+                particle.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { 
+                        transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px) scale(0)`, 
+                        opacity: 0 
+                    }
+                ], {
+                    duration: 1000,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }).onfinish = () => particle.remove();
+            }
+        }
+
+        // Enhanced page load animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus on token input
+            const tokenInput = document.getElementById('referralLink');
+            if (tokenInput) {
+                setTimeout(() => {
+                    tokenInput.focus();
+                    tokenInput.select();
+                }, 1000);
+            }
+
+            // Add scroll-triggered animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'slideInUp 0.8s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements for scroll animations
+            document.querySelectorAll('.token-card, .security-notice, .usage-guide').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Add keyboard shortcut for copying (Ctrl+C or Cmd+C)
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement === tokenInput) {
+                    e.preventDefault();
+                    copyReferralLink();
+                }
+            });
+        });
+
+        // Add smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+{% endblock %}

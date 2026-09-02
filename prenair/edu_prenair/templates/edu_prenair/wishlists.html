@@ -1,0 +1,81 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Wishlist{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+   		<!-- Breadcrumb -->
+		<div class="breadcrumb-bar breadcrumb-bar-info">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 col-12">
+						<div class="breadcrumb-list">
+							<h2 class="breadcrumb-title">Wishlist</h2>
+							<nav aria-label="breadcrumb" class="page-breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /Breadcrumb -->
+        
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    {% if request.user.is_edu_instructor %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+                    {% else %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+                    {% endif %}
+
+                   <!-- Instructor Wishlist -->
+					<div class="col-xl-9 col-lg-9">
+
+						<div class="settings-widget card-info">
+							<div class="settings-menu p-0">
+								<div class="profile-heading">
+									<h3>Wishlist</h3>
+								</div>
+								<div class="checkout-form pb-0">
+									<div class="row">
+										{% if wishlists %}
+                                        {% for enroll in wishlists %}
+										{% include 'edu_prenair/partials/course_card.html' %}
+                                        {% endfor %}
+										{% else %}
+										<div class="col-12 text-center">
+											<p>No Wishlist found.</p>
+										</div>
+										{% endif %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Instructor Wishlist -->
+
+                    
+                </div>
+            </div>
+        </div>	
+        <!-- /Page Content -->
+
+
+
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

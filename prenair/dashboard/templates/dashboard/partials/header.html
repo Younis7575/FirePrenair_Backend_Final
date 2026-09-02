@@ -1,0 +1,739 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navbar</title>
+    <link rel="stylesheet" href="{% static "home/css/navbar.css" %}">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  
+
+  <body>
+    <style>
+      .search-container-final input {
+        border: none;
+        outline: none;
+        flex: 1;
+        padding: 6px;
+        font-size: 1em;
+        font-weight: 500 !important;
+        letter-spacing: -0.04em;
+        }
+
+      .red-dot {
+        width: 8px;
+        height: 8px;
+        background-color: red;
+        border-radius: 50%;
+        position: absolute;
+        top: 8px;
+        right: 1px;
+        transform: translate(50%, -50%);
+        z-index: 1;
+      }
+  
+  
+          /* Scoped Notification Dropdown Styling */
+      .notification-dropdown-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      /* Bell trigger button */
+      .notification-dropdown-toggle {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        color: #333;
+        font-size: 17px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .notification-dropdown-toggle:hover {
+        background-color: #f2f4f8;
+        color: #1e3a8a;
+      }
+
+      /* Dropdown Menu Styling */
+      .notification-dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 46px;
+        background-color: #fff;
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 12px 34px rgba(0, 32, 63, 0.16);
+        z-index: 1000;
+        width: 380px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Show Dropdown */
+      .notification-dropdown-menu.show {
+        display: block;
+        animation: notificationFadeIn 0.25s ease-in-out;
+      }
+
+      /* Dropdown header row */
+      .notification-dropdown-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 26px;
+        border-bottom: 1px solid #f0f1f5;
+      }
+
+      .notification-dropdown-header span:first-child {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #1c2b3a;
+      }
+
+      .notification-count-pill {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ff6f61;
+        background-color: #fff1ef;
+        padding: 3px 9px;
+        border-radius: 999px;
+      }
+
+      /* Scrollable list of notifications */
+      .notification-dropdown-list {
+        list-style: none;
+        margin: 0;
+        padding: 6px 0 12px;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+
+      .notification-dropdown-list::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .notification-dropdown-list::-webkit-scrollbar-thumb {
+        background-color: #e2e5eb;
+        border-radius: 999px;
+      }
+
+      /* Specific Styling for <li> Tags inside Notification Dropdown */
+      .notification-dropdown-menu li {
+        list-style-type: none;
+        margin: 0;
+      }
+
+      /* Styling for the notification message */
+      .notification-dropdown-item-msg {
+        font-size: 13.5px;
+        line-height: 1.45;
+        padding: 0;
+        color: #1c2b3a;
+        font-weight: 500;
+        text-decoration: none;
+        flex: 1;
+        min-width: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* Icon bubble shown to the left of each notification message */
+      .notification-icon-wrap {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background-color: #eef2ff;
+        color: #1e3a8a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      /* Hover Effect on Dropdown Items */
+      .notification-flex:hover {
+        background-color: #f7f9fc;
+      }
+
+      /* "See More" footer link */
+      .notification-dropdown-item.text-center {
+        display: block;
+        padding: 16px 26px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ff6f61;
+        text-align: center;
+        text-decoration: none;
+        border-top: 1px solid #f0f1f5;
+        transition: background-color 0.2s ease;
+      }
+
+      /* Hover effect on "See More" item */
+      .notification-dropdown-item.text-center:hover {
+        background-color: #fff1ef;
+      }
+
+      /* Mark as read button - fixed size so the icon can never balloon */
+      .notification-mark-read-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #28a745;
+        border: 1px solid #d9f0e1;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      }
+
+      .notification-mark-read-btn:hover {
+        color: #fff;
+        background-color: #28a745;
+        border-color: #28a745;
+      }
+
+      /* Flex container for styling notification items */
+      .notification-flex {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px 26px;
+        border-bottom: 1px solid #f5f6f8;
+        transition: background-color 0.2s ease;
+      }
+
+      .notification-flex:last-child {
+        padding-bottom: 20px;
+        border-bottom: none;
+      }
+
+      /* Empty state ("No new notifications") */
+      .notification-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 32px 18px;
+        color: #8a94a6;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .notification-empty-state i {
+        font-size: 22px;
+        color: #c7cddb;
+      }
+
+      /* Smooth Dropdown Animation */
+      @keyframes notificationFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+.select-style {
+  position: relative;
+  display: inline-block;
+  width: 100px;
+}
+
+.select-style select {
+  appearance: none;
+  padding: 7px 20px;
+  border: 1px solid #ddd;
+  color: white;
+  border-radius: 44px;
+  background: #1e3a8a;
+  cursor: pointer;
+  width: 100%;
+}
+
+.has-submenu {
+    position: relative;
+}
+
+.submenu {
+    display: none;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    z-index: 1001;
+    animation: fadeIn 0.2s ease;
+}
+
+.submenu-caret {
+    margin-left: auto;
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+
+.submenu .dropdown-item-user {
+    padding: 10px 20px;
+    font-size: 0.95em;
+    border-radius: 0;
+}
+
+.submenu .dropdown-item-user i {
+    font-size: 1.1em;
+}
+
+.has-submenu.active + .submenu {
+    display: block;
+}
+
+.has-submenu.active .submenu-caret {
+    transform: rotate(90deg);
+    color: #ff6f61;
+}
+  
+    </style>
+
+    <div class='The-great-navbar'>
+      <header class="navbar-final">
+        <a href="{% url 'home' %}"><div class="logo-final">
+          <img src="{% static "images/navbar/fireprenair_logo_no_bg.png" %}"
+          alt="Prenair Logo">
+        </div></a>
+
+        <div class="partition-vertical"></div>
+
+        <!-- Toggle button for mobile view -->
+        <button class="menu-toggle-final">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        {% include 'home/partials/home-head-top-cat.html' %}
+        
+        <div class="options options-flex">
+          <div>
+            <form action="{% url 'change_language' %}" method="post" class="language-form">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ request.path }}">
+              <div class="select-style">
+                  <select name="language" onchange="this.form.submit()">
+                      {% get_current_language as CURRENT_LANGUAGE_CODE %}
+                      {% get_available_languages as LANGUAGES %}
+                      {% for code, name in LANGUAGES %}
+                          <option value="{{ code }}" 
+                              {% if code == CURRENT_LANGUAGE_CODE %}selected{% endif %}>
+                              {{ name }}
+                          </option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </form>
+        </div>
+          <button class="the-button currency-btn">US$ USD</button>
+          {% if request.user.is_authenticated %}
+          {% if request.user.role != 'admin' %}
+              <div class="user-dropdown">
+                  {% if request.user.profile_pic %}
+                      <img
+                        src="{{ request.user.profile_pic.url }}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% else %}
+                      <img
+                        src="{% static 'digi_prenair/img/avatar.png' %}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% endif %}
+                  <div class="dropdown-menu-user">
+                      <div class="dropdown-header">
+                          {% if request.user.profile_pic %}
+                              <img style="display: inline-block;"
+                                src="{{ request.user.profile_pic.url }}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% else %}
+                              <img
+                                src="{% static 'digi_prenair/img/avatar.png' %}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% endif %}
+                          <p class="user-name">{{ request.user.name }}</p>
+                          <small class="user-email">{{ request.user.email }}</small>
+                      </div>
+                      <hr>
+                      <a href="{% url 'dashboard_home' %}" class="dropdown-item-user">
+                          <i class="fas fa-tachometer-alt"></i> Dashboard
+                      </a>
+                      <a href="{% url 'user_orders' %}" class="dropdown-item-user">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                      </a>
+                      <a href="{% url 'payout_request' %}" class="dropdown-item-user">
+                        <i class="fas fa-money-bill"></i> Get Paid Now
+                      </a>
+                      <a href="{% url 'my_websites' %}" class="dropdown-item-user">
+                        <i class="fas fa-globe"></i> My Websites  
+                      </a>
+                      <a href="{% url 'funnel_list' %}" class="dropdown-item-user">
+                        <i class="fas fa-globe"></i> Funnels  
+                      </a>
+                      <a href="#" class="dropdown-item-user has-submenu">
+                        <i class="fas fa-plus-circle"></i> Create Content
+                        <i class="fas fa-chevron-right submenu-caret"></i>
+                    </a>
+                    <div class="submenu">
+                        <a href="{% url 'create_gig' %}" data-url="{% url 'create_gig' %}" class="dropdown-item-user open-gig-popup">
+                            <i class="fas fa-cube"></i> New Gig
+                        </a>
+                        <a href="{% url 'course_create_eduprenair' %}" data-url="{% url 'course_create_eduprenair' %}" class="dropdown-item-user open-course-popup">
+                            <i class="fas fa-graduation-cap"></i> Create Course
+                        </a>
+                        <a href="{% url 'upload_item_digiprenair' %}" data-url="{% url 'upload_item_digiprenair' %}" class="dropdown-item-user open-product-popup">
+                            <i class="fas fa-project-diagram"></i> New Product
+                        </a>
+                        <a href="{% url 'create_website' %}" class="dropdown-item-user">
+                            <i class="fas fa-globe"></i> Launch Website
+                        </a>
+                    </div>
+                      <a href="{% url 'dashboard_edit_profile' %}" class="dropdown-item-user">
+                          <i class="fas fa-cog"></i> Settings
+                      </a>
+                      {% if not user.is_work_profile_approved %}
+                          <a href="{% url 'become_seller' %}" class="dropdown-item-user">
+                              <i class="fa-regular fa-circle-check"></i> Become a Seller
+                          </a>
+                      {% endif %}
+                      {% if request.user.is_work_freelancer %}
+                          <a href="{% url 'toggle_work_profile' %}" class="dropdown-item-user">
+                              <i class="fa-regular fa-circle-check"></i> Switch to Buyer
+                          </a>
+                      {% else %}
+                          {% if user.is_work_profile_approved %}
+                              <a href="{% url 'toggle_work_profile' %}" class="dropdown-item-user">
+                                  <i class="fa-regular fa-circle-check"></i> Switch to Seller
+                              </a>
+                          {% endif %}
+                      {% endif %}
+                      <a href="{% url 'logout' %}" class="dropdown-item-user logout">
+                          <i class="fas fa-sign-out-alt"></i> Logout
+                      </a>
+                  </div>
+              </div>
+          {% else %}
+              <div class="user-dropdown">
+                  {% if request.user.profile_pic %}
+                      <img
+                        src="{{ request.user.profile_pic.url }}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% else %}
+                      <img
+                        src="{% static 'digi_prenair/img/avatar.png' %}"
+                        alt="User Image"
+                        class="user-avatar"
+                      />
+                  {% endif %}
+                  <div class="dropdown-menu-user">
+                      <div class="dropdown-header">
+                          {% if request.user.profile_pic %}
+                              <img
+                                src="{{ request.user.profile_pic.url }}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% else %}
+                              <img
+                                src="{% static 'digi_prenair/img/avatar.png' %}"
+                                alt="User Image"
+                                class="user-avatar-header"
+                              />
+                          {% endif %}
+                          <p class="user-name">{{ request.user.name }}</p>
+                          <small class="user-email">{{ request.user.email }}</small>
+                      </div>
+                      <hr>
+                      <a href="{% url 'admin_dashboard' %}" class="dropdown-item-user">
+                          <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                      </a>
+                      <a href="{% url 'dashboard_edit_profile' %}" class="dropdown-item-user">
+                          <i class="fas fa-cog"></i> Settings
+                      </a>
+                      <a href="{% url 'logout' %}" class="dropdown-item-user logout">
+                          <i class="fas fa-sign-out-alt"></i> Logout
+                      </a>
+                  </div>
+              </div>
+          {% endif %}
+      {% else %}
+          <div>
+              <a href="{% url 'register' %}"><button class="the-button start-btn">Start for Free</button></a>
+              <a href="{% url 'login' %}"><button class="sign-btn">Sign</button></a>
+          </div>
+      {% endif %}
+      
+        </div>      
+      </header>
+
+      <!-- Sidebar menu for mobile view -->
+      <div class="sidebar">
+        <button class="close-btn-final">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Polished Search Bar -->
+        <form action="{% url 'gigs' %}" class="">
+          <div class="mobile-search">
+            <input type="text" name="keyword" placeholder="Search services, Products, Networking, etc" class="search-input"/>
+            <button class="search-btn-final"><i class="fa-solid fa-search"></i></button>
+          </div>
+        </form>
+
+        <!-- Second Navbar Links (as list items) -->
+        <ul class="sidebar-links-second">
+          <li>
+            <a href="{% url "work_home" %}"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Workprenair</a
+            >
+          </li>
+          <li>
+            <a href="{% url "edu_home" %}"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Eduprenair</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_home" %}"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Digiprenair</a
+            >
+          </li>
+          <li>
+            <a href="{% url "commu_home" %}"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Commuprenair</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span> How
+              it works</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Why?</a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><span><i class="fa-solid fa-square-caret-right"></i></span>
+              Pricing</a
+            >
+          </li>
+        </ul>
+
+        <!-- Start and Sign Buttons -->
+        {% if not user.is_authenticated %}
+        <button class="sidebar-start-btn">Start for Free</button>
+        <button class="sidebar-sign-btn">Sign In</button>
+        {% endif %}
+      </div>
+      
+ 
+    <div class="partition-horizontal"></div>
+
+    <div class="second-main">
+      <nav class="navbar-second" style="height: 50px;">
+        <div class="navbar-left-second">
+          <div class="navbar-feature-second">
+            {% if request.user.role == "admin" %}
+            <a href="{% url "admin_dashboard" %}" class="feature-button-second ">Dashboard</a>
+            {% else %}
+            <a href="{% url "dashboard_home" %}" class="feature-button-second ">Dashboard</a>
+            {% endif %}
+          </div>
+          <ul class="navbar-links-second">
+            <li><a href="{% url 'payout_settings' %}">Payout Settings</a></li>
+            <li><a href="{% url 'billings' %}">Upgrade </a></li>
+            <li class="disappear-navbar-extra-links"><a class="open-gig-popup" href="{% url 'create_gig' %}" data-url="{% url 'create_gig' %}">Create Gig</a></li>
+            <li class="disappear-navbar-extra-links"><a class="open-course-popup" data-url="{% url 'course_create_eduprenair' %}" href="{% url 'course_create_eduprenair' %}">Create Course</a></li>
+            <li class="disappear-navbar-extra-links"><a class="open-product-popup" data-url="{% url 'upload_item_digiprenair' %}" href="{% url 'upload_item_digiprenair' %}">New Product</a></li>
+            <li class="disappear-navbar-extra-links"><a href="{% url 'my_websites' %}">My Websites</a></li>
+            <li ><a href="{% url 'funnel_list' %}">Funnels</a></li>
+            <li class=""><a href="{% url 'funnel_emails_by_tag' %}">My Tags</a></li>
+            <li class="dropdown-container-last">
+              <a href="#" class="dropdown-trigger-last">
+                More <i class="fa-solid fa-caret-down"></i>
+              </a>
+              <ul class="dropdown-menu-last">
+            <li><a href="{% url 'payout_request' %}">Get Paid</a></li>
+            <li><a href="{% url 'user_orders' %}">My Orders</a></li>x
+            <li><a href="{% url 'payout_request' %}">Get Paid</a></li>
+            <li><a class="open-gig-popup" href="{% url 'create_gig' %}" data-url="{% url 'create_gig' %}">Create Gig</a></li>
+            <li><a class="open-course-popup" data-url="{% url 'course_create_eduprenair' %}" href="{% url 'course_create_eduprenair' %}">Create Course</a></li>
+            <li><a href="{% url 'upload_item_digiprenair' %}">New Product</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="navbar-right-second">
+          {% if missing_fields|length > 0 %}
+          <button style="background-color: #ff6f61; color: white; border-radius: 25px; padding: 5px 10px; text-decoration: none;" href="javascript:void(0)" id="uniqueFloatingButton">Complete Profile</button>
+          {% endif %}
+          <div class="dropdown-second">
+            <a class="navbar-products-second">
+              <span class="icon-span"><img src="{% static "images/navbar/icons.png" %}" alt="Category
+                Icon"></span>
+              Our Products &nbsp;&nbsp;<i class="fa-solid fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu-second">
+              <li><a href="{% url "digi_home" %}">Digiprenair</a></li>
+              <li><a href="{% url "work_home" %}">Workprenair</a></li>
+              <li><a href="{% url "edu_home" %}">Eduprenair</a></li>
+              <li><a href="{% url "commu_home" %}">Commuprenair</a></li>
+            </ul>
+          </div>
+
+          {% if user.is_authenticated %}
+            <div class="navbar-icons-second">
+              <div class="notification-dropdown-container">
+                <a class="notification-dropdown-toggle" id="customNotificationDropdown" role="button">
+                  <i class="fas fa-bell"></i>
+                  {% if unread_count > 0 %}
+                  <span class="badge-second badge-red-second">{{ unread_count }}</span>
+                  {% endif %}
+                </a>
+                <div class="notification-dropdown-menu" id="customNotificationMenu">
+                  <div class="notification-dropdown-header">
+                    <span>Notifications</span>
+                    {% if unread_count > 0 %}
+                    <span class="notification-count-pill">{{ unread_count }} new</span>
+                    {% endif %}
+                  </div>
+                  <ul class="notification-dropdown-list">
+                    {% if recent_unread_notifications %}
+                    {% for notification in recent_unread_notifications %}
+                    <li class="notification-flex">
+                      <div class="notification-icon-wrap"><i class="fas fa-bell"></i></div>
+                      <a class="notification-dropdown-item-msg">{{ notification.message }}</a>
+                      <a href="{% url 'mark_notification_as_read' notification.id  %}" class="notification-mark-read-btn" title="Mark as Read">
+                        <i class="fa-solid fa-check"></i>
+                      </a>
+                    </li>
+                    {% endfor %}
+                    {% else %}
+                    <li class="notification-empty-state">
+                      <i class="fa-regular fa-bell-slash"></i>
+                      <span>No new notifications</span>
+                    </li>
+                    {% endif %}
+                  </ul>
+                  <a class="notification-dropdown-item text-center" href="{% url "dashboard_notifications" %}">See More</a>
+                </div>
+              </div>
+              <div class="custom-icon-item">
+                <a href="{% url 'digi_shoping_cart' %}">
+                  <i class="fas fa-shopping-cart"></i>
+                </a>
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      </nav>
+    </div>
+  </div>
+  {% include 'dashboard/partials/popups_scripts.html' %}
+
+    <script>
+      // Toggle the sidebar on mobile view
+      const menuToggle = document.querySelector(".menu-toggle-final");
+      const sidebar = document.querySelector(".sidebar");
+      const closeBtn = document.querySelector(".close-btn-final");
+
+      menuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("show");
+      });
+
+      // Close the sidebar when the close button is clicked
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.remove("show");
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const customDropdownToggle = document.getElementById("customNotificationDropdown");
+        const customDropdownMenu = document.getElementById("customNotificationMenu");
+        customDropdownToggle.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent bubbling up
+          customDropdownMenu.classList.toggle("show");
+        });
+        document.addEventListener("click", () => {
+          if (customDropdownMenu.classList.contains("show")) {
+            customDropdownMenu.classList.remove("show");
+          }
+        });
+        customDropdownMenu.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const hasSubmenus = document.querySelectorAll('.has-submenu');
+
+        hasSubmenus.forEach(hasSubmenu => {
+          hasSubmenu.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            hasSubmenus.forEach(sub => {
+              if (sub !== this) sub.classList.remove('active');
+            });
+            this.classList.toggle('active');
+          });
+        });
+        document.addEventListener('click', function (e) {
+          const isClickInside = Array.from(hasSubmenus).some(hasSubmenu => {
+            const submenu = hasSubmenu.nextElementSibling;
+            return hasSubmenu.contains(e.target) ||
+              (submenu && submenu.contains(e.target));
+          });
+
+          if (!isClickInside) {
+            hasSubmenus.forEach(sub => sub.classList.remove('active'));
+          }
+        });
+        document.querySelectorAll('.submenu a').forEach(link => {
+          link.addEventListener('click', () => {
+            link.closest('.submenu')
+              .previousElementSibling
+              .classList.remove('active');
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

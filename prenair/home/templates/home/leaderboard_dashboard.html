@@ -1,0 +1,2952 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Leaderboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<script src="{% static 'home/js/worldmap.js' %}"></script>
+<script src="{% static 'home/js/mapdata.js' %}"></script>
+<style>
+:root {
+    --primary: #007bff;
+    --primary-gradient: linear-gradient(135deg, #007bff 0%, #1e3a8a 100%);
+    --secondary: #ff6f61;
+    --secondary-gradient: linear-gradient(135deg, #ff6f61 0%, #fd7e14 100%);
+    --text-dark: #1e3a8a;
+    --text-medium: #6c757d; /* Kept as is since it's not in the palette but used for secondary text */
+    --text-light: #1e3a8a;
+    --bg-light: #ffffff;
+    --bg-white: #ffffff;
+    --glass-bg: rgba(244, 164, 91, 0.2);
+    --glass-blur: blur(10px);
+    --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    --border-radius: 1.5rem;
+    --transition: all 0.3s ease-in-out;
+    --text-primary-card: #1e3a8a;
+    --text-secondary-card: #1e3a8a;
+    --hover-primary-card: rgba(244, 164, 91, 0.2);
+    --hover-secondary-card: rgba(244, 164, 91, 0.2);
+    --chart-bg: rgba(244, 164, 91, 0.2);
+    --chart-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23007bff' fill-opacity='0.05' d='M0,192L80,202.7C160,213,320,235,480,213.3C640,192,800,128,960,138.7C1120,149,1280,235,1360,277.3L1440,320L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat top center / cover, #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+
+.leaderboard-container {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.leaderboard-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.leaderboard-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0px 42px 42px 42px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: var(--card-shadow);
+    color: #ffffff;
+}
+
+.leaderboard-nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+/* .leaderboard-nav-item:hover,
+.leaderboard-nav-item.active {
+    background: #007bff;
+    color: #ffffff;
+    box-shadow: var(--card-hover-shadow);
+} */
+
+.leaderboard-nav-item:hover::before,
+.leaderboard-nav-item.active::before {
+    opacity: 0.2;
+}
+
+.leaderboard-nav-item i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+}
+.leaderboard-header {
+    display: flex;
+    text-align: center;
+    padding: 1rem 15px;
+    margin: 0 auto;
+    width: fit-content;
+    flex-direction: row; /* Changed from column to row */
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Allows wrapping if content overflows */
+    gap: 1rem; /* Adds spacing between h1 and p */
+}
+
+.leaderboard-header h1 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 0; /* Remove margin-bottom to prevent extra spacing */
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: #1e3a8a;
+}
+
+.leaderboard-header .global-h1 {
+    color: #000000;
+    background: #fff;
+    border-radius: 0px 33px 33px 33px;
+    padding: 7px 33px 8px 20px;
+}
+
+.leaderboard-header p {
+    color: #000000;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.leaderboard-leaderboard-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.lead-card {
+    background: #fd7e14;
+    backdrop-filter: var(--glass-blur);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(244, 164, 91, 0.2);
+}
+
+.lead-card > *:not(.card-header-leaderboard):not(.card-glow):not(.pulse-effect) {
+    padding: 3px;
+}
+
+.lead-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.lead-card.secondary {
+    background: #ff6f61;
+}
+
+.lead-card.secondary::before {
+    background: var(--secondary-gradient);
+}
+
+.lead-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.lead-card:hover::before {
+    opacity: 1;
+}
+
+.lead-card-glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 123, 255, 0.3) 0%, rgba(0, 123, 255, 0) 70%);
+    border-radius: 50%;
+    top: -100px;
+    right: -100px;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.lead-card.secondary .lead-card-glow {
+    background: radial-gradient(circle, rgba(255, 111, 97, 0.3) 0%, rgba(255, 111, 97, 0) 70%);
+}
+
+.lead-card:hover .lead-card-glow {
+    opacity: 1;
+}
+
+.card-header-leaderboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    background-color: #1e3a8a;
+    padding: 8px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    color: #ffffff;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.lead-card.secondary .card-header-leaderboard {
+    background-color: #fd7e14;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lead-card.secondary .card-title {
+    color: #1e3a8a;
+}
+
+.card-title i {
+    color: #ffffff;
+    font-size: 1.5rem;
+}
+
+.lead-card.secondary .card-title i {
+    color: #ff6f61;
+}
+
+.lead-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: rgba(244, 164, 91, 0.2);
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.lead-card.secondary .lead-badge {
+    color: #ff6f61;
+}
+
+.lead-badge:hover {
+    background: rgba(244, 164, 91, 0.2);
+    transform: scale(1.05);
+}
+
+.lead-card.secondary .lead-badge:hover {
+    background: rgba(244, 164, 91, 0.2);
+}
+
+.lead-badge i {
+    font-size: 0.875rem;
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 8px;
+    overflow-y: auto;
+    margin: 10px 0px;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 2px solid rgba(244, 164, 91, 0.2);
+    position: relative;
+    margin: 5px;
+}
+
+.lead-item-1{
+    background: rgba(244, 164, 91, 0.2);
+}
+.lead-item-2{
+    background: rgba(148, 255, 72, 0.2);
+}
+.lead-item-3{
+    background: rgba(250, 197, 5, 0.2);
+}
+
+.leaderboard-item:hover {
+    background: rgba(50, 223, 2, 0.2);
+    transform: translateX(8px);
+}
+
+.leaderboard-item:hover .leaderboard-role {
+    color: #1e3a8a;
+}
+
+.lead-card.secondary .leaderboard-item:hover {
+    background: rgba(244, 164, 91, 0.2);
+}
+
+.leaderboard-rank {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.lead-card.secondary .leaderboard-rank {
+    background: var(--secondary-gradient);
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #fd7e14 0%, #ff6f61 100%);
+    box-shadow: 0 4px 8px rgba(253, 126, 20, 0.3);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #1e3a8a 0%, #007bff 100%);
+    box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #28a745 0%, #007bff 100%);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.leaderboard-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.leaderboard-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transition: var(--transition);
+}
+
+.leaderboard-avatar:hover {
+    transform: scale(1.1);
+}
+
+.lead-card.secondary .leaderboard-avatar {
+    background: var(--secondary-gradient);
+}
+
+.leaderboard-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.lead-card.secondary .leaderboard-name {
+    color: #1e3a8a;
+}
+
+.leaderboard-role {
+    font-size: 0.875rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.leaderboard-score {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lead-card.secondary .leaderboard-score {
+    color: #ff6f61;
+}
+
+.leaderboard-score span {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #6c757d;
+}
+
+.lead-badge-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem;
+}
+
+.lead-badge-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: .5rem;
+    border-radius: var(--border-radius);
+    background: #ffffff;
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid rgba(244, 164, 91, 0.2);
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0px;
+}
+
+.lead-badge-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #007bff;
+    position: relative;
+    z-index: 2;
+    animation: glow 2s ease-in-out infinite;
+}
+
+.lead-card.secondary .lead-badge-icon {
+    color: #ff6f61;
+}
+
+.lead-badge-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1e3a8a;
+}
+
+.lead-card.secondary .lead-badge-title {
+    color: #1e3a8a;
+}
+
+.lead-badge-subtitle {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.progress-leaderboard-container {
+    width: 100%;
+    height: 10px;
+    background: rgba(244, 164, 91, 0.2);
+    border-radius: 5px;
+    margin: 0.75rem 0 0.75rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    animation: progress 2s ease-in-out;
+}
+
+.lead-card.secondary .progress-bar {
+    background: var(--secondary-gradient);
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(244, 164, 91, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+    animation: shimmer 1.5s infinite;
+}
+
+.progress-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #ffffff;
+}
+
+.progress-details strong {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.lead-card.secondary .progress-details strong {
+    color: #ff6f61;
+}
+
+.card-bottom {
+    margin-top: auto;
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.pulse-effect {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #28a745;
+    box-shadow: 0 0 0 rgba(40, 167, 69, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 160px;
+    background: rgba(244, 164, 91, 0.2);
+    backdrop-filter: var(--glass-blur);
+    color: #1e3a8a;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: var(--transition);
+    box-shadow: var(--card-shadow);
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.badge-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.badge-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(244, 164, 91, 0.2);
+    border-radius: 1rem;
+    border: 1px solid rgba(244, 164, 91, 0.2);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    margin: 5px;
+    padding: 5px;
+}
+
+.badge-detail-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(244, 164, 91, 0.2);
+}
+
+.lead-card.secondary .badge-detail-item {
+    background: rgba(244, 164, 91, 0.2);
+}
+
+.badge-detail-icon {
+    width: 3rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.lead-card.secondary .badge-detail-icon {
+    background: var(--secondary-gradient);
+}
+
+.badge-detail-text {
+    flex-grow: 1;
+}
+
+.badge-detail-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.lead-card.secondary .badge-detail-title {
+    color: #1e3a8a;
+}
+
+.badge-detail-desc {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.badge-detail-check {
+    font-size: 1.25rem;
+    color: #28a745;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.badge-detail-item:hover .badge-detail-check {
+    opacity: 1;
+}
+
+.chart-container {
+    background: rgba(244, 164, 91, 0.2);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: var(--chart-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+#map a {
+    display: none !important;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #1e3a8a;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes glow {
+    0% { text-shadow: 0 0 5px rgba(0, 123, 255, 0.5); }
+    50% { text-shadow: 0 0 15px rgba(0, 123, 255, 0.8); }
+    100% { text-shadow: 0 0 5px rgba(0, 123, 255, 0.5); }
+}
+
+@keyframes progress {
+    0% { width: 0; }
+    100% { width: inherit; }
+}
+
+.section {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: var(--transition);
+}
+
+.section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.world-map-container {
+    background: #1e3a8a;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(244, 164, 91, 0.2);
+}
+
+.world-map-container:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.world-map-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.hub-chart {
+    background-color: #ffffff;
+    backdrop-filter: var(--glass-blur);
+    border-radius: 10px;
+    padding: 3px;
+    box-shadow: var(--chart-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.hub-chart:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.nav-item-1 {
+    background-color: #007bff;
+}
+
+.nav-item-2 {
+    background-color: #fd7e14;
+}
+
+.nav-item-3 {
+    background-color: #dc3545;
+}
+
+.nav-item-4 {
+    background-color: #28a745;
+}
+
+.nav-item-5 {
+    background-color: #ff6f61;
+}
+
+/* ----------------------- First Row ------------------- */
+.card-container {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+}
+
+.card-top-seller {
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+}
+
+.card-top-seller.blue {
+    border-bottom: 5px solid #007bff;
+}
+
+.card-top-seller.red {
+    border-bottom: 5px solid #dc3545;
+}
+
+.card-top-seller.orange {
+    border-bottom: 5px solid #fd7e14;
+}
+
+.card-top-seller.green {
+    border-bottom: 5px solid #28a745;
+}
+
+.lead-card-head-1{
+    background: #007bff;
+}
+.lead-card-head-2{
+    background: #dc3545;
+}
+.lead-card-head-3{
+    background: #fd7e14;
+}
+.lead-card-head-4{
+   background: #28a745;
+}
+.lead-card-1{
+    background: #0078f87d;
+}
+.lead-card-2{
+   background: #dc354563;
+}
+.lead-card-3{
+    background: #fd7e1469;
+}
+.lead-card-4{
+   background: rgba(127, 215, 64, 0.56);
+}
+
+.progress-circle {
+    width: 60px;
+    height: 60px;
+    margin: auto;
+    background: conic-gradient(#007bff 0% 58%, #ddd 58% 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-circle.red {
+    background: conic-gradient(#dc3545 0% 62%, #ddd 62% 100%);
+}
+
+.progress-circle.orange {
+    background: conic-gradient(#fd7e14 0% 72%, #ddd 72% 100%);
+}
+
+.progress-circle.green {
+    background: conic-gradient(#28a745 0% 81%, #ddd 81% 100%);
+}
+
+.progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+.progress-value {
+    font-size: 14px;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+    color: #6c757d;
+}
+
+.label {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.value {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.value .icon {
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+.value .up {
+    color: #28a745;
+}
+
+.value .down {
+    color: #dc3545;
+}
+
+.progress-top-seller-circle {
+    width: 120px;
+    height: 120px;
+    background: conic-gradient(#28a745 0% 75%, #ddd 75% 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-top-seller-circle::before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+.progress-top-seller-value {
+    font-size: 24px;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+    color: #1e3a8a;
+}
+
+.seller-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    width: 100%;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.stats {
+    font-size: 14px;
+    color: #6c757d;
+    flex: 1;
+    text-align: center;
+    min-width: 80px;
+    margin: 0.5rem 0;
+}
+
+.spending-target {
+    font-size: 14px;
+    color: #fd7e14;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.seller-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+.seller-avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-right: 1rem;
+}
+
+.seller-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+}
+
+.seller-country {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.seller-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.seller-info {
+    display: flex;
+    align-items: center;
+}
+
+.seller-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.hub-charts-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    padding: 1rem 0;
+    height: 240px;
+}
+
+.hub-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+}
+
+.chart-legend {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.top-seller-container {
+    max-height: 280px;
+}
+
+.leaderboard-product-header,
+.leaderboard-product {
+    display: grid;
+    grid-template-columns: 60px 2fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.leaderboard-product-header {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.5rem 1rem;
+    background: rgba(244, 164, 91, 0.1);
+    border-bottom: 1px solid rgba(244, 164, 91, 0.2);
+}
+
+.leaderboard-product-type {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leaderboard-product-stat {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.leaderboard-product-stat.up {
+    color: #28a745;
+}
+
+.leaderboard-item.lead-item-header {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0.5rem 1rem;
+}
+
+.leaderboard-item.lead-item-4 {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.leaderboard-item.lead-item-5 {
+    background: rgb(248 174 15 / 41%);
+}
+
+.leaderboard-rank.rank-4 {
+    background: linear-gradient(135deg, #007bff 0%, #1e3a8a 100%);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.leaderboard-rank.rank-5 {
+    background: linear-gradient(135deg, #28a745 0%, #1e3a8a 100%);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 1024px) {
+    .leaderboard-name,
+    .leaderboard-role {
+        max-width: 120px;
+    }
+
+    .hub-charts-container {
+        grid-template-columns: 2fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .hub-charts-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+     .leaderboard-product-header,
+    .leaderboard-product {
+        grid-template-columns: 50px 1.5fr 1fr 1fr 1fr 1fr;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .leaderboard-product-type {
+        font-size: 0.9rem;
+    }
+
+    .leaderboard-product-stat {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .leaderboard-nav {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+
+    .leaderboard-nav-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .leaderboard-header h1 {
+        font-size: 1rem;
+    }
+
+    .leaderboard-header p {
+        font-size: 12px;
+    }
+
+    .leaderboard-name,
+    .leaderboard-role {
+        max-width: 100px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-header-leaderboard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .leaderboard-product-header,
+    .leaderboard-product {
+        grid-template-columns: 40px 1fr 0.8fr 0.8fr 0.8fr 0.8fr;
+        gap: 0.3rem;
+        font-size: 0.8rem;
+    }
+
+    .leaderboard-product-type {
+        font-size: 0.85rem;
+    }
+
+    .leaderboard-product-stat {
+        font-size: 0.75rem;
+    }
+
+    .leaderboard-rank {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .seller-header {
+        flex-direction: column;
+        align-items: center;
+    }
+    .top-seller-container {
+        max-height: fit-content;
+    }
+    .seller-info {
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+    .seller-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    .seller-details {
+        align-items: center;
+    }
+    .stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .stats {
+        width: 100%;
+        text-align: center;
+    }
+    .hub-charts-container {
+        grid-template-columns: repeat(2, 1fr);
+        height: fit-content;
+    }
+    .hub-chart {
+        margin-bottom: 1rem;
+    }
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+    .leaderboard-product-header {
+        display: none;
+    }
+    .leaderboard-product {
+        grid-template-columns: 40px 1fr;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        align-items: center;
+    }
+    .leaderboard-rank {
+        grid-column: 1;
+        grid-row: 1;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .leaderboard-product-type {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 0.9rem;
+    }
+    .leaderboard-product-stat {
+        display: none; /* Hide all stats (Sales, Revenue, Avg Price, Δ vs Prior Period) */
+    }
+}
+@media (max-width: 500px) {
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock extra_css %}
+{% block content %}
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %}); padding-top: 0px" >
+<div class="container">
+    <div class="leaderboard-header">
+        <h1 id="header-title" class="global-h1">🔥 Fireprenair Leaderboard: Who’s on Fire This Week?</h1>
+        <p>Track your progress, compete with peers, and unlock achievements to reach the top of the leaderboard.</p>
+    </div>
+    <nav class="leaderboard-nav">
+        <!-- <div style="display: flex; gap: 5px; margin-bottom: 1.5rem;"> -->
+        <div class="leaderboard-nav-item nav-item-1 active" data-section="global">
+            <i class="fas fa-globe"></i> Global
+        </div>
+        <div class="leaderboard-nav-item nav-item-2" data-section="country">
+            <i class="fas fa-flag"></i> Country
+        </div>
+        <div class="leaderboard-nav-item nav-item-3" data-section="department">
+            <i class="fas fa-building"></i> Department
+        </div>
+        <div class="leaderboard-nav-item nav-item-4" data-section="lead-badges">
+            <i class="fas fa-trophy"></i> Badges
+        </div>
+        <div class="leaderboard-nav-item nav-item-5" data-section="challenges">
+            <i class="fas fa-trophy"></i> Challenges
+        </div>
+        <!-- </div> -->
+    </nav>
+    <main class="main-content">
+        
+        <div class="leaderboard-leaderboard-container">
+            <p id="header-subtitle" style="display: flex; justify-content: center;"></p>
+            <!-- Global Leaderboard Section -->
+             <div class="section active" id="global">
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="grid-container">
+                    <!-- Sales Growth -->
+                    <div class="card-container">
+                        <div class="card-top-seller blue">
+                            <div class="label">Sales Growth</div>
+                            <div class="value">
+                                <span class="icon up">↑</span> 75%
+                            </div>
+                            <div class="progress-circle">
+                                <div class="progress-value">75</div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Refund / Dispute Rate -->
+                    <div class="card-container">
+                        <div class="card-top-seller red">
+                            <div class="label">Refund Rate</div>
+                            <div class="value">
+                                <span class="icon down">↓</span> 4.2%
+                            </div>
+                            <div class="progress-circle red">
+                                <div class="progress-value">62</div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Seller Revenue -->
+                    <div class="card-container">
+                        <div class="card-top-seller orange">
+                            <div class="label">Seller Revenue</div>
+                            <div class="value">${{ no_1_seller.total_earnings }}</div>
+                            <div class="progress-circle orange">
+                                <div class="progress-value">72</div>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Items Sold -->
+                    <div class="card-container">
+                        <div class="card-top-seller green">
+                            <div class="label">Items Sold</div>
+                            <div class="value">
+                                <span class="icon up">+</span> {{ no_1_seller.digi_total_sales }} orders
+                            </div>
+                            <div class="progress-circle green">
+                                <div class="progress-value">81</div>
+                            </div>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+            
+            <div class="row" style="margin-bottom: 15px;">
+                <!-- Traffic Stats Card -->
+                <div class="col-md-6 mb-3">
+                    <div class="card-container">
+                        <div class="card-top-seller">
+                            <div class="label">Traffic Sources</div>
+                            <canvas style="max-height: 220px;" id="trafficChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Top Seller Card -->
+                <div class="col-md-6 mb-3">
+                    <div class="card-container top-seller-container">
+                        <div class="seller-profile">
+                            <div class="seller-header">
+                                <div class="seller-info">
+                                    <div class="seller-avatar">JD</div>
+                                    <div class="seller-details">
+                                        <div class="seller-name">{{ no_1_seller.name }}</div>
+                                        <div class="seller-country"><i class="fas fa-map-marker-alt"></i> {{ no_1_seller.country }}</div>
+                                    </div>
+                                </div>
+                                <div class="progress-top-seller-circle">
+                                    <div class="progress-top-seller-value">75</div>
+                                </div>
+                            </div>
+                            <div class="stats-container">
+                                <div class="stats">Sales Growth: 75%</div>
+                                <div class="stats">Earnings: ${{ no_1_seller.total_earnings }}</div>
+                                <div class="stats">Rating: {{ no_1_seller.digi_average_rating }}</div>
+                                <div class="stats">Sales: {{ no_1_seller.digi_total_sales }}</div>
+                            </div>
+                            <div class="spending-target">Spending Target: 32%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="row g-4 mb-4" style="margin-bottom: 15px;">
+                    <!-- World Map Card -->
+                    <div class="col-12 col-md-4 col-lg-6 mb-3">
+                        <div class="lead-card">
+                            <div class="lead-card-head-1" style="margin-bottom: 0; color: white;">
+                                <div class="card-title">
+                                    <i class="fas fa-globe"></i> Global Leaderboard
+                                </div>
+                            </div>
+                            <!-- World map container for SimpleMaps -->
+                            <div id="map" style="width: 100%; height: 250px; padding: 0;"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Hub Card with Four Charts -->
+                    <div class="col-12 col-lg-6 mb-3">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-chart-pie"></i> Market Hub
+                                </div>
+                            </div>
+                            <div class="hub-charts-container" style="padding: 10px;">
+                                <div class="hub-chart">
+                                    <h3 class="chart-title">Workprenair</h3>
+                                    <canvas id="workprenair_chart" width="100" height="240"></canvas>
+                                    <div class="chart-legend" id="industriesChartLegend"></div>
+                                </div>
+                                <!-- User Country Breakdown Doughnut Chart -->
+                                <div class="hub-chart">
+                                    <h3 class="chart-title">Eduprenair</h3>
+                                    <canvas id="eduprenair_chart" width="100" height="240"></canvas>
+                                    <div class="chart-legend" id="countriesChartLegend"></div>
+                                </div>
+                                <!-- Top Product Types Pie Chart -->
+                                <div class="hub-chart">
+                                    <h3 class="chart-title">Commuprenair</h3>
+                                    <canvas id="commuprenair_chart" width="100" height="240"></canvas>
+                                    <div class="chart-legend" id="productsChartLegend"></div>
+                                </div>
+                                <!-- User Engagement Doughnut Chart -->
+                                <div class="hub-chart">
+                                    <h3 class="chart-title">Digiprenair</h3>
+                                    <canvas id="digiprenair_chart" width="100" height="240"></canvas>
+                                    <div class="chart-legend" id="engagementChartLegend"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4" style="margin-bottom: 15px;">
+                    <!-- Top Global Sellers -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="pulse-effect"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-crown"></i> Top Global Sellers
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for seller in top_sellers %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ seller.name }}</div>
+                                            <div class="leaderboard-role">${{ seller.total_earnings }} Revenue</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">${{ seller.total_earnings }}</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Top Global Products -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-2">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-2">
+                                <div class="card-title">
+                                    <i class="fas fa-star"></i> Top Global Products
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for product in top_products %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{% if product.title %}{{ product.title }}{% else %}Coming Soon{% endif %}</div>
+                                            <div class="leaderboard-role">{{ product.total_sales }} Sales</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{% if product.total_sales %}{{ product.total_sales }} Sales{% endif %}</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Global Rising Stars -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-rocket"></i> Global Rising Stars
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for star in rising_stars %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ star.name }}</div>
+                                            <div class="leaderboard-role">{{ star.growth }}% Growth</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{{ star.growth }}%</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Most Loved Creators -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-heart"></i> Most Loved Creators
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for creator in loved_creators %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ creator.name }}</div>
+                                            <div class="leaderboard-role">{{ creator.review_count}} Reviews</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{{ creator.review_count }} Reviews</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Country Leaderboard Section -->
+            <div class="section" id="country">
+                <div class="row g-4 mb-4">
+                    <!-- Country Sales Distribution Pie Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Sales by Country</h3>
+                            <canvas id="countrySalesPieChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="countrySalesChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Top Performing Regions Bar Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Top Regions</h3>
+                            <canvas id="regionsBarChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="regionsChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Product Popularity by Country Pie Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Product Popularity</h3>
+                            <canvas id="countryProductsPieChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="countryProductsChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Seller Activity Doughnut Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Seller Activity</h3>
+                            <canvas id="countryActivityDoughnutChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="countryActivityChartLegend"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <!-- Top Sellers By Country -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="pulse-effect"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-flag"></i> Top Sellers By Country
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for country in country_sellers %}
+                                <div class="leaderboard-item country-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ country.top_seller|default:"Coming Soon" }}{% if not country.top_seller %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role"><i class="fas fa-map-marker-alt"></i> {{ country.country|default:"Global" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Top Products By Country -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-2">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-2">
+                                <div class="card-title">
+                                    <i class="fas fa-star"></i> Top Products By Country
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for product in country_products %}
+                                <div class="leaderboard-item country-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ product.top_product|default:"New Product" }}{% if not product.top_product %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role"><i class="fas fa-map-marker-alt"></i> {{ product.seller__country|default:"Global" }}{% if not product.seller__country %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Most Active Sellers By Country -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-bolt"></i> Most Active Sellers By Country
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for seller in active_sellers %}
+                                <div class="leaderboard-item country-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ seller.top_active|default:"New Seller" }}{% if not seller.top_active %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role"><i class="fas fa-map-marker-alt"></i> {{ seller.country|default:"Global" }}{% if not seller.country %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Rising Creators By Country -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-rocket"></i> Rising Creators By Country
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for creator in rising_creators %}
+                                <div class="leaderboard-item country-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ creator.top_creator|default:"New Creator" }}{% if not creator.top_creator %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role"><i class="fas fa-map-marker-alt"></i> {{ creator.country|default:"Global" }}{% if not creator.country %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Leaderboard Section -->
+            <div class="section" id="department">
+                <div class="row g-4 mb-4">
+                    <!-- Department Revenue Share Pie Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Revenue by Department</h3>
+                            <canvas id="deptRevenuePieChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="deptRevenueChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Top Departments Bar Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Top Departments</h3>
+                            <canvas id="deptBarChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="deptChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Product Types by Department Pie Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Product Types</h3>
+                            <canvas id="deptProductsPieChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="deptProductsChartLegend"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Department Engagement Doughnut Chart -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="chart-container p-3 border rounded h-100" style="background: white;">
+                            <div class="chart-glow"></div>
+                            <h3 class="chart-title">Department Engagement</h3>
+                            <canvas id="deptEngagementDoughnutChart" width="200" height="200"></canvas>
+                            <div class="chart-legend" id="deptEngagementChartLegend"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <!-- Digiprenair Top Sellers -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="pulse-effect"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-digital-tachograph"></i> Digiprenair Top Sellers
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for seller in digi_sellers %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ seller.name|default:"New Seller" }}{% if not seller.name %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role">{{ seller.role|default:"Digital Products" }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">${{ seller.digi_total_earnings|default:0|floatformat:"0" }}K</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Eduprenair Top Rated Products -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-2">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-2">
+                                <div class="card-title">
+                                    <i class="fas fa-graduation-cap"></i> Eduprenair Top Rated Products
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for product in edu_products %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ product.title|default:"New Course" }}{% if not product.title %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role">By {{ product.instructor__name|default:"Our Team" }} | {{ product.avg_rating|default:5|floatformat:1 }} Avg Rating</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{{ product.avg_rating|default:5|floatformat:1 }}/5</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Workprenair Fastest Growing Sellers -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-briefcase"></i> Workprenair Fastest Growing
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for seller in work_growth %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ seller.name|default:"New Seller" }}{% if not seller.name %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role">{{ seller.role|default:"Freelance" }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{{ seller.growth|default:0|floatformat:"0" }}% Growth</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Commuprenair Most New Products -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-video"></i> Commuprenair New Products
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                {% for product in commu_new %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                        <div>
+                                            <div class="leaderboard-name">{{ product.title|default:"New Product" }}{% if not product.title %}<span class="dummy-badge">Sample</span>{% endif %}</div>
+                                            <div class="leaderboard-role">{{ product.instructor__name|default:"Our Experts" }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="leaderboard-score">{{ product.product_count|default:0 }} Products</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges & Levels Section -->
+            <div class="section" id="lead-badges">
+                <div class="row g-4">
+                    <!-- Level 1 Badge -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-certificate"></i> Level 1 Badge
+                                </div>
+                            </div>
+                            <div class="lead-badge-card" style="display: flex; flex-direction: column; align-items: center;">
+                                <div class="lead-badge-icon"><img src="https://fireprenair.s3.amazonaws.com/images/misc/user_bage_1.png" alt="Level 1 Badge" style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); animation: glow 2s ease-in-out infinite;"></div>
+                                <div class="lead-badge-title" style="font-size: 1.5rem; margin-top: 1.5rem; background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Level 1</div>
+                                <div class="badge-detail-list">
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-user-plus"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">Join the Platform</div>
+                                            <div class="badge-detail-desc">Awarded upon account creation</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Level 2 Badge -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-2">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-2">
+                                <div class="card-title">
+                                    <i class="fas fa-certificate"></i> Level 2 Badge
+                                </div>
+                            </div>
+                            <div class="lead-badge-card" style="display: flex; flex-direction: column; align-items: center;">
+                                <div class="lead-badge-icon"><img src="https://fireprenair.s3.amazonaws.com/images/misc/user_bage_2.png" alt="Level 2 Badge" style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); animation: glow 2s ease-in-out infinite;"></div>
+                                <div class="lead-badge-title" style="font-size: 1.5rem; margin-top: 1.5rem; background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Level 2</div>
+                                <div class="badge-detail-list">
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-tasks"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">2+ Projects</div>
+                                            <div class="badge-detail-desc">Complete at least 2 projects</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon" style="width: 2.6rem;"><i class="fas fa-dollar-sign"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">$500+ Earnings</div>
+                                            <div class="badge-detail-desc">Earn a minimum of $500</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle actes de la vie quotidienne"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-star"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">3.5+ Rating</div>
+                                            <div class="badge-detail-desc">Maintain a rating of 3.5 or higher</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Level 3 Badge -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-certificate"></i> Level 3 Badge
+                                </div>
+                            </div>
+                            <div class="lead-badge-card" style="display: flex; flex-direction: column; align-items: center;">
+                                <div class="lead-badge-icon"><img src="https://fireprenair.s3.amazonaws.com/images/misc/user_bage_3.png" alt="Level 3 Badge" style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); animation: glow 2s ease-in-out infinite;"></div>
+                                <div class="lead-badge-title" style="font-size: 1.5rem; margin-top: 1.5rem; background: var(--secondary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Level 3</div>
+                                <div class="badge-detail-list">
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-tasks"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">15+ Projects</div>
+                                            <div class="badge-detail-desc">Complete at least 15 projects</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon" style="width: 2.6rem;"><i class="fas fa-dollar-sign"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">$2000+ Earnings</div>
+                                            <div class="badge-detail-desc">Earn a minimum of $2000</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-star"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">3.5+ Rating</div>
+                                            <div class="badge-detail-desc">Maintain a rating of 3.5 or higher</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+
+                    <!-- Level 4 Badge -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-certificate"></i> Level 4 Badge
+                                </div>
+                            </div>
+                            <div class="lead-badge-card" style="display: flex; flex-direction: column; align-items: center;">
+                                <div class="lead-badge-icon"><img src="https://fireprenair.s3.amazonaws.com/images/misc/user_bage_4.png" alt="Level 4 Badge" style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); animation: glow 2s ease-in-out infinite;"></div>
+                                <div class="lead-badge-title" style="font-size: 1.5rem; margin-top: 1.5rem; background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Level 4</div>
+                                <div class="badge-detail-list">
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-tasks"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">30+ Projects</div>
+                                            <div class="badge-detail-desc">Complete at least 30 projects</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon" style="width: 2.6rem;"><i class="fas fa-dollar-sign"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">$5000+ Earnings</div>
+                                            <div class="badge-detail-desc">Earn a minimum of $5000</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                    <div class="badge-detail-item">
+                                        <div class="badge-detail-icon"><i class="fas fa-star"></i></div>
+                                        <div class="badge-detail-text">
+                                            <div class="badge-detail-title">4.0+ Rating</div>
+                                            <div class="badge-detail-desc">Maintain a rating of 4.0 or higher</div>
+                                        </div>
+                                        <div class="badge-detail-check"><i class="fas fa-check-circle"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="challenges">
+                <div class="row g-4">
+                    <!-- Upcoming Events -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-calendar-alt"></i> Upcoming Events
+                                </div>
+                                <div class="lead-badge tooltip">
+                                    <i class="fas fa-bell"></i> New
+                                    <span class="tooltip-text">Don't miss these events!</span>
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item  lead-item-1">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-avatar"
+                                            style="background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);">
+                                            <i class="fas fa-rocket"></i>
+                                        </div>
+                                        <div>
+                                            <div class="leaderboard-name">Boost Your Referrals</div>
+                                            <div class="leaderboard-role">June 15, 2025</div>
+                                        </div>
+                                    </div>
+                                    <div class="leaderboard-score">25 <span>pts</span></div>
+                                </div>
+                                <div class="leaderboard-item lead-item-2">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-avatar"
+                                            style="background: linear-gradient(135deg, #9C27B0 0%, #E040FB 100%);">
+                                            <i class="fas fa-laptop"></i>
+                                        </div>
+                                        <div>
+                                            <div class="leaderboard-name">FirePrenair Workshop</div>
+                                            <div class="leaderboard-role">June 28, 2025</div>
+                                        </div>
+                                    </div>
+                                    <div class="leaderboard-score">40 <span>pts</span></div>
+                                </div>
+                                <div class="leaderboard-item lead-item-3">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-avatar"
+                                            style="background: linear-gradient(135deg, #e46803 0%, #ef9102 100%);">
+                                            <i class="fas fa-laptop"></i>
+                                        </div>
+                                        <div>
+                                            <div class="leaderboard-name">Networking</div>
+                                            <div class="leaderboard-role">June 22, 2025</div>
+                                        </div>
+                                    </div>
+                                    <div class="leaderboard-score">15 <span>pts</span></div>
+                                </div>
+                            </div>
+                            <div class="card-bottom">
+                                <!-- <button class="cta-button">
+                                                <i class="fas fa-calendar-plus"></i> Register Now
+                                            </button> -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Flash Challenges -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-bolt"></i> Flash Challenges
+                                </div>
+                                <div class="lead-badge tooltip">
+                                    <i class="fas fa-clock"></i> New
+                                    <span class="tooltip-text">Limited-time challenges!</span>
+                                </div>
+                            </div>
+                            <div class="progress-leaderboard-container">
+                                <div class="progress-bar" style="width: 70%;"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>Challenge Progress</span>
+                                <span><strong>7</strong>/10 Tasks</span>
+                            </div>
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item lead-item-1">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank">1</div>
+                                        <div>
+                                            <div class="leaderboard-name">Weekly Quiz</div>
+                                            <div class="leaderboard-role">Expires in 2 days</div>
+                                        </div>
+                                    </div>
+                                    <div class="leaderboard-score">25 <span>pts</span></div>
+                                </div>
+                                <div class="leaderboard-item  lead-item-2">
+                                    <div class="leaderboard-user">
+                                        <div class="leaderboard-rank">2</div>
+                                        <div>
+                                            <div class="leaderboard-name">Social Share</div>
+                                            <div class="leaderboard-role">Expires in 5 hours</div>
+                                        </div>
+                                    </div>
+                                    <div class="leaderboard-score">15 <span>pts</span></div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Department Challenges -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-tasks"></i> Department Challenges
+                                </div>
+                                <div class="lead-badge tooltip">
+                                    <i class="fas fa-fire"></i> Active
+                                    <span class="tooltip-text">Ongoing department tasks!</span>
+                                </div>
+                            </div>
+                            <div class="lead-badge-group">
+                                <div class="lead-badge-card">
+                                    <div class="lead-badge-icon"><i class="fas fa-trophy"></i></div>
+                                    <div class="lead-badge-title">Referral Master</div>
+                                    <div class="lead-badge-subtitle">50 Points</div>
+                                </div>
+                                <div class="lead-badge-card">
+                                    <div class="lead-badge-icon"><i class="fas fa-star"></i></div>
+                                    <div class="lead-badge-title">Quiz Champion</div>
+                                    <div class="lead-badge-subtitle">30 Points</div>
+                                </div>
+                                <div class="lead-badge-card">
+                                    <div class="lead-badge-icon"><i class="fas fa-certificate"></i></div>
+                                    <div class="lead-badge-title">Survey Pro</div>
+                                    <div class="lead-badge-subtitle">25 Points</div>
+                                </div>
+                                <div class="lead-badge-card">
+                                    <div class="lead-badge-icon"><i class="fas fa-award"></i></div>
+                                    <div class="lead-badge-title">Social Expert</div>
+                                    <div class="lead-badge-subtitle">40 Points</div>
+                                </div>
+                                <!-- <div class="lead-badge-card">
+                                                    <div class="lead-badge-icon"><i class="fas fa-briefcase"></i></div>
+                                                    <div class="lead-badge-title">Workprenair Elite</div>
+                                                    <div class="lead-badge-subtitle">60 Points</div>
+                                                </div>
+                                                <div class="lead-badge-card">
+                                                    <div class="lead-badge-icon"><i class="fas fa-lightbulb"></i></div>
+                                                    <div class="lead-badge-title">Eduprenair Genius</div>
+                                                    <div class="lead-badge-subtitle">70 Points</div>
+                                                </div> -->
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                
+                
+                </div>
+            </div>
+            <h1 style="display: flex; justify-content: center; font-size: 22px; margin: 2.5rem 0px; color: #1e3a8a;">⏱️ Monthly Leading Products Across Our Four Hubs</h1>
+                <div class="row g-4" style="margin-bottom: 15px;">
+                    <div class="col-12">
+                        <div class="lead-card lead-card-1">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-1">
+                                <div class="card-title">
+                                    <i class="fas fa-chart-line"></i>Digiprenair (Digital Products)
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                
+                                <div class="leaderboard-item lead-item-header">
+                                    <div class="leaderboard-product-header">
+                                        <span class="product-header-item">Rank</span>
+                                        <span class="product-header-item">Product Name</span>
+                                        <span class="product-header-item">Sales</span>
+                                        <span class="product-header-item">Revenue</span>
+                                        <span class="product-header-item">Avg Price</span>
+                                        <span class="product-header-item">Δ vs Prior Period</span>
+                                    </div>
+                                </div>
+                                {% for prod in top_digi_products %}
+                                <div class="leaderboard-item lead-item-{{forloop.counter}}">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-{{forloop.counter}}">{{forloop.counter}}</span>
+                                        <span class="leaderboard-product-type">{{ prod.title }}</span>
+                                        <span class="leaderboard-product-stat">{{prod.sales}}</span>
+                                        <span class="leaderboard-product-stat">${{prod.revenue}}</span>
+                                        <span class="leaderboard-product-stat">${{prod.avg_price}}</span>
+                                        <span class="leaderboard-product-stat up">▲ +10%</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4" style="margin-bottom: 15px;">
+                    <div class="col-12">
+                        <div class="lead-card lead-card-2">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-2">
+                                <div class="card-title">
+                                    <i class="fas fa-briefcase"></i> Workprenair (Freelance Services)
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item lead-item-header">
+                                    <div class="leaderboard-product-header">
+                                        <span class="product-header-item">Rank</span>
+                                        <span class="product-header-item">Product Type</span>
+                                        <span class="product-header-item">Sales</span>
+                                        <span class="product-header-item">Revenue</span>
+                                        <span class="product-header-item">Avg Price</span>
+                                        <span class="product-header-item">Δ vs Prior Period</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-1">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-1">1</span>
+                                        <span class="leaderboard-product-type">Paid Newsletters</span>
+                                        <span class="leaderboard-product-stat">140</span>
+                                        <span class="leaderboard-product-stat">$2,100</span>
+                                        <span class="leaderboard-product-stat">$15.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +14%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-2">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-2">2</span>
+                                        <span class="leaderboard-product-type">Licensed Content</span>
+                                        <span class="leaderboard-product-stat">120</span>
+                                        <span class="leaderboard-product-stat">$6,000</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +5%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-3">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-3">3</span>
+                                        <span class="leaderboard-product-type">AI-Prompt Bundles</span>
+                                        <span class="leaderboard-product-stat">130</span>
+                                        <span class="leaderboard-product-stat">$6,500</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +20%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-4">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-4">4</span>
+                                        <span class="leaderboard-product-type">Low-Code App Templates</span>
+                                        <span class="leaderboard-product-stat">90</span>
+                                        <span class="leaderboard-product-stat">$13,500</span>
+                                        <span class="leaderboard-product-stat">$150.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +18%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-5">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-5">5</span>
+                                        <span class="leaderboard-product-type">Digital Marketing Playbooks</span>
+                                        <span class="leaderboard-product-stat">80</span>
+                                        <span class="leaderboard-product-stat">$24,000</span>
+                                        <span class="leaderboard-product-stat">$300.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +25%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4" style="margin-bottom: 15px;">
+                    <div class="col-12">
+                        <div class="lead-card lead-card-3">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-3">
+                                <div class="card-title">
+                                    <i class="fas fa-graduation-cap"></i> Eduprenair (Online Learning)
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item lead-item-header">
+                                    <div class="leaderboard-product-header">
+                                        <span class="product-header-item">Rank</span>
+                                        <span class="product-header-item">Product Type</span>
+                                        <span class="product-header-item">Sales</span>
+                                        <span class="product-header-item">Revenue</span>
+                                        <span class="product-header-item">Avg Price</span>
+                                        <span class="product-header-item">Δ vs Prior Period</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-1">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-1">1</span>
+                                        <span class="leaderboard-product-type">Mini Courses</span>
+                                        <span class="leaderboard-product-stat">170</span>
+                                        <span class="leaderboard-product-stat">$8,500</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +6%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-2">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-2">2</span>
+                                        <span class="leaderboard-product-type">Audio Guides</span>
+                                        <span class="leaderboard-product-stat">150</span>
+                                        <span class="leaderboard-product-stat">$7,500</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +4%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-3">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-3">3</span>
+                                        <span class="leaderboard-product-type">Interactive eBooks & Flipbooks</span>
+                                        <span class="leaderboard-product-stat">130</span>
+                                        <span class="leaderboard-product-stat">$6,500</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +7%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-4">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-4">4</span>
+                                        <span class="leaderboard-product-type">Subscription-Based Micro-Certifications</span>
+                                        <span class="leaderboard-product-stat">120</span>
+                                        <span class="leaderboard-product-stat">$9,600</span>
+                                        <span class="leaderboard-product-stat">$80.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +15%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-5">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-5">5</span>
+                                        <span class="leaderboard-product-type">Workbooks & Planners</span>
+                                        <span class="leaderboard-product-stat">110</span>
+                                        <span class="leaderboard-product-stat">$6,600</span>
+                                        <span class="leaderboard-product-stat">$60.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +2%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4" style="margin-bottom: 15px;">
+                    <div class="col-12">
+                        <div class="lead-card lead-card-4">
+                            <div class="card-glow"></div>
+                            <div class="card-header-leaderboard lead-card-head-4">
+                                <div class="card-title">
+                                    <i class="fas fa-users"></i> Commuprenair (Community & Assets)
+                                </div>
+                            </div>
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item lead-item-header">
+                                    <div class="leaderboard-product-header">
+                                        <span class="product-header-item">Rank</span>
+                                        <span class="product-header-item">Product Type</span>
+                                        <span class="product-header-item">Sales</span>
+                                        <span class="product-header-item">Revenue</span>
+                                        <span class="product-header-item">Avg Price</span>
+                                        <span class="product-header-item">Δ vs Prior Period</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-1">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-1">1</span>
+                                        <span class="leaderboard-product-type">Community Memberships</span>
+                                        <span class="leaderboard-product-stat">100</span>
+                                        <span class="leaderboard-product-stat">$5,000</span>
+                                        <span class="leaderboard-product-stat">$50.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +9%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-2">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-2">2</span>
+                                        <span class="leaderboard-product-type">3D-Printable Models & Blueprints</span>
+                                        <span class="leaderboard-product-stat">70</span>
+                                        <span class="leaderboard-product-stat">$2,800</span>
+                                        <span class="leaderboard-product-stat">$40.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +4%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-3">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-3">3</span>
+                                        <span class="leaderboard-product-type">Stock Video/Animation Clips</span>
+                                        <span class="leaderboard-product-stat">60</span>
+                                        <span class="leaderboard-product-stat">$12,000</span>
+                                        <span class="leaderboard-product-stat">$200.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +30%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-4">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-4">4</span>
+                                        <span class="leaderboard-product-type">AR/VR Filter & Lens Kits</span>
+                                        <span class="leaderboard-product-stat">50</span>
+                                        <span class="leaderboard-product-stat">$8,750</span>
+                                        <span class="leaderboard-product-stat">$175.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +22%</span>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-item lead-item-5">
+                                    <div class="leaderboard-product">
+                                        <span class="leaderboard-rank rank-5">5</span>
+                                        <span class="leaderboard-product-type">Data Sets & Analytics Models</span>
+                                        <span class="leaderboard-product-stat">40</span>
+                                        <span class="leaderboard-product-stat">$10,000</span>
+                                        <span class="leaderboard-product-stat">$250.00</span>
+                                        <span class="leaderboard-product-stat up">▲ +2%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+{% endblock content %}
+{% block extra_javascript %}
+<script src="{% static 'home/js/worldmap.js' %}"></script>
+<script src="{% static 'home/js/mapdata.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const chartColors = [
+        '#384680', 
+        '#F29D38', 
+        '#E7A554', 
+        '#4B89B0', 
+        '#63AA63'   
+    ];
+
+    function createGradient(ctx, chartArea, color) {
+        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+        gradient.addColorStop(0, color.replace('0.8', '0.3'));
+        gradient.addColorStop(1, color);
+        return gradient;
+    }
+
+    function createCircularChart(canvasId, legendId, chartData, chartType, title) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const chart = new Chart(ctx, {
+            type: chartType,
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1500,
+                    easing: 'easeOutElastic'
+                },
+                cutout: chartType === 'doughnut' ? '50%' : '0%',
+                radius: '80%'
+            }
+        });
+        // const legendContainer = document.getElementById(legendId);
+        // chartData.labels.forEach((label, index) => {
+        //     const legendItem = document.createElement('div');
+        //     legendItem.className = 'legend-item';
+        //     legendItem.innerHTML = `
+        //         <span class="legend-color" style="background-color: ${chartData.datasets[0].backgroundColor[index]}"></span>
+        //         ${label} (${chartData.datasets[0].data[index]}%)
+        //     `;
+        //     legendContainer.appendChild(legendItem);
+        // });
+    }
+
+    function createBarChart(canvasId, legendId, chartData, title) {
+        console.log(legendId)
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#6B7280', font: { size: 12 } },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#6B7280', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                }
+            },
+            plugins: [{
+                id: 'customCanvasBackground',
+                beforeDraw: (chart) => {
+                    const ctx = chart.canvas.getContext('2d');
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                    ctx.fillRect(0, 0, chart.width, chart.height);
+                    ctx.restore();
+                }
+            }]
+        });
+
+       
+    }
+
+    const industriesChartData = {
+    labels: ['Software Development', 'Graphic Design', 'Marketing', 'Content Writing', 'Others'],
+    datasets: [{
+        data: [40, 20, 15, 15, 10],
+        backgroundColor: chartColors,
+        borderColor: ['rgba(255, 255, 255, 0.9)'],
+        borderWidth: 2,
+        hoverOffset: 20
+    }]
+};
+createCircularChart('workprenair_chart', 'industriesChartLegend', industriesChartData, 'pie', 'Industry Categories');
+
+// EduPrenair User Country Doughnut Chart
+const countriesChartData = {
+    labels: ['USA', 'Pakistan', 'India', 'UK', 'Others'],
+    datasets: [{
+        data: [50, 30, 10, 5, 5],
+        backgroundColor: chartColors,
+        borderColor: ['rgba(255, 255, 255, 0.9)'],
+        borderWidth: 2,
+        hoverOffset: 30
+    }]
+};
+createCircularChart('eduprenair_chart', 'countriesChartLegend', countriesChartData, 'doughnut', 'User Country Breakdown');
+
+// CommuPrenair Product Types Pie Chart
+const productsChartData = {
+    labels: ['Highly Active', 'Moderately Active', 'Inactive', 'New Users'],
+    datasets: [{
+        data: [40, 20, 20, 10, 10],
+        backgroundColor: chartColors,
+        borderColor: ['rgba(255, 255, 255, 0.9)'],
+        borderWidth: 2,
+        hoverOffset: 20
+    }]
+};
+createCircularChart('commuprenair_chart', 'productsChartLegend', productsChartData, 'pie', 'Top Product Types');
+
+// DigiPrenair User Engagement Doughnut Chart
+const engagementChartData = {
+    labels: ['Digital Tools', 'Templates', 'Courses', 'Services', 'Others'],
+    datasets: [{
+        data: [50, 25, 15, 10],
+        backgroundColor: chartColors.slice(0, 4),
+        borderColor: ['rgba(255, 255, 255, 0.9)'],
+        borderWidth: 2,
+        hoverOffset: 30
+    }]
+};
+createCircularChart('digiprenair_chart', 'engagementChartLegend', engagementChartData, 'doughnut', 'User Engagement');
+    const newChartColors = [
+        '#FF00CC',  // Neon Magenta
+        '#00FF99',  // Electric Green
+        '#FF9900',  // Vibrant Orange
+        '#3366FF',  // Deep Blue
+        '#FF3366'   // Hot Pink
+    ];
+
+    // Country Sales Distribution Pie Chart
+    const countrySalesChartData = {
+        labels: ['USA', 'Pakistan', 'UK', 'Canada', 'Australia'],
+        datasets: [{
+            data: [40, 25, 15, 10, 10],
+            backgroundColor: chartColors,
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 2,
+            hoverOffset: 25
+        }]
+    };
+    createCircularChart('countrySalesPieChart', 'countrySalesChartLegend', countrySalesChartData, 'pie', 'Sales by Country');
+
+    // Top Performing Regions Bar Chart
+    const regionsChartData = {
+        labels: ['North America', 'Asia', 'Europe', 'South America', 'Africa'],
+        datasets: [{
+            data: [35, 30, 20, 10, 5],
+            backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return chartColors[context.dataIndex];
+                return createGradient(ctx, chartArea, chartColors[context.dataIndex]);
+            },
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 1,
+            borderRadius: 10,
+            barThickness: 35
+        }]
+    };
+    createBarChart('regionsBarChart', 'regionsChartLegend', regionsChartData, 'Top Regions');
+
+    // Product Popularity by Country Pie Chart
+    const countryProductsChartData = {
+        labels: ['Digital', 'Courses', 'Services', 'Coaching', 'Others'],
+        datasets: [{
+            data: [30, 25, 20, 15, 10],
+            backgroundColor: chartColors,
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 2,
+            hoverOffset: 25
+        }]
+    };
+    createCircularChart('countryProductsPieChart', 'countryProductsChartLegend', countryProductsChartData, 'pie', 'Product Popularity');
+
+    // Seller Activity Doughnut Chart
+    const countryActivityChartData = {
+        labels: ['Highly Active', 'Moderately Active', 'Low Activity', 'Inactive'],
+        datasets: [{
+            data: [40, 30, 20, 10],
+            backgroundColor: chartColors.slice(0, 4),
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 2,
+            hoverOffset: 35
+        }]
+    };
+    createCircularChart('countryActivityDoughnutChart', 'countryActivityChartLegend', countryActivityChartData, 'doughnut', 'Seller Activity');
+
+    // revenue by department Bar Chart
+    const revenueChartData = {
+        labels: ['Digiprenair', 'Eduprenair', 'Workprenair', 'Commuprenair'],
+        datasets: [{
+            data: [40, 30, 20, 10],
+            backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return chartColors[context.dataIndex];
+                return createGradient(ctx, chartArea, chartColors[context.dataIndex]);
+            },
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 1,
+            borderRadius: 10,
+            barThickness: 35
+        }]
+    };
+
+    createBarChart('deptRevenuePieChart', 'deptrevenueChartLegend', revenueChartData, 'Revenue by Department');
+
+    // Top department Bar Chart
+    const topDepartmentChartData = {
+        labels: ['Digiprenair', 'Eduprenair', 'Workprenair', 'Commuprenair'],
+        datasets: [{
+            data: [35, 30, 20, 15],
+            backgroundColor: chartColors.slice(0, 4),
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 2,
+            hoverOffset: 35
+        }]
+    };
+
+    createCircularChart('deptBarChart', 'deptChartLegend', topDepartmentChartData, 'pie', 'Top Departments');
+
+    // top products doughnut chart
+    const topProductsChartData = {
+        labels: ['Digital Products', 'Courses', 'Services', 'Webinars', 'Others'],
+        datasets: [{
+            data: [30, 25, 20, 15, 10],
+            backgroundColor: chartColors,
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 2,
+            hoverOffset: 25
+        }]
+    };
+
+    createCircularChart('deptProductsPieChart', 'deptProductsChartLegend', topProductsChartData, 'doughnut', 'Top Products');
+
+    // department engagement bar chart
+    const deptEngagementChartData = {
+        labels: ['Digiprenair', 'Eduprenair', 'Workprenair', 'Commuprenair'],
+        datasets: [{
+            data: [40, 30, 20, 10],
+            backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return chartColors[context.dataIndex];
+                return createGradient(ctx, chartArea, chartColors[context.dataIndex]);
+            },
+            borderColor: ['rgba(255, 255, 255, 0.9)'],
+            borderWidth: 1,
+            borderRadius: 10,
+            barThickness: 35
+        }]
+    };
+
+    createBarChart('deptEngagementDoughnutChart', 'deptEngagementChartLegend', deptEngagementChartData, 'Department Engagement');
+    
+
+    // Sidebar navigation
+    const sidebarItems = document.querySelectorAll('.leaderboard-nav-item');
+    const sections = document.querySelectorAll('.section');
+    const headerTitle = document.querySelector('#header-title');
+    const headerSubtitle = document.querySelector('#header-subtitle');
+
+    const sectionTitles = {
+        global: '🔥 Fireprenair Leaderboard: Who’s on Fire This Week?',
+        country: 'Country Leaderboard',
+        department: 'Department Leaderboard',
+        'lead-badges': 'Badges & Levels Showcase',
+        challenges: 'Challenges & Rewards'
+    };
+
+    const sectionSubtitles = {
+        country: 'See how sellers and products rank across different countries.',
+        department: 'Explore top performers in each department: Digiprenair, Eduprenair, Workprenair, and Commuprenair.',
+        'lead-badges': 'Showcase your badges and track your progress towards new levels.',
+        challenges: 'Participate in challenges to earn rewards and recognition.'
+    };
+
+    sidebarItems.forEach(item => {
+    item.addEventListener('click', () => {
+        sidebarItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        sections.forEach(section => section.classList.remove('active'));
+        const sectionId = item.dataset.section;
+        document.getElementById(sectionId).classList.add('active');
+        // headerTitle.textContent = sectionTitles[sectionId];
+        headerSubtitle.textContent = sectionSubtitles[sectionId];
+       // if (sectionId !== 'global') {
+       //     headerTitle.classList.remove('global-h1');
+       // } else {
+       //     headerTitle.classList.add('global-h1');
+       // }
+    });
+});
+
+    // Card hover effects
+    const cards = document.querySelectorAll('.lead-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-10px)';
+            const glow = card.querySelector('.lead-card-glow');
+            if (glow) glow.style.opacity = '1';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+            const glow = card.querySelector('.lead-card-glow');
+            if (glow) glow.style.opacity = '0';
+        });
+    });
+
+    // World map container hover effect
+    const worldMapContainer = document.querySelector('.world-map-container');
+    if (worldMapContainer) {
+        worldMapContainer.addEventListener('mouseenter', () => {
+            worldMapContainer.style.transform = 'translateY(-10px)';
+        });
+        worldMapContainer.addEventListener('mouseleave', () => {
+            worldMapContainer.style.transform = 'translateY(0)';
+        });
+    }
+
+    // Hub chart hover effects
+    const hubCharts = document.querySelectorAll('.hub-chart');
+    hubCharts.forEach(chart => {
+        chart.addEventListener('mouseenter', () => {
+            chart.style.transform = 'translateY(-5px)';
+        });
+        chart.addEventListener('mouseleave', () => {
+            chart.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+
+<script>
+  const generateLastNDates = (n) => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < n; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = d.toLocaleString('default', { month: 'short' });
+      dates.unshift(`${day} ${month}`);
+    }
+    return dates;
+  };
+
+  const dateLabels = generateLastNDates(12);
+
+  const ctx = document.getElementById('trafficChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: dateLabels,
+      datasets: [
+        {
+          label: 'Website',
+          data: [400, 500, 600, 300, 200, 400, 300, 700, 200, 300, 200, 100],
+          backgroundColor: '#007bff',
+          barThickness: 20,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Social Media',
+          type: 'line',
+          data: [700, 600, 500, 600, 400, 300, 400, 500, 300, 200, 100, 200],
+          borderColor: '#28a745',
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Website Blog'
+          },
+          max: 800,
+          ticks: {
+            stepSize: 100
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock extra_javascript %}

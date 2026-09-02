@@ -1,0 +1,517 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Proposal{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<style>
+    /* Overlay */
+.checkout-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: none;
+}
+
+.checkout-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: none;
+  overflow: hidden;
+}
+
+/* Header */
+.checkout-popup-header {
+  background: #ff6f61;
+  color: #fff;
+  padding: 15px;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Close Button */
+.checkout-popup-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Body */
+.checkout-popup-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.checkout-popup-body p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.checkout-popup-buttons {
+  display: flex;
+  justify-content: space-around;
+}
+
+.checkout-popup-btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+}
+
+.stripe-btn {
+  background-color: #6772e5;
+}
+
+.paypal-btn {
+  background-color: #ffc439;
+}
+
+/* Logo Styling */
+.checkout-popup-logo {
+  display: block;
+  margin: 0 auto 10px;
+  height: 30px;
+}
+
+.offer-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: none;
+}
+
+
+.offer-details-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    display: none;
+}
+
+.offer-details-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ff6f61;
+    color: white;
+}
+
+.offer-details-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.offer-gig-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.offer-gig-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.offer-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.offer-meta-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.offer-meta-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.offer-meta-value {
+    font-weight: 500;
+    color: #2d3436;
+}
+
+.offer-description {
+    line-height: 1.6;
+    color: #4a5568;
+    margin: 20px 0;
+}
+
+.offer-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+{% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                {% if request.user.is_work_freelancer %}
+                <h4 class="heading4 max-lg:mt-3">Proposals Sent</h4>
+                <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Proposals</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Title</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Sent on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if custom_offers_sent %}
+                                {% for offer in custom_offers_sent %}
+                                <tr class="item duration-300 hover:bg-background" 
+                                    data-offer-id="{{ offer.id }}"
+                                    data-gig-image="{{ offer.gig.image.url }}"
+                                    data-gig-title="{{ offer.gig.title }}"
+                                    data-gig-link="{% url 'gig_detail' offer.gig.slug %}"
+                                    data-price="${{ offer.price }}"
+                                    data-delivery-time="{{ offer.delivery_time }}"
+                                    data-status="{% if offer.is_accepted %}Accepted{% else %}Pending{% endif %}"
+                                    data-sent-date="{{ offer.created_at|date:'M d, Y' }}"
+                                    data-description="{{ offer.description }}">
+                                    <th scope="row" class="p-5 text-left cursor-pointer" onclick="showOfferDetails('{{ offer.id }}')">
+                                        <div class="info">
+                                            <a class="title heading6 duration-300 hover:underline">{{offer.title|slice:":100"}}</a>
+                                            <div class="flex flex-wrap items-center gap-4 mt-2">
+                                                <a href="{% url 'work_user_profile' offer.recipient.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                    <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                        <img src="{{offer.recipient.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if offer.recipient.is_online %}
+                                                        <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                        {% else %}
+                                                        <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <span class="employers_name font-normal">Proposal for {{offer.recipient.username}}</span>
+                                                </a>
+                                                <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                                <div class="address flex items-center gap-2 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{offer.recipient.country}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{offer.price}}</td>
+                                    <td class="p-5">
+                                        {% if offer.is_accepted %}
+                                        <span class="tag bg-opacity-10 bg-success text-success text-button">Accepted</span>
+                                        {% else %}
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{offer.created_at.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ offer.recipient.slug }}"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_chat">
+                                                <span class="ph ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Send Message</span>
+                                            </button></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {% else %}
+                <h4 class="heading4 max-lg:mt-3">Proposals Received</h4>
+                <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Proposals</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Title</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Sent on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if custom_offers_received %}
+                                {% for offer in custom_offers_received %}
+                                <tr class="item duration-300 hover:bg-background" 
+                                    data-offer-id="{{ offer.id }}"
+                                    data-gig-image="{{ offer.gig.image.url }}"
+                                    data-gig-title="{{ offer.gig.title }}"
+                                    data-gig-link="{% url 'gig_detail' offer.gig.slug %}"
+                                    data-price="${{ offer.price }}"
+                                    data-delivery-time="{{ offer.delivery_time }}"
+                                    data-status="{% if offer.is_accepted %}Accepted{% else %}Pending{% endif %}"
+                                    data-sent-date="{{ offer.created_at|date:'M d, Y' }}"
+                                    data-description="{{ offer.description }}">
+                                    <th scope="row" class="p-5 text-left cursor-pointer" onclick="showOfferDetails('{{ offer.id }}')">
+                                        <div class="info">
+                                            <a class="title heading6 duration-300 hover:underline">{{offer.title|slice:":300"}}</a>
+                                            <div class="flex flex-wrap items-center gap-4 mt-2">
+                                                <a href="{% url 'work_user_profile' offer.sender.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                    <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                        <img src="{{offer.sender.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if offer.recipient.is_online %}
+                                                        <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                        {% else %}
+                                                        <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <span class="employers_name font-normal">Proposal by {{offer.sender.username}}</span>
+                                                </a>
+                                                <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                                <div class="address flex items-center gap-2 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{offer.sender.country}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{offer.price}}</td>
+                                    <td class="p-5">
+                                        {% if offer.is_accepted %}
+                                        <span class="tag bg-opacity-10 bg-success text-success text-button">Accepted</span>
+                                        {% else %}
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{offer.created_at.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ offer.sender.slug }}"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_chat">
+                                                <span class="ph ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Send Message</span>
+                                            </button></a>
+                                            {% if not offer.is_accepted %}
+                                            <a href="#" onclick="openCustomOfferPopup('{{ offer.id }}')"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                <span class="ph ph-credit-card text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Place Order</span>
+                                            </button></a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="checkout-popup-overlay" id="customOfferPopupOverlay"></div>
+
+<!-- Popup -->
+<div class="checkout-popup" id="customOfferPopup">
+  <div class="checkout-popup-header">
+    <h3>Select Payment Method</h3>
+    <button class="checkout-popup-close" onclick="closeCustomOfferPopup()">×</button>
+  </div>
+  <div class="checkout-popup-body">
+    <p>Please choose your preferred payment method for this custom offer:</p>
+    <div class="checkout-popup-buttons">
+      <!-- Stripe -->
+      <a 
+        id="customOfferStripeCheckout" 
+        href="#" 
+        class="checkout-popup-btn stripe-btn"
+      >
+        <img 
+          src="https://cdn.brandfetch.io/idxAg10C0L/theme/light/logo.svg?c=1bfwsmEH20zzEfSNTed" 
+          alt="Stripe Logo" 
+          class="checkout-popup-logo"
+        >
+        Pay with Stripe
+      </a>
+      <!-- PayPal -->
+      <a 
+        id="customOfferPaypalCheckout" 
+        href="#" 
+        class="checkout-popup-btn paypal-btn"
+      >
+        <img 
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png" 
+          alt="PayPal Logo" 
+          class="checkout-popup-logo"
+        >
+        Pay with PayPal
+      </a>
+    </div>
+  </div>
+</div>
+<div class="offer-details-overlay" id="offerDetailsOverlay"></div>
+<div class="offer-details-popup" id="offerDetailsPopup">
+  <div class="offer-details-header">
+      <h3>Offer Details</h3>
+      <button class="close-btn" onclick="closeOfferDetails()">&times;</button>
+  </div>
+  <div class="offer-details-body">
+      <div class="offer-gig-info">
+          <img id="offerGigImage" class="offer-gig-image" 
+               src="{% static 'images/placeholder.png' %}" 
+               alt="Gig Image">
+          <div>
+              <h4 id="offerGigTitle" class="heading6"></h4>
+              <a id="offerGigLink" href="#" target="_blank" 
+                 class="text-primary hover:underline">View Gig</a>
+          </div>
+      </div>
+      
+      <div class="offer-meta">
+          <div class="offer-meta-item">
+              <div class="offer-meta-label">Price</div>
+              <div class="offer-meta-value" id="offerPrice"></div>
+          </div>
+          <div class="offer-meta-item">
+              <div class="offer-meta-label">Delivery Time</div>
+              <div class="offer-meta-value" id="offerDelivery"></div>
+          </div>
+          <div class="offer-meta-item">
+              <div class="offer-meta-label">Status</div>
+              <div class="offer-meta-value" id="offerStatus"></div>
+          </div>
+          <div class="offer-meta-item">
+              <div class="offer-meta-label">Sent On</div>
+              <div class="offer-meta-value" id="offerDate"></div>
+          </div>
+      </div>
+
+      <div class="offer-description" id="offerDescription"></div>
+
+      <div class="offer-actions">
+          <button class="btn_action category-btn-final" onclick="closeOfferDetails()">
+              Close
+          </button>
+      </div>
+  </div>
+</div>
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+   <!-- Modal -->
+   <div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+   </div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+function openCustomOfferPopup(offerId) {
+  const stripeCheckoutUrl = `/workprenair/custom-offer/checkout/${offerId}/`;
+  const paypalCheckoutUrl = `/workprenair/custom-offer/paypal-checkout/${offerId}/`;
+
+  document.getElementById("customOfferStripeCheckout").href = stripeCheckoutUrl;
+  document.getElementById("customOfferPaypalCheckout").href = paypalCheckoutUrl;
+
+  document.getElementById("customOfferPopupOverlay").style.display = "block";
+  document.getElementById("customOfferPopup").style.display = "block";
+}
+
+function closeCustomOfferPopup() {
+  document.getElementById("customOfferPopupOverlay").style.display = "none";
+  document.getElementById("customOfferPopup").style.display = "none";
+}
+
+function showOfferDetails(offerId) {
+    const offerRow = document.querySelector(`tr[data-offer-id="${offerId}"]`);
+    
+    document.getElementById('offerGigImage').src = offerRow.dataset.gigImage;
+    document.getElementById('offerGigTitle').textContent = offerRow.dataset.gigTitle;
+    document.getElementById('offerGigLink').href = offerRow.dataset.gigLink;
+    document.getElementById('offerPrice').textContent = offerRow.dataset.price;
+    document.getElementById('offerDelivery').textContent = offerRow.dataset.deliveryTime + ' days';
+    document.getElementById('offerStatus').textContent = offerRow.dataset.status;
+    document.getElementById('offerDate').textContent = offerRow.dataset.sentDate;
+    document.getElementById('offerDescription').textContent = offerRow.dataset.description;
+
+    // Show popup
+    document.getElementById('offerDetailsOverlay').style.display = 'block';
+    document.getElementById('offerDetailsPopup').style.display = 'block';
+}
+
+function closeOfferDetails() {
+    document.getElementById('offerDetailsOverlay').style.display = 'none';
+    document.getElementById('offerDetailsPopup').style.display = 'none';
+}
+</script>
+
+{% endblock extra_javascript %}

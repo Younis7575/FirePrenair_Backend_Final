@@ -1,0 +1,1284 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load static %}
+{% block title %} Fireprenair - Events {% endblock title %}
+
+{% block extra_css %}
+<style>
+    /* Google Fonts - Poppins */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    /* Main Styling */
+    .main-content {
+        background-color: #f5f7ff;
+        font-family: 'Poppins', sans-serif;
+        padding: 3rem 0;
+    }
+    
+    /* Header Area Styling */
+    .head-area {
+        position: relative;
+        margin-bottom: 2.5rem !important;
+        padding-bottom: 1.5rem;
+    }
+    
+    .head-area h4 {
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 1.75rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .head-area h4::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: #ff6f61;
+        border-radius: 2px;
+    }
+    
+    .create-event-btn {
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .create-event-btn:hover {
+        background-color: #e05a4d;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 111, 97, 0.4);
+    }
+    
+    .create-event-btn:active {
+        transform: translateY(0);
+    }
+    
+    .create-event-btn i {
+        vertical-align: middle;
+        font-size: 1.2rem;
+    }
+    
+    /* Filter Area Styling */
+    .category-filter {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 5px 20px rgba(30, 58, 138, 0.08);
+        border-top: 5px solid #1e3a8a;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-filter::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 5px;
+        background: #ff6f61;
+    }
+    
+    .filter-input {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1.25rem;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-input:focus {
+        border-color: #ff6f61;
+        box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.15);
+        outline: none;
+    }
+    
+    .filter-btn {
+        background-color: #1e3a8a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+    }
+    
+    .filter-btn:hover {
+        background-color: #15296a;
+        transform: translateY(-2px);
+    }
+    
+    /* Event Card Styling */
+    .event-card {
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                    box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        background: white;
+        margin-bottom: 10px;
+        border: none;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(30, 58, 138, 0.1);
+    }
+    
+    .image-container {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .event-image {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+        transition: transform 0.6s ease;
+    }
+    
+    .event-card:hover .event-image {
+        transform: scale(1.05);
+    }
+    
+    .event-date {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #ff6f61;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+    }
+    
+    .virtual-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #1e3a8a;
+        color: white;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .virtual-badge i {
+        font-size: 1rem;
+        margin-right: 5px;
+    }
+    
+    .event-details {
+        padding: 25px;
+        background: white;
+        position: relative;
+    }
+    
+    .event-details h5 {
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        min-height: 2.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .event-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .event-meta-item i {
+        color: #ff6f61;
+        margin-right: 5px;
+        font-size: 1.1rem;
+    }
+    
+    .event-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        min-height: 4.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    
+    .view-details-btn {
+        color: #1e3a8a;
+        background-color: transparent;
+        border: 2px solid #1e3a8a;
+        border-radius: 30px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .view-details-btn:hover {
+        background-color: #1e3a8a;
+        color: white;
+    }
+    
+    /* No Events Found Styling */
+    .no-events-container {
+        background: white;
+        border-radius: 15px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(30, 58, 138, 0.08);
+    }
+    
+    .no-events-container img {
+        max-width: 250px;
+        margin-bottom: 2rem;
+        opacity: 0.8;
+    }
+    
+    .no-events-container h4 {
+        color: #1e3a8a;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .no-events-container p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .create-event-btn-lg {
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .create-event-btn-lg:hover {
+        background-color: #e05a4d;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 111, 97, 0.4);
+    }
+    
+    /* Animation Effects */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .event-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+    
+    .col-xl-4:nth-child(1) .event-card { animation-delay: 0.1s; }
+    .col-xl-4:nth-child(2) .event-card { animation-delay: 0.2s; }
+    .col-xl-4:nth-child(3) .event-card { animation-delay: 0.3s; }
+    .col-xl-4:nth-child(4) .event-card { animation-delay: 0.4s; }
+    .col-xl-4:nth-child(5) .event-card { animation-delay: 0.5s; }
+    .col-xl-4:nth-child(6) .event-card { animation-delay: 0.6s; }
+    
+    /* Category badge */
+    .category-badge {
+        position: absolute;
+        bottom: 3px;
+        left: 4px;
+        background: #1e3a8a;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        z-index: 3;
+    }
+
+
+.gradient-bg {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.btn-ai-create {
+    background: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(127, 0, 255, 0.3);
+}
+
+.btn-ai-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(127, 0, 255, 0.4);
+}
+
+.ai-generated {
+    background-color: var(--primary-light);
+    border: 2px dashed var(--primary);
+    border-radius: 10px;
+}
+
+.ai-form-step {
+    display: none;
+    animation: slideIn 0.4s ease-out;
+}
+
+.ai-form-step.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-loader {
+    border: 4px solid var(--primary-light);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn-refresh-ai {
+    background: transparent;
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
+    border-radius: 20px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.btn-refresh-ai:hover {
+    background: var(--secondary);
+    color: white;
+}
+
+.ai-event-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(14, 23, 53, 0.85);
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.4s ease;
+}
+
+.ai-event-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 90%;
+    max-width: 700px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 10px 30px rgba(30, 58, 138, 0.2);
+    z-index: 10000;
+    display: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.ai-event-popup.active {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.ai-event-overlay.active {
+    opacity: 1;
+}
+
+.ai-event-header {
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #15296a 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-event-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3-3 1.343-3 3-3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4-4 1.79-4 4-4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232748aa' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #1e3a8a 0%, #15296a 100%);
+    opacity: 1;
+    z-index: -1;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.ai-event-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.ai-event-header h2 .magic-icon {
+    margin-right: 12px;
+    background: linear-gradient(135deg, #ff6f61 0%, #ff9a8f 100%);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(255, 111, 97, 0.4);
+}
+
+.ai-event-header h2 .magic-icon i {
+    font-size: 22px;
+}
+
+.ai-event-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.ai-event-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: rotate(90deg);
+}
+
+.ai-event-body {
+    padding: 32px;
+    max-height: calc(90vh - 180px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #ff6f61 #f5f5f5;
+}
+
+.ai-event-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-event-body::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+.ai-event-body::-webkit-scrollbar-thumb {
+    background: #ff6f61;
+    border-radius: 10px;
+}
+
+.ai-event-footer {
+    padding: 20px 32px;
+    border-top: 1px solid #eee;
+    text-align: right;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* Form Elements with enhanced styling */
+.ai-form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+.ai-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.ai-form-control {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ai-form-control:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    outline: none;
+}
+
+.ai-form-group textarea.ai-form-control {
+    min-height: 110px;
+    resize: vertical;
+}
+
+/* File input styling */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-input-wrapper:hover {
+    border-color: #1e3a8a;
+    background-color: rgba(30, 58, 138, 0.02);
+}
+
+.file-input-wrapper .file-input-icon {
+    font-size: 32px;
+    color: #1e3a8a;
+    margin-bottom: 10px;
+}
+
+.file-input-wrapper .file-input-text {
+    font-size: 0.95rem;
+    color: #4a5568;
+}
+
+.file-input-wrapper .file-input-text strong {
+    color: #1e3a8a;
+    text-decoration: underline;
+}
+
+.file-input-wrapper input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-preview {
+    display: none;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.file-preview img {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Toggle switch styling */
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    margin-right: 10px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e2e8f0;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+    background-color: #1e3a8a;
+}
+
+input:checked + .switch-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* Loading state */
+.ai-loading {
+    display: none;
+    text-align: center;
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-loading .loader-animation {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.ai-loading .loader-animation div {
+    box-sizing: border-box;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 8px solid transparent;
+    border-top-color: #1e3a8a;
+    border-radius: 50%;
+    animation: spinny 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.ai-loading .loader-animation div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+
+.ai-loading .loader-animation div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+
+.ai-loading .loader-animation div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+
+@keyframes spinny {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-loading h4 {
+    color: #1e3a8a;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.ai-loading p {
+    color: #4a5568;
+    margin-bottom: 0;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+/* Buttons styling */
+.ai-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-btn-cancel {
+    background-color: #f8f9fa;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.ai-btn-cancel:hover {
+    background-color: #e2e8f0;
+}
+
+.ai-btn-primary {
+    background: linear-gradient(135deg, #1e3a8a 0%, #15296a 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.2);
+}
+
+.ai-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+}
+
+.ai-btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.ai-btn i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+/* Form step animations */
+.ai-form-step {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.ai-form-step.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.step-dot.active {
+    background-color: #1e3a8a;
+    transform: scale(1.2);
+}
+
+/* Animation for popup */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ai-event-header {
+        padding: 20px 24px;
+    }
+    
+    .ai-event-body {
+        padding: 24px;
+    }
+    
+    .ai-event-footer {
+        padding: 16px 24px;
+    }
+    
+    .ai-event-header h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+{% include 'commu_prenair/partials/header.html' %}
+
+<main class="main-content">
+    <div class="container">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xl-9 col-lg-8">
+                <div class="head-area d-flex justify-content-between align-items-center">
+                    <h4>Upcoming Events</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="category-btn-final" onclick="openAIEvent()">
+                            <i class="fas fa-magic me-2"></i>AI Create
+                        </button>
+                        <a href="{% url 'create_event' %}" class="category-btn-final" style="color: white; padding: 10px 20px;">
+                            Create Event
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="category-filter">
+                    <form class="row g-4" method="GET" action="{% url 'commu_events' %}" id="event_form">
+                        <div class="col-md-4">
+                            <div class="position-relative">
+                                <i class="material-symbols-outlined" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;">search</i>
+                                <input type="text" name="q" class="form-control filter-input" placeholder="Search events..." 
+                                       value="{{ request.GET.q }}" style="padding-left: 45px;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="position-relative">
+                                <i class="material-symbols-outlined" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;">category</i>
+                                <select name="category" class="form-select filter-input" style="padding-left: 45px;">
+                                    <option value="">All Categories</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if cat.id|slugify == request.GET.category %}selected{% endif %}>
+                                        {{ cat.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn filter-btn w-100">
+                                <i class="material-symbols-outlined me-2">filter_alt</i> Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="row g-4">
+                    {% if events %}
+                        {% for event in events %}
+                        <div class="col-xl-4 col-md-6">
+                            <div class="event-card shadow-sm">
+                                <div class="image-container">
+                                    {% if event.event_image %}
+                                    <img src="{{ event.event_image.url }}" class="event-image" alt="{{ event.title }}">
+                                    {% else %}
+                                    <div class="event-image" style="background: linear-gradient(135deg, #ebedf7 0%, #d2d6ef 100%); display: flex; justify-content: center; align-items: center;">
+                                        <i class="material-symbols-outlined" style="font-size: 4rem; color: #bbc1e1;">event</i>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="event-date">
+                                        {{ event.start_time|date:"M d" }}
+                                    </div>
+                                    
+                                    {% if event.is_virtual %}
+                                    <span class="virtual-badge">
+                                        <i style="color: white;" class="material-symbols-outlined">public</i> Virtual
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if event.category %}
+                                    <div class="category-badge">
+                                        {{ event.category.name }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="event-details">
+                                    <h5>{{ event.title }}</h5>
+                                    <div class="event-meta">
+                                        <div class="event-meta-item">
+                                            <i class="material-symbols-outlined">schedule</i>
+                                            {{ event.start_time|time }}
+                                        </div>
+                                        {% if not event.is_virtual %}
+                                        <div class="event-meta-item">
+                                            <i class="material-symbols-outlined">location_on</i>
+                                            {{ event.location|truncatechars:15 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <p class="event-description">{{ event.description|truncatechars:120 }}</p>
+                                    <a href="{% url 'event_detail' event.slug %}" class="category-btn-final" style="color: white;">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="no-events-container">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfyDDAElY58f-mmrhgncjex7NoK7VAvL-DvQ&s" 
+                                     alt="No events" class="mb-4" style="border-radius: 10px;">
+                                <h4>No Upcoming Events Found</h4>
+                                <p>Looking for something interesting? Why not create your own event!</p>
+                                <a href="{% url 'create_event' %}" class="category-btn-final" style="color: white; width: fit-content;">
+                                     Create an Event
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="ai-event-overlay" id="aiEventOverlay"></div>
+<div class="ai-event-popup" id="aiEventPopup">
+    <div class="ai-event-header">
+        <div class="header-content">
+            <h2>
+                <span class="magic-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+                AI Event Creation
+            </h2>
+            <button onclick="closeAIEvent()" class="ai-event-close" id="closeAiEventBtn" type="button">×</button>
+        </div>
+    </div>
+    
+    <form id="aiEventForm" enctype="multipart/form-data">
+        <!-- Form Content -->
+        <div class="ai-event-body">
+                <div class="ai-form-group">
+                    <label>Event Idea</label>
+                    <textarea class="ai-form-control" name="idea" rows="3" required
+                     placeholder="Describe your event idea in detail..."></textarea>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="ai-form-group">
+                            <label>Category</label>
+                            <select name="category" class="ai-form-control">
+                                <option value="">Select Category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="ai-form-group">
+                            <label>Event Type</label>
+                            <div class="toggle-container">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="is_virtual" id="isVirtualToggle">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="toggle-label">Virtual Event</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="ai-form-group">
+                            <label>Start Time</label>
+                            <input type="datetime-local" class="ai-form-control" name="start_time" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="ai-form-group">
+                            <label>End Time</label>
+                            <input type="datetime-local" class="ai-form-control" name="end_time" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-form-group virtual-link-field">
+                    <label>Meeting Link</label>
+                    <input type="url" class="ai-form-control" name="virtual_link" 
+                           placeholder="https://meet.example.com/your-meeting">
+                </div>
+
+                <div class="ai-form-group location-field" style="display: none;">
+                    <label>Location</label>
+                    <input type="text" class="ai-form-control" name="location" 
+                           placeholder="Enter venue address">
+                </div>
+                <div class="ai-form-group">
+                    <label>Event Image</label>
+                    <div class="file-input-wrapper">
+                        <div class="file-input-icon">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                        </div>
+                        <div class="file-input-text">
+                            Drag & drop your image here or <strong>Browse Files</strong>
+                        </div>
+                        <input type="file" class="ai-form-control" name="event_image" id="eventImageUpload" required>
+                    </div>
+                    <div class="file-preview" id="imagePreview">
+                        <img id="previewImg" src="#" alt="Preview">
+                    </div>
+                </div>
+            </div>
+            <!-- Loading State -->
+            <div class="ai-loading" id="aiLoading">
+                <div class="loader-animation">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <h4>Creating Your Event</h4>
+                <p>Our AI is generating the perfect event based on your inputs...</p>
+            </div>
+
+        <!-- Form Footer -->
+        <div class="ai-event-footer">
+            <button type="button" class="ai-btn ai-btn-cancel" id="cancelBtn" onclick="closeAIEvent()">
+                Cancel
+            </button>
+            <button type="submit" class="category-btn-final" id="createEventBtn">
+                <i class="fas fa-wand-magic-sparkles"></i> Create with AI
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[name="event_image"]');
+    const previewContainer = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const uploadContent = document.querySelector('.file-input-wrapper');
+    
+    imageInput.addEventListener('change', function(e) {
+        previewContainer.style.display = 'block'; 
+        
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+            }
+            
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    let timeout = null;
+    const searchInput = document.querySelector('input[name="q"]');
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        
+        timeout = setTimeout(() => {
+            const searchValue = this.value.toLowerCase();
+            document.querySelectorAll('.event-card').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const cardParent = card.closest('.col-xl-4');
+                
+                if (text.includes(searchValue)) {
+                    cardParent.style.display = 'block';
+                } else {
+                    cardParent.style.display = 'none';
+                }
+            });
+            
+            const visibleCards = document.querySelectorAll('.col-xl-4[style="display: block;"]');
+            const noResultsEl = document.querySelector('#no-results-message');
+            
+            if (visibleCards.length === 0 && searchValue.length > 0) {
+                if (!noResultsEl) {
+                    const noResults = document.createElement('div');
+                    noResults.id = 'no-results-message';
+                    noResults.className = 'col-12 mt-4';
+                    noResults.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="material-symbols-outlined" style="font-size: 4rem; color: #d0d4e4;">search_off</i>
+                            <h5 class="mt-3" style="color: #1e3a8a;">No matching events found</h5>
+                            <p class="text-muted">Try adjusting your search criteria</p>
+                        </div>
+                    `;
+                    document.querySelector('.row.g-4').appendChild(noResults);
+                }
+            } else if (noResultsEl) {
+                noResultsEl.remove();
+            }
+        }, 300);
+    });
+
+    // Smooth category filter animation
+    document.querySelector('select[name="category"]').addEventListener('change', function() {
+        document.querySelector('.filter-btn').innerHTML = '<i class="material-symbols-outlined me-2 spin">sync</i> Filtering...';
+        setTimeout(() => {
+            document.getElementById('event_form').submit();
+        }, 300);
+    });
+    
+    // Add spin animation for loading state
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .spin {
+                animation: spin 1s linear infinite;
+                display: inline-block;
+            }
+        </style>
+    `);
+});
+
+function openAIEvent() {
+    const popup = document.getElementById('aiEventPopup');
+    const overlay = document.getElementById('aiEventOverlay');
+    
+    overlay.style.display = 'block';
+    popup.style.display = 'block';
+    
+    setTimeout(() => {
+        popup.style.transform = 'translate(-50%, -50%) scale(1)';
+        popup.style.opacity = '1';
+    }, 10);
+}
+
+function closeAIEvent() {
+    const popup = document.getElementById('aiEventPopup');
+    const overlay = document.getElementById('aiEventOverlay');
+    
+    popup.style.transform = 'translate(-50%, -50%) scale(0.95)';
+    popup.style.opacity = '0';
+    
+    setTimeout(() => {
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+    }, 300);
+}
+
+document.getElementById('aiEventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const loading = document.querySelector('.ai-loading');
+    const body = document.querySelector('.ai-event-body');
+    const footer = document.querySelector('.ai-event-footer');
+
+    body.style.display = 'none';
+    footer.style.display = 'none';
+    loading.style.display = 'flex';
+
+    try {
+        const response = await fetch('/commuprenair/events/create/ai/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if(data.success) {
+            window.location.href = `/commuprenair/events/${data.slug}/`;
+        } else {
+            alert('Error: ' + (data.error || 'Failed to create event'));
+            closeAIEvent();
+        }
+    } catch (error) {
+        alert('Error connecting to server');
+        closeAIEvent();
+    } finally {
+        loading.style.display = 'none';
+        footer.style.display = 'flex';
+        body.style.display = 'block';
+    }
+});
+
+// Handle virtual/physical toggle
+document.querySelector('input[name="is_virtual"]').addEventListener('change', function() {
+    const isVirtual = this.checked;
+    document.querySelector('.virtual-link-field').style.display = isVirtual ? 'block' : 'none';
+    document.querySelector('.location-field').style.display = isVirtual ? 'none' : 'block';
+});
+</script>
+{% endblock %}

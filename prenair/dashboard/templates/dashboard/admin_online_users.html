@@ -1,0 +1,139 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashbpoard |
+Admin{% endblock title %} {% load static %} 
+{% load custom_filters %} 
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div
+    class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex"
+  >
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+      <div class="container h-full lg:py-15 sm:py-12 py-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Admin Panel</h4>
+        <div class="earning_block mt-7.5 rounded-lg bg-white">
+          <div class="flex flex-wrap items-center justify-between gap-5 pt-5 px-6">
+            <form method="GET" action="" class="relative flex items-center w-[340px] h-12">
+                <!-- Search Input -->
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search_query }}"
+                    class="w-full h-full pl-4 pr-12 border border-line rounded-lg overflow-hidden"
+                    placeholder="Search by keyword"
+                />
+                <!-- Search Button -->
+                <button type="submit" class="absolute top-1/2 -translate-y-1/2 right-16">
+                    <span class="ph ph-magnifying-glass text-xl block"></span>
+                </button>
+                <!-- Reset Button -->
+                <a
+                    href="{% url 'admin_dashboard' %}" 
+                    class="absolute top-1/2 -translate-y-1/2 right-4 text-secondary text-sm underline hover:text-primary"
+                >
+                    Reset
+                </a>
+            </form>
+        </div>
+          <div class="list overflow-x-auto w-full py-5 px-6 rounded-xl">
+              <table class="w-full max-md:w-[600px]">
+                  <thead class="border-b border-line">
+                      <tr>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Name</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Email</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Username</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Country</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Online</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Date Joined</th>
+                          <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">View More</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in page_obj %}
+                    <tr class="item duration-300 hover:bg-background">
+                        <th scope="row" class="p-5 text-left whitespace-nowrap">{{ user.name }}</th>
+                        <td class="p-5">{{ user.email }}</td>
+                        <td class="p-5">{{ user.username }}</td>
+                        <td class="p-5 whitespace-nowrap">{{ user.country }}</td>
+                        <td class="p-5 whitespace-nowrap">True</td>
+                        <td class="p-5 whitespace-nowrap">{{ user.created_at|date:"M. d, Y" }}</td>
+                        <td class="p-5 whitespace-nowrap">
+                          <a target="_blank"  href="{% url 'admin:profiles_customuser_change' user.id %}" style="color: #1e3a8a;">View More</a>
+                        </td>
+                      
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-5 text-center">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>       
+              </table>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-4 p-6 border-t border-line">
+            <ul class="list_pagination menu_tab flex items-center justify-center gap-2 w-full md:mt-10 mt-7" role="tablist">
+              {% if page_obj.has_previous %}
+              <li role="presentation">
+                  <a href="?page={{ page_obj.previous_page_number }}" class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded border border-line text-title duration-300 hover:border-black" role="tab" aria-selected="false">&lt</a>
+              </li>
+              {% endif %}
+          
+              {% for num in page_obj.paginator.page_range %}
+              <li role="presentation">
+                  <a href="?page={{ num }}" class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded border border-line text-title duration-300 {% if page_obj.number == num %}active{% endif %}" role="tab" aria-selected="{% if page_obj.number == num %}true{% else %}false{% endif %}">{{ num }}</a>
+              </li>
+              {% endfor %}
+          
+              {% if page_obj.has_next %}
+              <li role="presentation">
+                  <a href="?page={{ page_obj.next_page_number }}" class="tab_btn -fill flex items-center justify-center w-10 h-10 rounded border border-line text-title duration-300 hover:border-black" role="tab" aria-selected="false">&gt</a>
+              </li>
+              {% endif %}
+          </ul>
+          
+            <p class="text-secondary whitespace-nowrap">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
+            </p>
+        </div>
+        
+      </div>
+      </div>
+      <div
+        class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  {% endblock extra_javascript %}
+</body>

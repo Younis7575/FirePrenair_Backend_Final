@@ -1,0 +1,169 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Dashboard{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+   <!-- Breadcrumb -->
+		<div class="breadcrumb-bar breadcrumb-bar-info">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12 col-12">
+						<div class="breadcrumb-list">
+							<h2 class="breadcrumb-title">Dashboard</h2>
+							<nav aria-label="breadcrumb" class="page-breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="{% url 'edu_home' %}">Home</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /Breadcrumb -->
+
+   <!-- Page Content -->
+		<div class="page-content">
+			<div class="container">
+				<div class="row">
+
+					{% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+					<!-- Student Dashboard -->
+					<div class="col-xl-9 col-lg-9">
+
+						<!-- Dashboard Grid -->
+						<div class="row justify-content-center">
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Enrolled Courses</h5>
+										<h2>{{enrolled_courses.count}}</h2>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Active Courses</h5>
+										<h2>{{enrolled_courses.count}}</h2>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Completed Courses</h5>
+										<h2>{{completed_courses.count}}</h2>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Total Students</h5>
+										<h2>{{students.count}}</h2>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Total Active Courses</h5>
+										<h2>{{courses_teaching.count}}</h2>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-4 col-md-6 d-flex">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>Total Earnings</h5>
+										<h2>${{request.user.edu_total_earnings}}</h2>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /Dashboard Grid -->
+
+						<div class="instructor-course-table">
+							<div class="dashboard-title">
+								<h4>Recently Created Courses</h4>
+							</div>
+							<div class="table-responsive custom-table">
+
+								<!-- Referred Users-->
+								<table class="table table-nowrap mb-0">
+									<thead>
+										<tr>
+											<th>Courses</th>
+											<th>Enrolled</th>
+											<th>Status</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% if courses_teaching %}
+										    {% for course in courses_teaching %}
+										        <tr>
+										            <td>
+										                <div class="table-course-detail">
+										                    <a href="#" class="course-table-img">
+										                        <span><img src="{{ course.thumbnail.url }}" alt="Img"></span>
+										                        {{ course.title }}
+										                    </a>
+										                </div>
+										            </td>
+										            <td>{{ course.total_students }}</td>
+										            <td>Published</td>
+										        </tr>
+										    {% endfor %}
+										{% else %}
+										    <tr>
+										        <td colspan="3" class="text-center">No courses found.</td>
+										    </tr>
+										{% endif %}
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="dashboard-title">
+							<h4>Recently Enrolled Courses</h4>
+						</div>
+						<div class="row">
+							{% if courses_teaching %}
+							{% for enroll in enrolled_courses %}
+							<!-- Course Grid -->
+							{% include 'edu_prenair/partials/course_card.html' %}
+							<!-- /Course Grid -->
+							{% endfor %}
+							{% else %}
+							<div class="col-md-12">
+								<div class="card dash-info flex-fill">
+									<div class="card-body">
+										<h5>No Courses Found</h5>
+									</div>
+								</div>
+							</div>
+							{% endif %}
+						</div>
+						
+					</div>
+					<!-- Student Dashboard -->
+
+				</div>
+			</div>
+		</div>
+		<!-- /Page Content -->
+
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

@@ -1,0 +1,110 @@
+{% load static %}
+
+<style>
+  .messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 300px;
+    z-index: 1000;
+  }
+
+  .alert {
+    position: relative; /* Allow absolute positioning of close icon */
+    padding: 15px 40px 15px 20px; /* Add padding on the right for the close icon */
+    margin: 10px 0;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0; /* Start hidden for fade-in */
+    transform: translateY(-20px); /* Start slightly above */
+    animation: fadeIn 0.5s forwards; /* Fade-in animation */
+    transition: opacity 0.5s ease, transform 0.5s ease; /* Transition for fade-out */
+    font-family: Arial, sans-serif; /* Use a clean font */
+  }
+
+  .alert-success {
+    background-color: #4caf50;
+  }
+  .alert-info {
+    background-color: #2196f3;
+  }
+  .alert-warning {
+    background-color: #ff9800;
+  }
+  .alert-error {
+    background-color: #f44336;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px; /* Position it closer to the right edge */
+    transform: translateY(-50%); /* Center vertically */
+    cursor: pointer;
+    font-size: 18px;
+    color: white;
+    transition: color 0.3s;
+  }
+
+  .close-icon:hover {
+    color: #ddd; /* Change color on hover for better UX */
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+</style>
+
+<div class="messages">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+        <span class="close-icon" aria-label="Close" title="Close">&times;</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll('.alert');
+    
+    alerts.forEach(alert => {
+      // Add fade-out animation after 3 seconds if not manually closed
+      setTimeout(() => {
+        alert.style.animation = 'fadeOut 0.5s forwards'; // Start fade-out animation
+
+        // Remove the alert from the DOM once the fade-out animation ends
+        alert.addEventListener('animationend', () => {
+          alert.remove(); // Remove alert after animation completes
+        });
+      }, 3000); // Set duration before fade-out starts
+
+      // Handle close icon click
+      const closeIcon = alert.querySelector('.close-icon');
+      closeIcon.addEventListener('click', () => {
+        alert.style.animation = 'fadeOut 0.5s forwards'; // Start fade-out animation
+
+        // Remove the alert from the DOM once the fade-out animation ends
+        alert.addEventListener('animationend', () => {
+          alert.remove(); // Remove alert after animation completes
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

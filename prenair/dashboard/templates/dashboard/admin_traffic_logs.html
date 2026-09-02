@@ -1,0 +1,431 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+  .analytics-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.analytics-header h1 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.875rem;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+}
+
+.date-filter {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.date-filter select,
+.date-filter input {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    min-width: 180px;
+}
+
+.date-filter select:focus,
+.date-filter input:focus {
+    outline: none;
+    border-color: #ff6f61;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.date-filter button {
+    background: #ff6f61;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.date-filter button:hover {
+    background: #ff6f61;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+}
+
+.summary-card h3 {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card p {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+#topPagesList {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.page-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.page-item:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.page-item span:first-child {
+    flex: 1;
+    margin-right: 1rem;
+    color: #475569;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.page-item span:last-child {
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .analytics-header {
+        padding: 1.5rem;
+    }
+    
+    .date-filter {
+        flex-direction: column;
+    }
+    
+    .date-filter select,
+    .date-filter input,
+    .date-filter button {
+        width: 100%;
+    }
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container py-8">
+                <div class="analytics-header mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Web Traffic Analytics</h1>
+                    <div class="date-filter flex gap-4 mt-4">
+                        <select id="periodSelect" class="p-2 rounded border">
+                            <option value="day">Last 24 Hours</option>
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                        </select>
+                        <input type="date" id="startDate" class="p-2 rounded border">
+                        <input type="date" id="endDate" class="p-2 rounded border">
+                        <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded">
+                            Apply Filter
+                        </button>
+                    </div>
+                </div>
+    
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-gray-500 text-sm">Total Visits</h3>
+                        <p class="text-3xl font-bold" id="totalVisits">0</p>
+                    </div>
+                    <!-- Add more summary cards as needed -->
+                </div>
+    
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Timeline Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Traffic Trend</h3>
+                        <div id="timelineChart"></div>
+                    </div>
+    
+                    <!-- Country Distribution -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Top Countries</h3>
+                        <div id="countryChart"></div>
+                    </div>
+    
+                    <!-- Device Breakdown -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Device Distribution</h3>
+                        <div id="deviceChart"></div>
+                    </div>
+    
+                    <!-- Top Pages Table -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Most Visited Pages</h3>
+                        <div id="topPagesList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2025 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+<script>
+    let timelineChart, countryChart, deviceChart;
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').max = today;
+    document.getElementById('endDate').max = today;
+
+    document.getElementById('startDate').addEventListener('change', function() {
+        document.getElementById('endDate').min = this.value;
+    });
+
+    document.getElementById('endDate').addEventListener('change', function() {
+        document.getElementById('startDate').max = this.value;
+    });
+});
+
+    let isLoading = false;
+    async function loadData() {
+        if (isLoading) return;
+        
+        isLoading = true;
+        showLoading();
+        
+        try {
+            const period = document.getElementById('periodSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const response = await fetch(`{% url 'traffic_insights_json' %}?period=${period}&start_date=${startDate}&end_date=${endDate}`);
+            const data = await response.json();
+
+            // Update total visits
+            document.getElementById('totalVisits').textContent = data.total_visits;
+
+            // Update charts
+            updateTimelineChart(data.timeline);
+            updateCountryChart(data.countries);
+            updateDeviceChart(data.devices);
+            updateTopPages(data.top_pages);
+        } catch (error) {
+            console.error('Error loading data:', error);
+        } finally {
+            isLoading = false;
+            hideLoading();
+        }
+    }
+
+    function showLoading() {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="spinner">
+            <svg class="animate-spin h-8 w-8 text-[var(--primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) overlay.remove();
+}
+    
+    function updateTimelineChart(data) {
+        const options = {
+        chart: {
+            type: 'area',
+            height: 350,
+            toolbar: { show: true },
+            zoom: { enabled: false },
+            animations: { enabled: true, speed: 800 }
+        },
+        series: [{
+            name: 'Visits',
+            data: data.map(item => item.visits)
+        }],
+        xaxis: {
+            categories: data.map(item => new Date(item.time_period).toLocaleDateString()),
+            labels: { style: { colors: '#64748b' } }
+        },
+        yaxis: { labels: { style: { colors: '#64748b' } } },
+        colors: ['#3B82F6'],
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.2 } },
+        tooltip: { theme: 'light' }
+    };
+    
+        if (timelineChart) {
+            timelineChart.updateOptions(options);
+        } else {
+            timelineChart = new ApexCharts(document.querySelector("#timelineChart"), options);
+            timelineChart.render();
+        }
+    }
+    
+    function updateCountryChart(data) {
+        const options = {
+            chart: { type: 'bar', height: 350 },
+            series: [{
+                name: 'Visits',
+                data: data.map(item => item.visits)
+            }],
+            xaxis: {
+                categories: data.map(item => item.country || 'Unknown')
+            },
+            colors: ['#10B981']
+        };
+    
+        if (countryChart) {
+            countryChart.updateOptions(options);
+        } else {
+            countryChart = new ApexCharts(document.querySelector("#countryChart"), options);
+            countryChart.render();
+        }
+    }
+    
+    function updateDeviceChart(data) {
+        const options = {
+            chart: { type: 'donut', height: 350 },
+            series: data.map(item => item.visits),
+            labels: data.map(item => item.device_type),
+            colors: ['#6366F1', '#F59E0B', '#EF4444']
+        };
+    
+        if (deviceChart) {
+            deviceChart.updateOptions(options);
+        } else {
+            deviceChart = new ApexCharts(document.querySelector("#deviceChart"), options);
+            deviceChart.render();
+        }
+    }
+    
+    function updateTopPages(data) {
+        const container = document.getElementById('topPagesList');
+        container.innerHTML = data.map(item => `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <span class="truncate">${item.url}</span>
+                <span class="text-blue-600 font-medium">${item.visits}</span>
+            </div>
+        `).join('');
+    }
+    
+    // Initial load
+    document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+
+{% endblock extra_javascript %}

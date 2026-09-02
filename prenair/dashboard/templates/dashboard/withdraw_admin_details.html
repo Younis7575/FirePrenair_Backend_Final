@@ -1,0 +1,271 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+    /* General Enhancements */
+    .form-container {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Username Section */
+    .username-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+    }
+    .username-section img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid #ddd;
+    }
+    .username-details {
+        flex: 1;
+    }
+    .username {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+    .user-status {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Payment Section */
+    .payment-info {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #28a745;
+        text-align: center;
+        margin: 20px 0;
+        border: 2px dashed #28a745;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* Status Section */
+    .status-section {
+        margin-top: 20px;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 5px;
+    }
+    .status-badge.pending {
+        background-color: #ffc107;
+        color: #fff;
+    }
+    .status-badge.processing {
+        background-color: #17a2b8;
+        color: #fff;
+    }
+    .status-badge.completed {
+        background-color: #28a745;
+        color: #fff;
+    }
+    .status-badge.failed {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    select {
+        border: 2px solid #ddd;
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 8px;
+        background: #fff;
+        transition: border-color 0.3s;
+    }
+    select:focus {
+        border-color: #17a2b8;
+        outline: none;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3 font-bold">Withdrawal Request Details</h4>
+
+                <!-- Username Section -->
+                <div class="username-section mt-6">
+                    <img src="{{ withdraw_request.user.profile_pic.url }}" alt="User Avatar">
+                    <div class="username-details">
+                        <div class="username">{{ withdraw_request.user.username }}</div>
+                        <div class="user-status">Location: {{ withdraw_request.user.country }}</div>
+                    </div>
+                </div>
+
+                <!-- Payment Section -->
+                <div class="payment-info">
+                    ${{ withdraw_request.amount }}
+                </div>
+
+                <!-- Payoneer Information -->
+                <div class="payoneer-info mt-5">
+                    {% if withdraw_request.payout_type == 'Paypal'  %}
+                    <label class="font-semibold text-gray-700">Paypal Account Information:</label>
+                    {% with paypal_info=withdraw_request.get_paypal_info %}
+                    <ul class="mt-2 pl-4 list-disc text-gray-600">
+                        <li><strong>Email:</strong> {{ paypal_info.email }}</li>
+                        <li><strong>Name:</strong> {{ paypal_info.name }}</li>
+                    </ul>
+                    {% endwith %}
+                    {% else %}
+                    <label class="font-semibold text-gray-700">Payoneer Account Information:</label>
+                    {% with payoneer_info=withdraw_request.get_paypal_info %}
+                    <ul class="mt-2 pl-4 list-disc text-gray-600">
+                        <li><strong>Email:</strong> {{ payoneer_info.email }}</li>
+                        <li><strong>Name:</strong> {{ payoneer_info.name }}</li>
+                    </ul>
+                    {% endwith %}
+                    {% endif %}
+                </div>
+
+                <!-- Status Section -->
+                <div class="status-section mt-5">
+                    <label class="font-semibold text-gray-700">Current Status:</label>
+                    <span class="status-badge {% if withdraw_request.status == 'PENDING' %}pending{% elif withdraw_request.status == 'PROCESSING' %}processing{% elif withdraw_request.status == 'COMPLETED' %}completed{% else %}failed{% endif %}">
+                        {{ withdraw_request.status }}
+                    </span>
+                </div>
+
+                <!-- Update Status -->
+                <div class="status-update mt-5">
+                    <label for="status" class="font-semibold text-gray-700">Update Withdrawal Status:</label>
+                    <form method="post" action="{% url 'withdraw_admin_detail' withdraw_request.id %}">
+                        {% csrf_token %}
+                        <select name="status" id="status" class="w-full mt-2">
+                            <option value="PENDING" {% if withdraw_request.status == "PENDING" %}selected{% endif %}>Pending</option>
+                            <option value="PROCESSING" {% if withdraw_request.status == "PROCESSING" %}selected{% endif %}>Processing</option>
+                            <option value="COMPLETED" {% if withdraw_request.status == "COMPLETED" %}selected{% endif %}>Completed</option>
+                            <option value="FAILED" {% if withdraw_request.status == "FAILED" %}selected{% endif %}>Failed</option>
+                        </select>
+                        <button type="submit" class="category-btn-final mt-7.5">Update Status</button>
+                    </form>
+                </div>
+                
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2024 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+
+        <!-- modal_create_meeting -->
+        <div class="modal_item modal_create_meeting relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_create_meeting">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Create Meeting</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <form class="form grid sm:grid-cols-2 gap-5 md:p-7.5 p-6">
+                <div class="date col-span-full">
+                    <label for="date">Date <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="date" type="date" required />
+                </div>
+                <div class="time">
+                    <label>Time <span class="text-red">*</span></label>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-4 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="10:00 AM">10:00 AM</span>
+                            <ul class="list_option scrollbar_custom w-full max-h-[200px] bg-white">
+                                <li class="capitalize" data-item="8:00 AM">8:00 AM</li>
+                                <li class="capitalize" data-item="8:30 AM">8:30 AM</li>
+                                <li class="capitalize" data-item="9:00 AM">9:00 AM</li>
+                                <li class="capitalize" data-item="9:30 AM">9:30 AM</li>
+                                <li class="capitalize" data-item="10:00 AM">10:00 AM</li>
+                                <li class="capitalize" data-item="10:30 AM">10:30 AM</li>
+                                <li class="capitalize" data-item="11:00 AM">11:00 AM</li>
+                                <li class="capitalize" data-item="11:30 AM">11:30 AM</li>
+                                <li class="capitalize" data-item="1:00 PM">1:00 PM</li>
+                                <li class="capitalize" data-item="1:30 PM">1:30 PM</li>
+                                <li class="capitalize" data-item="2:00 PM">2:00 PM</li>
+                                <li class="capitalize" data-item="2:30 PM">2:30 PM</li>
+                                <li class="capitalize" data-item="3:00 PM">3:00 PM</li>
+                                <li class="capitalize" data-item="3:30 PM">3:30 PM</li>
+                                <li class="capitalize" data-item="4:00 PM">4:00 PM</li>
+                                <li class="capitalize" data-item="4:30 PM">4:30 PM</li>
+                            </ul>
+                        </div>
+                        <span class="icon_down ph ph-caret-down right-3"></span>
+                    </div>
+                </div>
+                <div class="duration">
+                    <label for="duration">Duration <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="duration" type="text" placeholder="Duration" required />
+                </div>
+                <div class="col-span-full message">
+                    <label for="message">Message <span class="text-red">*</span></label>
+                    <textarea class="border w-full px-4 py-3 mt-2 border-line rounded-lg" id="message" name="message" rows="4" placeholder="Message" required></textarea>
+                </div>
+                <div class="flex items-center justify-end col-span-full gap-5 sm:mt-2">
+                    <button class="button-main bg-primary" type="submit">Re-schedule Meeting</button>
+                    <button class="button-main -border close_popup_btn" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- modal_delete -->
+        <div class="modal_item modal_delete relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_delete">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Delete</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <div class="flex flex-col items-center py-7 md:px-10 px-6">
+                <h5 class="heading5 text-center">Are you sure you want to delete?</h5>
+                <p class="mt-3 text-secondary text-center">Do you really want to delete your these record? <br class="max-sm:hidden" />This process can't be undo.</p>
+                <div class="flex items-center gap-5 mt-6">
+                    <button class="button-main bg-red btn_confirm_delete">Confirm</button>
+                    <button class="button-main -border close_popup_btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+{% endblock extra_javascript %}

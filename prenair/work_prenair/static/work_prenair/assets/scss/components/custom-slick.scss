@@ -1,0 +1,22 @@
+/* Slick */
+section {
+    &:has(.slide-overflow-unset) {
+        overflow: hidden;
+    }
+}
+
+.slick-slider {
+    &.slide-overflow-unset {
+        margin-left: -15px;
+        margin-right: -15px;
+
+        .slick-list {
+            margin-right: -1000px;
+            padding-right: 1000px;
+
+            .slick-slide {
+                padding: 0 15px;
+            }
+        }
+    }
+}

@@ -1,0 +1,1134 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% load course_filters %}
+{% block title %}Fireprenair | Eduprenair - Course{% endblock title %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+
+<link
+  href="https://unpkg.com/@videojs/themes@1/dist/city/index.css"
+  rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+<style>
+	/* Overlay */
+	.checkout-popup-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.6);
+		z-index: 999;
+		display: none;
+	}
+
+	.checkout-popup {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 400px;
+		background: #fff;
+		border-radius: 10px;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+		z-index: 1000;
+		display: none;
+		overflow: hidden;
+	}
+
+	/* Header */
+	.checkout-popup-header {
+		background: #ff6f61;
+		color: #fff;
+		padding: 15px;
+		font-size: 18px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	/* Close Button */
+	.checkout-popup-close {
+		background: none;
+		border: none;
+		font-size: 20px;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	/* Body */
+	.checkout-popup-body {
+		padding: 20px;
+		text-align: center;
+	}
+
+	.checkout-popup-body p {
+		font-size: 16px;
+		margin-bottom: 20px;
+	}
+
+	/* Buttons */
+	.checkout-popup-buttons {
+		display: flex;
+		justify-content: space-around;
+	}
+
+	.checkout-popup-btn {
+		padding: 10px 20px;
+		border-radius: 5px;
+		text-decoration: none;
+		color: #fff;
+		font-weight: bold;
+		cursor: pointer;
+		text-align: center;
+	}
+
+	.stripe-btn {
+		background-color: #6772e5;
+	}
+
+	.paypal-btn {
+		background-color: #ffc439;
+	}
+
+	/* Logo Styling */
+	.checkout-popup-logo {
+		display: block;
+		margin: 0 auto 10px;
+		height: 30px;
+	}
+
+	.star-rating {
+		display: flex;
+		flex-direction: row-reverse;
+		justify-content: center;
+	}
+
+	.star-rating input[type="radio"] {
+		display: none;
+	}
+
+	.star-rating label {
+		font-size: 2em;
+		color: #ddd;
+		cursor: pointer;
+	}
+
+	.star-rating input[type="radio"]:checked~label {
+		color: #ffc107;
+	}
+
+	.popup-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.6);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.popup-content {
+		background: white;
+		padding: 20px;
+		text-align: center;
+		border-radius: 8px;
+	}
+
+	.enroll-btn {
+		display: inline-block;
+		margin-top: 10px;
+		padding: 9px 15px;
+		background: #f67609;
+		color: white;
+		text-decoration: none;
+		border-radius: 10px;
+		border: none;
+	}
+
+	.video-player {
+		margin-top: 10px;
+	}
+
+	.video-modal {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(40, 69, 154, 0.75);
+		z-index: 12000;
+	}
+
+	.video-modal-content {
+		position: relative;
+		width: 80%;
+		max-width: 1200px;
+		margin: 5vh auto;
+		animation: modalAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		background: transparent;
+		border-radius: 15px;
+	}
+
+	.close-modal {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		color: white;
+		font-size: 2.5rem;
+		cursor: pointer;
+		transition: color 0.2s ease;
+		z-index: 1001;
+	}
+
+	.close-modal:hover {
+		color: #f66962;
+	}
+
+	.modal-video-container {
+		position: relative;
+		overflow: hidden;
+		border-radius: 15px;
+	}
+
+	.plyr {
+		border-radius: 15px;
+		overflow: hidden;
+	}
+
+	.play-button {
+    z-index: 2;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #ff817b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+    
+}
+
+
+
+.play-button i {
+    font-size: 28px;
+    color: white;
+}
+
+.waves {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: -46px;
+    left: 0;
+    z-index: 1;
+}
+
+.wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ff817b;
+    animation: wavePulse 3s infinite;
+}
+
+.wave-2 { animation-delay: 1s; }
+.wave-3 { animation-delay: 2s; }
+
+@keyframes wavePulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+
+
+	@keyframes modalAppear {
+		from {
+			transform: scale(0.8);
+			opacity: 0;
+		}
+
+		to {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.progress-section {
+		background-color: var(--bs-card-bg);
+		color: #fff;
+		padding: 40px;
+		border-radius: 12px;
+	}
+
+	.progress-header h3,
+	.progress-header h1,
+	.progress-header h2 {
+		font-size: 28px;
+		color: chocolate;
+		font-weight: 700;
+		text-align: center;
+		margin-bottom: 30px;
+	}
+
+	.progress-bar-custom {
+		position: relative;
+		background-color: #343a40;
+		border-radius: 12px;
+		height: 24px;
+		overflow: hidden;
+		box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.3);
+	}
+
+	.progress-bar-fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		border-radius: 12px;
+		background: linear-gradient(90deg, chocolate, #e8f100);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-weight: bold;
+		font-size: 14px;
+		transition: width 0.6s ease;
+		box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.progress-details {
+		margin-top: 25px;
+		display: flex;
+		justify-content: space-between;
+		font-size: 15px;
+		color: #adb5bd;
+		font-weight: 500;
+	}
+
+
+/* Modal Overlay */
+.popup-overlay-analysis {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  transition: opacity 0.3s ease;
+}
+
+/* Modal Content */
+.popup-content-analysis {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  transition: transform 0.3s ease;
+  animation: modalAppear 0.3s ease-out forwards;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Close Button */
+.close-modal-analysis {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 24px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-modal-analysis:hover {
+  color: #4b5563;
+  background-color: #f3f4f6;
+}
+
+/* Modal Header */
+.popup-content-analysis h4 {
+  color: #111827;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border: 0.25rem solid #1e3a8a;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner 0.75s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner p {
+  margin-top: 1rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Analysis Result */
+#analysisResult {
+  padding: 0.5rem 0;
+}
+
+#analysisResult h5 {
+  color: #111827;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+#analysisResult p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+#analysisResult ul {
+  margin: 0.75rem 0 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+#analysisResult li {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+#analysisResult li::before {
+  content: '';
+  position: absolute;
+  left: -1.25rem;
+  top: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #1e3a8a;
+  border-radius: 50%;
+}
+
+/* Error Message */
+#analysisError {
+  padding: 1rem;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#analysisResult, #analysisError {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Sentiment Badges */
+.sentiment-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.sentiment-badge.positive {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.sentiment-badge.negative {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.sentiment-badge.neutral {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Section styling */
+.sentiment-section,
+.key-points-section,
+.suggestions-section {
+  margin-bottom: 1.5rem;
+}
+
+.key-points-section ul {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem 1rem 1rem 2.5rem;
+}
+
+.suggestions-section p {
+  background-color: #f0f9ff;
+  border-left: 4px solid #1e3a8a;
+  padding: 1rem;
+  border-radius: 0 8px 8px 0;
+}
+</style>
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+			<!-- Inner Banner -->
+			<div class="inner-banner" style=" background: linear-gradient(to right, #5bb2d6, #fcdd7e);">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-8">
+							<div class="instructor-wrap border-bottom-0 m-0">
+								<div class="about-instructor align-items-center">
+									<div class="abt-instructor-img">
+										<a href="instructor-profile.html"><img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid"></a>
+									</div>
+									<div class="instructor-detail me-3">
+										<h5><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h5>
+										<p>{{course.category_l_2.name}}</p>
+									</div>									
+									<div class="rating mb-0">							
+										{% include 'edu_prenair/partials/course_rating.html' %}
+										<span class="d-inline-block average-rating"><span>{{course.average_rating}}</span>
+									</div>
+								</div>
+								<span class="web-badge mb-3">{{course.category_l_2.name}}</span>
+							</div>
+							<h2>{{course.title}}</h2>
+							<p style="color: white;">{{sub_description_html|safe}}</p>
+							<div class="course-info d-flex align-items-center border-bottom-0 m-0 p-0">
+								<div class="cou-info">
+									<img src="{% static 'edu_prenair/assets/img/temp/icon-01.svg' %}" alt="Img">
+									<p>{{course.total_lessons}}+ Lesson</p>
+								</div>
+								<div class="cou-info">
+									<img src="{% static 'edu_prenair/assets/img/temp/timer-icon.svg' %}" alt="Img">
+									<p>{{course.duration}} hour</p>
+								</div>
+								<div class="cou-info">
+									<img src="{% static 'edu_prenair/assets/img/temp/people.svg' %}" alt="Img">
+									<p>{{course.total_students}} students enrolled</p>
+								</div>
+							</div>							
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Inner Banner -->
+			
+			<!-- Course Content -->
+			<section class="page-content course-sec">
+				<div class="container">
+				
+					<div class="row">
+						<div class="col-lg-8">
+						
+							<!-- Overview -->
+							<div class="card overview-sec">
+								<div class="card-body">
+									<h5 class="subs-title">Overview</h5>
+									<h6>Course Description</h6>
+									<p>{{description_html|safe}}</p>
+									<h6>What you'll learn</h6>
+									<div class="row">
+										<div class="col-md-6">
+											<ul>
+												<li>{{course.category_l_1.name}}</li>
+												<li>{{course.category_l_2.name}}</li>
+												<li>{{course.category_l_3.name}}</li>
+											</ul>
+										</div>
+									</div>
+									<h6>Requirements</h6>
+									<ul class="mb-0">
+										<li>{{course.requirements}}</li>
+									</ul>
+								</div>
+							</div>
+							<!-- /Overview -->
+							
+							<!-- Course Content -->
+							<div class="card content-sec">
+							    <div class="card-body">
+							        <div class="row">
+							            <div class="col-sm-6">
+							                <h5 class="subs-title">Course Content</h5>
+							            </div>
+							            <div class="col-sm-6 text-sm-end">
+							                <h6>{{ modules.count }} Modules | {{ course.total_lessons }} Lessons | {{ course.duration }} Hours</h6>
+							            </div>
+							        </div>
+									
+									{% if is_enrolled %}
+									<button class="category-btn-final" onclick="window.location.href='{% url 'course_content' course.slug %}'">Go to Learning</button>
+									{% else %}
+									<button type="button" class="category-btn-final" style="color: white;"
+										onclick="openCheckoutPopup('{{ course.slug }}', '{{ course.title }}', '{{ course.price|floatformat:2 }}')">
+										BUY NOW
+									</button>
+									{% endif %}
+							        
+							    </div>
+							</div>
+														
+							<!-- Instructor -->
+							<div class="card instructor-sec">
+								<div class="card-body">
+									<h5 class="subs-title">About the instructor</h5>
+									<div class="instructor-wrap">
+										<div class="about-instructor">
+											<div class="abt-instructor-img">
+												<a href="{% url 'edu_profile' course.instructor.slug %}"><img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid"></a>
+											</div>
+											<div class="instructor-detail">
+												<h5><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h5>
+												<p>{{course.instructor.edu_bio}}</p>
+											</div>
+										</div>
+										<div class="rating">	
+                                            {% include 'edu_prenair/partials/course_rating.html' %}
+											<span class="d-inline-block average-rating">{{course.average_rating}} Course Average Rating</span>
+										</div>
+									</div>
+									<div class="course-info d-flex align-items-center">
+										<div class="cou-info">
+											<img src="{% static 'edu_prenair/assets/img/temp/play.svg' %}" alt="Img">
+											<p>{{course.instructor.edu_instrcutor_courses.count}} Courses</p>
+										</div>
+										<div class="cou-info">
+											<img src="{% static 'edu_prenair/assets/img/temp/icon-01.svg' %}" alt="Img">
+											<p>{{course.total_lessons}}+ Lesson</p>
+										</div>
+										<div class="cou-info">
+											<img src="{% static 'edu_prenair/assets/img/temp/icon-02.svg' %}" alt="Img">
+											<p>{{course.instructor.edu_instructor_courses_length}} Hours</p>
+										</div>
+										<div class="cou-info">
+											<img src="{% static 'edu_prenair/assets/img/temp/people.svg' %}" alt="Img">
+											<p>{{course.instructor.edu_instructor_total_students}} students enrolled</p>
+										</div>
+									</div>
+									<p>{{course.instructor.edu_bio}}</p>
+								</div>
+							</div>
+							<!-- /Instructor -->
+                            
+                            {% for rating in course.all_ratings %}
+							<!-- Reviews -->
+							<div class="card review-sec">
+								<div class="card-body">
+									<h5 class="subs-title">Review</h5>
+									<div class="instructor-wrap">
+										<div class="about-instructor">
+											<div class="abt-instructor-img">
+												<a href="{% url 'edu_profile' rating.user.slug %}"><img src="{{rating.user.profile_pic.url}}" alt="img" class="img-fluid"></a>
+											</div>
+											<div class="instructor-detail">
+												<h5><a href="{% url 'edu_profile' rating.user.slug %}">{{rating.user.name}}</a></h5>
+												<p>{{rating.user.edu_bio}}</p>
+											</div>
+										</div>
+										<div class="rating">	
+                                            {% if rating.rating == 1 %}						
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+
+                                            {% elif rating.rating == 2 %}
+                                            <i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+                                            {% elif rating.rating == 3 %}
+                                            <i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star"></i>
+											<i class="fas fa-star"></i>
+
+                                            {% elif rating.rating == 4 %}
+                                            <i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star"></i>
+
+                                            {% elif rating.rating == 5 %}
+                                            <i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+											<i class="fas fa-star filled"></i>
+                                            {% endif %}
+											<span class="d-inline-block average-rating">{{rating.rating}} Star Rating</span>
+										</div>
+									</div>
+									<p class="rev-info">“ {{rating.review}} “</p>
+								</div>
+								{% if request.user == course.instructor %}
+    							<div class="text-end mt-3">
+									<button style="display: inline;" class="category-btn-final mt-3" onclick="analyzeReview('{{ review.review|escapejs }}', this, false)">
+										<i class="fas fa-chart-line mr-2"></i> Analyze Review
+									</button>
+    							</div>
+    							{% endif %}
+							</div>
+							<!-- /Reviews -->
+                            {% endfor %}
+                            
+                            {% if is_enrolled and not request.user == course.instructor %}
+							<!-- Comment -->
+                             {% if not has_rated %}
+							<div class="card comment-sec">
+                                <div class="card-body">
+                                    <h5 class="subs-title">Post A Review</h5>
+                                    <form method="post" action="{% url 'post_review' course.slug %}">
+                                        {% csrf_token %}
+                                        <div class="input-block">
+                                            <!-- Star Rating UI -->
+                                            <div class="star-rating">
+                                                {% for i in "54321" %}
+                                                    <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" required>
+                                                    <label for="star{{ i }}" title="{{ i }} stars">&#9733;</label>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="input-block">
+                                            <textarea required name="review_text" rows="4" class="form-control" placeholder="Your Review"></textarea>
+                                        </div>
+                                        <div class="submit-section">
+                                            <button class="category-btn-final" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+							<!-- /Comment -->
+                            {% else %}
+                            <div class="instructor-detail me-3">
+                                <h5>You Have Rated this Course</h5>
+                            </div>
+                             {% endif %}
+							{% endif %}
+						</div>	
+						
+						<div class="col-lg-4">
+							<div class="sidebar-sec">
+							
+								<!-- Video -->
+								<div class="video-sec vid-bg">
+									<div class="card">
+										<div class="card-body">
+											{% with first_video=course.get_first_video %}
+												{% if first_video %}
+												<div class="vid-container" onclick="handlePreviewClick('{{ first_video.id }}', '{{ first_video.video.url }}')">
+													<div class="video-hero-overlay">
+														<div class="waves">
+															<div class="wave wave-1"></div>
+															<div class="wave wave-2"></div>
+															<div class="wave wave-3"></div>
+														</div>
+														<div class="play-icon play-button" style="top: 42%;">
+															<i style="padding-left: 0;" class="fa-solid fa-play"></i>
+														</div>
+													</div>
+													<img src="{{ course.thumbnail.url }}" alt="Course Thumbnail" class="video-hero-thumbnail">
+												</div>
+												{% else %}
+													<div class="video-thumbnail">
+														<img src="{{ course.thumbnail.url }}" alt="Course Thumbnail">
+													</div>
+												{% endif %}
+											{% endwith %}
+											<div class="video-details">
+												<div class="course-fee">
+													{% if course.is_course_free %}
+													<h2>FREE</h2>
+													{% endif %}
+													{% if course.is_course_on_discount %}
+													<p style="font-size: 1.5rem; background-color: #1e3a8a; color: white; padding: 0 10px; border-radius: 15px;">${{course.course_price}} <span>${{course.price}}</span></p>
+													{% endif %}
+												</div>
+												<div style="display: flex; justify-content: space-between;">
+													{% if course|is_user_enrolled:request.user %}
+													<button class="category-btn-final">Keep Learning</button>
+													{% else %}
+													<button type="button" class="category-btn-final" style="color: white;"
+														onclick="openCheckoutPopup('{{ course.slug }}', '{{ course.title }}', '{{ course.price|floatformat:2 }}')">
+														BUY NOW
+													</button>
+													{% endif %}
+													{% if course|in_wishlist:request.user %}
+													<button onclick="location.href='{% url 'remove_from_wishlist' course.slug %}'" class="btn btn-enroll category-btn-final" style="background-color: #ff6f61; border: none;">Remove from Wishlist</button>
+													{% else %}
+													<button onclick="location.href='{% url 'add_to_wishlist' course.slug %}'" class="btn btn-enroll category-btn-final" style="background-color: #ff6f61; border: none;">Add to Wishlist</button>
+													{% endif %}
+													</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- /Video -->
+								
+								<!-- Include -->
+								<div class="card include-sec">
+									<div class="card-body">
+										<div class="cat-title">
+											<h4>Includes</h4>
+										</div>
+										<ul>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/key.svg' %}" class="me-2" alt="Img"> Full lifetime access</li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/mobile.svg' %}" class="me-2" alt="Img"> Access on mobile and TV</li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/cloud.svg' %}" class="me-2" alt="Img"> Assignments</li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/teacher.svg' %}" class="me-2" alt="Img"> Certificate of Completion</li>
+										</ul>
+									</div>
+								</div>
+								<!-- /Include -->
+								
+								<!-- Features -->
+								<div class="card feature-sec">
+									<div class="card-body">
+										<div class="cat-title">
+											<h4>Includes</h4>
+										</div>
+										<ul>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/users.svg' %}" class="me-2" alt="Img"> Enrolled: <span>{{course.enrolled_students.count}} students</span></li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/timer.svg' %}" class="me-2" alt="Img"> Duration: <span>{{course.duration}} hours</span></li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/chapter.svg' %}" class="me-2" alt="Img"> Chapters: <span>{{course.total_modules.count}}</span></li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/video.svg' %}" class="me-2" alt="Img"> Video:<span> {{course.duration}} hours</span></li>
+											<li><img src="{% static 'edu_prenair/assets/img/temp/chart.svg' %}" class="me-2" alt="Img"> Level: <span>{{course.level}}</span></li>
+										</ul>
+									</div>
+								</div>
+								<!-- /Features -->
+								
+							</div>
+						</div>
+					</div>	
+				</div>
+			</section>
+			<!-- /Pricing Plan -->
+
+			<div class="video-modal" id="videoPlayer" style="display: none;">
+				<div class="video-modal-content">
+					<span class="close-modal" onclick="closeVideoPlayer()">&times;</span>
+					<div class="modal-video-container">
+						<video 
+							id="mainVideoPlayer" 
+							class="plyr" 
+							playsinline 
+							controls>
+							<source src="" type="video/mp4">
+						</video>
+					</div>
+				</div>
+			</div>
+
+		<!-- Enrollment Popup -->
+		<div id="enrollPopup" class="popup-overlay" style="display: none;">
+		    <div class="popup-content">
+		        <p>Please enroll in the course to access this content.</p>
+		        <button onclick="closeEnrollPopup()" class="enroll-btn">Close</button>
+		    </div>
+		</div>
+
+		<div class="checkout-popup-overlay" id="customOfferPopupOverlay"></div>
+		<div class="checkout-popup" id="paymentPopup" style="display: none;">
+			<div class="checkout-popup-header">
+				<h3 style="color: white;">Select Payment Method</h3>
+				<button class="checkout-popup-close" onclick="closePaymentPopup()">×</button>
+			</div>
+			<div class="checkout-popup-body">
+				<p>Please choose your preferred payment method for this course:</p>
+				<div class="checkout-popup-buttons">
+					<!-- Stripe -->
+					<a style="color: white;" id="stripeCheckoutButton" href="#" class="checkout-popup-btn stripe-btn">
+						<img src="https://cdn.brandfetch.io/idxAg10C0L/theme/light/logo.svg?c=1bfwsmEH20zzEfSNTed"
+							alt="Stripe Logo" class="checkout-popup-logo">
+						Pay with Stripe
+					</a>
+					<!-- PayPal -->
+					<a style="color: white;" id="paypalCheckoutButton" href="#" class="checkout-popup-btn paypal-btn">
+						<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png"
+							alt="PayPal Logo" class="checkout-popup-logo">
+						Pay with PayPal
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div id="analysisModal" class="popup-overlay-analysis" style="display: none;">
+			<div class="popup-content-analysis">
+				<span class="close-modal-analysis" onclick="closeAnalysisModal()">&times;</span>
+				<h4>Review Analysis</h4>
+				<div id="analysisContent">
+					<div class="loading-spinner">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p>Analyzing review sentiment...</p>
+					</div>
+					<div id="analysisResult" style="display: none;"></div>
+					<div id="analysisError" style="display: none;"></div>
+				</div>
+			</div>
+		</div>
+
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}
+
+{% block extra_javascript %}
+
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
+<script>
+	const player = new Plyr('#mainVideoPlayer');
+	let currentLessonId = null;
+	
+
+	function handlePreviewClick(lessonId, videoUrl) {
+	    const videoModal = document.getElementById('videoPlayer');
+	    const videoSource = document.querySelector('#mainVideoPlayer source');
+	    videoSource.src = videoUrl;
+	    player.source = {
+	        type: 'video',
+	        sources: [{
+	            src: videoUrl,
+	            type: 'video/mp4'
+	        }]
+	    };	
+	    currentLessonId = lessonId;
+	    videoModal.style.display = 'block';
+	    player.play();
+	}
+
+	function closeVideoPlayer() {
+	    const videoModal = document.getElementById('videoPlayer');
+	    videoModal.style.display = 'none';
+	    player.pause();
+	}
+
+    function closeEnrollPopup() {
+    document.getElementById('enrollPopup').style.display = 'none';
+	}
+
+	function handleLessonComplete(lessonId, courseSlug) {
+		console.log(courseSlug)
+    fetch(`/eduprenair/lesson-complete/${lessonId}/${courseSlug}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+	        if (data.progress) {
+	            const progressBar = document.getElementById("progress-bar");
+	            progressBar.style.width = `${data.progress}%`;
+	            progressBar.innerText = `${data.progress}%`;
+			
+	            const completedLessonsText = `Completed Lessons: ${data.completed_lessons} of ${data.total_lessons} Lessons`;
+	            document.getElementById("completed-lessons").innerText = completedLessonsText;
+
+	            if (data.is_completed) {
+	                alert("Course completed! Congratulations!");
+	            }
+	        }
+	    })
+	    .catch(error => console.error("Error updating lesson completion:", error));
+	}
+
+		document.querySelectorAll(".video-js").forEach(video => {
+	    const videoPlayer = videojs(video);
+
+	    videoPlayer.on("ended", function() {
+	        const lessonId = this.el().dataset.lessonId;
+	        const courseSlug = this.el().dataset.courseId;
+	        handleLessonComplete(lessonId, courseSlug);
+	    });
+	});
+
+
+	function openCheckoutPopup(courseSlug, courseTitle, coursePrice) {
+    const stripeCheckoutUrl = `/eduprenair/course/${courseSlug}/checkout/`;
+    const paypalCheckoutUrl = `/eduprenair/paypal-checkout/${courseSlug}/`;
+
+    document.getElementById('stripeCheckoutButton').setAttribute('href', stripeCheckoutUrl);
+    document.getElementById('paypalCheckoutButton').setAttribute('href', paypalCheckoutUrl);
+
+	document.getElementById("customOfferPopupOverlay").style.display = "block";
+    const popup = document.getElementById('paymentPopup');
+    popup.style.display = 'block';
+
+	}
+
+	function closePaymentPopup() {
+	    const popup = document.getElementById('paymentPopup');
+	    popup.style.display = 'none';
+		document.getElementById("customOfferPopupOverlay").style.display = "none";
+	}
+
+	function analyzeReview(reviewText, button) {
+    const courseInstructorSlug = '{{ course.instructor.slug }}';
+    const modal = document.getElementById('analysisModal');
+    const resultDiv = document.getElementById('analysisResult');
+    const errorDiv = document.getElementById('analysisError');
+    const loading = modal.querySelector('.loading-spinner');
+
+    modal.style.display = 'flex';
+    loading.style.display = 'flex';
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    
+    document.body.style.overflow = 'hidden';
+
+    fetch('/eduprenair/course/analyze-review/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({ review: reviewText, target_slug: courseInstructorSlug })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            errorDiv.textContent = data.error;
+            errorDiv.style.display = 'block';
+        } else {
+            let sentimentClass = 'neutral';
+            if (data.analysis.sentiment.toLowerCase().includes('positive')) {
+                sentimentClass = 'positive';
+            } else if (data.analysis.sentiment.toLowerCase().includes('negative')) {
+                sentimentClass = 'negative';
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="sentiment-section">
+                    <h5>Sentiment Analysis</h5>
+                    <span class="sentiment-badge ${sentimentClass}">${data.analysis.sentiment}</span>
+                </div>
+                
+                <div class="key-points-section">
+                    <h5>Key Points</h5>
+                    <ul>
+                        ${data.analysis.key_points.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="suggestions-section">
+                    <h5>Suggestions</h5>
+                    <p>${data.analysis.suggestions}</p>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+        loading.style.display = 'none';
+    })
+    .catch(error => {
+        errorDiv.textContent = 'Error analyzing review. Please try again.';
+        errorDiv.style.display = 'block';
+        loading.style.display = 'none';
+    });
+}
+
+function closeAnalysisModal() {
+    document.getElementById('analysisModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+document.getElementById('analysisModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeAnalysisModal();
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && document.getElementById('analysisModal').style.display === 'flex') {
+        closeAnalysisModal();
+    }
+});
+</script>
+{% endblock extra_javascript %}

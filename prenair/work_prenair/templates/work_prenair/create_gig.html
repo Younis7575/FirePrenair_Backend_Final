@@ -1,0 +1,1585 @@
+{% load static %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600;1,700&display=swap');
+
+    /* ── Overlay & popup shell ── */
+    .gig-creation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .popup-content {
+        background-color: #fff;
+        border-radius: 18px;
+        width: 92%;
+        max-width: 980px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+    }
+
+    .popup-layout {
+        display: flex;
+        height: 100%;
+        max-height: 90vh;
+    }
+
+    /* ── Left sidebar ── */
+    .popup-left {
+        width: 34%;
+        min-width: 280px;
+        background: linear-gradient(170deg, #f5a062 0%, #e8735c 42%, #d4587a 100%);
+        border-radius: 18px 90px 90px 18px;
+        padding: 26px 20px 20px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+    }
+
+    .popup-left::before {
+        content: '';
+        position: absolute;
+        width: 210px; height: 210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.10);
+        top: -40px; right: -60px;
+        z-index: 0;
+    }
+    .popup-left::after {
+        content: '';
+        position: absolute;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        top: 140px; right: -25px;
+        z-index: 0;
+    }
+    .deco-yellow {
+        position: absolute;
+        bottom: -10px; right: 10px;
+        width: 85px; height: 85px;
+        border-radius: 50%;
+        background: #f4c542;
+        z-index: 0;
+    }
+
+    .popup-left-logo { position: relative; z-index: 2; }
+
+    .gig-steps-sidebar {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        gap: 0;
+    }
+
+    .gig-step-item {
+        display: flex;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .step-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 40px;
+    }
+
+    .step-circle {
+        width: 40px; height: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.18);
+        transition: all 0.35s ease;
+        flex-shrink: 0;
+    }
+    .gig-step-item.active .step-circle {
+        background: rgba(255,255,255,0.92);
+        color: #e8735c;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: scale(1.08);
+    }
+    .gig-step-item.completed .step-circle {
+        background: rgba(255,255,255,0.92);
+        color: #27ae60;
+    }
+    .gig-step-item.completed .step-info h4 { color: #f4c542; }
+    .gig-step-item.completed .step-desc-box { background: rgba(244,197,66,0.30); }
+
+    .step-connector {
+        flex: 1;
+        width: 2.5px;
+        min-height: 12px;
+        background: rgba(255,255,255,0.25);
+        margin: 3px 0;
+        border-radius: 2px;
+        transition: background 0.3s;
+    }
+    .gig-step-item.completed .step-connector { background: rgba(255,255,255,0.55); }
+
+    .step-info { padding-bottom: 14px; flex: 1; }
+    .step-info h4 {
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 5px;
+        letter-spacing: 0.2px;
+    }
+    .step-desc-box {
+        background: rgba(255,240,210,0.22);
+        border-radius: 22px 0px 22px 22px;
+        padding: 8px 12px;
+    }
+    .step-desc-box p {
+        margin: 0;
+        font-size: 11px;
+        color: rgba(255,255,255,0.88);
+        line-height: 1.45;
+    }
+
+    .popup-left-bottom {
+        position: relative;
+        z-index: 2;
+        margin-top: 8px;
+    }
+    .gig-progress-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+    .gig-progress-dots .dot {
+        width: 22px; height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.30);
+        transition: all 0.35s;
+    }
+    .gig-progress-dots .dot.active {
+        background: #fff;
+        width: 32px;
+    }
+
+    /* ── Right panel ── */
+    .popup-right {
+        flex: 1;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        padding: 16px 28px 8px;
+        overflow-y: auto;
+        max-height: 90vh;
+        position: relative;
+    }
+    .popup-right::-webkit-scrollbar { width: 6px; }
+    .popup-right::-webkit-scrollbar-thumb { background: #e8735c; border-radius: 3px; }
+
+    .close-popup {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: linear-gradient(135deg, #e8735c 0%, #f4a261 100%);
+        color: #fff;
+        border: none;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 3px 12px rgba(232,115,92,0.3);
+        line-height: 1;
+    }
+    .close-popup:hover {
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 5px 18px rgba(232,115,92,0.4);
+    }
+
+    .popup-title {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        font-size: 26px;
+        color: #e8735c;
+        margin: 0 0 4px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    .popup-tagline {
+        font-size: 12.5px;
+        color: #666;
+        margin: 0 0 14px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* ── Form box ── */
+    .form-box {
+        position: relative;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 12px 24px 20px;
+        margin-bottom: 26px;
+        background: #fff;
+        overflow: visible;
+    }
+
+    .form-step { display: none; }
+    .form-step.active {
+        display: block;
+        animation: gigFadeIn 0.35s ease;
+    }
+    @keyframes gigFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .form-step-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    .form-step-desc {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 14px;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    /* ── Field rows ── */
+    .field-row {
+        display: flex;
+        gap: 16px;
+    }
+    .field-row > .g-field { flex: 1; min-width: 0; }
+
+    .g-field {
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .g-field.full-width { width: 100%; }
+
+    .g-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+
+    .form-control,
+    .category-dropdown {
+        width: 100%;
+        padding: 8px 14px;
+        border: 1.5px solid #ddd;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.25s, box-shadow 0.25s;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .form-control:focus,
+    .category-dropdown:focus {
+        border-color: #e8735c;
+        box-shadow: 0 0 0 3px rgba(232,115,92,0.10);
+    }
+    .form-control.field-error,
+    .category-dropdown.field-error {
+        border-color: #e74c3c !important;
+    }
+
+    textarea.form-control {
+        min-height: 66px;
+        max-height: 66px;
+        border-radius: 16px;
+        resize: none;
+        line-height: 1.4;
+    }
+    #gig_id_description_gig.form-control {
+        min-height: 84px;
+        max-height: 84px;
+    }
+
+    .form-control.file-input { padding: 6px 10px; cursor: pointer; }
+    .form-control.file-input::file-selector-button {
+        background: #ff6f61;
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 10px;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
+    .form-control.file-input::file-selector-button:hover { background: #e8735c; }
+
+    .char-counter {
+        text-align: right;
+        font-size: 0.72rem;
+        color: #999;
+        margin-top: 3px;
+    }
+
+    .helper-text {
+        font-size: 11px;
+        color: #999;
+        margin-top: 3px;
+        display: block;
+    }
+
+    .ai-generate-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+    }
+    .btn-ai-generate {
+        background: #fff8f6;
+        border: 1.5px solid #f4a261;
+        color: #e8735c;
+        border-radius: 16px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
+    .btn-ai-generate:hover { background: #fdeee9; }
+
+    /* ── Category & tags ── */
+    .category-row .g-field { min-width: 0; }
+
+    .tag-list {
+        max-height: 130px;
+        overflow-y: auto;
+        position: absolute;
+        width: 100%;
+        z-index: 10;
+        border: 1.5px solid #ddd;
+        border-radius: 12px;
+        background-color: #fff;
+        margin-top: 4px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .tag-list li { padding: 8px 14px; font-size: 12.5px; cursor: pointer; }
+    .tag-list li:hover { background: rgba(232,115,92,0.08); }
+
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #ff6f61;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 14px;
+        font-size: 12px;
+    }
+    .selected-tag button {
+        background: none;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        line-height: 1;
+        font-size: 13px;
+    }
+
+    /* ── Images ── */
+    .image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    .image-preview {
+        width: 90px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid #ddd;
+    }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .remove-image {
+        position: absolute;
+        top: 3px; right: 3px;
+        background: rgba(0,0,0,0.65);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 18px; height: 18px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Package tabs ── */
+    .package-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .package-tab {
+        background: #f5f5f5;
+        border: 1.5px solid #eee;
+        color: #666;
+        border-radius: 18px;
+        padding: 7px 18px;
+        font-size: 12.5px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+    .package-tab i { margin-right: 6px; }
+    .package-tab.active {
+        background: #ff6f61;
+        border-color: #ff6f61;
+        color: #fff;
+    }
+    .package-tab.tab-error { border-color: #e74c3c; color: #e74c3c; }
+
+    .package-panel { display: none; }
+    .package-panel.active { display: block; }
+
+    /* ── Loading spinner ── */
+    .loading-spinner { display: flex; align-items: center; }
+    .loading-spinner.hidden { display: none; }
+    .spinner {
+        border: 3px solid rgba(0,0,0,0.1);
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border-left-color: #e8735c;
+        animation: gigSpin 1s linear infinite;
+    }
+    @keyframes gigSpin { to { transform: rotate(360deg); } }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 11px;
+        margin-top: 4px;
+        font-weight: 500;
+        min-height: 0;
+    }
+
+    .text-red { color: #e74c3c; }
+
+    /* ── Nav buttons (straddle bottom border of form-box) ── */
+    .form-actions {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 50%);
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        width: calc(100% - 48px);
+        max-width: 380px;
+        pointer-events: none;
+    }
+    .form-actions button { pointer-events: auto; }
+
+    .btn-next, .btn-submit {
+        background: #ff6f61;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 30px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .btn-next:hover, .btn-submit:hover {
+        box-shadow: 0 4px 16px rgba(232,115,92,0.35);
+        transform: translateY(-1px);
+    }
+
+    .btn-prev {
+        background: #1e3a8a;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 26px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .btn-prev:hover {
+        box-shadow: 0 4px 14px rgba(30,58,138,0.30);
+        transform: translateY(-1px);
+    }
+    .btn-prev:disabled {
+        background: #ccc;
+        color: #888;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    #gig-step-1 .form-actions > button:first-child { visibility: hidden; }
+
+    /* ── Responsive ── */
+    @media (max-width: 991px) {
+        .popup-left { display: none; }
+        .popup-right { border-radius: 18px; }
+        .popup-content { max-width: 600px; }
+    }
+    @media (max-width: 576px) {
+        .popup-content { width: 98%; border-radius: 14px; }
+        .popup-right { padding: 18px 16px 16px; border-radius: 14px; }
+        .form-box { padding: 16px 14px 46px; margin-bottom: 28px; border-radius: 16px; }
+        .field-row { flex-direction: column; gap: 0; }
+        .field-row > .g-field { flex: none; }
+        .popup-title { font-size: 21px; }
+        .form-actions {
+            flex-direction: column-reverse;
+            gap: 10px;
+            width: calc(100% - 28px);
+            max-width: none;
+        }
+        .btn-next, .btn-submit, .btn-prev { width: 100%; text-align: center; }
+    }
+</style>
+
+<!-- Popup Content -->
+<div class="gig-creation-popup hidden"
+     data-mode="{% if gig %}edit{% else %}create{% endif %}"
+     data-has-image="{% if gig and gig.image %}1{% else %}0{% endif %}"
+     data-existing-image-url="{% if gig and gig.image %}{{ gig.image.url }}{% endif %}">
+    <div class="popup-content">
+        <div class="popup-layout">
+
+            <!-- ═══ Left Sidebar ═══ -->
+            <div class="popup-left">
+                <div class="deco-yellow"></div>
+
+                <div class="popup-left-logo">
+                    <img src="{% static 'images/navbar/fireprenair_logo_no_bg.png' %}" alt="logo" style="max-width: 35%;">
+                </div>
+
+                <div class="gig-steps-sidebar" id="gigSidebarSteps">
+                    <div class="gig-step-item active" data-step="1">
+                        <div class="step-marker">
+                            <div class="step-circle"><i class="fas fa-file-signature"></i></div>
+                            <div class="step-connector"></div>
+                        </div>
+                        <div class="step-info">
+                            <h4>Service Basics</h4>
+                            <div class="step-desc-box">
+                                <p>Title, description and category for your service.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gig-step-item" data-step="2">
+                        <div class="step-marker">
+                            <div class="step-circle"><i class="fas fa-images"></i></div>
+                            <div class="step-connector"></div>
+                        </div>
+                        <div class="step-info">
+                            <h4>Media &amp; Portfolio</h4>
+                            <div class="step-desc-box">
+                                <p>Show your work with images and a promo video.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gig-step-item" data-step="3">
+                        <div class="step-marker">
+                            <div class="step-circle"><i class="fas fa-tags"></i></div>
+                        </div>
+                        <div class="step-info">
+                            <h4>Packages &amp; Pricing</h4>
+                            <div class="step-desc-box">
+                                <p>Set up your Basic, Standard and Premium tiers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="popup-left-bottom">
+                    <div class="gig-progress-dots" id="gigProgressDots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Right Panel ═══ -->
+            <div class="popup-right">
+                <button id="close-popup" class="close-popup">&times;</button>
+
+                <h3 class="popup-title">{% if gig %}Edit Gig{% else %}Create New Gig{% endif %}</h3>
+                <p class="popup-tagline">Set up your service in three quick steps and start earning on Workprenair.</p>
+
+                <div class="form-box">
+                    <form id="gig-creation-form" action="{% if gig %}{% url 'edit_gig' gig.slug %}{% else %}{% url 'create_gig' %}{% endif %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Step 1: Service Basics -->
+                        <div id="gig-step-1" class="form-step active">
+                            <h4 class="form-step-title">Service Basics</h4>
+                            <p class="form-step-desc">Give your service a clear title and the right category.</p>
+
+                            <div class="g-field full-width">
+                                <label for="gig_id_title">Service Title <span class="text-red">*</span></label>
+                                <input type="text" id="gig_id_title" name="title" class="form-control" required
+                                    placeholder="Enter a compelling service title" maxlength="80"
+                                    value="{% if gig %}{{ gig.title }}{% endif %}">
+                                <div class="char-counter"><span id="gig-title-chars">{% if gig %}{{ gig.title|length }}{% else %}0{% endif %}</span>/80</div>
+                                <div class="error-message" id="gig-title-error"></div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="gig_id_short_description">Short Description <span class="text-red">*</span></label>
+                                <textarea id="gig_id_short_description" name="short_description" class="form-control" required
+                                    placeholder="Briefly describe your service (160-220 characters)" maxlength="220">{% if gig %}{{ gig.short_description|default:'' }}{% endif %}</textarea>
+                                <div class="char-counter"><span id="gig-short-desc-chars">{% if gig and gig.short_description %}{{ gig.short_description|length }}{% else %}0{% endif %}</span>/220</div>
+                                <div class="error-message" id="gig-short-desc-error"></div>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="field-row category-row" id="gig-category-selector">
+                                <div class="g-field">
+                                    <label>Category <span class="text-red">*</span></label>
+                                    <select id="gig_categoryLevel1" name="category_level_1" class="category-dropdown" required>
+                                        <option value="">Select Category</option>
+                                        {% if categories %}
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}" {% if selected_category_l_1 == category.id %}selected{% endif %}>
+                                                {{ category.name }}
+                                            </option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                    <div class="error-message" id="gig-category-error"></div>
+                                </div>
+
+                                <div class="g-field {% if not selected_category_l_2 %}hidden{% endif %}">
+                                    <label>Subcategory</label>
+                                    <select id="gig_categoryLevel2" name="category_level_2" class="category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+
+                                <div class="g-field {% if not selected_category_l_3 %}hidden{% endif %}">
+                                    <label>Specialty</label>
+                                    <select id="gig_categoryLevel3" name="category_level_3" class="category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+
+                                <input type="hidden" name="selected_category_id" id="gig-selectedCategoryId">
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="g-field full-width">
+                                <label>Tags</label>
+                                <div id="gig-tag-selector" class="relative">
+                                    <input type="text" id="gig-tagInput" placeholder="Add tags and press Enter" class="form-control">
+                                    <ul id="gig-tagList" class="tag-list hidden"></ul>
+                                    <div id="gig-selectedTags" class="selected-tags">
+                                        {% if gig and existing_tags %}
+                                            {% for tag in existing_tags %}
+                                            <span class="selected-tag">
+                                                {{ tag.name }}
+                                                <button type="button" class="remove-tag" data-id="{{ tag.id }}">×</button>
+                                            </span>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <input type="hidden" name="tags" id="gig-tags" value="{% if gig and existing_tags %}{{ existing_tags|safe }}{% else %}[]{% endif %}">
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-prev" disabled>Previous</button>
+                                <button type="button" class="btn-next" data-next="2" onclick="validateGigStep1()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Media & Portfolio -->
+                        <div id="gig-step-2" class="form-step">
+                            <h4 class="form-step-title">Media &amp; Portfolio</h4>
+                            <p class="form-step-desc">Describe your service in depth and show off your work.</p>
+
+                            <div class="g-field full-width">
+                                <label for="gig_id_description_gig">Full Description <span class="text-red">*</span></label>
+                                <textarea id="gig_id_description_gig" name="gig_description" class="form-control" required
+                                    placeholder="Describe your service in detail (scope, approach, deliverables, FAQs)">{% if gig %}{{ gig.description }}{% endif %}</textarea>
+                                <div class="error-message" id="gig-description-error"></div>
+                                <div class="ai-generate-row">
+                                    <button type="button" id="gig-generate-description-btn" class="btn-ai-generate"
+                                        onclick="generateGigDescription()">
+                                        <i class="fas fa-wand-magic-sparkles"></i>Generate with AI
+                                    </button>
+                                    <div id="gig-loading-spinner" class="loading-spinner hidden">
+                                        <div class="spinner"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field-row">
+                                <div class="g-field">
+                                    <label for="gig_id_image">Featured Image <span class="text-red">*</span></label>
+                                    <input type="file" id="gig_id_image" name="image" accept="image/*" class="form-control file-input" {% if not gig %}required{% endif %}>
+                                    <span class="helper-text">16:9, 1920×1080+, JPG/PNG, ≤ 5MB</span>
+                                    {% if gig %}
+                                    <span class="helper-text">Leave blank to keep current image.</span>
+                                    {% endif %}
+                                    <div class="error-message" id="gig-image-error"></div>
+
+                                    <div class="image-preview-container">
+                                        <div id="gig-featured-image-preview" class="image-preview {% if not gig or not gig.image %}hidden{% endif %}">
+                                            <img src="{% if gig and gig.image %}{{ gig.image.url }}{% else %}#{% endif %}" alt="Featured image preview">
+                                            <button type="button" class="remove-image">&times;</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="gig_id_additional_images">Additional Images (Optional)</label>
+                                    <input type="file" id="gig_id_additional_images" name="additional_images" accept="image/*" multiple
+                                        class="form-control file-input">
+                                    <span class="helper-text">Up to 3, JPG/PNG, ≤ 5MB each</span>
+
+                                    <div class="image-preview-container" id="gig-additional-images-preview"></div>
+                                </div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="gig_id_promo_video">Promo Video (Optional)</label>
+                                <input type="url" id="gig_id_promo_video" name="promo_video" class="form-control"
+                                    placeholder="YouTube or Vimeo URL" value="{% if gig %}{{ gig.promo_video|default:'' }}{% endif %}">
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-prev" data-prev="1">Previous</button>
+                                <button type="button" class="btn-next" data-next="3" onclick="validateGigStep2()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Packages & Pricing -->
+                        <div id="gig-step-3" class="form-step">
+                            <h4 class="form-step-title">Packages &amp; Pricing</h4>
+                            <p class="form-step-desc">Define what's included in each package tier.</p>
+
+                            <div class="package-tabs" id="gig-package-tabs">
+                                <button type="button" class="package-tab active" data-package="basic"><i class="fas fa-circle"></i>Basic</button>
+                                <button type="button" class="package-tab" data-package="standard"><i class="fas fa-star"></i>Standard</button>
+                                <button type="button" class="package-tab" data-package="premium"><i class="fas fa-crown"></i>Premium</button>
+                            </div>
+
+                            {% for package in package_names %}
+                            <div class="package-panel {% if forloop.first %}active{% endif %}" data-package="{{ package }}">
+                                <div class="field-row">
+                                    <div class="g-field">
+                                        <label for="gig_{{ package }}_name">{{ package|title }} Package Name</label>
+                                        <input type="text" id="gig_{{ package }}_name" name="{{ package }}_name" placeholder="{{ package|title }} Package Name"
+                                            class="form-control" value="{% if gig %}{% if package == 'basic' %}{{ gig.basic_name }}{% elif package == 'standard' %}{{ gig.standard_name }}{% elif package == 'premium' %}{{ gig.premium_name }}{% endif %}{% endif %}">
+                                        <div class="error-message" id="gig-{{ package }}-name-error"></div>
+                                    </div>
+                                    <div class="g-field">
+                                        <label for="gig_{{ package }}_delivery_time">Delivery Time (days)</label>
+                                        <input type="number" id="gig_{{ package }}_delivery_time" name="{{ package }}_delivery_time" placeholder="e.g. 3"
+                                            class="form-control" value="{% if gig %}{% if package == 'basic' %}{{ gig.basic_delivery_time }}{% elif package == 'standard' %}{{ gig.standard_delivery_time }}{% elif package == 'premium' %}{{ gig.premium_delivery_time }}{% endif %}{% endif %}">
+                                        <div class="error-message" id="gig-{{ package }}-delivery-time-error"></div>
+                                    </div>
+                                </div>
+
+                                <div class="g-field full-width">
+                                    <label for="gig_{{ package }}_description">{{ package|title }} Package Description</label>
+                                    <textarea id="gig_{{ package }}_description" name="{{ package }}_description"
+                                        placeholder="{{ package|title }} Package Description"
+                                        class="form-control">{% if gig %}{% if package == 'basic' %}{{ gig.basic_description }}{% elif package == 'standard' %}{{ gig.standard_description }}{% elif package == 'premium' %}{{ gig.premium_description }}{% endif %}{% endif %}</textarea>
+                                    <div class="error-message" id="gig-{{ package }}-description-error"></div>
+                                </div>
+
+                                <div class="field-row">
+                                    <div class="g-field">
+                                        <label for="gig_{{ package }}_revisions">Revisions</label>
+                                        <select id="gig_{{ package }}_revisions" name="{{ package }}_revisions" class="category-dropdown">
+                                            <option value="0" {% if gig %}{% if package == 'basic' and gig.basic_revisions == 0 %}selected{% elif package == 'standard' and gig.standard_revisions == 0 %}selected{% elif package == 'premium' and gig.premium_revisions == 0 %}selected{% endif %}{% endif %}>0</option>
+                                            <option value="1" {% if gig %}{% if package == 'basic' and gig.basic_revisions == 1 %}selected{% elif package == 'standard' and gig.standard_revisions == 1 %}selected{% elif package == 'premium' and gig.premium_revisions == 1 %}selected{% endif %}{% endif %}>1</option>
+                                            <option value="2" {% if gig %}{% if package == 'basic' and gig.basic_revisions == 2 %}selected{% elif package == 'standard' and gig.standard_revisions == 2 %}selected{% elif package == 'premium' and gig.premium_revisions == 2 %}selected{% endif %}{% endif %}>2</option>
+                                            <option value="999" {% if gig %}{% if package == 'basic' and gig.basic_revisions == 999 %}selected{% elif package == 'standard' and gig.standard_revisions == 999 %}selected{% elif package == 'premium' and gig.premium_revisions == 999 %}selected{% endif %}{% endif %}>Unlimited</option>
+                                        </select>
+                                        <div class="error-message" id="gig-{{ package }}-revisions-error"></div>
+                                    </div>
+                                    <div class="g-field">
+                                        <label for="gig_{{ package }}_price">Price ($)</label>
+                                        <input type="number" id="gig_{{ package }}_price" name="{{ package }}_price" placeholder="0.00" step="0.01"
+                                            class="form-control" value="{% if gig %}{% if package == 'basic' %}{{ gig.basic_price }}{% elif package == 'standard' %}{{ gig.standard_price }}{% elif package == 'premium' %}{{ gig.premium_price }}{% endif %}{% endif %}">
+                                        <div class="error-message" id="gig-{{ package }}-price-error"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-prev" data-prev="2">Previous</button>
+                                <button type="submit" class="btn-submit">{% if gig %}Update Gig{% else %}Publish Gig{% endif %}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the gig creation form functionality
+    function initializeGigCreationForm() {
+        const popup = document.querySelector('.gig-creation-popup');
+        const closeBtn = document.getElementById('close-popup');
+        const form = document.getElementById('gig-creation-form');
+
+        if (!popup || !closeBtn) return;
+
+        // Close popup when close button is clicked
+        closeBtn.addEventListener('click', () => {
+            popup.classList.add('hidden');
+        });
+
+        // Close popup when clicking outside
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) {
+                popup.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                popup.classList.add('hidden');
+            }
+        });
+
+        // Multi-step navigation
+        const stepButtons = document.querySelectorAll('.btn-next, .btn-prev');
+
+        stepButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (button.classList.contains('btn-prev')) {
+                    const prevStep = button.getAttribute('data-prev');
+                    if (prevStep) {
+                        navigateToGigStep(prevStep);
+                    }
+                }
+                // btn-next validation/navigation is handled by onclick handlers
+            });
+        });
+
+        // Package tabs (Step 3)
+        const packageTabs = document.querySelectorAll('.package-tab');
+        packageTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                activatePackageTab(tab.getAttribute('data-package'));
+            });
+        });
+
+        // Character counters
+        const titleInput = document.getElementById('gig_id_title');
+        const titleChars = document.getElementById('gig-title-chars');
+        const shortDescInput = document.getElementById('gig_id_short_description');
+        const shortDescChars = document.getElementById('gig-short-desc-chars');
+
+        if (titleInput && titleChars) {
+            titleInput.addEventListener('input', () => {
+                titleChars.textContent = titleInput.value.length;
+            });
+        }
+
+        if (shortDescInput && shortDescChars) {
+            shortDescInput.addEventListener('input', () => {
+                shortDescChars.textContent = shortDescInput.value.length;
+            });
+        }
+
+        // Image preview functionality
+        const featuredImageInput = document.getElementById('gig_id_image');
+        const featuredImagePreview = document.getElementById('gig-featured-image-preview');
+        const additionalImagesInput = document.getElementById('gig_id_additional_images');
+        const additionalImagesPreview = document.getElementById('gig-additional-images-preview');
+
+        if (featuredImageInput && featuredImagePreview) {
+            featuredImageInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        featuredImagePreview.querySelector('img').src = e.target.result;
+                        featuredImagePreview.classList.remove('hidden');
+                    }
+
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Remove featured image
+            const removeImageBtn = featuredImagePreview.querySelector('.remove-image');
+            if (removeImageBtn) {
+                removeImageBtn.addEventListener('click', function () {
+                    const isEditMode = popup.dataset.mode === 'edit';
+                    const existingImageUrl = popup.dataset.existingImageUrl || '';
+                    if (isEditMode && existingImageUrl) {
+                        featuredImagePreview.querySelector('img').src = existingImageUrl;
+                        featuredImagePreview.classList.remove('hidden');
+                    } else {
+                        featuredImagePreview.classList.add('hidden');
+                    }
+                    featuredImageInput.value = '';
+                });
+            }
+        }
+
+        if (additionalImagesInput && additionalImagesPreview) {
+            additionalImagesInput.addEventListener('change', function () {
+                additionalImagesPreview.innerHTML = '';
+
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            const previewDiv = document.createElement('div');
+                            previewDiv.className = 'image-preview';
+
+                            previewDiv.innerHTML = `
+                            <img src="${e.target.result}" alt="Additional image preview">
+                            <button type="button" class="remove-image">&times;</button>
+                        `;
+
+                            additionalImagesPreview.appendChild(previewDiv);
+
+                            // Add remove functionality
+                            previewDiv.querySelector('.remove-image').addEventListener('click', function () {
+                                previewDiv.remove();
+                            });
+                        }
+
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+        }
+
+        // Category and Tag functionality (your existing code)
+        const categoryLevel1 = document.getElementById('gig_categoryLevel1');
+        const categoryLevel2 = document.getElementById('gig_categoryLevel2');
+        const categoryLevel3 = document.getElementById('gig_categoryLevel3');
+        const selectedCategoryId = document.getElementById('gig-selectedCategoryId');
+
+        // Function to fetch child categories
+        async function fetchCategories(parentId, targetDropdown) {
+            targetDropdown.innerHTML = '<option value="">Loading...</option>';
+            try {
+                const response = await fetch(`/workprenair/api/categories/${parentId}/`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    targetDropdown.innerHTML = '<option value="">Select Category</option>';
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        targetDropdown.appendChild(option);
+                    });
+                    targetDropdown.parentElement.classList.remove('hidden');
+                } else {
+                    targetDropdown.innerHTML = '<option value="">No Categories Found</option>';
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                targetDropdown.innerHTML = '<option value="">Error Loading Categories</option>';
+            }
+        }
+
+        // Event Listeners for each level
+        if (categoryLevel1) {
+            categoryLevel1.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                if (categoryLevel2) {
+                    categoryLevel2.innerHTML = '<option value="">Select Category</option>';
+                    categoryLevel2.parentElement.classList.add('hidden');
+                }
+                if (categoryLevel3) {
+                    categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+                    categoryLevel3.parentElement.classList.add('hidden');
+                }
+
+                if (selectedId) {
+                    fetchCategories(selectedId, categoryLevel2);
+                    if (selectedCategoryId) {
+                        selectedCategoryId.value = selectedId;
+                    }
+                }
+            });
+        }
+
+        if (categoryLevel2) {
+            categoryLevel2.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                if (categoryLevel3) {
+                    categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+                    categoryLevel3.parentElement.classList.add('hidden');
+                }
+
+                if (selectedId) {
+                    fetchCategories(selectedId, categoryLevel3);
+                    if (selectedCategoryId) {
+                        selectedCategoryId.value = selectedId;
+                    }
+                }
+            });
+        }
+
+        if (categoryLevel3) {
+            categoryLevel3.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                if (selectedId && selectedCategoryId) {
+                    selectedCategoryId.value = selectedId;
+                }
+            });
+        }
+
+        // Pre-populate categories in edit mode
+        const selectedCategoryL1 = "{{ selected_category_l_1|default:'' }}";
+        const selectedCategoryL2 = "{{ selected_category_l_2|default:'' }}";
+        const selectedCategoryL3 = "{{ selected_category_l_3|default:'' }}";
+
+        if (selectedCategoryL1 && categoryLevel1 && categoryLevel1.value === selectedCategoryL1) {
+            // Category already selected in template, just load children
+            if (selectedCategoryL2 && categoryLevel2) {
+                fetchCategories(selectedCategoryL1, categoryLevel2).then(() => {
+                    categoryLevel2.value = selectedCategoryL2;
+                    if (selectedCategoryL3 && categoryLevel3) {
+                        fetchCategories(selectedCategoryL2, categoryLevel3).then(() => {
+                            categoryLevel3.value = selectedCategoryL3;
+                        });
+                    }
+                });
+            }
+        } else if (selectedCategoryL1 && categoryLevel1) {
+            categoryLevel1.value = selectedCategoryL1;
+            fetchCategories(selectedCategoryL1, categoryLevel2).then(() => {
+                if (selectedCategoryL2 && categoryLevel2) {
+                    categoryLevel2.value = selectedCategoryL2;
+                    fetchCategories(selectedCategoryL2, categoryLevel3).then(() => {
+                        if (selectedCategoryL3 && categoryLevel3) {
+                            categoryLevel3.value = selectedCategoryL3;
+                        }
+                    });
+                }
+            });
+        }
+
+        // Tags functionality
+        const tagInput = document.getElementById('gig-tagInput');
+        const tagList = document.getElementById('gig-tagList');
+        const selectedTagsDiv = document.getElementById('gig-selectedTags');
+        const hiddenTagsInput = document.getElementById('gig-tags');
+
+        let selectedTags = [];
+
+        // Initialize selected tags from existing tags in edit mode
+        {% if gig and existing_tags %}
+        try {
+            selectedTags = {{ existing_tags|safe }};
+        } catch (e) {
+            console.error('Error parsing existing tags:', e);
+            selectedTags = [];
+        }
+        {% endif %}
+
+        async function fetchTags(query) {
+            try {
+                const response = await fetch(`/workprenair/api/search_tags/?q=${query}`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    return data.tags;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error fetching tags:', error);
+                return [];
+            }
+        }
+
+        function updateTagList(tags) {
+            if (tags.length > 0) {
+                tagList.innerHTML = tags
+                    .map(tag => `<li data-id="${tag.id}">${tag.name}</li>`)
+                    .join('');
+                tagList.classList.remove('hidden');
+            }
+        }
+
+        function addTag(tag) {
+            if (!selectedTags.find(t => t.id === tag.id)) {
+                selectedTags.push(tag);
+
+                // Update UI
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'selected-tag';
+                tagSpan.innerHTML = `
+                ${tag.name}
+                <button type="button" class="remove-tag" data-id="${tag.id}">×</button>
+            `;
+                selectedTagsDiv.appendChild(tagSpan);
+
+                // Update hidden input value
+                hiddenTagsInput.value = JSON.stringify(selectedTags.map(t => t.id));
+            }
+        }
+
+        function removeTag(tagId) {
+            selectedTags = selectedTags.filter(tag => tag.id !== tagId);
+
+            // Update UI
+            const tagSpan = selectedTagsDiv.querySelector(`.remove-tag[data-id="${tagId}"]`).parentElement;
+            selectedTagsDiv.removeChild(tagSpan);
+
+            // Update hidden input value
+            hiddenTagsInput.value = JSON.stringify(selectedTags.map(t => t.id));
+        }
+
+        if (tagInput && tagList) {
+            tagInput.addEventListener('input', async () => {
+                const query = tagInput.value.trim();
+                if (query.length > 1) {
+                    const tags = await fetchTags(query);
+                    updateTagList(tags);
+                } else {
+                    tagList.classList.add('hidden');
+                }
+            });
+        }
+
+        if (tagList) {
+            tagList.addEventListener('click', (e) => {
+                if (e.target.tagName === 'LI') {
+                    const tagId = parseInt(e.target.getAttribute('data-id'), 10);
+                    const tagName = e.target.textContent.trim();
+                    addTag({ id: tagId, name: tagName });
+
+                    // Clear input and hide dropdown
+                    if (tagInput) {
+                        tagInput.value = '';
+                    }
+                    tagList.classList.add('hidden');
+                }
+            });
+        }
+
+        // Event listener for removing a selected tag
+        if (selectedTagsDiv) {
+            selectedTagsDiv.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-tag')) {
+                    const tagId = parseInt(e.target.getAttribute('data-id'), 10);
+                    removeTag(tagId);
+                }
+            });
+        }
+
+        // Modify tag input event listener
+        if (tagInput) {
+            tagInput.addEventListener('keydown', async (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tagName = tagInput.value.trim();
+                    if (tagName) {
+                        // Check if already exists in selected tags
+                        const existing = selectedTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
+                        if (!existing) {
+                            try {
+                                const response = await fetch('/workprenair/api/create_tag/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}',
+                                    },
+                                    body: JSON.stringify({ name: tagName })
+                                });
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    addTag({ id: data.tag.id, name: data.tag.name });
+                                    tagInput.value = '';
+                                } else {
+                                    alert('Error creating tag: ' + (data.error || 'Unknown error'));
+                                }
+                            } catch (error) {
+                                console.error('Error creating tag:', error);
+                                alert('Error creating tag. Please try again.');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Validate all steps before submission
+            if (!validateGigStep1() || !validateGigStep2() || !validateGigStep3()) {
+                alert('Please complete all required fields before submitting.');
+                return;
+            }
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        window.location.href = data.redirect_url;
+                    } else {
+                        if (data.form_errors) {
+                            // Display form errors
+                            Object.keys(data.form_errors).forEach(field => {
+                                const errorEl = document.getElementById(`gig-${field.replace('_', '-')}-error`);
+                                if (errorEl) {
+                                    errorEl.textContent = data.form_errors[field][0];
+                                }
+                            });
+                        } else {
+                            alert('Error: ' + (data.error || 'Unknown error'));
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error creating gig. Please try again.');
+                });
+        });
+    }
+
+    // Package tab switching (Step 3)
+    function activatePackageTab(packageName) {
+        document.querySelectorAll('.package-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-package') === packageName);
+        });
+        document.querySelectorAll('.package-panel').forEach(panel => {
+            panel.classList.toggle('active', panel.getAttribute('data-package') === packageName);
+        });
+    }
+
+    // Validation functions for each step
+    function validateGigStep1() {
+        let isValid = true;
+
+        // Clear previous errors
+        clearGigStepErrors(1);
+
+        // Validate title
+        const title = document.getElementById('gig_id_title');
+        if (!title || !title.value.trim()) {
+            showGigError('gig-title', 'Service title is required');
+            isValid = false;
+        } else if (title.value.trim().length < 5) {
+            showGigError('gig-title', 'Service title must be at least 5 characters');
+            isValid = false;
+        }
+
+        // Validate short description
+        const shortDesc = document.getElementById('gig_id_short_description');
+        if (!shortDesc || !shortDesc.value.trim()) {
+            showGigError('gig-short-desc', 'Short description is required');
+            isValid = false;
+        } else if (shortDesc.value.trim().length < 160) {
+            showGigError('gig-short-desc', 'Short description must be at least 160 characters');
+            isValid = false;
+        }
+
+        // Validate category
+        const category = document.getElementById('gig_categoryLevel1');
+        if (!category || !category.value) {
+            showGigError('gig-category', 'Please select a category');
+            isValid = false;
+        }
+
+        if (isValid) {
+            navigateToGigStep(2);
+        }
+
+        return isValid;
+    }
+
+    function validateGigStep2() {
+        let isValid = true;
+
+        // Clear previous errors
+        clearGigStepErrors(2);
+
+        // Validate full description
+        const description = document.getElementById('gig_id_description_gig');
+        if (!description || !description.value.trim()) {
+            showGigError('gig-description', 'Full description is required');
+            isValid = false;
+        }
+
+        // Validate featured image
+        const featuredImageInput = document.getElementById('gig_id_image');
+        const popup = document.querySelector('.gig-creation-popup');
+        const isEditMode = popup && popup.dataset.mode === 'edit';
+        const hasImage = popup && popup.dataset.hasImage === '1';
+
+        if (featuredImageInput) {
+            const featuredImage = featuredImageInput.files[0];
+            if (!featuredImage && (!isEditMode || !hasImage)) {
+                showGigError('gig-image', 'Featured image is required');
+                isValid = false;
+            } else if (featuredImage) {
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(featuredImage.type)) {
+                    showGigError('gig-image', 'Please upload a JPG or PNG image');
+                    isValid = false;
+                }
+
+                // Check file size (5MB max)
+                if (featuredImage.size > 5 * 1024 * 1024) {
+                    showGigError('gig-image', 'Image size must be less than 5MB');
+                    isValid = false;
+                }
+            }
+        }
+
+        // Validate additional images (if any)
+        const additionalImagesInput = document.getElementById('gig_id_additional_images');
+        if (additionalImagesInput && additionalImagesInput.files && additionalImagesInput.files.length > 3) {
+            alert('You can upload a maximum of 3 additional images');
+            isValid = false;
+        }
+
+        if (isValid) {
+            navigateToGigStep(3);
+        }
+
+        return isValid;
+    }
+
+    function validateGigStep3() {
+        let isValid = true;
+        let firstInvalidPackage = null;
+
+        // Clear previous errors
+        clearGigStepErrors(3);
+        document.querySelectorAll('.package-tab').forEach(tab => tab.classList.remove('tab-error'));
+
+        // Validate each package - hardcoded since they're fixed
+        const packageNames = ['basic', 'standard', 'premium'];
+        packageNames.forEach(package => {
+            let packageValid = true;
+
+            // Package name
+            const packageName = document.getElementById(`gig_${package}_name`);
+            if (!packageName || !packageName.value.trim()) {
+                showGigError(`gig-${package}-name`, 'Package name is required');
+                isValid = false;
+                packageValid = false;
+            }
+
+            // Package description
+            const packageDesc = document.getElementById(`gig_${package}_description`);
+            if (!packageDesc || !packageDesc.value.trim()) {
+                showGigError(`gig-${package}-description`, 'Package description is required');
+                isValid = false;
+                packageValid = false;
+            }
+
+            // Delivery time
+            const deliveryTime = document.getElementById(`gig_${package}_delivery_time`);
+            if (!deliveryTime || !deliveryTime.value || deliveryTime.value < 1) {
+                showGigError(`gig-${package}-delivery-time`, 'Delivery time must be at least 1 day');
+                isValid = false;
+                packageValid = false;
+            }
+
+            // Price
+            const price = document.getElementById(`gig_${package}_price`);
+            if (!price || !price.value || price.value < 0.01) {
+                showGigError(`gig-${package}-price`, 'Price must be at least $0.01');
+                isValid = false;
+                packageValid = false;
+            }
+
+            if (!packageValid) {
+                const tab = document.querySelector(`.package-tab[data-package="${package}"]`);
+                if (tab) tab.classList.add('tab-error');
+                if (!firstInvalidPackage) firstInvalidPackage = package;
+            }
+        });
+
+        if (firstInvalidPackage) {
+            activatePackageTab(firstInvalidPackage);
+        }
+
+        return isValid;
+    }
+
+    function showGigError(fieldId, message) {
+        const errorElement = document.getElementById(`${fieldId}-error`);
+        const inputElement = document.getElementById(fieldId.replace('gig-', 'gig_id_').replace(/-/g, '_'));
+
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+
+        if (inputElement) {
+            inputElement.classList.add('field-error');
+        }
+    }
+
+    function clearGigStepErrors(stepNumber) {
+        const stepElement = document.getElementById(`gig-step-${stepNumber}`);
+        if (!stepElement) return;
+
+        const errorElements = stepElement.querySelectorAll('.error-message');
+        const fieldElements = stepElement.querySelectorAll('.form-control, .category-dropdown');
+
+        errorElements.forEach(element => {
+            element.textContent = '';
+        });
+
+        fieldElements.forEach(element => {
+            element.classList.remove('field-error');
+        });
+    }
+
+    function navigateToGigStep(stepNumber) {
+        stepNumber = parseInt(stepNumber);
+        const steps = document.querySelectorAll('.form-step');
+
+        // Hide all steps
+        steps.forEach(step => {
+            step.classList.remove('active');
+        });
+
+        // Show target step
+        const targetStep = document.getElementById(`gig-step-${stepNumber}`);
+        if (targetStep) {
+            targetStep.classList.add('active');
+        }
+
+        // Update sidebar step indicators and progress dots
+        const sidebarItems = document.querySelectorAll('.gig-step-item');
+        sidebarItems.forEach(item => {
+            const stepNum = parseInt(item.getAttribute('data-step'));
+            item.classList.remove('active', 'completed');
+
+            if (stepNum < stepNumber) {
+                item.classList.add('completed');
+            } else if (stepNum === stepNumber) {
+                item.classList.add('active');
+            }
+        });
+
+        const dots = document.querySelectorAll('#gigProgressDots .dot');
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === stepNumber - 1);
+        });
+    }
+
+    // AI Description Generation
+    function generateGigDescription() {
+        const title = document.getElementById("gig_id_title");
+        const descriptionTextArea = document.getElementById("gig_id_description_gig");
+        const loadingSpinner = document.getElementById("gig-loading-spinner");
+
+        if (!title || !title.value.trim()) {
+            alert("Please enter a title to generate a description.");
+            return;
+        }
+
+        if (loadingSpinner) {
+            loadingSpinner.classList.remove("hidden");
+        }
+
+        fetch("{% url 'generate_description_workprenair' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ title: title.value.trim() })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add("hidden");
+                }
+
+                if (data.description && descriptionTextArea) {
+                    descriptionTextArea.value = data.description;
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add("hidden");
+                }
+                alert(`Error: ${error.message}`);
+            });
+    }
+
+    // Initialize the form when the popup loads
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeGigCreationForm();
+    });
+</script>

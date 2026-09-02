@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Your {{ plan_name }} Subscription Renewed</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Your {{ plan_name }} subscription has been successfully renewed. You're all set to continue enjoying premium features!</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">View Billing Details</a>
+    </div>
+{% endblock %}

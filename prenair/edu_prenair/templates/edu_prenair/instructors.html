@@ -1,0 +1,221 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Instructors{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+     
+    <!-- Page Wrapper -->
+    <div class="page-content">
+        
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <form method="get" action="{% url 'edu_instructors' %}">
+                        <!-- Course Categories Filter -->
+                        <div class="card search-filter">
+                            <div class="card-body">
+                                <div class="filter-widget mb-0">
+                                    <div class="categories-head d-flex align-items-center">
+                                        <h4>Course categories</h4>
+                                        <i class="fas fa-angle-down"></i>
+                                    </div>
+                                    {% for category in categories %}
+                                        <div>
+                                            <label class="custom_check">
+                                                <input type="checkbox" name="category" value="{{ category.id }}">
+                                                <span class="checkmark"></span> {{ category.name }} ({{ category.course_count }})
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Instructors Filter -->
+                        <!-- <div class="card search-filter">
+                            <div class="card-body">
+                                <div class="filter-widget mb-0">
+                                    <div class="categories-head d-flex align-items-center">
+                                        <h4>Instructors</h4>
+                                        <i class="fas fa-angle-down"></i>
+                                    </div>
+                                    {% for instructor in instructors %}
+                                        <div>
+                                            <label class="custom_check">
+                                                <input type="checkbox" name="instructor" value="{{ instructor.id }}">
+                                                <span class="checkmark"></span> {{ instructor.name }} ({{ instructor.course_count }})
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div> -->
+                    
+                        <!-- Submit Button -->
+                        <button type="submit" class="category-btn-final" style="padding: 15px 30px;">Filter</button>
+                    </form>
+                    
+                </div>
+                <div class="col-lg-9">
+                
+                    <!-- Filter -->
+                    <div class="showing-list">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="show-result">
+                                        <h4>Showing 5 results per Page</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">	
+                                <div class="show-filter add-course-info">
+                                    <form method="get" action="{% url 'edu_instructors' %}">
+                                        <div class="row gx-2 align-items-center">
+                                            <div class="col-md-4 col-item">
+                                                <div class="search-group">
+                                                    <i class="feather-search"></i>
+                                                    <input type="text" name="search" class="form-control" placeholder="Search Instructors by Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-lg-6 col-item">
+                                                <div class="input-block select-form mb-0">
+                                                    <select class="form-select select" name="category">
+                                                        <option value="">All Categories</option>
+                                                        {% for category in categories %}
+                                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="col-md-2 category-btn-final">Search</button>
+                                        </div>
+                                        
+                                    </form>
+                                </div>	
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /Filter -->
+                     
+                    
+                    <div class="row">
+                    
+                        <!-- Instructor List -->
+                        {% for instructor in page_obj %}
+                        <div class="col-lg-12 d-flex">
+                            <div class="instructor-list flex-fill">
+                                <div class="instructor-img">
+                                    <a href="{% url 'edu_profile' instructor.slug %}">
+                                        <img class="img-fluid" alt="Img" src="{{instructor.profile_pic.url}}">
+                                    </a>
+                                </div>
+                                <div class="instructor-content">												
+                                    <h5><a href="{% url 'edu_profile' instructor.slug %}">{{instructor.name}}</a></h5>
+                                    <h6>{{instructor.edu_bio}}</h6>
+                                    <div class="instructor-info">
+                                        <div class="rating-img d-flex align-items-center">
+                                            <img src="{% static 'edu_prenair/assets/img/temp/icon-01.svg' %}" class="me-1" alt="Img">
+                                            <p>12+ Lesson</p>
+                                        </div>
+                                        <div class="course-view d-flex align-items-center ms-0">
+                                            <img src="{% static 'edu_prenair/assets/img/temp/icon-02.svg' %}" class="me-1" alt="Img">
+                                            <p>{{instructor.edu_instructor_courses_length}} hours</p>
+                                        </div>
+                                        <div class="rating-img d-flex align-items-center">
+                                            <img src="{% static 'edu_prenair/assets/img/temp/user-icon.svg' %}" class="me-1" alt="Img">
+                                            <p>{{instructor.edu_instrcutor_courses.count}} Courses</p>
+                                        </div>
+                                        <div class="rating">							
+                                            {% if instructor.instructor_courses_rating > 1 and instructor.instructor_courses_rating <= 2 %}						
+                                        	<i class="fas fa-star filled"></i>
+                                        	<i class="fas fa-star filled"></i>
+                                        	<i class="fas fa-star"></i>
+                                        	<i class="fas fa-star"></i>
+                                        	<i class="fas fa-star"></i>
+
+                                             {% elif instructor.instructor_courses_rating > 2 and instructor.instructor_courses_rating <= 3 %}
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star"></i>
+                                             <i class="fas fa-star"></i>
+
+                                             {% elif instructor.instructor_courses_rating > 3 and instructor.instructor_courses_rating <= 4 %}
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star"></i>
+
+                                             {% elif instructor.instructor_courses_rating > 4 and instructor.instructor_courses_rating <= 5 %}
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+                                             <i class="fas fa-star filled"></i>
+
+                                        {% endif %}
+                                            <span class="d-inline-block average-rating"><span>{{instructor.instructor_courses_rating}}</span></span>
+                                        </div>	
+                                    </div>
+                                    <div class="instructor-badge">
+                                        {% for category in instructor.instructor_course_categories %}
+                                        <span class="web-badge">{{category.title}}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <!-- /Instructor List -->
+                    </div>
+                    
+                   <!-- Pagination Controls -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <ul class="pagination lms-page lms-pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item prev">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item next">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- /Pagination Controls -->
+                </div>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+    <!-- /Page Wrapper -->
+    
+    {% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

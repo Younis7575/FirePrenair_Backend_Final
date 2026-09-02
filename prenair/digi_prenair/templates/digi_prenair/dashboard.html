@@ -1,0 +1,318 @@
+{% extends 'digi_prenair/base.html' %} 
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+    <style>
+        /* Make the chart responsive */
+        #monthlyEarningsChart {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Optional: Add some padding around the canvas for smaller screens */
+        .chart-container {
+            padding: 20px;
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 768px) {
+            .chart-container {
+                padding: 15px;
+            }
+            #monthlyEarningsChart {
+                width: 100%;
+                height: 250px; /* Adjust height for tablet */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-container {
+                padding: 10px;
+            }
+            #monthlyEarningsChart {
+                width: 100%;
+                height: 200px; /* Adjust height for phones */
+            }
+        }
+
+        @media (max-width: 320px) {
+            .chart-container {
+                padding: 5px;
+            }
+            #monthlyEarningsChart {
+                width: 100%;
+                height: 150px; /* Adjust height for small phones */
+            }
+        }
+    </style>
+<div
+  class="primary-content-area container content-padding grid-small-sidebar-left"
+>
+  <aside>
+    <!-- dahsboard menu -->
+    <div class="user-db-menu">
+      <div class="user-db-header">
+        <div class="user-db-cover-image profile-cover-image">
+          {% if user.digi_cover_photo %}
+          <img src="{{ user.digi_cover_photo.url }}" alt="cover photo" />
+          {% else %}
+          <!-- Default cover image if user hasn't uploaded one -->
+          <img
+            src="{% static "digi_prenair/img/content/profile/default-cover.png" %}"
+            alt="cover photo"
+          />
+          {% endif %}
+        </div>
+        <div class="user-header-user-profile">
+          <div class="avatar box-64">
+            <a href="{% url 'digi_profile' user.slug %}">
+              {% if user.profile_pic %}
+              <img src="{{ user.profile_pic.url }}" alt="avatar" />
+              {% else %}
+              <img
+                src="{% static 'digi_prenair/img/avatar.png' %}"``
+                alt="default avatar"
+              />
+              {% endif %} {% if user.digi_is_verified %}
+              <span class="verified">
+                <svg class="crumina-icon">
+                  <use xlink:href="#check-icon"></use>
+                </svg>
+              </span>
+              {% endif %}</a
+            >
+          </div>
+          <div class="title">
+            <a href="{% url 'digi_profile' user.slug %}"
+              >{{ user.name|default:user.username }}</a
+            >
+          </div>
+          <div class="item-meta">
+            <span class="gradient-text">@{{ user.username }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="user-db-body">
+        <ul class="profile-menu">
+          <li>
+            <a href="{% url "digi_profile_info" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#user-icon"></use></svg
+              >Profile Info</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_profile_settings" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#settings-icon"></use></svg
+              >Account Settings</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_notifications" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#slide-filter-icon"></use></svg
+              >Notification Settings</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_purchases" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#wallet-icon"></use></svg
+              >Purchases</a
+            >
+          </li>
+          {% if user.is_digi_seller %}
+          <li>
+            <a href="{% url "digi_dashboard" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#dashboard-icon"></use></svg
+              >Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_manage_items" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#file-text-icon"></use></svg
+              >Manage Items</a
+            >
+          </li>
+          <li>
+            <a href="{% url "digi_upload_item" %}"
+              ><svg class="crumina-icon">
+                <use xlink:href="#picture-icon"></use></svg
+              >Upload Item</a
+            >
+          </li>
+          {% comment %} <li>
+            <a href="!#"
+              ><svg class="crumina-icon">
+                <use xlink:href="#circle-checked-icon"></use></svg
+              >Get Verified</a
+            >
+          </li> {% endcomment %}
+          {% endif %}
+          {% if user.is_authenticated %}
+            <li class="logout">
+              <a href="{% url 'logout' %}">
+                <svg class="crumina-icon">
+                  <use xlink:href="#logout-icon"></use>
+                </svg>
+                Log Out
+              </a>
+            </li>
+            {% endif %}
+        </ul>
+      </div>
+    </div>
+  </aside>
+  <div class="main-content-area">
+    <div class="page-title-section">
+      <h2>Your <span class="gradient-text">Dashboard</span></h2>
+    </div>
+    <div class="dashboard-wrapper">
+      <!--   user stats -->
+      <div class="user-stats-section">
+        <div class="stat-item blue-gradient-diagonal">
+          <div class="stat-icon">
+            <svg class="crumina-icon">
+              <use xlink:href="#face-id-icon"></use>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-number">{{ total_items_listed }}</div>
+            <div class="stat-description">Total Items Listed</div>
+          </div>
+        </div>
+        <div class="stat-item fuchsia-gradient-diagonal">
+          <div class="stat-icon">
+            <svg class="crumina-icon">
+              <use xlink:href="#heart-icon"></use>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-number">{{ total_items_sold }}</div>
+            <div class="stat-description">Total Items Sold</div>
+          </div>
+        </div>
+        <div class="stat-item yellow-gradient-diagonal">
+          <div class="stat-icon">
+            <svg class="crumina-icon">
+              <use xlink:href="#dollar-icon"></use>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-number">${{ total_sales_amount }}</div>
+            <div class="stat-description">Total Sales Amount</div>
+          </div>
+        </div>
+      </div>
+      <!--    earnings diagram -->
+      <div class="chart-container">
+        <h5>Earnings Report</h5>
+        <canvas id="monthlyEarningsChart"></canvas>
+      </div>
+      <!--    selling items -->
+      <div class="statement-list">
+        <div class="statement">
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th scope="col" class="heading-label">Date</th>
+                <th scope="col" class="heading-label">Item details</th>
+                {% comment %} <th scope="col" class="heading-label">Type</th> {% endcomment %}
+                {% comment %} <th scope="col" class="heading-label">Price</th> {% endcomment %}
+                {% comment %} <th scope="col" class="heading-label">Fee</th> {% endcomment %}
+                {% comment %} <th scope="col" class="heading-label">Tax</th> {% endcomment %}
+                <th scope="col" class="heading-label">Earnings</th>
+                <th scope="col" class="heading-label">After Taxes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sale in page_obj %}
+              <tr>
+                <td data-label="Date">
+                  <div class="date">{{ sale.order.created_at|date:"M d, Y" }}</div>
+                </td>
+                <td data-label="Item details">
+                  <div class="item-title gradient-text">
+                    <a href="{% url 'digi_product' sale.product.slug %}"
+                      >{{ sale.product.title }}</a
+                    >
+                  </div>
+                </td>
+                {% comment %} <td data-label="type" class="stat-value">Sale</td> {% endcomment %}
+                {% comment %} <td data-label="price" class="stat-value">$12.00</td> {% endcomment %}
+                {% comment %} <td data-label="fee" class="stat-value">-$1.00</td> {% endcomment %}
+                {% comment %} <td data-label="tax" class="stat-value">-$1.00</td> {% endcomment %}
+                <td data-label="earnings" class="green stat-value">${{ sale.price }}</td>
+                <td data-label="earnings" class="green stat-value">${{ sale.price|floatformat:2|multiply:0.88 }}</td></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">No recent sales</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-section flex-right">
+          <ul class="pagination-list">
+              {% if page_obj.has_previous %}
+                  <li class="page-item page-nav-prev"><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+              {% endif %}
+              
+              {% for num in page_obj.paginator.page_range %}
+                  <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                      <a href="?page={{ num }}">{{ num|default:"..." }}</a>
+                  </li>
+              {% endfor %}
+              
+              {% if page_obj.has_next %}
+                  <li class="page-item page-nav-next"><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+              {% endif %}
+          </ul>
+      </div>
+      
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/decimal.js@10.3.1/decimal.min.js"></script> 
+<script>
+  // Assuming `monthly_earnings` is a list of numbers passed from Django
+  const earnings = {{ monthly_earnings|safe }};
+  const months = {{ months|safe }};
+
+  // Use Decimal.js for high precision, if necessary
+  const decimalEarnings = earnings.map(amount => new Decimal(amount)); // Convert to Decimal objects
+  const earningsData = decimalEarnings.map(decimal => decimal.toNumber()); // Convert to regular numbers for Chart.js
+
+  const ctx = document.getElementById('monthlyEarningsChart').getContext('2d');
+  const monthlyEarningsChart = new Chart(ctx, {
+      type: 'bar', // Choose 'bar', 'line', or other types
+      data: {
+          labels: months, // Pass months as labels
+          datasets: [{
+              label: 'Monthly Earnings (in USD)',
+              data: earningsData, // Use the Decimal-converted data
+              backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light green
+              borderColor: 'rgba(75, 192, 192, 1)', // Dark green
+              borderWidth: 1
+          }]
+      },
+      options: {
+          responsive: true,
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          }
+      }
+  });
+</script>
+{% endblock %}

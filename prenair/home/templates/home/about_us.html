@@ -1,0 +1,168 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}About FirePrenair{% endblock %}
+
+{% block content %}
+
+<style>
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/about_us.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+
+    .about-container {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: -60px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .about-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .about-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .about-section-us {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .section-content {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="about-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">About FirePrenair</h1>
+                    <p class="hero-text">
+                        FirePrenair is more than just a platform—it’s a revolutionary ecosystem designed to empower entrepreneurs, freelancers, educators, and creators worldwide.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Who We Are -->
+            <div class="about-section-us">
+                <h2 class="section-title">Who We Are</h2>
+                <p class="section-content">
+                    Founded on the belief that entrepreneurship should be accessible to everyone, FirePrenair combines cutting-edge technology with a user-friendly interface to create an all-in-one solution for professional growth. Whether you’re a freelancer looking for new opportunities, a digital creator seeking to sell products, or a business professional aiming to expand your network, FirePrenair is the ultimate partner in your success.
+                </p>
+            </div>
+
+            <!-- What We Offer -->
+            <div class="about-section-us">
+                <h2 class="section-title">What We Offer</h2>
+                <p class="section-content">FirePrenair is divided into four robust departments, each tailored to meet the diverse needs of our users:</p>
+                <ul class="section-list">
+                    <li><span class="highlight">WorkPrenair (Freelancing Services):</span>
+                        <ul class="nested-list">
+                            <li>A marketplace where freelancers can showcase their skills, connect with clients, and grow their careers.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">DigiPrenair (Digital Products):</span>
+                        <ul class="nested-list">
+                            <li>A hub for creators to sell digital products, from eBooks and templates to music and software.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">EduPrenair (E-Learning):</span>
+                        <ul class="nested-list">
+                            <li>An educational platform for creating, hosting, and enrolling in courses that inspire growth and development.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">CommuPrenair (Business Networking):</span>
+                        <ul class="nested-list">
+                            <li>A professional networking space where entrepreneurs can connect, collaborate, and share opportunities.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Why FirePrenair -->
+            <div class="about-section-us">
+                <h2 class="section-title">Why FirePrenair?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Global Reach:</span> Serving users in over 50 countries, FirePrenair bridges geographical gaps to foster global collaboration.</li>
+                    <li><span class="highlight">AI-Powered Tools:</span> Enhance productivity with AI-driven solutions for content generation, project management, analytics, and personalized recommendations.</li>
+                    <li><span class="highlight">End-to-End Support:</span> From project inception to final delivery, our platform provides all the tools you need to succeed.</li>
+                    <li><span class="highlight">Community-Centric Approach:</span> Join a thriving network of professionals who inspire, mentor, and collaborate for mutual success.</li>
+                </ul>
+            </div>
+
+            <!-- Vision and Mission -->
+            <div class="about-section-us">
+                <h2 class="section-title">Our Vision</h2>
+                <p class="section-content">
+                    At FirePrenair, we envision a world where entrepreneurs thrive without barriers. By leveraging the power of technology and community, we aim to be the driving force behind the success of millions of businesses worldwide.
+                </p>
+            </div>
+
+            <div class="about-section-us">
+                <h2 class="section-title">Our Mission</h2>
+                <p class="section-content">
+                    To empower individuals and businesses with innovative tools, insightful resources, and meaningful connections that drive growth and sustainability in the digital economy.
+                </p>
+            </div>
+
+            <!-- Closing Statement -->
+            <div class="about-section-us">
+                <p class="section-content">
+                    Join us on this journey and ignite your entrepreneurial spirit with FirePrenair—where innovation meets opportunity.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

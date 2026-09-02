@@ -1,0 +1,107 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Fireprenair | Blog - {{blog.title}}{% endblock %}
+
+{% block content %}
+
+<style>
+
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-9 col-md-12">
+
+						<!-- Blog Post -->
+						<div class="blog">
+							<div class="blog-image" style="border: 2px solid black;">
+								<a href="javascript:void(0);"><img class="img-fluid" src="{{blog.featured_image.url}}"
+										alt="Post Image"></a>
+							</div>
+							<div class="blog-info clearfix">
+								<div class="post-left">
+                                    <ul>
+                                        <li>
+                                            <div class="post-author">
+                                                <a href="javascript:void(0);"><img src="{{blog.author.profile_pic.url}}" alt="Post Author">
+                                                    <span>{{blog.author.name}}</span></a>
+                                            </div>
+                                        </li>
+                                        <li><img class="img-fluid" src="{% static 'home/images/icon-22.svg' %}" alt="Img">{{blog.published_date.date}}</li>
+                                        <li><img class="img-fluid" src="{% static 'home/images/icon-23.svg' %}" alt="Img">{{blog.category.name}}</li>
+                                    </ul>
+								</div>
+							</div>
+							<h3 class="blog-title"><a href="javascript:void(0);">{{blog.title}}</a></h3>
+							<div class="blog-content">
+								<p>{{blog.content|safe}}</p>
+							</div>
+						</div>
+						<!-- /Blog Post -->
+
+					</div>
+
+					<!-- Blog Sidebar -->
+					<div class="col-lg-3 col-md-12 sidebar-right theiaStickySidebar">
+						<!-- Latest Posts -->
+						<div class="card post-widget blog-widget">
+							<div class="card-header">
+								<h4 class="card-title">Recent Posts</h4>
+							</div>
+							<div class="card-body">
+                                <ul class="latest-posts">
+                                    {% for post in recent_posts %}
+                                    <li>
+                                        <div class="post-thumb">
+                                            <a href="javascript:void(0);">
+                                                {% if post.featured_image %}
+                                                <img class="img-fluid" src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                                                {% else %}
+                                                <img class="img-fluid" src="{% static 'assets/img/blog/default.jpg' %}" alt="{{ post.title }}">
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                        <div class="post-info">
+                                            <h4>
+                                                <a href="javascript:void(0);">{{ post.title }}</a>
+                                            </h4>
+                                            <p>
+                                                <img class="img-fluid" src="{% static 'assets/img/icon/icon-22.svg' %}" alt="Calendar Icon">
+                                                {{ post.published_date|date:"M d, Y" }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                    {% empty %}
+                                    <li>No recent posts available.</li>
+                                    {% endfor %}
+                                </ul>
+							</div>
+						</div>
+						<!-- /Latest Posts -->
+
+						<!-- Categories -->
+						<div class="card category-widget blog-widget">
+							<div class="card-header">
+								<h4 class="card-title">Categories</h4>
+							</div>
+							<div class="card-body">
+								<ul class="categories">
+                                    {% for cat in categories %}
+									<li><a href="javascript:void(0);"><i class="fas fa-angle-right"></i> {{ cat.name }} </a></li>
+                                    {% endfor %}
+								</ul>
+							</div>
+						</div>
+						<!-- /Categories -->
+
+
+					</div>
+					<!-- /Blog Sidebar -->
+
+				</div>
+			</div>
+</div>
+
+{% endblock content %}

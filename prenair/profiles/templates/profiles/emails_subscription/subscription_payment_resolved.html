@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Payment Successful for {{ plan_name }}</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Good news! Your payment issue has been resolved, and your {{ plan_name }} subscription is active again.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Go to Dashboard</a>
+    </div>
+{% endblock %}

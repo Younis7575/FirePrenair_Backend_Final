@@ -1,0 +1,231 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Eduprenair{% endblock title %} {% load static %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "work_prenair/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div
+      class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+    >
+      <div class="container h-full lg:py-15 sm:py-12 py-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Dashboard</h4>
+        <div class="services sm:py-14">
+          <h5 class="heading5 max-lg:mb-3">Latest Posts</h5>
+          <div class="container flex flex-col items-center mt-3">
+              <ul class="list_layout_cols list_services grid lg:grid-cols-3 sm:grid-cols-2 md:gap-7.5 gap-5 w-full mt-10">
+                {% for post in recent_posts %}
+                  <li class="item h-full">
+                      <div class="service_item overflow-hidden relative rounded-lg h-full bg-white shadow-md duration-300 hover:shadow-xl">
+                          <a href="{% url "commu_profile" post.author.slug %}" class="service_thumb">
+                            {% if post.image %}
+                              <img src="{{post.image.url}}" alt="1" class="w-full" />
+                            {% endif %}
+                          </a>
+                          <div class="service_info py-5 px-4">
+                              <div class="flex items-center justify-between">
+                              </div>
+                              <a href="{% url "commu_profile" post.author.slug %}" class="service_title text-title pt-2 duration-300 hover:text-primary">{{post.title}}</a>
+                              <div class="service_more_info flex items-center justify-between gap-1 mt-4 pt-4 border-t border-line">
+                                  <a class="service_author flex items-center gap-2">
+                                      <img src="{{post.author.profile_pic.url}}" alt="IMG-1" class="service_author_avatar w-8 h-8 rounded-full" />
+                                      <span class="service_author_name -style-1">{{post.author.username}}</span>
+                                  </a>
+                              </div>
+                          </div>
+                      </div>
+                  </li>
+                {% endfor %}
+              </ul>
+          </div>
+      </div>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5">
+          <div class="jobs">
+            <h5 class="heading5 px-6">Connections</h5>
+            <div class="flex flex-col items-center">
+              <ul class="list_jobs overflow-hidden w-full md:mt-10 mt-7 rounded-lg bg-white shadow-lg">
+                {% for connection in connections %}
+                <li class="item">
+                  <div class="jobs_item -style-list flex flex-wrap items-center justify-between gap-4 sm:px-6 px-5 py-4 border-b border-line bg-white duration-300 hover:bg-background hover:border-transparent">
+                    <a href="{% url "commu_profile" connection.slug %}" class="jobs_info flex flex-wrap items-center gap-3">
+                      {% if connection.profile_pic %}
+                      <img src="{{ connection.profile_pic.url }}" alt="{{ connection.username }}" class="jobs_logo w-15 h-15 rounded-full flex-shrink-0" />
+                      {% endif %}
+                      <div>
+                        {% if connection.username %}
+                        <span class="jobs_company text-sm font-semibold text-primary">{{ connection.username }}</span>
+                        {% endif %}
+                        {% if connection.name %}
+                        <strong class="jobs_name max-sm:mt-0.5 text-title duration-300 hover:text-primary">{{ connection.name }}</strong>
+                        {% endif %}
+                      </div>
+                    </a>
+                    <div class="flex flex-wrap items-center gap-5 gap-y-1">
+                      {% if connection.country %}
+                      <div class="jobs_address -style-1 text-secondary">
+                        <span class="ph ph-map-pin text-lg align-middle"></span>
+                        <span class="address caption1 align-middle">{{ connection.country }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                    <a href="{% url "commu_profile" connection.slug %}" class="button-main -border -small">View Profile</a>
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+        </div>
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-6">
+            <h5 class="heading5 px-6">Notifications</h5>
+            <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+              {% for notification in notifications %}
+              <li class="item flex gap-2">
+                <span
+                  class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary"
+                >
+                  <span class="ph-fill ph-bell text-lg"></span>
+                </span>
+                <div class="content flex flex-col gap-2">
+                  <p class="title text-secondary">
+                    {{ notification.message|truncatechars:50 }}
+                  </p>
+                  <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                </div>
+              </li>
+              {% empty %}
+              <li class="item">
+                <p class="text-center text-secondary">No notifications available.</p>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div
+        class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get data from the template context
+      const courseTitles = {{ course_titles|safe }};
+      const enrollmentCounts = {{ enrollment_counts|safe }};
+    
+      // Get the canvas context before creating the gradient
+      const ctx = document.getElementById("course-enrollment-chart").getContext("2d");
+    
+      // Create the gradient outside of the dataset
+      const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+      gradient.addColorStop(0, "rgba(0, 172, 193, 0.8)");
+      gradient.addColorStop(1, "rgba(0, 172, 193, 0.3)");
+    
+      // Create the Chart.js Horizontal Bar Chart
+      const courseEnrollmentChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: courseTitles, // Course titles as labels
+          datasets: [
+            {
+              label: "Enrollments",
+              data: enrollmentCounts, // Enrollment counts
+              backgroundColor: gradient, // Use gradient directly here
+              borderColor: "#00ACC3",  // Matching border with gradient
+              borderWidth: 2,
+              hoverBackgroundColor: "#00B8D4",  // Hover effect color
+              hoverBorderColor: "#0288D1",
+              hoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y', // Horizontal bar chart
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)', // Subtle grid lines
+                borderDash: [5, 5], // Dashed grid lines for a cleaner look
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+            y: {
+              grid: {
+                display: false, // Hides vertical grid lines
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              displayColors: false,
+              callbacks: {
+                label: function (context) {
+                  return `${context.label}: ${context.raw} students`;
+                },
+              },
+            },
+            legend: {
+              display: false, // Hide legend if only one dataset
+            },
+          },
+          animation: {
+            duration: 1000,  // Smooth animation
+            easing: 'easeInOutQuad',
+          },
+        },
+      });
+    });
+  </script>
+
+  {% endblock extra_javascript %}
+</body>

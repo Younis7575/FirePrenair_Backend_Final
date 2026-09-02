@@ -1,0 +1,76 @@
+{% load static %}
+<!-- sidebar -->
+<div class="col-xl-3 col-lg-3 theiaStickySidebar">
+    <div class="settings-widget dash-profile">
+        <div class="settings-menu">
+            <div class="profile-bg">
+                <div class="profile-img">
+                    <a href="{% url 'edu_profile' request.user.slug %}"><img src="{{request.user.profile_pic.url}}"
+                            alt="Img"></a>
+                </div>
+            </div>
+            <div class="profile-group">
+                <div class="profile-name text-center">
+                    <h4><a href="{% url 'edu_profile' request.user.slug %}">{{request.user.name}}</a></h4>
+                    <p>{{request.user.edu_bio}}</p>
+                    <a href="{% url 'course_create_eduprenair' %}" class="category-btn-final" style="color: white; margin-top: 10px;">Add New Course</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="settings-widget account-settings">
+        <div class="settings-menu">
+            <h3>Dashboard</h3>
+            <ul>
+                <li class="nav-item active">
+                    <a href="{% url 'edu_student_dashboard' %}" class="nav-link">
+                        <i class="bx bxs-tachometer"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'edu_profile' request.user.slug %}" class="nav-link"><i class="bx bxs-user"></i>My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'student_courses' %}" class="nav-link">
+                        <i class="bx bxs-graduation"></i>Enrolled Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'wishlist' %}" class="nav-link">
+                        <i class="bx bxs-heart"></i>Wishlist
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'reviews' %}" class="nav-link">
+                        <i class="bx bxs-star"></i>Reviews
+                    </a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="instructor-quiz.html" class="nav-link">
+                        <i class="bx bxs-shapes"></i>My Quiz Attempts
+                    </a>
+                </li> -->
+                <li class="nav-item">
+                    <a href="{% url "edu_order_history" %}" class="nav-link">
+                        <i class="bx bxs-cart"></i>Order History
+                    </a>
+                </li>
+            </ul>
+            
+            <h3>Account Settings</h3>
+            <ul>
+                <li class="nav-item">
+                    <a href="{% url 'edu_settings' %}" class="nav-link ">
+                        <i class="bx bxs-cog"></i>Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url "logout" %}" class="nav-link">
+                        <i class="bx bxs-log-out"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- /Sidebar -->

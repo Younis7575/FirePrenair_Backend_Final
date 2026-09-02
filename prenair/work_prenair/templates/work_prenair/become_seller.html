@@ -1,0 +1,200 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Become Freelancer{% endblock title %}
+
+{% block extra_css %}
+
+    <style>
+        .autocomplete-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #fff;
+            z-index: 10;
+            /* width: 74.5%; */
+            width: 73.4%;
+        }
+        
+        .autocomplete-list li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .autocomplete-list li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+
+{% endblock extra_css %}
+
+
+    
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                <span class="ph ph-squares-four text-xl"></span>
+                <strong class="text-button">Menu</strong>
+            </button>
+            <div class="dashboard_profile scrollbar_custom w-full bg-surface" style="margin: 10px; background: url({% static 'home/images/banner.png' %});">
+                <form action="{% url 'become_seller' %}" method="post" enctype="multipart/form-data" class="container h-fit" style="padding-left: 0px;">
+                    {% csrf_token %}
+                    <div class="heading flex items-center justify-between">
+                        <h4>Become Freelancer</h4>
+                    </div>
+                
+                    <div class="gig-details p-8 mt-7 rounded-lg bg-white shadow-sm">
+                        <h5>Take your services to global level</h5>
+                        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+                
+                            <!-- name -->
+                            <div class="col-span-full">
+                                <label for="name">Name:<span class="text-red">*</span></label>
+                                <input type="text" id="name" value="{{request.user.name}}" name="name" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Enter your name">
+                            </div>
+                            
+                            <div class="col-span-full">
+                                <label for="phone">Phone Number:<span class="text-red">*</span></label>
+                                <input type="text" id="phone" name="phone" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Enter your phone number">
+                            </div>
+                            <div class="col-span-full">
+                                <label for="address">Country:<span class="text-red">*</span></label>
+                                <input type="text" id="country" name="country" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Start typing your country...">
+                                <ul id="country-list" class="autocomplete-list hidden"></ul>
+                            </div>
+                            
+                            
+                
+                            <!-- Description -->
+                            <div class="col-span-full">
+                                <label for="about">Workprenair Bio:<span class="text-red">*</span></label>
+                                <textarea id="about" name="about" class="w-full h-24 px-4 mt-2 border rounded-lg border-line" required placeholder="Tell Us Something about yourself..."></textarea>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="portfolio">Portfolio Link(If Any):</label>
+                                <input type="text" id="portfolio" name="portfolio" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" placeholder="Enter your portfolio link">
+                            </div>
+                            <div class="col-span-full">
+                                <label for="expertise">Your Expertise:<span class="text-red">*</span></label>
+                                <input type="text" id="expertise" name="expertise" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Enter your expertise">
+                            </div>
+                        </div>
+                        <button type="submit" class="category-btn-final" style="padding: 10px 20px; margin-top: 20px;">Apply Now</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+</div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+</div>
+
+{% endblock content %}
+
+
+{% block extra_javascript %}
+
+<script>
+   document.addEventListener("DOMContentLoaded", () => {
+    const countryInput = document.getElementById("country");
+    const countryList = document.getElementById("country-list");
+
+    // Fetch the list of countries from your API
+    async function fetchCountries() {
+        try {
+            const response = await fetch("https://countryapi.io/api/all", {
+                headers: {
+                    "Authorization": "Bearer CuqJLtZXzNeWxCqeC6Dns9qTsx8ZdxY2iJWeUXsD"
+                }
+            });
+            const data = await response.json();
+            return Object.values(data).map(country => ({
+                name: country.name,
+                flag: country.flag.small 
+            }));
+        } catch (error) {
+            console.error("Error fetching countries:", error);
+            return [];
+        }
+    }
+
+    function showSuggestions(countries, query) {
+        countryList.innerHTML = "";
+        if (!query) {
+            countryList.classList.add("hidden");
+            return;
+        }
+
+        const filtered = countries.filter(country => 
+            country.name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (filtered.length > 0) {
+            countryList.classList.remove("hidden");
+            filtered.forEach(country => {
+                const li = document.createElement("li");
+                li.classList.add("flex", "items-center", "gap-2", "cursor-pointer");
+
+                // Flag image
+                const flagImg = document.createElement("img");
+                flagImg.src = country.flag;
+                flagImg.alt = `${country.name} flag`;
+                flagImg.classList.add("w-6", "h-4", "object-cover");
+
+                // Country name
+                const countryName = document.createElement("span");
+                countryName.textContent = country.name;
+
+                li.appendChild(flagImg);
+                li.appendChild(countryName);
+
+                li.addEventListener("click", () => {
+                    countryInput.value = country.name;
+                    countryList.classList.add("hidden");
+                });
+                countryList.appendChild(li);
+            });
+        } else {
+            countryList.classList.add("hidden");
+        }
+    }
+
+    // Event listeners
+    fetchCountries().then(countries => {
+        countryInput.addEventListener("input", () => {
+            showSuggestions(countries, countryInput.value);
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!countryList.contains(e.target) && e.target !== countryInput) {
+                countryList.classList.add("hidden");
+            }
+        });
+    });
+});
+
+    </script>
+    
+
+{% endblock extra_javascript %}

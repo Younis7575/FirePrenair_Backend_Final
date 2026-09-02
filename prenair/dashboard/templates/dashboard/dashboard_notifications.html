@@ -1,0 +1,162 @@
+{% extends "dashboard/dashboard_base.html" %} 
+{% block title %}Fireprenair | Dashboard - Notifications{% endblock title %} 
+{% load static %} 
+{% block extra_css %}
+
+<style>
+  .delete-icon {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.delete-icon:hover {
+    color: #dc3545;  /* Change to a hover color if desired */
+}
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div
+      class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+    >
+      <div class="container h-full lg:px-15 sm:px-12 py-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Workprenair Notifications</h4>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5" style="margin-top: 2rem;">
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-3">
+              <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                  {% for notification in work_notifications %}
+                      <li class="item flex gap-2">
+                          <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                              <span class="ph-fill ph-bell text-lg"></span>
+                          </span>
+                          <div class="content flex flex-col gap-2">
+                              <p class="title text-secondary">{{ notification.message }}</p>
+                              <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                          </div>
+                          <!-- Delete icon with delete functionality -->
+                          <a href="{% url 'delete_notification' notification.id %}" class="delete-icon">
+                              <i class="fas fa-trash-alt text-red-500"></i> <!-- FontAwesome trash icon -->
+                          </a>
+                      </li>
+                  {% empty %}
+                      <li class="item">
+                          <p class="text-center text-secondary">No notifications available.</p>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+
+        <h4 class="heading4 max-lg:mt-3">Eduprenair Notifications</h4>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5" style="margin-top: 2rem;">
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-3">
+              <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                  {% for notification in edu_notifications %}
+                      <li class="item flex gap-2">
+                          <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                              <span class="ph-fill ph-bell text-lg"></span>
+                          </span>
+                          <div class="content flex flex-col gap-2">
+                              <p class="title text-secondary">{{ notification.message }}</p>
+                              <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                          </div>
+                          <!-- Delete icon with delete functionality -->
+                          <a href="{% url 'delete_notification' notification.id %}" class="delete-icon">
+                              <i class="fas fa-trash-alt text-red-500"></i> <!-- FontAwesome trash icon -->
+                          </a>
+                      </li>
+                  {% empty %}
+                      <li class="item">
+                          <p class="text-center text-secondary">No notifications available.</p>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+
+        <h4 class="heading4 max-lg:mt-3">Digiprenair Notifications</h4>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5" style="margin-top: 2rem;">
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-3">
+              <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                  {% for notification in digi_notifications %}
+                      <li class="item flex gap-2">
+                          <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                              <span class="ph-fill ph-bell text-lg"></span>
+                          </span>
+                          <div class="content flex flex-col gap-2">
+                              <p class="title text-secondary">{{ notification.message }}</p>
+                              <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                          </div>
+                          <!-- Delete icon with delete functionality -->
+                          <a href="{% url 'delete_notification' notification.id %}" class="delete-icon">
+                              <i class="fas fa-trash-alt text-red-500"></i> <!-- FontAwesome trash icon -->
+                          </a>
+                      </li>
+                  {% empty %}
+                      <li class="item">
+                          <p class="text-center text-secondary">No notifications available.</p>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+
+        <h4 class="heading4 max-lg:mt-3">Commuprenair Notifications</h4>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5" style="margin-top: 2rem;">
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-3">
+              <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                  {% for notification in commu_notifications %}
+                      <li class="item flex gap-2">
+                          <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                              <span class="ph-fill ph-bell text-lg"></span>
+                          </span>
+                          <div class="content flex flex-col gap-2">
+                              <p class="title text-secondary">{{ notification.message }}</p>
+                              <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                          </div>
+                          <!-- Delete icon with delete functionality -->
+                          <a href="{% url 'delete_notification' notification.id %}" class="delete-icon">
+                              <i class="fas fa-trash-alt text-red-500"></i> <!-- FontAwesome trash icon -->
+                          </a>
+                      </li>
+                  {% empty %}
+                      <li class="item">
+                          <p class="text-center text-secondary">No notifications available.</p>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+      {% include "dashboard/partials/footer_cta.html" %}
+      </div>
+      <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} 
+</body>

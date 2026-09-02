@@ -1,0 +1,945 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* General styling for the navbar */
+.The-great-navbar {
+    font-family: "Inter", sans-serif;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+/* Link styles */
+.The-great-navbar a {
+    transition: color 0.3s ease, text-decoration 0.3s ease !important;
+}
+
+.The-great-navbar a:hover {
+    /* color: #ff6f61 !important; */
+}
+
+/* Button styles */
+.The-great-navbar button {
+    transition: background-color 0.3s ease, transform 0.3s ease !important;
+}
+
+/* .The-great-navbar button:hover {
+    background-color: #ff6f61 !important;
+    transform: scale(1.05) !important;
+} */
+
+/* Close general styling for the navbar */
+
+
+
+.The-great-navbar {
+    font-family: "Inter", sans-serif !important;
+    background: url(../images/banner.png);
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.navbar-final {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    font-weight: 500 !important;
+    
+}
+
+.logo-final {
+    display: flex;
+    align-items: center;
+}
+
+.logo-final img {
+    width: 130px;
+}
+
+.partition-vertical {
+    width: 2px;
+    height: 55px;
+    background-color: #ffffff;
+    color: #f5f5f6;
+}
+
+.search-container-final {
+    display: flex;
+    align-items: center;
+    margin: 0 20px;
+    flex: 1;
+    background: #fff;
+    border-radius: 0px 44px 44px 44px;
+    padding: 0px 3px 0px 0px;
+    position: relative;
+}
+
+.category-btn-final {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: #ff6f61;
+    color: #fff;
+    border: none;
+    border-radius: 0px 22px 22px 22px;
+    padding: 7px 9px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    /* font-weight: 800 !important; */
+    /* line-height: 1 !important; */
+}
+
+.category-btn-final img {
+    width: 21px;
+    margin-top: 2px;
+}
+
+/* Dropdown container styling with background image */
+.dropdown-menu-final.dropdown-large-final {
+    display: none;
+    /* Initially hidden */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    /* Adjust as per your layout */
+    background-color: white;
+    /* White with transparency */
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    /* Your background image here */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    color: #333;
+}
+
+/* Styling for each column in dropdown */
+.dropdown-large-final .row {
+    display: flex;
+    gap: 20px;
+    /* Spacing between columns */
+}
+
+/* Column layout in the dropdown */
+.dropdown-large-final .col-md-3 {
+    flex: 1;
+    padding: 10px;
+}
+
+/* Header styling in dropdown columns */
+.dropdown-header-final {
+    font-size: 0.7em;
+    /* color: #ff6f61; */
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Link styling in dropdown */
+.dropdown-item-final {
+    display: block;
+    font-weight: 500;
+    color: #00203F;
+    text-decoration: none;
+    padding-top: 6px;
+    padding-bottom: 4px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    font-size: 0.9em;
+}
+
+.dropdown-item-final:hover {
+    color: #ff6f61;
+    transform: translateX(5px);
+    /* Adds a slight movement on hover */
+}
+
+.dropdown-intro-final {
+    font-size: 0.7em;
+    color: #000000d6;
+}
+
+/* Show dropdown on hover */
+.category-btn-final:hover+.dropdown-menu-final.dropdown-large-final,
+.dropdown-menu-final.dropdown-large-final:hover {
+    display: block;
+}
+
+.search-container-final{
+    font-size: 16px; 
+    line-height: 1.5px;
+}
+
+.search-container-final input {
+    border: none !important;
+    outline: none !important;
+    flex: 1 !important;
+    padding: 8px !important;
+    /* font-size: 1em !important; */
+    background-color: transparent !important;
+    color: #000000d6 !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.04em;
+
+}
+
+.search-btn-final {
+    background: #ff6f61;
+    border: none;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.the-button {
+    color: #fff;
+    border: none;
+    padding: 7.5px 11px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: pointer;
+    /* font-weight: 800 !important; */
+    line-height: 1;
+}
+
+.language-btn,
+.currency-btn {
+    background-color: #1e3a8a;
+    color: #fff;
+    font-size: 14px;
+}
+
+
+.currency-btn {
+    padding: 10px 20px 10px 20px;
+}
+
+
+.start-btn {
+    background-color: #ff6f61;
+    border-radius: 22px 0px 22px 22px;
+}
+
+.sign-btn {
+    border: 2px solid #00203f;
+    color: #00203f;
+    padding: 8px 12px;
+    border-radius: 22px 0px 22px 22px;
+    font-size: 0.9em;
+    margin-left: 10px;
+    cursor: pointer;
+    background-color: transparent;
+
+}
+
+/* .welcome-message {
+    font-size: 1em;
+    color: #00203f;
+    margin-left: 10px;
+    font-weight: 600;
+  } */
+  
+/* Modernized dropdown container */
+.user-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #013567;
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .dropdown-menu-user {
+    display: none;
+    position: absolute;
+    top: 41px;
+    right: 0;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 250px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .user-dropdown:hover .dropdown-menu-user {
+    display: block;
+  }
+  
+  .dropdown-header {
+    background-color: #f5f5f5;
+    text-align: center;
+    padding: 15px 10px;
+  }
+  
+  .user-avatar-header {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #ff6f61;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+  
+  .user-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #00203f;
+  }
+  
+  .user-email {
+    font-size: 0.9em;
+    color: #7a7a7a;
+  }
+  
+  hr {
+    border: none;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+  }
+  
+  .dropdown-item-user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    font-size: 1em;
+    color: #444;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dropdown-item-user i {
+    font-size: 1.3em;
+    color: #013567;
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+  
+/* Modern hover effect with dual colors */
+.dropdown-item-user:hover {
+    background: linear-gradient(90deg, #013567 0%, #ff6f61 100%);
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .dropdown-item-user:hover i {
+    color: #fff;
+    transform: scale(1.1);
+  }
+  
+  /* Subtle background gradient animation */
+  .dropdown-item-user::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skewX(-45deg);
+    transition: left 0.3s ease;
+    z-index: 0;
+  }
+  
+  .dropdown-item-user:hover::before {
+    left: 0;
+  }
+  
+  /* Text and icon layering above background effect */
+  .dropdown-item-user span,
+  .dropdown-item-user i {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .logout {
+    border-top: 1px solid #e5e5e5;
+    margin-top: 5px;
+    padding-top: 15px;
+  }
+  
+  .logout i {
+    color: #d9534f;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+
+  .options-flex {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+
+/* Sidebar-specific styles */
+.sidebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 75%;
+    height: 100%;
+    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+    /* padding: 20px; */
+    z-index: 20;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.show {
+    display: flex;
+    transform: translateX(0);
+}
+
+.close-btn-final {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    color: #555;
+    cursor: pointer;
+    /* margin-bottom: 15px; */
+    transition: color 0.2s;
+}
+
+.close-btn-final:hover {
+    color: #ff6f61;
+}
+
+/* Refined search bar */
+.mobile-search {
+    display: flex;
+    align-items: center;
+    background: #f1f1f1;
+    border-radius: 24px;
+    padding: 5px 10px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* margin-bottom: 20px; */
+    width: 100%;
+}
+
+.mobile-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1em;
+    color: #333;
+    font-weight: 500;
+}
+
+.mobile-search input::placeholder {
+    color: #888;
+    font-weight: 400;
+}
+
+.mobile-search .search-btn-final {
+    background: #ff6f61;
+    border: none;
+    color: #fff;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* Sidebar links */
+.sidebar-links-second {
+    list-style: none;
+    padding: 0;
+    /* margin-bottom: 25px; */
+}
+
+.sidebar-links-second li {
+    /* margin: 10px 0; */
+}
+
+.sidebar-links-second a {
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+    color: #333;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.sidebar-links-second a:hover {
+    background: #f7f7f7;
+    color: #ff6f61;
+}
+
+.sidebar-links-second i {
+    margin-right: 10px;
+    color: #ff6f61;
+}
+
+/* Start and Sign buttons in sidebar */
+.sidebar-start-btn,
+.sidebar-sign-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 1em;
+    padding: 12px 0;
+    border-radius: 25px;
+    font-weight: bold;
+    margin: 10px 0;
+    transition: background 0.3s;
+}
+
+.sidebar-start-btn {
+    background-color: #ff6f61;
+    color: #fff;
+}
+
+.sidebar-sign-btn {
+    background-color: transparent;
+    color: #ff6f61;
+    border: 2px solid #ff6f61;
+}
+
+.sidebar-start-btn:hover {
+    background-color: #ff5a4a;
+}
+
+.sidebar-sign-btn:hover {
+    background-color: #ff6f61;
+    color: #fff;
+}
+
+/* Menu toggle button */
+.menu-toggle-final {
+    display: none;
+    font-size: 1.5em;
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+}
+
+
+.sidebar-links-second {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.sidebar-links-second li {
+    margin-bottom: 15px;
+}
+
+.sidebar-links-second li a {
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+}
+
+/* second navbar  */
+
+/* Reset some basic styling */
+.partition-horizontal {
+    height: 2px;
+    background-color: #ffffff;
+    color: #f5f5f6;
+}
+
+
+/* General styling for second-main  */
+
+.second-main {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+
+/* close General styling for second-main  */
+
+
+.second-main {
+    padding: 20px;
+}
+
+.navbar-second {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 33px 5px 10px;
+    background: linear-gradient(to left, #ffffff, #f5f5f6);
+    border-radius: 0px 33px 33px 33px;
+}
+
+.navbar-left-second,
+.navbar-right-second {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-feature-second .feature-button-second {
+    padding: 6px 10px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 0px 22px 22px 22px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.navbar-links-second {
+    display: flex;
+    gap: 15px;
+    list-style: none;
+    margin-left: 20px;
+}
+
+/* General styling for navbar links */
+.navbar-links-second a {
+    text-decoration: none; /* Remove default underline */
+    color: #333; /* Default text color */
+    padding: 5px 10px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    position: relative; /* Needed for the underline effect */
+  }
+  
+  /* Add underline effect on hover */
+  .navbar-links-second a::after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 2px;
+    background-color: #007bff; /* Color of the underline */
+    transition: width 0.3s ease;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  
+  /* Hover state */
+  .navbar-links-second a:hover {
+    color: #007bff; /* Text color on hover */
+  }
+  
+  .navbar-links-second a:hover::after {
+    width: 100%; /* Expand underline */
+  }
+
+.navbar-products-second {
+    display: flex;
+    align-items: center;
+    color: #1e3a8a;
+    font-size: 16px;
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.navbar-products-second i {
+    margin-right: 5px;
+}
+
+.navbar-icons-second {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.icon-item-second {
+    position: relative;
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Dropdown container */
+.dropdown-second {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown menu */
+.dropdown-menu-second {
+    display: none;
+    position: absolute;
+    top: 100%;
+    /* Align below the parent */
+    left: 0;
+    z-index: 10;
+    background-color: #fff;
+    box-shadow: 0 10px 30px rgba(0, 32, 63, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    list-style: none;
+    padding: 6px;
+    margin: 8px 0 0;
+    min-width: 200px;
+}
+
+/* categories fix  */
+  
+  
+@media (max-width: 1120px) {
+    .navbar-links-second li:nth-child(n+5) {
+      display: none; /* Hide all links except the first 4 */
+    }
+    .dropdown-container {
+      display: block; /* Show dropdown for additional links */
+    }
+  }
+  
+
+/* categoreies fix  */
+
+.icon-span{
+    width: 21px;
+    /* margin-top: 2px; */
+    filter: invert(1);
+}
+
+.icon-span img{
+    width: 21px;
+    /* margin-top: 2px; */
+}
+
+
+
+/* Dropdown items */
+.dropdown-menu-second li {
+    border-bottom: none;
+}
+
+.dropdown-menu-second li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu-second a {
+    display: block;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #00203f;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.dropdown-menu-second a:hover {
+    background-color: #fff1ef;
+    color: #ff6f61;
+}
+
+/* Show dropdown on hover */
+.dropdown-second:hover .dropdown-menu-second {
+    display: block;
+}
+
+
+.badge-second {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 999px;
+    color: #fff;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.badge-blue-second {
+    background-color: #3b82f6;
+}
+
+.badge-red-second {
+    background-color: #ef4444;
+}
+
+.badge-yellow-second {
+    background-color: #f59e0b;
+}
+
+
+
+/* Mobile-specific styles */
+@media (max-width: 911px) {
+    .navbar-second {
+        display: none;
+        /* Hide the original second navbar */
+    }
+
+    .partition-vertical {
+        display: none;
+    }
+
+    /* Close button inside the sidebar */
+    .close-btn-final {
+        align-self: flex-end;
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        color: #333;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+
+    .sidebar.show .close-btn-final {
+        display: block;
+    }
+
+    /* Hide the search container and options on small devices */
+    .search-container-final,
+    .options {
+        display: none;
+    }
+
+    /* Center logo-final and add space for menu toggle */
+    .navbar-final {
+        justify-content: space-between;
+    }
+
+    .logo-final {
+        margin: 0 auto;
+    }
+
+    /* Display the menu toggle button */
+    .menu-toggle-final {
+        display: block;
+        font-size: 1.5em;
+        background: none;
+        border: none;
+        color: #333;
+        cursor: pointer;
+    }
+
+    /* Sidebar setup */
+    .sidebar {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 80%;
+        height: 100%;
+        background: #fff;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        z-index: 20;
+        flex-direction: column;
+    }
+
+    .sidebar input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .sidebar .the-button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .sidebar.show {
+        display: flex;
+    }
+}
+
+.search-container-final:hover .dropdown-menu-final {
+    display: block;
+  }
+  
+  .category_nav {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    width: 90%;
+    top: 154px;
+    border-radius: 10px;
+}
+
+.category_list_detail {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.text-button {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.caption1 {
+    font-size: 0.875rem;
+    color: #555;
+    text-decoration: none;
+}
+
+
+.search-form {
+    display: flex;
+    flex: 1; /* Make the form expand to fill the available space */
+    gap: 5px;
+  }
+  
+  .search-input {
+    flex: 1; /* Make the input fill the remaining space */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+
+.main-content-off .profile-sidebar-off .profile-pic-off .avatar-off::before {
+    position: absolute;
+    content: "";
+    width: 16px;
+    height: 16px;
+    background: gray;
+    border-radius: 50%;
+    top: -4px;
+    left: -4px;
+}

@@ -1,0 +1,165 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Manage Courses Eduprenair{% endblock title %} {% load static %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+<style>
+    .bg-orange{
+        background-color: orange;
+        color: white;
+    }
+    .bg-yellow{
+        background-color: #ff6f61;
+        color: white;
+    }
+</style>
+
+{% endblock extra_css %} 
+{% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="dashboard_bookmarks scrollbar_custom w-full bg-surface">
+      <div class="container h-fit max-lg:py-12 max-sm:py-8" style="padding-bottom: 4rem;">
+        <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+      </button>
+      <h4 class="heading4 max-lg:mt-3">'{{course.title}}' Statistics</h4>
+      <div class="bookmarks_block mt-7.5 rounded-lg bg-white">
+          <div class="list_category flex items-center h-20 px-6 border-b border-line">
+              <div class="menu_tab overflow-unset max-w-none">
+                  <ul class="menu flex gap-7" role="tablist">
+                      <li class="indicator absolute bottom-0 h-0.5 bg-primary rounded-full duration-300"></li>
+                      <li class="tab_item" role="presentation">
+                          <button class="tab_btn -before py-1 text-button hover:text-primary duration-300 active" id="projects_tab01" role="tab" aria-controls="projects_01" aria-selected="true">Stats</button>
+                      </li>
+                      <li class="tab_item" role="presentation">
+                          <button class="tab_btn -before py-1 text-button hover:text-primary duration-300" id="employers_tab03" role="tab" aria-controls="employers_03" aria-selected="false">Students</button>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+          <div id="projects_01" class="tab_list active" role="tabpanel" aria-labelledby="projects_tab01" aria-hidden="false">
+            <ul class="list_projects grid md:grid-cols-2 grid-cols-1 lg:gap-6 gap-5 p-6">
+                <li class="counter_item flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="counter_content">
+                        <span class="text-secondary text-sm font-medium">Total Students</span>
+                        <h4 class="number heading4 mt-1 text-2xl font-bold text-gray-800">{{students.count}}</h4>
+                    </div>
+                    <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-700">
+                        <span class="ph ph-user sm:text-3xl text-2xl"></span>
+                    </div>
+                </li>
+                <li class="counter_item flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="counter_content">
+                        <span class="text-secondary text-sm font-medium">Total Earnings from Course</span>
+                        <h4 class="number heading4 mt-1 text-2xl font-bold text-gray-800">${{course.sales_amount}}</h4>
+                    </div>
+                    <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient-to-r from-green-500 to-green-700">
+                        <span class="ph ph-chart-bar sm:text-3xl text-2xl"></span>
+                    </div>
+                </li>
+                <li class="counter_item flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="counter_content">
+                        <span class="text-secondary text-sm font-medium">Total Reviews</span>
+                        <h4 class="number heading4 mt-1 text-2xl font-bold text-gray-800">{{course.all_ratings.count}}</h4>
+                    </div>
+                    <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-700">
+                        <span class="ph ph-chat-circle-dots sm:text-3xl text-2xl"></span>
+                    </div>
+                </li>
+                <li class="counter_item flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="counter_content">
+                        <span class="text-secondary text-sm font-medium">Average Rating</span>
+                        <h4 class="number heading4 mt-1 text-2xl font-bold text-gray-800">{{course.average_rating}}</h4>
+                    </div>
+                    <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient-to-r from-red-500 to-red-700">
+                        <span class="ph ph-star sm:text-3xl text-2xl"></span>
+                    </div>
+                </li>
+            </ul>
+            
+            
+          </div>
+          <div id="employers_03" class="tab_list" role="tabpanel" aria-labelledby="employers_tab03" aria-hidden="true">
+            <ul class="list_employers grid 2xl:grid-cols-3 sm:grid-cols-2 lg:gap-6 gap-5 w-full p-6">
+                {% if students %}
+                {% for student in students %}
+                    <li class="item employers_item flex items-center justify-between gap-4 h-full p-6 rounded-lg bg-white shadow-md duration-300 hover:shadow-xl">
+                        <a href="{% url 'edu_profile' student.user.slug %}" class="employers_item flex items-center gap-4 w-full">
+                            <img src="{{ student.user.profile_pic.url }}" alt="profile-pic" class="flex-shrink-0 w-15 h-15" />
+                            <div class="w-full">
+                                <strong class="employers_name text-title duration-300 hover:text-primary">
+                                    {{ student.user.username }}
+                                </strong>
+                                <div class="employers_address -style-1 text-secondary mt-1">
+                                    <span class="ph ph-map-pin text-lg"></span>
+                                    <span class="address caption1 align-top">{{ student.user.country }}</span>
+                                </div>
+                                <div class="employers_address text-secondary mt-2 flex items-center gap-2">
+                                    <span class="ph ph-calendar text-lg"></span>
+                                    <span class="date caption1 align-top">Joined: {{ student.enrolled_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="employers_address text-secondary mt-2 flex items-center gap-2">
+                                    {% if student.is_completed %}
+                                    <span class="badge bg-orange text-black px-3 py-1 rounded-full text-sm">
+                                        Completed
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-yellow text-white px-3 py-1 rounded-full text-sm">
+                                        In Progress
+                                    </span>
+                                {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+                {% else %}
+                    <li class="item employers_item flex items-center justify-between gap-4 h-full p-6 rounded-lg bg-white shadow-md duration-300 hover:shadow-xl">
+                        <div class="w-full">
+                            <strong class="employers_name text-title duration-300 hover:text-primary">
+                                No students enrolled yet
+                            </strong>
+                        </div>
+                    </li>
+
+                {% endif %}
+
+            </ul>
+            
+            
+          </div>
+      </div>
+      {% include "dashboard/partials/footer_cta.html" %}
+      </div>
+
+      <div
+        class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+  {% endblock extra_javascript %}
+</body>

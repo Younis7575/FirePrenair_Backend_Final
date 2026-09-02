@@ -1,0 +1,448 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Admin Digiprenair Sales{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 20px;
+    }
+    
+    .filter-btn.active {
+        background: #1e3a8a;
+        color: white;
+        border-color: rgb(36, 117, 246);
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .sales-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .sales-table th,
+    .sales-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .sales-table th {
+        background: #f8fafc;
+        font-weight: 600;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four ph-duotone text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="heading4 max-lg:mt-3">Digiprenair Sales Analytics</h4>
+                    <div class="flex gap-2" id="timeFilter">
+                        <button class="filter-btn active" data-filter="all">All Time</button>
+                        <button class="filter-btn" data-filter="monthly">Monthly</button>
+                        <button class="filter-btn" data-filter="weekly">Weekly</button>
+                        <button class="filter-btn" data-filter="daily">Today</button>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Sales</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="totalSales">$0.00</h3>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <span class="ph ph-currency-dollar text-blue-600 text-xl"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Total Orders</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="totalOrders">0</h3>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <span class="ph ph-shopping-cart text-green-600 text-xl"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Last Sale</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="lastSale">$0.00</h3>
+                            </div>
+                            <div class="p-3 bg-purple-100 rounded-lg">
+                                <span class="ph ph-trend-up text-purple-600 text-xl"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Active Filter</p>
+                                <h3 class="text-xl font-bold text-gray-900" id="activeFilter">All Time</h3>
+                            </div>
+                            <div class="p-3 bg-orange-100 rounded-lg">
+                                <span class="ph ph-funnel text-orange-600 text-xl"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" style="margin-top: 20px;">
+                    <div class="chart-container">
+                        <h5 class="text-lg font-semibold mb-4">Sales Trend (Last 30 Days)</h5>
+                        <div id="salesChart"></div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h5 class="text-lg font-semibold mb-4">Top Selling Products</h5>
+                        <div id="productsChart"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <div class="chart-container" style="margin-top: 20px;">
+                    <h5 class="text-lg font-semibold mb-4">Recent Orders</h5>
+                    <div class="overflow-x-auto">
+                        <table class="sales-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTable">
+                                <!-- Orders will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>        
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+<script>
+
+// Use the properly serialized JSON
+const analyticsData = {{ analytics_json|safe }};
+const ordersData = {{ orders_json|safe }};
+
+let currentFilter = 'all';
+let salesChart, productsChart;
+
+function initializeCharts() {
+    // Check if we have data
+    if (!analyticsData.sales_chart || !analyticsData.top_products) {
+        console.error("Missing chart data");
+        return;
+    }
+
+    // Sales Trend Chart
+    try {
+        const salesChartOptions = {
+            series: [{
+                name: 'Sales ($)',
+                data: analyticsData.sales_chart.amounts
+            }],
+            chart: {
+                height: 350,
+                type: 'line',
+                zoom: {
+                    enabled: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            colors: ['#3b82f6'],
+            title: {
+                text: 'Sales Over Time',
+                align: 'left',
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            },
+            grid: {
+                borderColor: '#e7e7e7',
+                row: {
+                    colors: ['#f3f4f6', 'transparent'],
+                    opacity: 0.5
+                },
+            },
+            xaxis: {
+                categories: analyticsData.sales_chart.dates,
+                labels: {
+                    rotate: -45
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Sales Amount ($)'
+                },
+                labels: {
+                    formatter: function(value) {
+                        return '$' + value.toFixed(2);
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(value) {
+                        return '$' + value.toFixed(2);
+                    }
+                }
+            }
+        };
+
+        salesChart = new ApexCharts(document.querySelector("#salesChart"), salesChartOptions);
+        salesChart.render();
+    } catch (error) {
+        console.error("Error creating sales chart:", error);
+        document.getElementById("salesChart").innerHTML = "<p class='text-red-500'>Error loading sales chart</p>";
+    }
+
+    // Top Products Chart
+    try {
+        const productNames = analyticsData.top_products.map(p => 
+            p.title.length > 30 ? p.title.substring(0, 30) + '...' : p.title
+        );
+        const productSales = analyticsData.top_products.map(p => p.sales);
+
+        const productsChartOptions = {
+            series: [{
+                name: 'Units Sold',
+                data: productSales
+            }],
+            chart: {
+                height: 350,
+                type: 'bar',
+                toolbar: {
+                    show: true
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: true,
+                    dataLabels: {
+                        position: 'top'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -5,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#fff']
+                }
+            },
+            colors: ['#10b981'],
+            xaxis: {
+                categories: productNames,
+                title: {
+                    text: 'Units Sold'
+                }
+            },
+            yaxis: {
+                labels: {
+                    show: true
+                }
+            },
+            title: {
+                text: 'Top Selling Products',
+                align: 'left',
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            }
+        };
+
+        productsChart = new ApexCharts(document.querySelector("#productsChart"), productsChartOptions);
+        productsChart.render();
+    } catch (error) {
+        console.error("Error creating products chart:", error);
+        document.getElementById("productsChart").innerHTML = "<p class='text-red-500'>Error loading products chart</p>";
+    }
+}
+
+function updateStatistics(filter) {
+    let salesData, ordersData, lastSaleData;
+    
+    switch(filter) {
+        case 'monthly':
+            salesData = analyticsData.monthly_sales;
+            ordersData = 'Calculating...';
+            lastSaleData = analyticsData.last_sale ? analyticsData.last_sale.amount : 0;
+            break;
+        case 'weekly':
+            salesData = analyticsData.weekly_sales;
+            ordersData = 'Calculating...';
+            lastSaleData = analyticsData.last_sale ? analyticsData.last_sale.amount : 0;
+            break;
+        case 'daily':
+            salesData = analyticsData.daily_sales;
+            ordersData = 'Calculating...';
+            lastSaleData = analyticsData.last_sale ? analyticsData.last_sale.amount : 0;
+            break;
+        default: // all
+            salesData = analyticsData.total_sales;
+            ordersData = analyticsData.total_orders;
+            lastSaleData = analyticsData.last_sale ? analyticsData.last_sale.amount : 0;
+    }
+    
+    document.getElementById('totalSales').textContent = `$${salesData.toFixed(2)}`;
+    document.getElementById('totalOrders').textContent = ordersData;
+    document.getElementById('lastSale').textContent = `$${lastSaleData.toFixed(2)}`;
+    document.getElementById('activeFilter').textContent = 
+        filter === 'all' ? 'All Time' : 
+        filter === 'monthly' ? 'Monthly' :
+        filter === 'weekly' ? 'Weekly' : 'Today';
+}
+
+function populateOrdersTable() {
+    const tableBody = document.getElementById('ordersTable');
+    
+    // Clear existing rows
+    tableBody.innerHTML = '';
+    
+    if (!ordersData || ordersData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4 text-gray-500">
+                    No orders found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Add orders to table (limited to 10 for performance)
+    ordersData.slice(0, 10).forEach(order => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+        row.innerHTML = `
+            <td class="font-mono text-sm">#${order.id}</td>
+            <td class="font-medium">${order.user.username}</td>
+            <td class="text-sm text-gray-600">${new Date(order.created_at).toLocaleDateString()}</td>
+            <td class="font-semibold text-green-600">$${parseFloat(order.total_amount).toFixed(2)}</td>
+            <td>
+                <span class="px-2 py-1 rounded-full text-xs ${
+                    order.is_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                }">
+                    ${order.is_paid ? 'Paid' : 'Pending'}
+                </span>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, initializing charts...");
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Update statistics with default filter
+    updateStatistics('all');
+    
+    // Populate orders table
+    populateOrdersTable();
+    
+    // Add filter button event listeners
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Update filter
+            currentFilter = this.dataset.filter;
+            updateStatistics(currentFilter);
+        });
+    });
+});
+
+// Handle window resize for charts
+window.addEventListener('resize', function() {
+    if (salesChart) {
+        setTimeout(() => {
+            salesChart.update();
+        }, 300);
+    }
+    if (productsChart) {
+        setTimeout(() => {
+            productsChart.update();
+        }, 300);
+    }
+});
+</script>
+{% endblock extra_javascript %}

@@ -1,0 +1,13 @@
+.toastify {
+    position: fixed;
+    top: 138px;
+    right: 0;
+    z-index: 1000;
+    transform: translateX(100%);
+    box-shadow: 0px 10px 25px 0px rgba(72, 95, 119, 0.10);
+    transition: all .8s ease;
+
+    &.active {
+        transform: translateX(0);
+    }
+}

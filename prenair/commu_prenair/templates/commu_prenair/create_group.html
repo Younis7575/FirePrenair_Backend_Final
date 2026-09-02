@@ -1,0 +1,265 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Create Group {% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row profile-picture-area">
+            <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 col-8">
+                
+            </div>
+            <div class="col-xl-12 col-lg-8">
+                <div class="head-area mb-5">
+                    <h6>Create Group</h6>
+                </div>
+                <form action="{% url 'create_group' %}" method="POST" enctype="multipart/form-data" class="text-center d-grid gap-4">
+                    {% csrf_token %}
+                
+                    <!-- Profile Image Section -->
+                    <div class="single-box p-5">
+                        <div class="col-md-12">
+                            <div class="upload-single cover-img">
+                                <div class="head-area mb-2 text-start">
+                                    <h6>Front Image</h6>
+                                </div>
+                                <div class="profile-picture position-relative text-start d-flex align-items-center">
+                                    <!-- Initially hidden image preview -->
+                                    <img id="profile-img-preview" class="preview-image me-3" alt="Profile Image Preview" style="display: none; width: 100px; height: 100px; object-fit: cover;">
+                                    <div class="file-upload" style="position: absolute; right: 0; top: -40px;">
+                                        <label class="file text-start mt-2">
+                                            <input type="file" name="profile_img" accept="image/*" onchange="previewImage(event, 'profile-img-preview')">
+                                            <span style="background-color: #ff6f61;" class="cmn-btn d-center gap-1">
+                                                <i class="material-symbols-outlined mat-icon fs-2"> edit_note </i>
+                                                Upload Front Image
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Cover Image Section -->
+                    <div class="single-box p-5">
+                        <div class="col-md-12">
+                            <div class="upload-single cover-img">
+                                <div class="head-area mb-2 text-start">
+                                    <h6>Cover Image</h6>
+                                </div>
+                                <div class="profile-picture position-relative text-start d-flex align-items-center">
+                                    <!-- Initially hidden image preview -->
+                                    <img id="cover-img-preview" class="preview-image me-3" alt="Cover Image Preview" style="display: none; width: 100px; height: 100px; object-fit: cover;">
+                                    <div class="file-upload" style="position: absolute; right: 0; top: -40px;">
+                                        <label class="file text-start mt-2">
+                                            <input type="file" name="cover_img" accept="image/*" onchange="previewImage(event, 'cover-img-preview')">
+                                            <span style="background-color: #ff6f61;" class="cmn-btn d-center gap-1">
+                                                <i class="material-symbols-outlined mat-icon fs-2"> edit_note </i>
+                                                Upload Cover Photo
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Group Details Section -->
+                    <div class="single-box p-3 p-sm-5">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="name">Group Name</label>
+                                    <div class="input-area second">
+                                        <input type="text" name="name" placeholder="Enter group name" required autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="desc">Description</label>
+                                    <div class="input-area second">
+                                        <input type="text" name="desc" placeholder="Enter group description" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="is_private">Private Group</label>
+                                    <div class="input-area second">
+                                        <select name="is_private" class="flex items-center" style="position: relative; cursor: pointer; width: 100%; height: 3rem; padding-right: 2.5rem; padding-left: 1.5rem; border-width: 1px;">
+                                            <option value="True">Yes</option>
+                                            <option value="False">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="id_category_l_1">Select Category</label>
+                                    <div class="input-area second">
+                                        <select id="id_category_l_1-" name="category_l_1" class="flex items-center" style="position: relative; cursor: pointer; width: 100%; height: 3rem; padding-right: 2.5rem; padding-left: 1.5rem; border-width: 1px;">
+                                            <option value="">Select Category</option>
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}">{{ category.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="id_category_l_2">Select Sub-Category 1</label>
+                                    <div class="input-area second">
+                                        <select name="category_l_2" id="id_category_l_2-" class="flex items-center" style="position: relative; cursor: pointer; width: 100%; height: 3rem; padding-right: 2.5rem; padding-left: 1.5rem; border-width: 1px;">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="id_category_l_3">Select Sub-Category 2</label>
+                                    <div class="input-area second">
+                                        <select name="category_l_3" id="id_category_l_3-" class="flex items-center" style="position: relative; cursor: pointer; width: 100%; height: 3rem; padding-right: 2.5rem; padding-left: 1.5rem; border-width: 1px;">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 mt-4">
+                                <div class="btn-area text-end">
+                                    <button type="submit" class="category-btn-final">Create Group</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                
+                
+            </div>
+        </div>
+        
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM Loaded");
+    const level1Dropdown = document.getElementById("id_category_l_1-");
+    const level2Dropdown = document.getElementById("id_category_l_2-");
+    const level3Dropdown = document.getElementById("id_category_l_3-");
+    console.log(level1Dropdown);
+
+    // Pre-selected values (set in the backend for editing mode)
+    const selectedCategoryL1 = "{{ selected_category_l_1|default:'' }}";
+    const selectedCategoryL2 = "{{ selected_category_l_2|default:'' }}";
+    const selectedCategoryL3 = "{{ selected_category_l_3|default:'' }}";
+
+    // Function to fetch categories and populate the dropdown
+    function fetchCategories(parentId, targetDropdown, selectedValue = null) {
+        console.log(parentId);
+        fetch(`/commuprenair/get-child-categories/?parent_id=${parentId}`)
+
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                targetDropdown.innerHTML = '<option value="">Select</option>';
+                data.categories.forEach(category => {
+                    const option = document.createElement("option");
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    if (selectedValue && category.id == selectedValue) {
+                        option.selected = true;
+                    }
+                    targetDropdown.appendChild(option);
+                });
+                targetDropdown.disabled = false;
+
+                // Trigger change event to ensure further cascading
+                targetDropdown.dispatchEvent(new Event("change"));
+            });
+    }
+
+    // Handle Level 1 Change
+    level1Dropdown.addEventListener("change", function () {
+        const selectedValue = this.value;
+        console.log(selectedValue);
+        if (selectedValue) {
+            fetchCategories(selectedValue, level2Dropdown);
+            level3Dropdown.innerHTML = '<option value="">Select</option>';
+            level3Dropdown.disabled = true;
+        } else {
+            level2Dropdown.innerHTML = '<option value="">Select</option>';
+            level3Dropdown.innerHTML = '<option value="">Select</option>';
+            level2Dropdown.disabled = true;
+            level3Dropdown.disabled = true;
+        }
+    });
+
+    // Handle Level 2 Change
+    level2Dropdown.addEventListener("change", function () {
+        const selectedValue = this.value;
+        if (selectedValue) {
+            fetchCategories(selectedValue, level3Dropdown, selectedCategoryL3);
+        } else {
+            level3Dropdown.innerHTML = '<option value="">Select</option>';
+            level3Dropdown.disabled = true;
+        }
+    });
+
+    // Handle Pre-selected Values (for Editing)
+    if (selectedCategoryL1) {
+        level1Dropdown.value = selectedCategoryL1;
+        fetchCategories(selectedCategoryL1, level2Dropdown, selectedCategoryL2);
+    }
+
+    if (selectedCategoryL2) {
+        fetchCategories(selectedCategoryL2, level3Dropdown, selectedCategoryL3);
+    }
+});
+
+function previewImage(event, previewId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewElement = document.getElementById(previewId);
+                previewElement.src = e.target.result;
+                previewElement.style.display = "block";  // Show the image
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+</script>
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<!-- <script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script> -->
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+
+<!-- JavaScript for Image Preview -->
+
+    
+{% endblock javascript %}

@@ -1,0 +1,74 @@
+{% load static %}
+{% load course_filters %}
+<!-- Course Grid -->
+<div class="col-xxl-4 col-md-6 d-flex">
+    <div class="course-box flex-fill">
+        <div class="product">
+            <div class="product-img">
+                <a href="{% url "course_detail" enroll.course.slug %}">
+                    <img class="img-fluid" alt="Img" src="{{enroll.course.thumbnail.url}}">
+                </a>
+                {% if course.is_course_on_discount %}
+		    	<div class="price">
+		    		<h3>${{enroll.course.course_price}} <span>${{enroll.course.price}}</span></h3>
+		    	</div>
+		    	{% else %}
+		    	<div class="price">
+		    		<h3>${{enroll.course.price}}</h3>
+		    	</div>
+		    	{% endif %}
+            </div>
+            <div class="product-content">
+                <div class="course-group d-flex">
+                    <div class="course-group-img d-flex">
+                        <a href="{% url 'edu_profile' enroll.course.instructor.slug %}"><img
+                                src="{{enroll.course.instructor.profile_pic.url}}" alt="Img"
+                                class="img-fluid"></a>
+                        <div class="course-name">
+                            <h4><a href="{% url 'edu_profile' enroll.course.instructor.slug %}">{{enroll.course.instructor.name}}</a></h4>
+                            <p>Instructor</p>
+                        </div>
+                    </div>
+                    <div class="course-share d-flex align-items-center justify-content-center">
+                        {% if enroll.course|in_wishlist:request.user %}
+                        <a href="{% url 'remove_from_wishlist' enroll.course.slug %}"><i class="fa-regular fa-heart color-active"></i></a>
+                        {% else %}
+                        <a href="{% url 'add_to_wishlist' enroll.course.slug %}"><i class="fa-regular fa-heart"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                <h3 class="title instructor-text"><a href="{% url "course_detail" enroll.course.slug %}">{{enroll.course.title}}</a></h3>
+                <div class="course-info d-flex align-items-center">
+                    <div class="rating-img d-flex align-items-center">
+                        <img src="{% static 'edu_prenair/assets/img/temp/icon-01.svg' %}" alt="Img">
+                        <p>{{enroll.course.total_lessons}}+ Lesson</p>
+                    </div>
+                    <div class="course-view d-flex align-items-center">
+                        <img src="{% static 'edu_prenair/assets/img/temp/icon-02.svg' %}" alt="Img">
+                        <p>{{enroll.course.duration}} Hours</p>
+                    </div>
+                    {% if enroll.course.monthly_subscription %}
+					<div class="course-view d-flex align-items-center">
+						<img src="{% static 'edu_prenair/assets/img/temp/cloud.svg' %}" alt="Img">
+						<p>Monthly Subscription</p>
+					</div>
+					{% else %}
+					<div class="course-view d-flex align-items-center">
+						<img src="{% static 'edu_prenair/assets/img/temp/cloud.svg' %}" alt="Img">
+						<p>One Time Payment</p>
+					</div>
+					{% endif %}
+                </div>
+                <div class="rating mb-0">
+                    <i class="fas fa-star filled"></i>
+                    <i class="fas fa-star filled"></i>
+                    <i class="fas fa-star filled"></i>
+                    <i class="fas fa-star filled"></i>
+                    <i class="fas fa-star filled"></i>
+                    <span class="d-inline-block average-rating"><span>5</span> ({{enroll.course.five_star_ratings.count}})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Course Grid -->

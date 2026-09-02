@@ -1,0 +1,109 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - My Orders{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+{% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">{{project.name}}</h5>
+                    <p>{{project.description}}</p>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Product</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if project.order_items %}
+                                {% for item in project.order_items.all %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info flex items-center gap-3">
+                                          <a href="#" class="avatar flex-shrink-0 w-15 h-15 rounded-full overflow-hidden">
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover" />
+                                          </a>
+                                          <a href="{% url 'digi_product' item.product.slug %}" class="block">
+                                            <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">
+                                              {{ item.product.title }}
+                                            </strong>
+                                          </a>
+                                        </div>
+                                      </th>
+                                    <td class="p-5">${{item.price}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <!-- <a href="#"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Product</span>
+                                            </button></a> -->
+                                            <a href="{% url 'download_product' item.product.id %}">
+                                                <button class="btn_action flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                    <span class="ph ph-cloud-arrow-down text-xl"></span>
+                                                    <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Download</span>
+                                                </button>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+   <!-- Modal -->
+   <div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+   </div>
+   
+    
+
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+
+{% endblock extra_javascript %}

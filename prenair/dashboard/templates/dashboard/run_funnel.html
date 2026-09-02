@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ funnel.name }} - Step {{ step_order }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+        }
+
+        .funnel-content {
+            min-height: calc(100vh - 80px);
+            /* padding: 20px; */
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .funnel-button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #007bff;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .funnel-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .funnel-button:active {
+            transform: translateY(0);
+        }
+
+        .download-button {
+            background: #28a745;
+        }
+
+        .download-button:hover {
+            background: #1e7e34;
+        }
+
+        .checkout-button {
+            background: #dc3545;
+        }
+
+        .checkout-button:hover {
+            background: #c82333;
+        }
+
+        .step-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Step Indicator -->
+    <!-- <div class="step-indicator">
+        Step {{ step_order }} of {{ funnel.steps.count }}
+    </div> -->
+
+    <!-- Step Content -->
+    <div class="funnel-content">
+        {{ step_html_content|safe }}
+    </div>
+
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        {% if step_order == 3 and next_step %}
+        {% if product %}
+        <a href="{% url 'create_checkout_session' funnel_id=funnel.id product_id=product.id %}"
+            class="funnel-button checkout-button">
+            Buy Now - ${{ product.price }}
+        </a>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 500);
+        });
+
+        // Handle any forms in the step content
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (form.closest('.funnel-content')) {
+                // Let the form submit normally
+                return true;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,90 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Add Announcement{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+   {% include 'edu_prenair/partials/header.html' %}
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar breadcrumb-bar-info">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="breadcrumb-list">
+                    <h2 class="breadcrumb-title">Add Announcement</h2>
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Add Announcement</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->
+
+<!-- Page Content -->
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            
+            {% if request.user.is_edu_instructor %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+            {% else %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+            {% endif %}
+           
+            <div class="col-xl-9 col-lg-8 col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Add Announcement to Course</h3>
+                        
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            
+                            <!-- Dropdown for selecting course by slug -->
+                            <div class="mb-3">
+                                <label for="course" class="form-label">Select Course:</label>
+                                <select name="course" id="course" class="form-select" required>
+                                    <option value="" disabled selected>Select a course</option>
+                                    {% for course in instructor_courses %}
+                                        <option value="{{ course.slug }}">{{ course.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                    
+                            <!-- Input for title -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Announcement Title:</label>
+                                <input type="text" name="title" id="title" class="form-control" placeholder="Enter title" required>
+                            </div>
+                    
+                            <!-- Textarea for content -->
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Content:</label>
+                                <textarea name="content" id="content" class="form-control" rows="4" placeholder="Enter announcement content" required></textarea>
+                            </div>
+                    
+                            <button type="submit" class="category-btn-final">Add Announcement</button>
+                        </form>
+                    </div>
+                </div>
+            </div>	
+
+        </div>
+    </div>
+</div>	
+<!-- /Page Content -->
+
+
+</div>
+<!-- /Main Wrapper -->
+{% include 'home/partials/footer.html' %}
+
+{% endblock content %}

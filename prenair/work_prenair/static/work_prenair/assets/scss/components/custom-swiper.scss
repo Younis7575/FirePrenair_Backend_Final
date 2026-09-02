@@ -1,0 +1,182 @@
+/* Slider - Swiper Pagination */
+.swiper {
+    cursor: grab;
+    user-select: none;
+
+    &-slide {
+        height: unset !important;
+    }
+
+    &-pagination {
+        &-bullet {
+            position: relative;
+            margin: 0 8px !important;
+            background: transparent;
+            border: 1px solid var(--black);
+            opacity: 1 !important;
+            transition: all ease 0.5s;
+
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                padding: 8px;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                border: 1px solid transparent;
+                transition: all ease 0.5s;
+                border-radius: 50%;
+
+                @media (max-width: 767.98px) {
+                    padding: 6px;
+                }
+            }
+
+            &-active {
+                background: var(--black);
+
+                &::before {
+                    border-color: var(--black);
+                }
+            }
+        }
+    }
+
+    &.dots-white {
+        .swiper-pagination-bullet {
+            border-color: var(--white);
+
+            &-active {
+                background: var(--white);
+
+                &::before {
+                    border-color: var(--white);
+                }
+            }
+        }
+    }
+
+    &.-section {
+        padding-bottom: 56px;
+        padding-left: 16px;
+        padding-right: 16px;
+        margin-left: -16px;
+        margin-right: -16px;
+
+        .swiper-pagination {
+            bottom: 0;
+        }
+
+        @media (max-width: 767.98px) {
+            padding-bottom: 40px;
+        }
+    }
+
+    &-list-images {
+        cursor: pointer;
+    }
+
+    &.overflow-unset {
+        padding-right: 10000px;
+        margin-right: -10000px;
+    }
+}
+
+.slider-main {
+
+    .swiper-pagination-fraction,
+    .swiper-pagination-custom,
+    .swiper-horizontal>.swiper-pagination-bullets,
+    .swiper-pagination-bullets.swiper-pagination-horizontal {
+        bottom: 24px;
+    }
+}
+
+/* Swiper Navigation */
+.section-swiper-navigation {
+    &:has(.swiper.-section) {
+
+        .custom-button-prev,
+        .custom-button-next,
+        .custom-button-prev2,
+        .custom-button-next2,
+        .custom-button-prev3,
+        .custom-button-next3,
+        .custom-button-prev4,
+        .custom-button-next4,
+        .custom-button-testimonials-prev,
+        .custom-button-testimonials-next {
+            top: calc(50% - 26px);
+        }
+    }
+
+    .custom-button-prev,
+    .custom-button-next,
+    .custom-button-prev2,
+    .custom-button-next2,
+    .custom-button-prev3,
+    .custom-button-next3,
+    .custom-button-prev4,
+    .custom-button-next4,
+    .custom-button-testimonials-prev,
+    .custom-button-testimonials-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        color: var(--black);
+        background-color: var(--white);
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        transition: all ease 0.4s;
+
+        &.-border {
+            border: 1px solid var(--line);
+        }
+
+        &.-relative {
+            position: relative !important;
+            top: unset !important;
+            left: unset !important;
+            right: unset !important;
+            bottom: unset !important;
+            transform: unset !important;
+        }
+
+        &:hover {
+            border-color: var(--black);
+            background-color: var(--black);
+            color: var(--white);
+        }
+
+        &.slick-disabled,
+        &.swiper-button-disabled {
+            cursor: default;
+            background-color: var(--line);
+            border-color: var(--line);
+            color: var(--black);
+        }
+
+        @media (max-width: 767.98px) {
+            width: 40px;
+            height: 40px;
+        }
+    }
+}
+
+/* Swiper Thumb */
+.swiper {
+    .swiper-slide {
+        border: 1px solid transparent;
+
+        &-thumb-active {
+            border: 1px solid var(--black);
+        }
+    }
+}

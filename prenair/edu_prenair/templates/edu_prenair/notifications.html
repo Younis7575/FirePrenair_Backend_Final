@@ -1,0 +1,105 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Notifications{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar breadcrumb-bar-info">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="breadcrumb-list">
+                    <h2 class="breadcrumb-title">Notifications</h2>
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->
+
+<!-- Page Content -->
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            
+            {% if request.user.is_edu_instructor %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+            {% else %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+            {% endif %}
+            <div class="col-xl-9 col-lg-9">	
+
+                <div class="settings-widget card-details mb-0">
+                    <div class="settings-menu p-0">
+                        <div class="profile-heading">
+                            <h3>Notifications</h3>
+                        </div>
+                        <div class="checkout-form personal-address">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="d-flex instructor-noti-head align-items-center">
+                                        <div class="noti-mark-btns">
+                                            <ul>
+                                                <li>
+                                                    <a href="#" class="btn"><i class="feather-check me-2"></i> Mark all as read</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#" class="btn btn-delete"><i class="feather-trash-2 me-2"></i> Delete all</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="notication-list">
+                                        <div class="notication-item">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="notication-content">
+                                                        <span>
+                                                            <img src="{{request.user.profile_pic.url}}" class="img-fluid" alt="img">
+                                                        </span>
+                                                        <div class="notication-info">
+                                                            <p><span>Thompson</span> Hicks enroll a new course on Programming</p>
+                                                            <p class="notify-time">10 mins ago</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="notification-btn text-end">
+                                                        <a href="javascript:void(0);" class="btn btn-danger">Delete</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>	
+            
+        </div>
+    </div>
+</div>	
+<!-- /Page Content -->
+
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

@@ -1,0 +1,269 @@
+/* Main color */
+:root {
+  --primary: #ff6f61;
+  --black: #151515;
+  --feature: #212E37;
+  --features: #504CFE;
+  --secondary: #67696e;
+  --placehover: #b1b1b1;
+  --line: #e4e4e4;
+  --surface: #f5f7f9;
+  --white: #fff;
+  --red: #eb4d4d;
+  --success: #37B853;
+  --yellow: #F4AA1A;
+  --background: #eef7f7;
+  --surface1: rgba(255, 255, 255, 0.1);
+  --surface2: rgba(255, 255, 255, 0.2);
+}
+
+/* Main class used in FreelanHub */
+.container {
+  max-width: 1322px !important;
+  width: 100%;
+  padding-right: 16px;
+  padding-left: 16px;
+  margin: 0 auto;
+
+  @media (min-width: 1024px) {
+    max-width: 1360px !important;
+    padding-right: 35px;
+    padding-left: 35px;
+  }
+}
+
+.heading1 {
+  font-size: 56px;
+  line-height: 68px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heading2 {
+  font-size: 44px;
+  line-height: 52px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heading3 {
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heading4 {
+  font-size: 30px;
+  line-height: 42px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heading5 {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heading6 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.text-title {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.text-subtitle {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.text-button {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.text-button-sm {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.body1 {
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: 400;
+}
+
+.body2 {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+.caption1 {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+.caption2 {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+.text-label {
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.bg-linear {
+  background: linear-gradient(238deg, #faf7ef 0%, #f4f6fc 99.66%);
+}
+
+.bg-gradient {
+  background: linear-gradient(180deg, #35CFCF 0%, #104E97 100%);
+}
+
+.shadow-md {
+  box-shadow: 0px 1px 7px 0px rgba(72, 95, 119, 0.12);
+
+  &:hover {
+    box-shadow: 0px 5px 20px 1px rgba(72, 95, 119, 0.18);
+  }
+}
+
+.shadow-lg {
+  box-shadow: 0px 1px 7px 0px rgba(72, 95, 119, 0.15);
+
+  &:hover {
+    box-shadow: 0px 5px 20px 1px rgba(72, 95, 119, 0.22);
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .heading1 {
+    font-size: 48px;
+    line-height: 58px;
+  }
+
+  .heading2 {
+    font-size: 36px;
+    line-height: 46px;
+  }
+
+  .heading3 {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .heading4 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .heading5 {
+    font-size: 22px;
+    line-height: 32px;
+  }
+
+  .body1 {
+    font-size: 19px;
+  }
+
+  .body2 {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .heading1 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .heading2 {
+    font-size: 24px;
+    line-height: 34px;
+  }
+
+  .heading3 {
+    font-size: 22px;
+    line-height: 32px;
+  }
+
+  .heading4 {
+    font-size: 20px;
+    line-height: 30px;
+  }
+
+  .heading5 {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .heading6 {
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .text-title {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .text-button {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .text-button-sm {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .body1 {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .body2 {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .caption1 {
+    font-size: 13px;
+    line-height: 22px;
+  }
+
+  .caption2 {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .text-label {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .button-main {
+    font-size: 14px;
+    line-height: 22px;
+    padding: 10px 16px;
+    border-radius: 4px;
+  }
+}

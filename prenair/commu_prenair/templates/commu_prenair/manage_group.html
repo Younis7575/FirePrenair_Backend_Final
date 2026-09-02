@@ -1,0 +1,141 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Manage Group {% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4">
+                <div class="d-block d-lg-none">
+                    <button class="button profile-active mb-4 mb-lg-0 d-flex align-items-center gap-2">
+                        <i class="material-symbols-outlined mat-icon"> tune </i>
+                        <span>My profile</span>
+                    </button>
+                </div>
+                <div class="profile-sidebar cus-scrollbar p-5">
+                    <div class="d-block d-lg-none position-absolute end-0 top-0">
+                        <button class="button profile-close">
+                            <i class="material-symbols-outlined mat-icon fs-xl"> close </i>
+                        </button>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item d-flex gap-3 align-items-center">
+                            <div class="avatar position-relative">
+                                <img class="avatar-img max-un rounded" src="{{group.profile_img.url}}" style="width: 50px; height: 50px;" alt="avatar">
+                            </div>
+                            <div class="text-area">
+                                <h6 class="m-0 mb-1">{{group.name}}</h6>
+                                {% if group.is_public %}
+                                <p class="smtxt public-group">Public Group</p>
+                                {% else %}
+                                <p class="smtxt public-group">Private Group</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="btn-item mt-5 d-center gap-3">
+                            <a href="{% url 'group_detail' group.slug %}" class="cmn-btn w-100 justify-content-center gap-1">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="profile-link my-5 pb-5">
+                        <li>
+                            <a href="{% url 'commu_home' %}" class="d-flex gap-4">
+                                <i class="material-symbols-outlined mat-icon"> home </i>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="admin-tool">
+                        <p class="mdtxt">Admin tool</p>
+                        <ul class="profile-link border-0 mt-4">
+                            <li>
+                                <a href="{% url 'manage_group' group.slug %}" class="d-flex gap-4 active">
+                                    <i class="material-symbols-outlined mat-icon"> group </i>
+                                    <span>Member request</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-9 col-lg-8 cus-mar">
+                <div class="head-area d-center justify-content-between">
+                    <h5>Member Requests</h5>
+                    <div class="btn-right d-flex gap-2">
+                        <!-- Form for Bulk Approve All and Decline All -->
+                        <form method="post" action="{% url 'manage_group' group.slug %}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="approve_all" class="cmn-btn">Approve all</button>
+                            <button type="submit" name="action" value="decline_all" class="cmn-btn alt second">Decline all</button>
+                        </form>
+                    </div>
+                </div>
+            <!-- Search and Filter Form -->
+            <form method="get" action="{% url 'manage_group' group.slug %}" class="d-flex my-7 align-items-stretch justify-content-between gap-4">
+                <div class="input-area py-2 w-100 gap-2 d-flex align-items-center">
+                    <i class="material-symbols-outlined mat-icon">search</i>
+                    <input type="text" name="query" value="{{ query }}" placeholder="Search for members" autocomplete="off" class="form-control">
+                </div>
+                <button type="submit" class="cmn-btn alt third">
+                    <i class="material-symbols-outlined mat-icon">filter_alt</i>
+                    Filter
+                </button>
+            </form>
+
+            
+                <!-- Displaying Each Member Request -->
+                {% for member in member_requests %}
+                <div class="single-box member-single p-5 d-flex align-items-baseline justify-content-between">
+                    <div class="profile-item d-flex gap-3">
+                        <div class="avatar position-relative">
+                            <img class="avatar-img max-un rounded" src="{{ member.user.profile_pic.url }}" style="width: 48px; height: 48px;" alt="avatar">
+                        </div>
+                        <div class="text-area text-start">
+                            <h6 class="m-0 mb-1"><a href="{% url 'commu_profile' member.user.slug %}">{{ member.user.name }}</a></h6>
+                            <p class="mdtxt">Member requested on {{ member.created_at }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Form for Single Approve and Decline Actions -->
+                    <div class="btn-right d-flex gap-2">
+                        <form method="post" action="{% url 'manage_group' group.slug %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="member_id" value="{{ member.id }}">
+                            <button type="submit" name="action" value="approve" class="cmn-btn">Approve</button>
+                            <button type="submit" name="action" value="decline" class="cmn-btn alt second">Decline</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+        </div>
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+    
+{% endblock javascript %}

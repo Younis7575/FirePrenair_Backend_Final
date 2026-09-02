@@ -1,0 +1,419 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+
+
+{% block content %}
+<style>
+    :root {
+        --primary: #1e3a8a;
+        --accent: #ff6f61;
+        --surface: #ffffff;
+        --on-surface: #0F172A;
+    }
+
+    .quiz-container {
+        max-width: 1200px;
+        margin: 4rem auto;
+        padding: 4rem 3rem;
+        background: var(--surface);
+        border-radius: 32px;
+        box-shadow: 0 32px 64px -12px rgba(16, 24, 40, 0.15);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(30, 58, 138, 0.05);
+    }
+
+    .quiz-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.1);
+    }
+
+    .quiz-header {
+        margin-bottom: 4rem;
+        padding-bottom: 3rem;
+        border-bottom: 2px solid rgba(241, 245, 249, 0.8);
+        position: relative;
+    }
+
+    .quiz-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.025em;
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .quiz-header h1::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 60%;
+        background: var(--accent);
+        border-radius: 4px;
+    }
+
+    .quiz-progress {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 12px;
+        background: rgba(241, 245, 249, 0.8);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(16, 24, 40, 0.05);
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        width: 0%;
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        right: -2px;
+        top: -4px;
+        width: 20px;
+        height: 20px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+    }
+
+    .progress-text {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1.25rem;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .question-card {
+        margin: 3rem 0;
+        padding: 2.5rem;
+        background: var(--surface);
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        box-shadow: 0 12px 24px -8px rgba(30, 58, 138, 0.08);
+        border: 2px solid rgba(241, 245, 249, 0.8);
+    }
+
+    .question-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 32px -8px rgba(30, 58, 138, 0.12);
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .question-number {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 1.5rem;
+        position: relative;
+        padding-left: 3.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .question-number::before {
+        content: counter(question);
+        counter-increment: question;
+        position: absolute;
+        left: 0;
+        top: -8px;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--accent);
+        opacity: 0.3;
+        line-height: 1;
+    }
+
+    .question-text {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: var(--on-surface);
+        margin-bottom: 3rem;
+        padding-left: 3.5rem;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .question-text::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.8em;
+        width: 24px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        counter-reset: question;
+    }
+
+    .answer-card {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .answer-card input {
+        position: absolute;
+        opacity: 0;
+        height: 0;
+        width: 0;
+    }
+
+    .answer-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem;
+        border: 2px solid rgba(241, 245, 249, 0.8);
+        border-radius: 20px;
+        background: var(--surface);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .answer-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .answer-card:hover .answer-content {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(30, 58, 138, 0.08);
+    }
+
+    .answer-card input:checked + .answer-content {
+        border-color: transparent;
+        background: transparent;
+        box-shadow: 0 8px 24px rgba(30, 58, 138, 0.1);
+    }
+
+    .answer-card input:checked + .answer-content::before {
+        opacity: 0.1;
+    }
+
+    .option-marker {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(241, 245, 249, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--primary);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .answer-card input:checked + .answer-content .option-marker {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+    }
+
+    .option-text {
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+        color: var(--on-surface);
+        transition: color 0.3s ease;
+    }
+
+    .answer-card input:checked + .answer-content .option-text {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 3rem;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        float: right;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255,255,255,0.3),
+            transparent);
+        transition: left 0.6s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(30, 58, 138, 0.2);
+    }
+
+    .submit-btn:hover::after {
+        left: 100%;
+    }
+
+    @media (max-width: 768px) {
+        .quiz-container {
+            margin: 1rem;
+            padding: 2rem 1.5rem;
+            border-radius: 24px;
+        }
+
+        .answer-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .question-text {
+            padding-left: 0;
+        }
+
+        .question-text::before {
+            display: none;
+        }
+    }
+</style>
+<div class="main-wrapper">
+    {% include 'edu_prenair/partials/header.html' %}
+    <div class="quiz-container">
+        <div class="quiz-header">
+        <h1>{{ quiz.title }}</h1>
+        <div class="quiz-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0/{{ quiz.questions.count }}</span>
+        </div>
+    </div>
+
+    <form method="post" class="quiz-form">
+        {% csrf_token %}
+        {% for question in questions %}
+        <div class="question-card" data-question-id="{{ question.id }}">
+            <div class="question-header">
+                <span class="question-number">Question {{ forloop.counter }}</span>
+                <div class="question-actions">
+                    <button type="button" class="flag-btn" aria-label="Flag question">
+                        <i class="far fa-flag"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="question-text">{{ question.question_text }}</div>
+
+            <div class="answer-grid">
+                {% for option in question.answer_options %}
+                <label class="answer-card">
+                    <input type="radio" name="question_{{ question.id }}" value="{{ option }}" required>
+                    <span class="answer-content">
+                        <span class="option-marker">{{ forloop.counter0|add:1|stringformat:"d" }}</span>
+                        <span class="option-text">{{ option }}</span>
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="quiz-footer">
+            <button type="submit" class="submit-btn">
+                Submit Quiz
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </form>
+</div>
+{% include 'home/partials/footer.html' %}
+</div>
+
+
+<script>
+    // Progress tracking
+    const questionCards = document.querySelectorAll('.question-card');
+    const progressFill = document.querySelector('.progress-fill');
+    const progressText = document.querySelector('.progress-text');
+
+    function updateProgress() {
+        const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+        const total = questionCards.length;
+        const progress = (answered / total) * 100;
+
+        progressFill.style.width = `${progress}%`;
+        progressText.textContent = `${answered}/${total}`;
+    }
+
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', updateProgress);
+    });
+
+    // Form validation
+    document.querySelector('.quiz-form').addEventListener('submit', (e) => {
+        const unanswered = document.querySelectorAll('.question-card').length -
+            document.querySelectorAll('input[type="radio"]:checked').length;
+
+        if (unanswered > 0) {
+            e.preventDefault();
+            const confirmSubmit = confirm(`You have ${unanswered} unanswered questions. Submit anyway?`);
+            if (!confirmSubmit) return false;
+        }
+    });
+</script>
+{% endblock %}

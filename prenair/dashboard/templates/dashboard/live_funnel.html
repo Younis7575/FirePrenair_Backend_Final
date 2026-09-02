@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ funnel.name }} - Funnel</title>
+    <link rel="shortcut icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6fa;
+            color: #333;
+        }
+
+        .funnel-header {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .funnel-header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 1rem 0;
+        }
+
+        .step-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ccc;
+            transition: background-color 0.3s ease;
+        }
+
+        .step-circle.active {
+            background-color: #007bff;
+        }
+
+        .step-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .funnel-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-disabled {
+            background-color: #d1d1d1;
+            color: #888;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="funnel-header">
+        <h1>{{ funnel.name }}</h1>
+        <p>Explore this guided funnel experience</p>
+    </div>
+
+    <div class="step-indicator">
+        {% for step in funnel.steps.all %}
+            <div class="step-circle {% if forloop.first %}active{% endif %}" id="indicator-step-{{ forloop.counter0 }}"></div>
+        {% endfor %}
+    </div>
+
+    <div class="step-container" id="step-content">
+        {% with step=funnel.steps.first %}
+            {{ step.user_website.edited_html|safe }}
+        {% endwith %}
+    </div>
+
+    <div class="funnel-controls" style="max-width: 1200px; margin: auto;">
+        <button class="btn btn-primary" id="prevBtn">Previous</button>
+        <button class="btn btn-primary" id="nextBtn">Next</button>
+    </div>
+
+    <script>
+        const steps = [
+            {% for step in funnel.steps.all %}
+                `{{ step.user_website.edited_html|safe|escapejs }}`,
+            {% endfor %}
+        ];
+
+        let currentStep = 0;
+        const stepContent = document.getElementById("step-content");
+        const indicators = document.querySelectorAll(".step-circle");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        function updateStep(direction) {
+            currentStep += direction;
+            stepContent.innerHTML = steps[currentStep];
+
+            indicators.forEach((circle, idx) => {
+                circle.classList.toggle("active", idx === currentStep);
+            });
+
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+
+            prevBtn.classList.toggle("btn-disabled", currentStep === 0);
+            nextBtn.classList.toggle("btn-disabled", currentStep === steps.length - 1);
+        }
+
+        prevBtn.addEventListener("click", () => {
+            if (currentStep > 0) updateStep(-1);
+        });
+
+        nextBtn.addEventListener("click", () => {
+            if (currentStep < steps.length - 1) updateStep(1);
+        });
+
+        // Initial disable check
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = steps.length <= 1;
+    </script>
+
+</body>
+</html>

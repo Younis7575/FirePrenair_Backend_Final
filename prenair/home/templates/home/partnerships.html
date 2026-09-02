@@ -1,0 +1,190 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Partnerships{% endblock %}
+
+{% block content %}
+
+<style>
+    .partnership-container {
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .partnership-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .partnership-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+
+    .interactive-button {
+        background-color: #ff6f61;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .interactive-button:hover {
+        background-color: #1e3a8a;
+    }
+
+    .partnership-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .section-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    .cta-box {
+        background-color: #1e3a8a;
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .cta-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .cta-text {
+        font-size: 16px;
+        margin-bottom: 15px;
+        color: white;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    li{
+        margin: 10px;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/partner.jpg' %}');
+        background-size: cover;
+        background-position: caontain;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="partnership-container">
+           <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Partnerships</h1>
+                    <p class="hero-text">
+                        At FirePrenair, collaboration drives innovation. Our Partnership Program connects businesses, organizations, and individuals with the tools to empower entrepreneurs and creators worldwide. Together, we can redefine what’s possible!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Why Partner with FirePrenair? -->
+            <div id="why-partner" class="partnership-section">
+                <h2 class="section-title">Why Partner with FirePrenair?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Global Reach:</span> Access a user base spanning 50+ countries, including freelancers, creators, educators, and businesses.</li>
+                    <li><span class="highlight">Shared Growth:</span> Co-develop projects, expand markets, and achieve success together.</li>
+                    <li><span class="highlight">Innovation:</span> Leverage cutting-edge AI tools to deliver exceptional value to your audience or clients.</li>
+                    <li><span class="highlight">Revenue Opportunities:</span> Collaborate on co-branded initiatives and revenue-sharing agreements.</li>
+                </ul>
+            </div>
+
+            <!-- Types of Partnerships -->
+            <div class="partnership-section">
+                <h2 class="section-title">Types of Partnerships</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Technology Partnerships:</span> Integrate your tools with FirePrenair’s platform to enhance user experiences.</li>
+                    <li><span class="highlight">Affiliate & Marketing Partnerships:</span> Promote our services and benefit from shared campaigns.</li>
+                    <li><span class="highlight">Educational Partnerships:</span> Develop exclusive learning programs or joint certifications on EduPrenair.</li>
+                    <li><span class="highlight">Business Development Partnerships:</span> Collaborate to reach new markets and industries with tailored services.</li>
+                </ul>
+            </div>
+
+            <!-- Benefits of Partnering -->
+            <div class="partnership-section">
+                <h2 class="section-title">Benefits of Partnering with FirePrenair</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Exclusive Access:</span> Be the first to use new tools and market insights.</li>
+                    <li><span class="highlight">Co-Branding Opportunities:</span> Elevate your brand alongside FirePrenair through joint projects.</li>
+                    <li><span class="highlight">Shared Resources:</span> Utilize our infrastructure, marketing support, and analytics to maximize impact.</li>
+                    <li><span class="highlight">Dedicated Support:</span> Collaborate seamlessly with help from our partnership team.</li>
+                </ul>
+            </div>
+
+            <!-- How to Partner -->
+            <div class="partnership-section">
+                <h2 class="section-title">How to Partner with FirePrenair</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Submit an Application:</span> Fill out the partnership form on our website with your details and goals.</li>
+                    <li><span class="highlight">Collaborative Planning:</span> Work with our team to create a custom partnership model.</li>
+                    <li><span class="highlight">Launch & Grow:</span> Start the partnership and monitor progress with regular updates.</li>
+                </ul>
+                <button class="category-btn-final" onclick="location.href='/accounts/register/'">Apply Now</button>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="cta-box">
+                <h3 class="cta-title">Ready to Partner with Us?</h3>
+                <p class="cta-text">Join the FirePrenair family and create meaningful impact worldwide. Let’s innovate, grow, and succeed together!</p>
+                <button class="interactive-button">Contact Us</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+{% endblock content %}

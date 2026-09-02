@@ -1,0 +1,441 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashbpoard |
+Digiprenair{% endblock title %} {% load static %} 
+{% load custom_filters %} 
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+<style>
+  .chart {
+    position: relative;
+    width: 100%;  /* Make sure the canvas is 100% of its parent container */
+    height: 400px; /* You can adjust the height as needed */
+  }
+
+  .chart_overview {
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+  }
+  
+  h5.heading5 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  .chart_overview .chart {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+  @media (max-width: 768px) {
+    .chart {
+      height: 300px; /* Smaller chart on mobile devices */
+    }
+  }
+</style>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div
+    class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex"
+  >
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+      <div class="container h-full sm:py-12 px-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Dashboard</h4>
+        <ul
+          class="list_counter grid 2xl:grid-cols-4 grid-cols-2 sm:gap-7.5 gap-5 mt-7.5 w-full"
+        >
+          <li
+            class="counter_item applied_job flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Sales</span>
+              <h4 class="number heading4 mt-1">{{ total_sales }}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-briefcase sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item services_offered flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Earnings</span>
+              <h4 class="number heading4 mt-1">${{total_earnings}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph ph-money sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item views_profile flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Products</span>
+              <h4 class="number heading4 mt-1">{{digi_total_items}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-eye sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item total_reviews flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Reviews Recieved</span>
+              <h4 class="number heading4 mt-1">{{digi_total_reviews}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-thumbs-up sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+        </ul>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5 mt-7.5">
+          <div class="w-full h-full rounded-lg bg-white">
+            <div class="flex flex-wrap justify-between gap-6 p-6">
+              <h5 class="heading5">Monthly Earnings</h5>
+            </div>
+            <div class="chart md:px-6 pb-6">
+              <canvas id="chart-monthly-sales"></canvas>
+            </div>
+          </div>
+          <div
+            class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-6"
+          >
+            <h5 class="heading5 px-6">Notifications</h5>
+            <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+              {% for notification in notifications %}
+              <li class="item flex gap-2">
+                <span
+                  class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary"
+                >
+                  <span class="ph-fill ph-bell text-lg"></span>
+                </span>
+                <div class="content flex flex-col gap-2">
+                  <p class="title text-secondary">
+                    {{ notification.message|truncatechars:50 }}
+                  </p>
+                  <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                </div>
+              </li>
+              {% empty %}
+              <li class="item">
+                <p class="text-center text-secondary">No notifications available.</p>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+          <h5 class="heading5">Recent Sales</h5>
+          <div class="list overflow-x-auto w-full p-5 rounded-xl">
+            <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+              <thead class="border-b border-line">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Buyer
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Product
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Date
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Earning
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sale in recent_sales %}
+                <tr class="item duration-300 hover:bg-background">
+                  <th scope="row" class="p-5 text-left">
+                    <div class="info flex items-center gap-3">
+                      <a
+                        href="{% url 'user_profile' sale.order.user.id %}"
+                        class="avatar flex-shrink-0 w-15 h-15 rounded-full overflow-hidden"
+                      >
+                        <img
+                          src="{{ sale.product.image.url }}"
+                          alt="{{ sale.product.title }}"
+                          class="w-full h-full object-cover"
+                        />
+                      </a>
+                      <a href="{% url 'user_profile' sale.order.user.id %}" class="block">
+                        <strong
+                          class="candidates_name -style-1 heading6 duration-300 hover:text-primary"
+                          >{{ sale.order.user.username }}</strong
+                        >
+                      </a>
+                    </div>
+                  </th>
+                  <td class="p-5 heading6">{{ sale.product.title }}</td>
+                  <td class="p-5 whitespace-nowrap">
+                    {{ sale.order.created_at|date:"d-m-Y" }}
+                  </td>
+                  <td class="p-5">
+                    <span
+                      class="tag bg-opacity-10 bg-yellow text-yellow text-button"
+                      >${{ sale.price }}</span
+                    >
+                  </td>
+                  <td class="p-5">
+                    <span class="tag bg-opacity-10 bg-yellow text-yellow text-button">
+                      ${{ sale.price|multiply:0.90|floatformat:2 }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="recent_proposals p-6 mt-7.5 rounded-lg bg-white">
+          <h5 class="heading5">Recent Purchases</h5>
+          <div class="list overflow-x-auto w-full p-5 rounded-xl">
+            <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+              <thead class="border-b border-line">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Item
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Date Applied
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Download
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                  {% for item in order.order_items.all %}
+                    <tr class="item duration-300 hover:bg-background">
+                      <th scope="row" class="p-5 text-left">
+                        <div class="info flex items-center gap-3">
+                          <a href="#" class="avatar flex-shrink-0 w-15 h-15 rounded-full overflow-hidden">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover" />
+                          </a>
+                          <a href="{% url 'digi_product' item.product.slug %}" class="block">
+                            <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">
+                              {{ item.product.title }}
+                            </strong>
+                          </a>
+                        </div>
+                      </th>
+                      <td class="p-5 whitespace-nowrap">{{ order.created_at|date:"M d, Y" }}</td>
+                      <td class="p-5">
+                        <span class="tag bg-opacity-10 bg-yellow text-yellow text-button">
+                          ${{ item.product.price }}
+                        </span>
+                      </td>
+                      <td class="p-5">
+                        <span class="tag bg-opacity-10 bg-green text-green text-button" style="text-align: center;">
+                            {% if item.product.downloadable_file %}
+                            <a href="{% url 'download_product' item.product.id %}" class="download">
+                              {% else %}
+                            <a href="{% url 'digi_product' item.product.slug %}" class="download">
+                              {% endif %}
+                                Download <span class="ph ph-download"></span>
+                            </a>
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="p-5 whitespace-nowrap">No purchases found.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>              
+            </table>
+          </div>
+        </div>
+        {% include "dashboard/partials/footer_cta.html" %}
+      </div>
+      <div
+        class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const ctx = document.getElementById('chart-monthly-sales').getContext('2d');
+  
+      // Create a gradient for the bar chart
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(255, 159, 64, 0.8)');
+      gradient.addColorStop(1, 'rgba(255, 99, 132, 0.8)');
+  
+      const chartData = {
+        labels: {{ chart_data.labels|safe }},
+        datasets: [{
+          label: 'Total Sales',
+          data: {{ chart_data.sales|safe }},
+          backgroundColor: gradient,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 2,
+          borderRadius: 8,  // Rounded corners
+          barPercentage: 0.7,  // Adjust bar width
+          hoverBackgroundColor: 'rgba(255, 159, 64, 0.9)',
+        }]
+      };
+  
+      const config = {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 1000,
+            easing: 'easeOutQuint'  // Smooth animation
+          },
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                font: {
+                  size: 14,
+                  family: 'Arial, sans-serif',
+                  weight: 'bold'
+                },
+                color: '#333',
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              bodyColor: '#ffffff',
+              titleColor: '#ffffff',
+              padding: 10,
+              boxPadding: 6,
+              borderRadius: 6,
+              shadowOffsetX: 0,
+              shadowOffsetY: 4,
+              shadowBlur: 6,
+              shadowColor: 'rgba(0, 0, 0, 0.15)',
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              ticks: {
+                color: '#555',  // Modern color for x-axis labels
+                font: {
+                  size: 12,
+                  family: 'Arial, sans-serif'
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(200, 200, 200, 0.2)',  // Light grid lines
+                borderDash: [3, 3]  // Dashed grid lines
+              },
+              ticks: {
+                color: '#555',
+                font: {
+                  size: 12,
+                  family: 'Arial, sans-serif'
+                }
+              }
+            }
+          }
+        }
+      };
+  
+      // Create the chart instance
+      new Chart(ctx, config);
+    });
+  </script>
+
+  {% endblock extra_javascript %}
+</body>

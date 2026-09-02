@@ -1,0 +1,647 @@
+<!-- event_detail.html -->
+{% extends "commu_prenair/partials/base.html" %}
+{% load static %}
+{% block title %}{{ event.title }} | Fireprenair{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #ff6f61;
+        --secondary: #1e3a8a;
+        --light-primary: rgba(255, 111, 97, 0.1);
+        --light-secondary: rgba(30, 58, 138, 0.05);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .main-content {
+        padding-top: 30px;
+        padding-bottom: 60px;
+    }
+
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Header & Banner */
+    .event-header {
+        position: relative;
+        height: 500px;
+        overflow: hidden;
+        border-radius: 24px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .event-header:hover {
+        transform: translateY(-5px);
+    }
+
+    .event-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(30, 58, 138, 0.1) 0%, rgba(30, 58, 138, 0.7) 100%);
+    }
+
+    .event-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .event-header:hover img {
+        transform: scale(1.03);
+    }
+
+    /* Content Layout */
+    .event-content {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 40px;
+    }
+
+    /* Main Content */
+    .event-main {
+        background: white;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .event-main h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+
+    /* Countdown Timer */
+    .countdown-timer {
+        background: linear-gradient(135deg, var(--primary) 0%, #ff8a7f 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 25px rgba(255, 111, 97, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown-timer::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .countdown-timer::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+
+    .countdown-timer h4 {
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .countdown-item {
+        display: inline-block;
+        margin: 0 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .countdown-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Host Card */
+    .host-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 25px;
+        background: var(--light-secondary);
+        border-radius: 16px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 30px;
+        border-left: 5px solid var(--secondary);
+    }
+
+    .host-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .host-card img {
+        width: 70px !important;
+        height: 70px !important;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        object-fit: cover;
+    }
+
+    .host-card h6 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--secondary);
+    }
+
+    /* Event Description */
+    .event-description {
+        padding: 20px 0;
+        line-height: 1.8;
+        color: #505050;
+    }
+
+    .event-description h4 {
+        color: var(--secondary);
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .event-description h4::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    /* Virtual/Location Alert */
+    .event-location-box {
+        border-radius: 16px;
+        padding: 25px;
+        margin: 30px 0;
+        position: relative;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .virtual-event {
+        background: rgba(30, 58, 138, 0.08);
+        border: 1px solid rgba(30, 58, 138, 0.15);
+    }
+
+    .physical-event {
+        background: rgba(25, 135, 84, 0.08);
+        border: 1px solid rgba(25, 135, 84, 0.15);
+    }
+
+    .event-location-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .virtual-event .event-location-icon {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .physical-event .event-location-icon {
+        background: #198754;
+        color: white;
+    }
+
+    .event-location-content {
+        flex: 1;
+    }
+
+    .event-location-content h5 {
+        margin-bottom: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .virtual-event h5 {
+        color: var(--secondary);
+    }
+
+    .physical-event h5 {
+        color: #198754;
+    }
+
+    .copy-btn {
+        background: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .copy-btn:hover {
+        background: #152b67;
+        transform: translateY(-2px);
+    }
+
+    /* Sidebar */
+    .event-sidebar {
+        background: white;
+        padding: 35px;
+        border-radius: 24px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .event-meta-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 22px 0;
+        border-bottom: 1px solid #eee;
+        transition: transform 0.3s ease;
+    }
+
+    .event-meta-item:hover {
+        transform: translateX(5px);
+    }
+
+    .event-meta-item:last-child {
+        border-bottom: none;
+    }
+
+    .event-meta-item i {
+        color: var(--primary);
+        background: var(--light-primary);
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 1.8rem;
+    }
+
+    .event-meta-item h6 {
+        font-weight: 600;
+        color: var(--secondary);
+        margin-bottom: 8px;
+    }
+
+    .event-meta-item p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        font-weight: 600;
+        padding: 14px 24px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 111, 97, 0.25);
+    }
+
+    .btn-primary:hover {
+        background: #ff5c4e;
+        border-color: #ff5c4e;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255, 111, 97, 0.35);
+    }
+
+    .btn-success {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+        font-weight: 600;
+        padding: 14px 24px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.25);
+    }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+        font-weight: 600;
+        padding: 14px 24px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.25);
+    }
+
+    .btn-outline-secondary {
+        color: var(--secondary);
+        border-color: var(--secondary);
+        font-weight: 600;
+        padding: 14px 24px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--secondary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(30, 58, 138, 0.25);
+    }
+
+    /* Animations */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .event-content {
+            grid-template-columns: 1fr;
+        }
+
+        .event-header {
+            height: 350px;
+        }
+
+        .event-sidebar {
+            position: static;
+            margin-top: 30px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .countdown-item {
+            margin: 0 8px;
+        }
+
+        .countdown-number {
+            font-size: 1.8rem;
+        }
+
+        .event-main {
+            padding: 25px;
+        }
+
+        .event-sidebar {
+            padding: 25px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% include 'commu_prenair/partials/header.html' %}
+
+<main class="main-content">
+    <div class="container">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xl-9 col-lg-8">
+            <!-- Event Banner -->
+            <div class="event-header">
+                <img src="{{ event.event_image.url }}" alt="{{ event.title }}">
+            </div>
+
+            <!-- Countdown Timer -->
+            <div class="countdown-timer">
+                <h4 class="text-white mb-4">EVENT STARTS IN</h4>
+                <div id="countdown">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="days">00</div>
+                        <div>Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="hours">00</div>
+                        <div>Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="minutes">00</div>
+                        <div>Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="seconds">00</div>
+                        <div>Seconds</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-content">
+                <!-- Main Content -->
+                <div class="event-main">
+                    <h1>{{ event.title }}</h1>
+
+                    <!-- Host Card -->
+                    <div class="host-card">
+                        <img src="{{ event.creator.profile_pic.url }}" alt="{{ event.creator.username }}">
+                        <div>
+                            <h6 class="mb-1">Hosted by {{ event.creator.username }}</h6>
+                            <p class="text-muted mb-0">{{ event.created_at|timesince }} ago</p>
+                        </div>
+                    </div>
+
+                    <!-- Event Description -->
+                    <div class="event-description">
+                        <h4>About This Event</h4>
+                        <div class="lead">{{ event.description|linebreaks }}</div>
+                    </div>
+
+                    <!-- Virtual or Physical Location -->
+                    {% if event.is_virtual %}
+                    <div class="event-location-box virtual-event">
+                        <div class="event-location-icon">
+                            <i style="color: white;" class="material-symbols-outlined">video_call</i>
+                        </div>
+                        <div class="event-location-content">
+                            <h5>Virtual Event</h5>
+                            <p class="mb-0">Join using this link: <a href="{{ event.virtual_link }}" id="virtualLink"
+                                    class="text-primary">{{ event.virtual_link }}</a></p>
+                            <button class="copy-btn" onclick="copyLink()">
+                                <i style="color: white;" class="material-symbols-outlined" style="font-size: 18px;">content_copy</i> Copy Link
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="event-location-box physical-event">
+                        <div class="event-location-icon">
+                            <i style="color: white;" class="material-symbols-outlined">location_on</i>
+                        </div>
+                        <div class="event-location-content">
+                            <h5>Event Location</h5>
+                            <p class="mb-0">{{ event.location }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="event-sidebar">
+                    <div class="event-meta">
+                        <div class="event-meta-item">
+                            <i class="material-symbols-outlined">calendar_month</i>
+                            <div>
+                                <h6>Date & Time</h6>
+                                <p class="mb-0">
+                                    {{ event.start_time|date:"F j, Y" }}<br>
+                                    {{ event.start_time|time }} - {{ event.end_time|time }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {% if event.category %}
+                        <div class="event-meta-item">
+                            <i class="material-symbols-outlined">category</i>
+                            <div>
+                                <h6>Category</h6>
+                                <p class="mb-0">{{ event.category.name }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="event-meta-item">
+                            <i class="material-symbols-outlined">group</i>
+                            <div>
+                                <h6>Attendees</h6>
+                                <p class="mb-0">{{ event.attendees.count }} Registered</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        {% if request.user in event.attendees.all %}
+                        <button class="btn btn-success" disabled>You're Registered!</button>
+                        <a href="{% url 'leave_event' event.slug %}" class="btn btn-outline-danger">Cancel Registration</a>
+                        {% else %}
+                        <a href="{% url 'join_event' event.slug %}" class="btn btn-primary animate-pulse">
+                            Register Now
+                        </a>
+                        {% endif %}
+
+                        {% if request.user == event.creator %}
+                        <a href="{% url 'edit_event' event.slug %}" class="btn btn-outline-secondary">
+                            Edit Event
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // Countdown timer
+    function updateCountdown() {
+        const eventDate = new Date("{{ event.start_time|date:'c' }}").getTime();
+        const now = new Date().getTime();
+        const distance = eventDate - now;
+
+        if (distance < 0) {
+            document.getElementById("countdown").innerHTML = "<h5 class='animate-pulse'>Event has started!</h5>";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+        document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+        document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+    }
+
+    // Update every second
+    setInterval(updateCountdown, 1000);
+    updateCountdown(); // Initial call
+
+    // Copy virtual link
+    function copyLink() {
+        const link = document.getElementById('virtualLink');
+        navigator.clipboard.writeText(link.href);
+
+        // Create a temporary element for the toast
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = '#28a745';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = '<i class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">check_circle</i> Link copied to clipboard!';
+
+        document.body.appendChild(toast);
+
+        // Remove the toast after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 500);
+        }, 3000);
+    }
+</script>
+{% endblock %}

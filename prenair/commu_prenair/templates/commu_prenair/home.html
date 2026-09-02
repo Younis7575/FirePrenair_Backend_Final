@@ -1,0 +1,216 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load course_filters %}
+{% load static %}
+{% block title %} Fireprenair - Commuprenair {% endblock title %}
+
+{% block extra_css %} 
+<link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+<link
+  href="https://unpkg.com/video.js@7/dist/video-js.min.css"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://unpkg.com/@videojs/themes@1/dist/city/index.css"
+  rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px; background: url({% static 'home/images/banner.png' %});">
+    <div class="container sidebar-toggler">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xxl-6 col-xl-5 col-lg-8 mt-0 mt-lg-10 mt-xl-0 d-flex flex-column gap-7 cus-z">
+
+                <div class="share-post d-flex gap-3 gap-sm-5 p-3 p-sm-5">
+                    <div class="profile-box">
+                        <a href="#"><img src="{{request.user.profile_pic.url}}" style="width: 48px; height: 48px;"
+                                class="max-un rounded" alt="icon"></a>
+                    </div>
+                    <form action="{% url 'make_post' %}" method="post" enctype="multipart/form-data"
+                        class="w-100 position-relative">
+                        {% csrf_token %}
+                        <textarea name="content" required cols="10" rows="2"
+                            placeholder="Write something to Lerio.."></textarea>
+
+                        <div class="abs-area position-absolute d-none d-sm-block">
+                            <button type="submit" class="cmn-btn mt-3" style="background-color: #ff6f61;">Post</button>
+                        </div>
+                        <ul class="d-flex justify-content-between flex-wrap mt-3 gap-3">
+                            <li class="d-flex align-items-center gap-2" data-bs-toggle="modal"
+                                data-bs-target="#photoVideoMod">
+                                <img src="{% static 'commu_prenair/assets/images/icon/vgallery.png' %}" class="max-un"
+                                    alt="icon">
+                                <span>Have Photo/Video to Share?</span>
+                            </li>
+                        </ul>
+                        <!-- Add Submit Button -->
+                    </form>
+                </div>
+                
+                <div class="post-item d-flex flex-column gap-5 gap-md-7" id="news-feed">
+                    {% for post in posts %}
+
+                    {% include 'commu_prenair/partials/post_card.html' %}
+
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% include 'commu_prenair/partials/home_right_side.html' %}
+        </div>
+</main>
+<!-- Main Content end -->
+
+<!-- video popup start -->
+<div class="go-live-popup video-popup">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="modal cmn-modal fade" id="photoVideoMod">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content p-5">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'make_post' %}">
+                                {% csrf_token %}
+                                <div class="modal-header justify-content-center">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <i class="material-symbols-outlined mat-icon xxltxt"> close </i>
+                                    </button>
+                                </div>
+                                <div class="top-content pb-5">
+                                    <h5>Add post photo/video</h5>
+                                </div>
+                                <div class="mid-area">
+                                    <div class="d-flex mb-5 gap-3">
+                                        <div class="profile-box">
+                                            <a href="#"><img src="{{request.user.profile_pic.url}}"
+                                                    style="width: 50px; height: 50px;" class="max-un rounded"
+                                                    alt="icon"></a>
+                                        </div>
+                                        <textarea name="content" cols="10" required rows="2"
+                                            placeholder="Write something to Lerio.."></textarea>
+                                    </div>
+                                    <div>
+                                        <label>Title</label>
+                                        <input type="text" name="title" required placeholder="Title of your Post">
+                                    </div>
+                                    <div class="file-upload mt-2">
+                                        <label>Upload attachment</label>
+                                        <label class="file mt-1">
+                                            <input type="file" name="media" accept="image/*,video/*" onchange="handleFilePreview(event)">
+                                            <span class="file-custom pt-8 pb-8 d-grid text-center">
+                                                <i class="material-symbols-outlined mat-icon"> perm_media </i>
+                                                <span>Drag here or click to upload photo/video.</span>
+                                            </span>
+                                        </label>
+                                        <!-- Preview container -->
+                                        <div id="previewContainer" class="mt-3">
+                                            <img id="imagePreview" style="max-width: 100%; display: none;" alt="Image Preview">
+                                            <video id="videoPreview" controls style="max-width: 100%; display: none;"></video>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="footer-area pt-5">
+                                    <div class="btn-area d-flex justify-content-end gap-2">
+                                        <button type="button" class="category-btn-final" style="padding: 10px 20px; background-color: #1e3a8a;" data-bs-dismiss="modal"
+                                            aria-label="Close">Cancel</button>
+                                        <button type="submit" class="category-btn-final" style="padding: 10px 20px;">Post</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- video popup end -->
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/posts.js' %}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const player = new Plyr('.player', {
+            // Plyr options
+            controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        });
+
+        const successMessage = document.getElementById("successMessage");
+        const errorMessage = document.getElementById("errorMessage");
+
+        const videoElements = document.querySelectorAll('.video-js');
+
+        videoElements.forEach(videoElement => {
+            videojs(videoElement, {
+                controls: true,
+                preload: 'auto',
+                playbackRates: [0.5, 1, 1.5, 2],
+                fluid: true
+        });
+    });
+    });
+
+    function handleFilePreview(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const videoPreview = document.getElementById('videoPreview');
+
+    if (file) {
+        const fileReader = new FileReader();
+
+        fileReader.onload = function(e) {
+            const mimeType = file.type;
+
+            if (mimeType.startsWith('image/')) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                videoPreview.style.display = 'none';
+            } else if (mimeType.startsWith('video/')) {
+                videoPreview.src = e.target.result; // Set video source
+                videoPreview.style.display = 'block'; // Show video preview
+                imagePreview.style.display = 'none'; // Hide image preview
+            } else {
+                alert("Unsupported file type. Please upload an image or video.");
+                imagePreview.style.display = 'none';
+                videoPreview.style.display = 'none';
+            }
+        };
+
+        fileReader.readAsDataURL(file); 
+    } else {
+        imagePreview.style.display = 'none';
+        videoPreview.style.display = 'none';
+    }
+}
+
+</script>
+
+{% endblock javascript %}

@@ -1,0 +1,287 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Gigs{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .price-suggestion-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(3px);
+        display: none;
+    }
+
+    .price-suggestion {
+        overflow: hidden;
+        animation: popup-appear 0.3s ease-out;
+    }
+
+    .price-suggestion {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 600px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: none;
+    }
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+            style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:px-15 sm:px-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+                    data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <div class="container h-full lg:py-15 sm:py-12 py-8">
+
+                    <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                        <div style="display: flex; justify-content: space-between;">
+                            <h5 class="heading5">Active Gigs</h5>
+                            <div class="flex gap-2">
+                                <a href="{% url 'work_user_profile' request.user.username %}"
+                                    class="profile-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-primary bg-opacity-10 text-primary hover:bg-opacity-20 transition-all duration-300">
+                                    <span class="ph ph-user text-xl"></span>
+                                    View Profile
+                                </a>
+                                <a href="{% url 'create_gig' %}" data-url="{% url 'create_gig' %}" class="category-btn-final open-gig-popup">Create New Gig</a>
+                            </div>
+                        </div>
+                        <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                            <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                                <thead class="border-b border-line">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                                            Gig</th>
+                                        <th scope="col"
+                                            class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                                            Starts From</th>
+                                        <th scope="col"
+                                            class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                                            Active Orders</th>
+                                        <th scope="col"
+                                            class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                                            Completed Orders</th>
+                                        <th scope="col"
+                                            class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                                            Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if gigs %}
+                                    {% for gig in gigs %}
+                                    <tr class="item duration-300 hover:bg-background">
+                                        <th scope="row" class="p-5 text-left">
+                                            <div class="info">
+                                                <a href="{% url 'gig_detail' gig.slug %}" id="gig-title-{{ gig.slug }}"
+                                                    class="title heading6 duration-300 hover:underline">{{gig.title|slice:":100"}}</a>
+                                                <div class="flex flex-wrap items-center gap-4 mt-2">
+                                                    <a href="#"
+                                                        class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                        <img src="{{gig.user.profile_pic.url}}" alt="company/1"
+                                                            class="flex-shrink-0 w-5 h-5" />
+                                                        <span class="employers_name font-normal">Gig by
+                                                            {{gig.user.name}}</span>
+                                                    </a>
+                                                    <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                                    <div class="address flex items-center gap-2 text-secondary">
+                                                        <span class="ph ph-map-pin text-xl"></span>
+                                                        <span
+                                                            class="employers_address font-normal">{{gig.user.country}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <td class="p-5">${{gig.basic_price}}</td>
+                                        <td class="p-5">
+                                            <span
+                                                class="tag bg-opacity-10 bg-features text-features text-button">{{gig.active_orders.count}}</span>
+                                        </td>
+                                        <td class="p-5">
+                                            <span
+                                                class="tag bg-opacity-10 bg-success text-success text-button">{{gig.completed_orders.count}}</span>
+                                        </td>
+                                        <td class="p-5">
+                                            <div class="flex justify-end gap-2">
+                                                <a href="{% url 'gig_detail' gig.slug %}"><button
+                                                        class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white"
+                                                        data-type="modal_view_job">
+                                                        <span class="ph ph-eye text-xl"></span>
+                                                        <span
+                                                            class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View
+                                                            Gig</span>
+                                                    </button></a>
+                                                <a href="{% url 'edit_gig' gig.slug %}" data-url="{% url 'edit_gig' gig.slug %}" class="open-gig-popup"><button
+                                                        class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white"
+                                                        data-type="modal_chat">
+                                                        <span class="ph ph ph-pen text-xl"></span>
+                                                        <span
+                                                            class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Edit
+                                                            Gig</span>
+                                                    </button></a>
+                                                <a href="{% url 'delete_gig' gig.slug %}"> <button
+                                                        class="btn_action btn_submit flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white"
+                                                        data-type="modal_apply">
+                                                        <span class="ph ph-trash text-xl"></span>
+                                                        <span
+                                                            class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Delete
+                                                            Gig</span>
+                                                    </button></a>
+                                                <button
+                                                    onclick="openAIOptimizer('{{ gig.slug }}', false, '{{ gig.title }}')"
+                                                    class="ai-optimize-btn btn_action btn_submit flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                    <span class="ph ph-magic-wand text-xl"></span>
+                                                    <span
+                                                        class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Optimize
+                                                        Gig</span>
+                                                </button>
+                                                <button onclick="openPricingSuggestions('{{ gig.slug }}')"
+                                                    class="btn_action btn_submit flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                    <span class="ph ph-money-wavy text-xl"></span>
+                                                    <span
+                                                        class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Price
+                                                        Tips</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">No gigs found</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% include "dashboard/partials/footer_cta.html" %}
+                </div>
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+    {% include 'work_prenair/partials/ai_gig_suggestion.html' %}
+    <div class="price-suggestion-overlay" id="pricesuggestionOverlay"></div>
+    <div id="pricingSuggestionsModal" class="price-suggestion">
+        <div class="modal-content bg-white rounded-lg w-full max-w-2xl mx-auto mt-20 p-6">
+            <div class="modal-header flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">AI Pricing Suggestions</h3>
+                <button onclick="closePricingModal()" class="ph ph-x text-2xl"></button>
+            </div>
+            <div id="pricingSuggestionsContent" class="space-y-4">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include 'work_prenair/partials/menu-modal.html' %}
+
+    </div>
+
+    {% endblock content %}
+
+
+
+
+    {% block extra_javascript %}
+
+    <script>
+        function openPricingSuggestions(slug) {
+            const modal = document.getElementById('pricingSuggestionsModal');
+            const overlay = document.getElementById('pricesuggestionOverlay');
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+
+            fetch(`/workprenair/gigs/${slug}/suggest_pricing/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const content = `
+                <div class="space-y-6">
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-lg mb-2">Basic Package</h4>
+                            <div class="text-blue-600 font-bold text-2xl mb-2">$${data.basic_suggestion}</div>
+                            <p class="text-gray-600 text-sm">${data.explanations.basic_suggestion}</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-lg mb-2">Standard Package</h4>
+                            <div class="text-purple-600 font-bold text-2xl mb-2">$${data.standard_suggestion}</div>
+                            <p class="text-gray-600 text-sm">${data.explanations.standard_suggestion}</p>
+                        </div>
+                        <div class="bg-pink-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-lg mb-2">Premium Package</h4>
+                            <div class="text-pink-600 font-bold text-2xl mb-2">$${data.premium_suggestion}</div>
+                            <p class="text-gray-600 text-sm">${data.explanations.premium_suggestion}</p>
+                        </div>
+                    </div>
+                
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <h4 class="font-bold text-lg mb-3">Service Bundles</h4>
+                        <div class="space-y-3">
+                            ${data.bundles.map(bundle => `
+                                <div class="flex justify-between items-center bg-white p-3 rounded-lg">
+                                    <span>${bundle.bundle_name}</span>
+                                    <span class="font-bold text-primary">$${bundle.price}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                `;
+                    document.getElementById('pricingSuggestionsContent').innerHTML = content;
+                })
+                .catch(error => {
+                    document.getElementById('pricingSuggestionsContent').innerHTML =
+                        '<p class="text-red-500">Error loading suggestions. Please try again.</p>';
+                });
+        }
+
+        function closePricingModal() {
+            document.getElementById('pricingSuggestionsModal').style.display = 'none';
+            document.getElementById('pricesuggestionOverlay').style.display = 'none';
+        }
+    </script>
+    {% endblock extra_javascript %}

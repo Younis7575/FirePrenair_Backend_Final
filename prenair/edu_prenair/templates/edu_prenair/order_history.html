@@ -1,0 +1,201 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - My Courses{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+	{% include 'edu_prenair/partials/header.html' %}
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar breadcrumb-bar-info">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="breadcrumb-list">
+                    <h2 class="breadcrumb-title">Order History</h2>
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Order History</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->	
+
+<!-- Page Content -->
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            
+            {% if request.user.is_edu_instructor %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+            {% else %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+            {% endif %}
+            <!-- Instructor Order History -->
+						<div class="col-xl-9 col-lg-9">	
+
+							<div class="settings-widget card-details">
+								<div class="settings-menu p-0">
+									<div class="profile-heading">
+										<h3>Order History</h3>
+									</div>
+									<div class="checkout-form">
+
+										<!-- Order Tabs -->
+										<div class="wishlist-tab order-tab">
+											<ul class="nav">
+												<li class="nav-item">
+													<a href="javascript:void(0);" class="active" data-bs-toggle="tab" data-bs-target="#today">Today</a>
+												</li>
+												<li class="nav-item">
+													<a href="javascript:void(0);" data-bs-toggle="tab" data-bs-target="#month">Monthly</a>
+												</li>
+												<li class="nav-item">
+													<a href="javascript:void(0);" data-bs-toggle="tab" data-bs-target="#year">Yearly</a>
+												</li>
+											</ul>
+										</div>
+										<!-- /Order Tabs -->
+
+										<!-- Tab Content -->
+										<div class="tab-content">
+										
+										    <!-- Today -->
+										    <div class="tab-pane show active" id="today">
+										        <div class="table-responsive custom-table">
+										            {% if enrolls_today %}
+										            <table class="table table-nowrap mb-0">
+										                <thead>
+										                    <tr>
+										                        <th>Order ID</th>
+										                        <th>Course Name</th>
+										                        <th>Date</th>
+										                        <th>Price</th>
+										                    </tr>
+										                </thead>
+										                <tbody>
+										                    {% for enroll in enrolls_today %}
+										                    <tr>
+										                        <td><a href="javascript:void(0);" class="tab-title">#2643</a></td>
+										                        <td>
+										                            <a href="{% url 'course_detail' enroll.course.slug %}" class="tab-title title-course">
+										                                {{enroll.course.title}}
+										                            </a>
+										                        </td>
+										                        <td>{{enroll.enrolled_date.date}}</td>
+										                        <td>${{enroll.course.price}}</td>
+										                    </tr>
+										                    {% endfor %}
+										                </tbody>
+										            </table>
+										            {% else %}
+										            <div class="text-center py-3">
+										                <p>No enrollments found for today.</p>
+										            </div>
+										            {% endif %}
+										        </div>
+										    </div>
+										    <!-- /Today -->
+										
+										    <!-- Month -->
+										    <div class="tab-pane fade" id="month">
+										        <div class="table-responsive custom-table">
+										            {% if enrolls_month %}
+										            <table class="table table-nowrap mb-0">
+										                <thead>
+										                    <tr>
+										                        <th>Order ID</th>
+										                        <th>Course Name</th>
+										                        <th>Date</th>
+										                        <th>Price</th>
+										                    </tr>
+										                </thead>
+										                <tbody>
+										                    {% for enroll in enrolls_month %}
+										                    <tr>
+										                        <td><a href="javascript:void(0);" class="tab-title">#{{enroll.id}}</a></td>
+										                        <td>
+										                            <a href="{% url 'course_detail' enroll.course.slug %}" class="tab-title title-course">
+										                                {{enroll.course.title}}
+										                            </a>
+										                        </td>
+										                        <td>{{enroll.enrolled_date.date}}</td>
+										                        <td>${{enroll.course.price}}</td>
+										                    </tr>
+										                    {% endfor %}
+										                </tbody>
+										            </table>
+										            {% else %}
+										            <div class="text-center py-3">
+										                <p>No enrollments found for this month.</p>
+										            </div>
+										            {% endif %}
+										        </div>
+										    </div>
+										    <!-- /Month -->
+										
+										    <!-- Yearly -->
+										    <div class="tab-pane fade" id="year">
+										        <div class="table-responsive custom-table">
+										            {% if enrolls_year %}
+										            <table class="table table-nowrap mb-0">
+										                <thead>
+										                    <tr>
+										                        <th>Order ID</th>
+										                        <th>Course Name</th>
+										                        <th>Date</th>
+										                        <th>Price</th>
+										                    </tr>
+										                </thead>
+										                <tbody>
+										                    {% for enroll in enrolls_year %}
+										                    <tr>
+										                        <td><a href="javascript:void(0);" class="tab-title">#{{enroll.id}}</a></td>
+										                        <td>
+										                            <a href="{% url 'course_detail' enroll.course.slug %}" class="tab-title title-course">
+										                                {{enroll.course.title}}
+										                            </a>
+										                        </td>
+										                        <td>{{enroll.enrolled_date.date}}</td>
+										                        <td>${{enroll.course.price}}</td>
+										                    </tr>
+										                    {% endfor %}
+										                </tbody>
+										            </table>
+										            {% else %}
+										            <div class="text-center py-3">
+										                <p>No enrollments found for this year.</p>
+										            </div>
+										            {% endif %}
+										        </div>
+										    </div>
+										    <!-- /Yearly -->
+										
+										</div>
+										<!-- /Tab Content -->
+									</div>
+								</div>
+							</div>
+
+						</div>	
+						<!-- /Instructor Order History -->
+        </div>
+    </div>
+</div>	
+<!-- /Page Content -->
+
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

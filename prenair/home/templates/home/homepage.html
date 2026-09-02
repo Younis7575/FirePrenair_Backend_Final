@@ -1,0 +1,2686 @@
+{% load static %}
+{% load i18n %}
+{% load course_filters %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>Fireprenair</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+    <!-- Theme Settings Js -->
+    <script src="{% static "home/assets/js/theme-script.js" %}"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/css/bootstrap.min.css" %}" />
+
+    <!-- Fontawesome CSS -->
+    <link
+      rel="stylesheet"
+      href="{% static "home/assets/plugins/fontawesome/css/fontawesome.min.css" %}"
+    />
+    <link rel="stylesheet" href="{% static "home/assets/plugins/fontawesome/css/all.min.css" %}" />
+
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/css/owl.carousel.min.css" %}" />
+    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css" />
+
+    <!-- Slick CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/plugins/slick/slick.css" %}" />
+    <link rel="stylesheet" href="{% static "home/assets/plugins/slick/slick-theme.css" %}" />
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/plugins/select2/css/select2.min.css" %}" />
+
+    <!-- Aos CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/plugins/aos/aos.css" %}" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static "home/assets/css/style.css" %}" />
+
+    <!-- Navbar css  -->
+    <link rel="stylesheet" href="home/css/style.css" />
+
+    <!-- Custom css  -->
+    <link rel="stylesheet" href="{% static "home/css/custom.css" %}" />
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <!-- Plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+
+    <style>
+      .trusted-companies {
+        padding: 40px 0;
+        background-color: #ffffff;
+      }
+  
+      .section-title {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 24px;
+        color: #333;
+        font-weight: 400;
+        letter-spacing: -0.5px;
+      }
+  
+      .company-logos-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+  
+      .swiper-wrapper {
+        align-items: center;
+      }
+  
+      .swiper-slide {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        transition: opacity 0.3s ease;
+      }
+  
+      .company-logos {
+        max-width: 100px;
+        max-height: 40px;
+        object-fit: contain;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+        filter: grayscale(100%);
+      }
+  
+      .swiper-slide:hover .company-logos {
+        opacity: 1;
+      }
+  
+      @media (max-width: 768px) {
+        .trusted-companies {
+          padding: 30px 0;
+        }
+  
+        .section-title {
+          font-size: 20px;
+        }
+  
+        .swiper-slide {
+          height: 60px;
+          padding: 10px;
+        }
+  
+        .company-logos {
+          max-width: 80px;
+          max-height: 40px;
+        }
+      }
+    </style>
+
+
+  <style>
+    .analytic-home-top{
+      display: flex;
+      gap: 1rem;
+    }
+
+    .girl-slide-img-container {
+      position: relative;
+      width: fit-content; /* Adjust to fit the image size */
+      margin: 0 auto; /* Center within the column if needed */
+    }
+
+    .b-img1{
+      background: url('{% static "home/images/bub11.png" %}') no-repeat center center;
+    }
+    .b-img2{
+      background: url('{% static "home/images/bub2.png" %}') no-repeat center center;
+    }
+    .b-img3{
+      background: url('{% static "home/images/bub5.png" %}') no-repeat center center;
+    }
+    .b-img4{
+      background: url('{% static "home/images/bub10.png" %}') no-repeat center center;
+    }
+    .b-img5{
+      background: url('{% static "home/images/bub6.png" %}') no-repeat center center;
+    }
+    .b-img6{
+      background: url('{% static "home/images/bub3.png" %}') no-repeat center center;
+    }
+    .b-img7{
+      background: url('{% static "home/images/bub7.png" %}') no-repeat center center;
+    }
+    .b-img8{
+      background: url('{% static "home/images/bub1.png" %}') no-repeat center center;
+    }
+    .bubble {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-size: cover;
+      border-radius: 50%;
+      animation: floatBubble 5s infinite ease-in-out;
+      opacity: 0.8;
+    }
+
+
+    .bubble1 { top: 10%; left: 10%; animation-delay: 0s; }
+    .bubble2 { top: 40%; left: -6%; animation-delay: 1s; }
+    .bubble3 { top: 89%; left: 10%; animation-delay: 2s; }
+    .bubble4 { top: 0%; left: 39%; animation-delay: 3s; }
+    .bubble5 { top: 98%; left: 38%; animation-delay: 4s; }
+    .bubble6 { top: 86%; left: 76%; animation-delay: 5s; }
+    .bubble7 { top: 42%; left: 91%; animation-delay: 6s; }
+    .bubble8 { top: 15%; left: 66%; animation-delay: 7s; } 
+
+    .bubble-e {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      opacity: 0.8;
+    }
+
+
+    .bubble-img.img1 {
+      animation-delay: 0s; /* First image animation */
+    }
+
+    .bubble-img.img2 {
+      animation-delay: 0.5s; /* Second image overlay animation */
+    }
+
+
+    /* Bubble container */
+    .extra-bubbles {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Bubble element styles */
+    .bubble-e {
+      position: absolute;
+      width: 130px; /* Adjust the size of the bubble */
+      height: 130px;
+      opacity: 0.8;
+    }
+
+    /* Animation for bubble containers */
+    @keyframes bubbleFadeInOut {
+      0% {
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      75% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .extra-bubble1 {
+      top: -35%;
+      left: 20%;
+      animation: bubbleFadeInOut 8s infinite ease-in-out; /* 8 seconds cycle */
+      animation-delay: 0s; /* No delay for the first bubble */
+    }
+
+    .extra-bubble2 {
+      top: -81%;
+      left: 54%;
+      animation: bubbleFadeInOut 8s infinite ease-in-out;
+      animation-delay: 2s; /* Start 2 seconds later */
+    }
+
+    .extra-bubble3 {
+      top: -78%;
+      left: -8%;
+      animation: bubbleFadeInOut 8s infinite ease-in-out;
+      animation-delay: 4s; /* Start 4 seconds later */
+    }
+
+    .extra-bubble4 {
+      top: -24%;
+      left: 67%;
+      animation: bubbleFadeInOut 8s infinite ease-in-out;
+      animation-delay: 6s; /* Start 6 seconds later */
+    }
+
+
+
+    /* Image styles */
+    .bubble-img {
+      position: absolute;
+      width: 50%; /* Full size of the bubble */
+      height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      animation: showAndOverlay 6s infinite ease-in-out;
+    }
+
+    /* Partner image (img2) adjustment */
+    .bubble-img.img2 {
+      top: -12%; /* Position to the top-right */
+      left: 20%;
+      width: 88%;
+      height: auto;
+      animation-delay: 1s; /* 1-second delay for the second image */
+    }
+
+    /* Animation for both images */
+    @keyframes showAndOverlay {
+      0% {
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1; 
+      }
+      75% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 0; 
+      }
+    }
+
+
+    @keyframes floatBubble {
+      0% {
+        transform: scale(0.8) translateY(0);
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2) translateY(-30px);
+        opacity: 1;
+      }
+      75% {
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes showMsg {
+      0% {
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+      }
+      75% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    
+        
+      @media(max-width: 768px){
+        .analytic-home-top{
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+      
+        #promo-video-iframe {
+        height: 260px;
+      }
+      .promo-video-section{
+        display: block;
+        height: 280px;
+        padding: 7px;
+      }
+    }
+
+  .how-it-works .promo-container {
+  display: flex;
+  align-items: stretch;
+  gap: 2rem;
+}
+
+
+
+@media (max-width: 768px) {
+  .how-it-works {
+    flex-direction: column;
+  }
+  
+}
+
+.video-hero-section {
+    position: relative;
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+.vid-container {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.vid-container:hover {
+    transform: translateY(-5px);
+}
+
+.video-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    border-radius: 20px;
+}
+
+.play-button {
+  position: relative;
+    z-index: 2;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #ff817b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+    
+}
+
+.play-button:hover {
+    transform: scale(1.05);
+    color: #ff817b;
+}
+
+.play-button i {
+    font-size: 28px;
+    color: white;
+    margin-left: 5px;
+}
+
+.waves {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ff817b;
+    animation: wavePulse 3s infinite;
+}
+
+.wave-2 { animation-delay: 1s; }
+.wave-3 { animation-delay: 2s; }
+
+@keyframes wavePulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.play-button:hover {
+    transform: scale(1.1);
+}
+
+.video-hero-thumbnail {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.video-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(40 69 154 / 75%);
+    z-index: 12000;
+}
+
+.video-modal-content {
+    position: relative;
+    width: 80%;
+    max-width: 1200px;
+    margin: 5vh auto;
+    animation: modalAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border-radius: 15px;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+
+@keyframes modalAppear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+.close-modal:hover {
+    color: #f66962;
+}
+
+.modal-video-container {
+    position: relative;
+    padding-top: 56.25%;
+    background: transparent; /* Removed container background */
+    border-radius: 15px;
+    overflow: hidden;
+    border: none; /* Removed border */
+}
+
+.modal-video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-video-container video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+}
+
+.plyr--video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-percentage {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+.chart-percentage:hover {
+    transform: scale(1.15);
+    width: 45px;
+    height: 45px;
+    padding: fit-content;
+  }
+  
+.chart-percentage p:first-child {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.chart-percentage p:nth-child(2) {
+    /* margin: 0; */
+    font-size: 10px;
+}
+
+.chart-p-1 {
+color: #e3a918;
+}
+.chart-p-2 {
+color: #78a123;
+}
+.chart-p-3 {
+color: #8da857;
+}
+.chart-p-4 {
+color: #D2691E;
+}
+.chart-p-5 {
+color: #d85a00;
+}
+.chart-p-6, .chart-para-6 {
+color: #71b7bb;
+}
+.chart-p-7, .chart-para-7 {
+color: #7e8b8a;
+}
+.chart-p-8, .chart-para-8 {
+color: #0045a0;
+}
+
+.p-chart-1 {
+    top: 34%;
+    left: 18%;
+}
+.p-chart-2 {
+    top: 46%;
+    left: 17%;
+}
+.p-chart-3 {
+    top: 58%;
+    left: 22%;
+}
+.p-chart-4 {
+    top: 26%;
+    left: 28%;
+}
+.p-chart-5 {
+    top: 27%;
+    left: 39%;
+}
+.p-chart-6 {
+    top: 58%;
+    left: 41%;
+}
+.p-chart-7 {
+    top: 47%;
+    left: 53%;
+}
+.p-chart-8 {
+    top: 30%;
+    left: 53%;
+}
+.chart-para-6 {
+    position: absolute;
+    top: 75%;
+    left: 0%;
+    margin-top: 5px;
+}
+.chart-para-7 {
+    position: absolute;
+    top: 63%;
+    left: -9%;
+    margin-top: 8px;
+}
+.chart-para-8 {
+    position: absolute;
+    top: 90%;
+    left: 11%;
+    margin-top: 5px;
+}
+
+.chart-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.chart-icon:hover {
+    transform: scale(1.2) rotate(5deg);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.chart-icon i {
+    font-size: 17px;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.chart-icon:hover i {
+    transform: scale(1.1);
+}
+
+.icon-1 {
+    top: 32%;
+    left: 10.5%;
+}
+.icon-2 {
+    top: 52%;
+    left: 8%;
+}
+.icon-3 {
+    top: 68%;
+    left: 22%;
+}
+.icon-4 {
+    top: 20%;
+    left: 24%;
+}
+.icon-5 {
+    top: 20%;
+    left: 42%;
+}
+.icon-6 {
+    top: 71.4%;
+    left: 44%;
+}
+.icon-7 {
+    top: 52%;
+    left: 67%;
+}
+.icon-8 {
+    top: 26%;
+    left: 69%;
+}
+
+.tooltip-chart {
+  position: absolute;
+  background: gray;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-chart::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
+}
+
+.tooltip-chart.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-5px);
+}
+
+.title {
+    text-align: center;
+    color: #1f2937;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.chart-center-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    top: 55%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: all 0.4s ease;
+    background: linear-gradient(135deg, #ff6f61 0%, #ff6f61 100%);
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    z-index: 10;
+}
+
+.chart-center-icon:hover {
+    transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+    border-color: #ffffff;
+}
+
+.chart-center-icon i {
+    font-size: 40px;
+    color: #ffffff;
+    transition: all 0.4s ease;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chart-center-icon:hover i {
+    transform: scale(1.1) rotate(-10deg);
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+    .floating-card-leader {
+      position: absolute;
+      top: 14%;
+      left: 36%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(to right, #ed5042, #FF6F61);
+      border-radius: 0 42px 42px 42px;
+      padding: 6px 6px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      color: #0d47a1;
+    }
+
+    .floating-card-leader p{
+      color: white; 
+      text-align: center; 
+      margin: 0; 
+      margin-right: 6px; 
+      font-size: 12px;
+    }
+
+    .avatar-leader {
+    background: #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 7px;
+    color: #0d47a1;
+    font-weight: bold;
+}
+
+.avatar-leader img{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+    .text-leader {
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 15px;
+      color: #1e3a8a;
+      font-size: 12px;
+}
+
+    @keyframes float {
+      0% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(-20px); }
+      100% { transform: translate(-50%, -50%) translateY(0); }
+    }
+
+    .floating-card-leader {
+      animation: float 3s ease-in-out infinite;
+    }
+.floating-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: absolute;
+    bottom: 10%;
+    left: 8%;
+}
+.floating-button {
+    width: 70px;
+    height: 60px;
+    background: white;
+    border-radius: 0px 14px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    text-decoration: none;
+    color: #666;
+    transition: all 0.3s ease;
+    animation: floatUpDown 3s ease-in-out infinite;
+}
+.floating-button:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    color: #333;
+}
+.floating-button:nth-child(1) {
+    animation-delay: 0s;
+}
+.floating-button:nth-child(2) {
+    animation-delay: 0.5s;
+}
+.floating-button:nth-child(3) {
+    animation-delay: 1s;
+}
+.floating-button:nth-child(4) {
+    animation-delay: 1.5s;
+}
+@keyframes floatUpDown {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+.floating-button .icon {
+    font-size: 15px;
+    color: #4a90e2;
+}
+.floating-button .icon i {
+    color: gray;
+}
+.floating-button .label {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.floating-button .subtitle-button {
+    font-size: 8px;
+    opacity: 0.7;
+}
+
+.world-map-leaderboard {
+    background: #FF6F61;
+    width: fit-content;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+    color: white;
+    position: absolute;
+    gap: 5px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.world-map-leaderboard.card-1{
+    top: 45%;
+    right: 23%;
+    background: linear-gradient(to right, #5879bc, #00e4ff);
+
+}
+
+.world-map-leaderboard.card-2 {
+    bottom: 26%;
+    left: 8%;
+}
+
+.world-map-leaderboard{
+  font-size: 10px;
+}
+.world-map-leaderboard p{
+  font-size: 10px;
+}
+.world-map-leaderboard p{
+  font-size: 10px;
+}
+.world-map-leaderboard img{
+    width: 40px;
+    border-radius: 2px;
+    height: 31px;
+}
+.world-map-leaderboard i{
+    font-size: 20px;
+}
+
+.map-title {
+    font-size: 10px;
+}
+.world-map-leaderboard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+
+
+@media (max-width: 768px) {
+    .floating-buttons-container {
+         gap: 15px;
+     }
+
+     .floating-button {
+         width: 70px;
+         height: 70px;
+     }
+
+     .floating-button .icon {
+         font-size: 20px;
+     }
+
+     .floating-button .label {
+         font-size: 9px;
+     }
+
+
+    .play-button {
+        font-size: 4rem;
+    }
+
+    .video-modal-content {
+        width: 95%;
+        margin: 10vh auto;
+    }
+
+    .close-modal {
+        right: 0;
+        top: -50px;
+    }
+
+    .world-map-leaderboard.card-2 {
+      left: 15%;
+    }
+}
+
+@media (max-width: 480px) {
+    .vid-container {
+        border-width: 3px;
+    }
+
+}
+
+@media (max-width: 460px) {
+    .floating-buttons-container {
+      display: none;
+    }
+}
+
+@media (max-width: 449px) {
+  .floating-card-leader {
+      right: -75px;
+      left: auto;
+    }
+    .chart-percentage p:first-child {
+      font-size: 13px;
+      font-weight: 400;
+    }
+}
+@media (max-width: 350px) {
+  .chart-icon i{
+    font-size: 11px;
+  }
+}
+@media (max-width: 350px) {
+  .floating-card-leader {
+      display: none;
+    }
+    .chart-para{
+      display: none;
+    }
+    .world-map-leaderboard.card-1 {
+    top: 15%;
+  }
+  .world-map-leaderboard.card-2 {
+    bottom: 4%;
+  }
+}
+  </style>
+  </head>
+  <body>
+    {% include "home/partials/chatbot.html" %}
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      {% include 'home/partials/new_header.html' %}
+      <!-- /Header -->
+      {% include 'digi_prenair/partials/messages.html' %}
+      <!-- Home Banner -->
+      <section class="home-slide" style="background: url({% static 'home/images/banner.png' %}); margin-top: 0px; min-height:0px;">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-7" style="margin-top: 2rem;">
+              <div class="home-slide-face aos" data-aos="fade-up">
+                <div class="home-slide-text">
+                  <h1 class="title-txt" style="font-size: 48px; font-weight: 600; max-width: 600px; line-height: 1.2;">  
+                    {% trans "One-stop shop for all your digital needs!" %}
+                  </h1>
+                  <p>
+                    {% trans "From learning and earning to selling and consulting," %} <br />
+                    {% trans "we've got you covered!" %}
+                  </p>
+                </div>
+                <div class="banner-content">
+                  <form class="form" action="{% url 'gigs' %}" method="get">
+                    <div class="form-inner" style="border-radius: 0px 35px 35px 35px;">
+                        <div class="input-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="keyword"
+                                placeholder="{% trans "Search School, Online educational centers, etc" %}"
+                                value="{{ keyword|default_if_none:'' }}"
+                            />
+                            <span class="drop-detail">
+                                <select class="form-select" name="category_name">
+                                    <option value="">{% trans "All Categories" %}</option>
+                                    {% for category in work_featured_categories %}
+                                    <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </span>
+                            <button class="btn btn-primary sub-btn" type="submit">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                </div>
+                <div class="main-analytics analytic-home-top">
+                  <div class="rate-head text-nowrap">
+                    <h2>1k</h2>
+                    <p class="text-xs">{% trans "Total Freelancer" %}</p>
+                  </div>
+                  <div class="rate-head">
+                    <h2>120k</h2>
+                    <p class="text-xs">{% trans "Digital Products" %}</p>
+                  </div>
+                  <div class="rate-head">
+                    <h2>900k</h2>
+                    <p class="text-xs">{% trans "Order Received" %}</p>
+                  </div>
+                  <div class="rate-head">
+                    <h2>1300k</h2>
+                    <p class="text-xs">{% trans "Project Completed" %}</p>
+                  </div>
+                </div>
+                <div class="trust-user" style="margin-bottom: 30px;">
+                  <p style="white-space: nowrap;">{% trans "Trusted by over 15K Users worldwide since 2024" %}</p>
+                  <div class="trust-rating d-flex align-items-center">
+                    <div class="rate-head">
+                      <h2><span>1000</span>+</h2>
+                    </div>
+                    <div class="rating d-flex align-items-center">
+                      <h2 class="d-inline-block average-rating">4.4</h2>
+                      <i class="fas fa-star filled"></i>
+                      <i class="fas fa-star filled"></i>
+                      <i class="fas fa-star filled"></i>
+                      <i class="fas fa-star filled"></i>
+                      <i class="fas fa-star filled"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra-bubbles">
+                <div class="bubble-e extra-bubble1">
+                  <img src="{% static 'home/images/icon17.png' %}" alt="Bubble 1 Image 1" class="bubble-img img1">
+                  <img src="{% static 'home/images/fire1.png' %}" alt="Bubble 1 Image 2" class="bubble-img img2">
+                </div>
+                <div class="bubble-e extra-bubble2">
+                  <img src="{% static 'home/images/bub2.png' %}" style="position: absolute; left: 25%; top: 6%;" alt="Bubble 2 Image 1" class="bubble-img img1">
+                  <img src="{% static 'home/images/fire2.png' %}" alt="Bubble 2 Image 2" class="bubble-img img2">
+                </div>
+                <div class="bubble-e extra-bubble3">
+                  <img src="{% static 'home/images/icon21.png' %}" style="position: absolute; left: 47%; top: 6%;" alt="Bubble 3 Image 1" class="bubble-img img1">
+                  <img src="{% static 'home/images/fire3.png' %}" alt="Bubble 3 Image 2" class="bubble-img img2">
+                </div>
+                <div class="bubble-e extra-bubble4">
+                  <img src="{% static 'home/images/icon18.png' %}" alt="Bubble 4 Image 1" class="bubble-img img1">
+                  <img src="{% static 'home/images/fire4.png' %}" alt="Bubble 4 Image 2" class="bubble-img img2">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5 d-flex align-items-center">
+              <div class="girl-slide-img-container">
+                <div class="girl-slide-img aos" data-aos="fade-up">
+                   <a href="{% url 'leaderboard_dashboard' %}"><img src="{% static 'home/images/home_top.png' %}" alt="Img" /></a>
+                  </div>
+                  {% for seller in top_sellers %}
+                  <a href="{% url 'leaderboard_dashboard' %}"><div class="floating-card-leader">
+                    <div class="avatar-leader"><img src="{{ seller.profile_pic }}" alt=""></div>
+                    <p>{{ seller.name }}</p>
+                    <div class="text-leader">LEADS THE PLATFORM</div>
+                  </div></a>
+                  {% endfor %}
+                  <a href="{% url 'leaderboard_dashboard' %}">
+                    <div class="world-map-leaderboard card-1" data-tooltip="Top Performers by Country">
+                      <img src="{% static 'home/images/map.png' %}" alt="" class="map-image">
+                    </div>
+                  </a>
+                  
+                  <a href="{% url 'leaderboard_dashboard' %}">
+                    <div class="world-map-leaderboard card-2" data-tooltip="Top performers of the Month">
+                      <img src="{% static 'home/images/chart.png' %}" alt="" class="map-image">
+                    </div>
+                  </a>
+                  <a href="{% url 'leaderboard_dashboard' %}">
+                    <div class="demo-container">
+                      <!-- Percentage elements (Fireprenair themed) -->
+                      <div class="chart-percentage p-chart-1" data-tooltip="Sales Growth: 75%">
+                        <p class="chart-p-1">75%</p>
+                      </div>
+                      <div class="chart-percentage p-chart-2" data-tooltip="Refund Rate: 4.2%">
+                        <p class="chart-p-2">4.2%</p>
+                      </div>
+                      <div class="chart-percentage p-chart-3" data-tooltip="Seller Revenue: $14.5K">
+                        <p class="chart-p-3">$14.5K</p>
+                      </div>
+                      <div class="chart-percentage p-chart-4" data-tooltip="Items Sold: 342">
+                        <p class="chart-p-4">342</p>
+                      </div>
+                      <div class="chart-percentage p-chart-5" data-tooltip="Commuprenair Activity: 40%">
+                        <p class="chart-p-5">40%</p>
+                      </div>
+                      <div class="chart-percentage p-chart-6" data-tooltip="Digiprenair Sales: 60%">
+                        <p class="chart-p-6">60%</p>
+                        <p class="chart-para-6 chart-para">Digiprenair Sales</p>
+                      </div>
+                      <div class="chart-percentage p-chart-7" data-tooltip="Workprenair trends: 82%">
+                        <p class="chart-p-7">82%</p>
+                        <p class="chart-para-7 chart-para">Workprenair trends</p>
+                      </div>
+                      <div class="chart-percentage p-chart-8" data-tooltip="Eduprenair: 77%">
+                        <p class="chart-p-8">77%</p>
+                        <p class="chart-para-8 chart-para">Eduprenair</p>
+                      </div>
+                  
+                      <!-- Icon elements (Fireprenair themed) -->
+                      <div class="chart-icon icon-1">
+                        <i  class="fas fa-book-open"></i>
+                      </div>
+                      <div class="chart-icon icon-2">
+                        <i class="fas fa-store"></i>
+                      </div>
+                      <div class="chart-icon icon-3">
+                        <i class="fas fa-briefcase"></i>
+                      </div>
+                      <div class="chart-icon icon-4">
+                        <i class="fas fa-users"></i>
+                      </div>
+                      <div class="chart-icon icon-5">
+                        <i class="fas fa-star"></i>
+                      </div>
+                      <div class="chart-icon icon-6">
+                        <i class="fas fa-calendar-check"></i>
+                      </div>
+                      <div class="chart-icon icon-7">
+                        <i class="fas fa-shopping-cart"></i>
+                      </div>
+                      <div class="chart-icon icon-8">
+                        <i class="fas fa-user-plus"></i>
+                      </div>
+                  
+                      <div class="tooltip-chart" id="tooltip-chart"></div>
+                    </div>
+
+                  </a>
+                  <div class="floating-buttons-container">
+                    <!-- Eduprenair -->
+                    <a href="{% url 'leaderboard_dashboard' %}" class="floating-button">
+                      <div class="icon">
+                        <i class="fas fa-graduation-cap eduprenair-card"></i>
+                      </div>
+                      <div class="label">Learn</div>
+                      <div class="subtitle-button">Learning</div>
+                    </a>
+                  
+                    <!-- DigiPrenair -->
+                    <a href="{% url 'leaderboard_dashboard' %}" class="floating-button">
+                      <div class="icon">
+                        <i class="fas fa-shopping-cart digiprenair-card"></i>
+                      </div>
+                      <div class="label">Sell</div>
+                      <div class="subtitle-button">Digital Products</div>
+                    </a>
+                  
+                    <!-- WorkPrenair -->
+                    <a href="{% url 'leaderboard_dashboard' %}" class="floating-button">
+                      <div class="icon">
+                        <i class="fas fa-briefcase workprenair-card"></i>
+                      </div>
+                      <div class="label">Earn</div>
+                      <div class="subtitle-button">Freelance & Earn</div>
+                    </a>
+                  
+                    <!-- CommuPrenair -->
+                    <a href="{% url 'leaderboard_dashboard' %}" class="floating-button">
+                      <div class="icon">
+                        <i class="fas fa-users commuprenair-card"></i>
+                      </div>
+                      <div class="label">Connect</div>
+                      <div class="subtitle-button">Network & Grow</div>
+                    </a>
+                  </div>
+
+
+                  <div class="bubble b-img1 bubble1">
+                    <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img2 bubble2">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img3 bubble3">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img4 bubble4">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img5 bubble5">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img6 bubble6">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img7 bubble7">
+                  <span class="bubble-msg"></span>
+                </div>
+                <div class="bubble b-img8 bubble8">
+                  <span class="bubble-msg"></span>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+      </section>
+
+      <section class="section student-course" style="top: 0;">
+        <div class="container">
+          <div class="course-widget">
+            <div class="row">
+              <div class="col-lg-3 col-md-6">
+                <div class="course-full-width">
+                  <div
+                    class="blur-border course-radius align-items-center aos"
+                    data-aos="fade-up"
+                  >
+                    <div class="online-course d-flex align-items-center">
+                      <div class="course-img">
+                        <img src="{% static 'home/images/pencil-icon.svg' %}" alt="Img" />
+                      </div>
+                      <div class="course-inner-content">
+                        <h4><span>10</span>K</h4>
+                        <p>{% trans "Online Courses" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 d-flex">
+                <div class="course-full-width">
+                  <div class="blur-border course-radius aos" data-aos="fade-up">
+                    <div class="online-course d-flex align-items-center">
+                      <div class="course-img">
+                        <img src="{% static 'home/images/cources-icon.svg' %}" alt="Img" />
+                      </div>
+                      <div class="course-inner-content">
+                        <h4><span>200</span>+</h4>
+                        <p>{% trans "Expert Tutors" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 d-flex">
+                <div class="course-full-width">
+                  <div class="blur-border course-radius aos" data-aos="fade-up">
+                    <div class="online-course d-flex align-items-center">
+                      <div class="course-img">
+                        <img src="{% static 'home/images/certificate-icon.svg' %}" alt="Img" />
+                      </div>
+                      <div class="course-inner-content">
+                        <h4><span>6</span>K+</h4>
+                        <p>{% trans "Ceritified Courses" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 d-flex">
+                <div class="course-full-width">
+                  <div class="blur-border course-radius aos" data-aos="fade-up">
+                    <div class="online-course d-flex align-items-center">
+                      <div class="course-img">
+                        <img src="{% static 'home/images/gratuate-icon.svg' %}" alt="Img" />
+                      </div>
+                      <div class="course-inner-content">
+                        <h4><span>60</span>K +</h4>
+                        <p>{% trans "Online Students" %}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Video Promo Section -->
+      <section class="section" style="position: relative; max-width: 1350px; margin: 40px auto;">
+        <div class="vid-container">
+        <!-- Full-screen Video Thumbnail -->
+        <div class="video-hero-container" onclick="openVideoModal()">
+          <div class="video-hero-overlay">
+            <div class="waves">
+              <div class="wave wave-1"></div>
+              <div class="wave wave-2"></div>
+              <div class="wave wave-3"></div>
+          </div>
+            <div class="play-button">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+          <img src="{% static 'home/video/thumbnail.png' %}" alt="Video thumbnail" class="video-hero-thumbnail">
+        </div>
+      </div>
+    
+      <!-- Video Modal -->
+      <div id="videoModal" class="video-modal">
+        <div class="video-modal-content">
+          <span class="close-modal" onclick="closeVideoModal()">&times;</span>
+          <div class="modal-video-container">
+            <video id="modalVideo" class="plyr" playsinline controls>
+              <source src="{% static 'home/video/Fireprenair.mp4' %}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </div>
+    </section>
+
+        <!-- workprenair container -->
+        <section class="section">
+          <div class="container">
+            <div class="workprenair-container" style="background: linear-gradient(to right, #ff6eb1, #ffa894);">
+              <div class="row align-items-center">
+                <!-- Content Section -->
+                <div class="col-md-6 mb-4 mb-md-0" style="padding-left: 3rem;">
+                  <div class="workprenair-content">
+                    <h1 class="workprenair-title">WorkPrenair</h1>
+                    <h2 class="workprenair-heading">
+                      {% trans "Connect with" %} <br />
+                      <span class="workprenair-highlight" style="color: black;">
+                        {% trans "Top Talent Globally" %}
+                      </span>
+                    </h2>
+                    <p class="workprenair-description">
+                      {% trans "Find, hire, and manage expert freelancers globally with WorkPrenair." %}
+                      {% trans "Simplify your workflow and get projects done faster." %}
+                    </p>
+                    <ul class="workprenair-feature-list">
+                      <li class="workprenair-feature-item">
+                        <span class="workprenair-icon">
+                          <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </span>
+                        {% trans "Access Expert Talent: Fill your skill gaps with the best professionals." %}
+                      </li>
+                      <li class="workprenair-feature-item">
+                        <span class="workprenair-icon">
+                          <i class="fa-solid fa-toolbox"></i>
+                        </span>
+                        {% trans "Streamline Your Workflow: Hire, track, and pay seamlessly." %}
+                      </li>
+                      <li class="workprenair-feature-item">
+                        <span class="workprenair-icon">
+                          <i class="fa-solid fa-robot"></i>
+                        </span>
+                        {% trans "AI Matching: Get paired with the right talent for your needs." %}
+                      </li>
+                    </ul>
+                    <a href="{% url 'home' %}?register=true"><button class="category-btn-final" style="background-color: white; color: #ff6f61;">{% trans "Get Started" %}</button></a>
+                  </div>
+                </div>
+        
+                <!-- Image Section -->
+                <div class="col-md-6 text-center">
+                  <img src="{% static 'home/images/commu_ban.png' %}" alt="WorkPrenair" class="img-fluid" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        
+
+     <!-- Top Categories  Workprensir-->
+		<section class="section how-it-works">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+					<div class="section-sub-head">
+						<span>{% trans "Featured Services" %}</span>
+						<h2>{% trans "Workprenair Highlights" %}</h2>
+					</div>
+					<div class="all-btn all-category d-flex align-items-center">
+						<a href="{% url 'gigs' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 15px;">{% trans "Explore Services" %}</a>
+					</div>
+				</div>
+				<div class="section-text aos" data-aos="fade-up">
+          <p>{% trans "Workprenair empowers freelancers and professionals by offering unique services and a comprehensive knowledge base. Connect with clients, showcase your skills, and achieve your goals with our innovative platform." %}</p>
+        </div>
+				<div class="owl-carousel mentoring-course owl-theme aos" data-aos="fade-up">
+          {% for category in work_featured_categories %}
+					<a target="_blank" href="{% url 'gigs' %}?category_id={{category.id}}"><div class="feature-box text-center ">
+						<div class="feature-bg">
+							<div class="feature-header">
+								<div class="feature-icon">
+                  {% if category.img %}
+                  <img src="{{category.img.url}}" alt="Img">
+                  {% else %}
+									<img src="{% static 'home/images/prog_tech.png' %}" alt="Img">
+                  {% endif %}
+								</div>
+								<div class="feature-cont">
+									<div class="feature-text">{{category.name}}</div>
+								</div>
+							</div>
+							<p>{{category.gig_count}} {% trans "Sellers" %}</p>
+						</div>
+					</div></a>
+          {% endfor %}
+				</div>
+			</div>
+		</section>
+
+    <!-- Workprenair top services -->
+    <!-- Feature Course -->
+		<section class="section new-course" style="background: url({% static 'home/images/banner.png' %});">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+					<div class="section-sub-head">
+						<span>{% trans "What’s New" %}</span>
+						<h2>{% trans "Featured Services" %}</h2>
+					</div>
+					<div class="all-btn all-category d-flex align-items-center">
+						<a href="{% url 'gigs' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "All Services" %}</a>
+					</div>
+				</div>
+				<div class="section-text aos" data-aos="fade-up">
+          <p class="mb-0">{% trans "Workprenair empowers freelancers and businesses by offering a unique platform for professional" %}
+              {% trans "services. Explore a wide range of opportunities to collaborate, grow, and succeed with our comprehensive" %} 
+              {% trans "knowledge base and innovative features." %}</p>
+      </div>
+      
+				<div class="course-feature">
+					<div class="row">
+            {% for gig in best_services %}
+						<div class="col-lg-3 col-md-6 d-flex">
+							<div class="course-box d-flex aos" data-aos="fade-up">
+								<div class="product">
+									<div class="product-img">
+										<a href="{% url 'gig_detail' gig.slug %}">
+											<img class="img-fluid" alt="Img" src="{{gig.image.url}}">
+										</a>
+										<div class="price">
+											<h3>${{gig.basic_price}}</h3>
+										</div>
+									</div>
+									<div class="product-content">
+										<div class="course-group d-flex">
+											<div class="course-group-img d-flex">
+												<a href="{% url 'gig_detail' gig.slug %}"><img src="{{gig.user.profile_pic.url}}"
+														alt="Img" class="img-fluid">
+                            <!-- {% if gig.user.is_online %}
+                            <span style="background-color: green; display: flex; position: absolute; top: 57%; left: 18%; border: 2px solid white; width: 11px; height: 11px;" class="rounded"></span>
+                            {% else %}
+                            <span style="background-color: gray;" class=""></span>
+                            {% endif %}                           -->
+                          </a>
+												<div class="course-name">
+													<h4><a href="{% url 'gig_detail' gig.slug %}">{{gig.user.username}}</a></h4>
+													<p>{{gig.category_level_1.name}}</p>
+												</div>  
+											</div>
+										</div>
+										<h3 class="title instructor-text"><a href="{% url 'gig_detail' gig.slug %}">{{gig.title}}</a></h3>
+										<div class="course-info d-flex align-items-center">
+											<div class="course-view d-flex align-items-center">
+												<img src="{% static 'edu_prenair/assets/img/temp/icon-02.svg' %}" alt="Img">
+												<p>{{gig.basic_delivery_time}} Days Delivery</p>
+											</div>
+										</div>
+										<div class="d-flex align-items-center justify-content-between">
+											<div class="rating m-0">
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<span class="d-inline-block average-rating"><span>5.0</span> ({{gig.gig_fivestar_reviews.count}})</span>
+											</div>
+											<div class="all-btn all-category d-flex align-items-center">
+												<a href="{% url 'gig_detail' gig.slug %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">Order Now</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /Feature Course -->
+    
+
+     <!-- Eduprenair -->
+     <section class="section">
+      <div class="container">
+        <div class="workprenair-container" style="background: linear-gradient(to right, #6e5fa0, #e495c1); color: black;">
+          <div class="row align-items-center">
+            <!-- Content Section -->
+            <div class="col-md-6 mb-4 mb-md-0" style="padding-left: 3rem;">
+              <div class="workprenair-content">
+                <h1 class="workprenair-title">EduPrenair</h1>
+                <h2 class="workprenair-heading">
+                  {% trans "Connect with" %} <br />
+                  <span class="workprenair-highlight" style="color: #ff6f61;">
+                    {% trans "Earn Globally." %}
+                  </span>
+                </h2>
+                <p class="workprenair-description">
+                  {% trans "Turn your knowledge into impactful courses with EduPrenair. Use intuitive tools to design, share, and monetize your expertise globally." %}
+                </p>
+                <ul class="workprenair-feature-list">
+                  <li class="workprenair-feature-item" style="color: white;">
+                    <span class="workprenair-icon">
+                      <i class="fa-solid fa-screwdriver-wrench" style="color: white"></i>
+                    </span>
+                      {% trans "Drag-and-drop tools and templates make it easy." %}
+                  </li>
+                  <li class="workprenair-feature-item" style="color: white;">
+                    <span class="workprenair-icon">
+                      <i class="fa-solid fa-toolbox" style="color: white"></i>
+                    </span>
+                  {% trans "Track student progress and enhance engagement." %}
+                  </li>
+                  <li class="workprenair-feature-item" style="color: white;">
+                    <span class="workprenair-icon">
+                      <i class="fa-solid fa-robot" style="color: white"></i>
+                    </span>
+                    {% trans "Reach learners worldwide with subscription-based models." %}
+                  </li>
+                </ul>
+                <a href="{% url 'home' %}?register=true"><button class="category-btn-final" style="background-color: #ff6f61;">{% trans "Get Started" %}</button></a>
+              </div>
+            </div>
+    
+            <!-- Image Section -->
+            <div class="col-md-6 text-center">
+              <img src="{% static 'home/images/edu_ban.png' %}" alt="WorkPrenair" class="img-fluid" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+      
+      <!-- Top Categories Eduprenair -->
+      <section class="section how-it-works">
+        <div class="container">
+          <div class="section-header aos" data-aos="fade-up">
+            <div class="section-sub-head">
+              <span>{% trans "Learn and Grow" %}</span>
+              <h2>Eduprenair {% trans "Highlights" %}</h2>
+            </div>
+            <div class="all-btn all-category d-flex align-items-center">
+              <a href="{% url 'courses' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "Explore Courses" %}</a>
+            </div>
+          </div>
+          <div class="section-text aos" data-aos="fade-up">
+            <p>{% trans "Eduprenair is your gateway to quality education and skill development. Discover a wide range of courses, learn from industry experts, and take the next step in your professional journey." %}</p>
+          </div>
+          <div class="owl-carousel mentoring-course owl-theme aos" data-aos="fade-up">
+            {% for category in edu_featured_categories %}
+            <a target="_blank" href="{% url 'courses' %}?category_id={{category.id}}"><div class="feature-box text-center ">
+              <div class="feature-bg">
+                <div class="feature-header">
+                  <div class="feature-icon">
+                    {% if category.img %}
+                    <img src="{{category.img.url}}" alt="Img">
+                    {% else %}
+                    <img src="{% static 'home/images/prog_tech.png' %}" alt="Img">
+                    {% endif %}
+                  </div>
+                  <div class="feature-cont">
+                    <div class="feature-text">{{category.name}}</div>
+                  </div>
+                </div>
+                <p>{{category.course_count}} {% trans "Courses" %}</p>
+              </div>
+            </div></a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    <!-- eduprenair top services -->
+    <!-- Feature Course -->
+		<section class="section new-course" style="background: url({% static 'home/images/banner.png' %});">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+					<div class="section-sub-head">
+						<span>{% trans "What’s New" %}</span>
+						<h2>{% trans "Featured Courses" %}</h2>
+					</div>
+					<div class="all-btn all-category d-flex align-items-center">
+						<a href="{% url 'courses' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "All Courses" %}</a>
+					</div>
+				</div>
+				<div class="section-text aos" data-aos="fade-up">
+          <p class="mb-0">{% trans "Eduprenair is your gateway to learning and growth, offering a wide range of online courses designed" %} 
+              {% trans "to help you acquire new skills and advance your career. Discover, learn, and succeed with expert-led content" %} 
+              {% trans "tailored for every learner." %}</p>
+      </div>      
+				<div class="course-feature">
+					<div class="row">
+            {% for course in best_courses %}
+						<div class="col-lg-3 col-md-6 d-flex">
+							<div class="course-box d-flex aos" data-aos="fade-up">
+								<div class="product">
+									<div class="product-img">
+										<a href="{% url 'course_detail' course.slug %}">
+											<img class="img-fluid" alt="Img" src="{{course.thumbnail.url}}">
+										</a>
+										{% if course.is_course_on_discount %}
+											<div class="price">
+												<h3>${{course.course_price}} <span>${{course.price}}</span></h3>
+											</div>
+											{% else %}
+											<div class="price">
+												<h3>${{course.price}}</h3>
+											</div>
+											{% endif %}
+									</div>
+									<div class="product-content">
+										<div class="course-group d-flex">
+											<div class="course-group-img d-flex">
+												<a href="{% url 'edu_profile' course.instructor.slug %}"><img src="{{course.instructor.profile_pic.url}}"
+														alt="Img" class="img-fluid"></a>
+												<div class="course-name">
+													<h4><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h4>
+													<p>Instructor</p>
+												</div>
+											</div>
+										</div>
+										<h3 class="title instructor-text"><a href="{% url 'course_detail' course.slug %}">{{course.title}}</a></h3>
+										<div class="course-info d-flex align-items-center">
+											<div class="rating-img d-flex align-items-center">
+												<img src="{% static 'edu_prenair/assets/img/temp/icon-01.svg' %}" alt="Img">
+												<p>{{course.total_lessons}}+ Lesson</p>
+											</div>
+											<div class="course-view d-flex align-items-center">
+												<img src="{% static 'edu_prenair/assets/img/temp/icon-02.svg' %}" alt="Img">
+												<p>{{course.duration}} Hours</p>
+											</div>
+										</div>
+										<div class="d-flex align-items-center justify-content-between">
+											<div class="rating m-0">
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<span class="d-inline-block average-rating"><span>5.0</span> ({{course.five_star_ratings.count}})</span>
+											</div>
+											<div class="all-btn all-category d-flex align-items-center">
+												{% if course|is_user_enrolled:request.user %}
+													    <a href="{% url 'course_detail' course.slug %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">View Course</a>
+													{% else %}
+														<button onclick="window.location.href='{% url 'course_detail' course.slug %}'" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">View More</button>
+													{% endif %}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /Feature Course -->
+      
+      <!-- Digiprenair -->
+<section class="section how-it-works">
+  <div class="container">
+    <div class="workprenair-container" style="background: linear-gradient(to right, #5bb2d6, #fcdd7e); color: black;">
+      <div class="row align-items-center">
+        <!-- Content Section -->
+        <div class="col-md-6 mb-4 mb-md-0" style="padding-left: 3rem;">
+          <div class="workprenair-content">
+            <h1 class="workprenair-title" style="color: white">DigiPrenair</h1>
+            <h2 class="workprenair-heading" style="color: white">
+              {% trans "Create, Sell, and" %} <br />
+              <span class="workprenair-highlight" style="color: #ff6f61">{% trans "Scale Globally." %}</span>
+            </h2>
+            <p class="workprenair-description" style="color: #013567">
+              {% trans "Turn your creativity into profit with DigiPrenair. Sell digital products effortlessly to a global audience." %}
+            </p>
+            <ul class="workprenair-feature-list">
+              <li class="workprenair-feature-item">
+                <span class="workprenair-icon">
+                  <i class="fa-solid fa-screwdriver-wrench" style="color: white"></i>
+                </span>
+                {% trans "Easy Product Creation: Upload and showcase your digital assets." %}
+              </li>
+              <li class="workprenair-feature-item">
+                <span class="workprenair-icon">
+                  <i class="fa-solid fa-toolbox" style="color: white"></i>
+                </span>
+                {% trans "AI Tools: Optimize pricing and marketing strategies." %}
+              </li>
+              <li class="workprenair-feature-item">
+                <span class="workprenair-icon">
+                  <i class="fa-solid fa-globe" style="color: white"></i>
+                </span>
+                {% trans "Global Reach: Sell worldwide with secure payments." %}
+              </li>
+            </ul>
+            <button onclick="location.href='/?register=true'" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "Get Started" %}</button>
+          </div>
+        </div>
+        <!-- Image Section -->
+        <div class="col-md-6 text-center">
+          <img src="{% static 'home/images/digi_ban.png' %}" alt="DigiPrenair" class="img-fluid" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+     <!-- Top Categories Digiprenir -->
+     <section class="section how-it-works">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+          <div class="section-sub-head">
+              <span>{% trans "Digital Marketplace" %}</span>
+              <h2>{% trans "Digiprenair Highlights" %}</h2>
+          </div>
+          <div class="all-btn all-category d-flex align-items-center">
+              <a href="{% url 'digi_explore' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "Explore Marketplace" %}</a>
+          </div>
+      </div>
+      <div class="section-text aos" data-aos="fade-up">
+          <p>{% trans "Digiprenair connects creative professionals with a global audience through a vibrant digital marketplace. Buy and sell high-quality digital assets, templates, and tools designed to elevate your projects." %}</p>
+      </div>
+      
+				<div class="owl-carousel mentoring-course owl-theme aos" data-aos="fade-up">
+          {% for category in digi_featured_categories %}
+					<a target="_blank" href="{% url 'digi_explore' %}?category_id={{category.id}}"><div class="feature-box text-center ">
+						<div class="feature-bg">
+							<div class="feature-header">
+								<div class="feature-icon">
+                  {% if category.img %}
+                  <img src="{{category.img.url}}" alt="Img">
+                  {% else %}
+									<img src="{% static 'home/images/prog_tech.png' %}" alt="Img">
+                  {% endif %}
+								</div>
+								<div class="feature-cont">
+									<div class="feature-text">{{category.name}}</div>
+								</div>
+							</div>
+							<p>{{category.item_count}} Products</p>
+						</div>
+					</div></a>
+          {% endfor %}
+				</div>
+			</div>
+		</section>
+		<!-- /Top Categories -->
+
+    <!-- digiprenair top services -->
+    <!-- Feature Course -->
+		<section class="section new-course" style="background: url({% static 'home/images/banner.png' %});">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+					<div class="section-sub-head">
+						<span>{% trans "What’s New" %}</span>
+						<h2>{% trans "Featured Products" %}</h2>
+					</div>
+					<div class="all-btn all-category d-flex align-items-center">
+						<a href="{% url 'digi_explore' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "All Products" %}</a>
+					</div>
+				</div>
+				<div class="section-text aos" data-aos="fade-up">
+          <p class="mb-0">{% trans "Digiprenair is your gateway to the digital marketplace, offering creators a platform to showcase and sell their digital products. With seamless tools and resources, we empower innovation and creativity to reach a global" %} audience.</p>
+      </div>
+      
+				<div class="course-feature">
+					<div class="row">
+            {% for item in best_products %}
+						<div class="col-lg-3 col-md-6 d-flex">
+							<div class="course-box d-flex aos" data-aos="fade-up">
+								<div class="product">
+									<div class="product-img">
+										<a href="{% url 'digi_product' item.slug %}">
+											<img class="img-fluid" alt="Img" src="{{item.image.url}}">
+										</a>
+										<div class="price">
+											<h3>${{item.effective_price}} <span>${{item.effective_price}}</span></h3>
+										</div>
+									</div>
+									<div class="product-content">
+										<div class="course-group d-flex">
+											<div class="course-group-img d-flex">
+												<a href="{% url 'digi_product' item.slug %}"><img src="{{item.seller.profile_pic.url}}"
+														alt="Img" class="img-fluid"></a>
+												<div class="course-name">
+													<h4><a href="{% url 'digi_profile' item.seller.slug %}">{{item.seller.username}}</a></h4>
+													<p>{{item.category.name}}</p>
+												</div>
+											</div>
+										</div>
+										<h3 class="title instructor-text"><a href="{% url 'digi_product' item.slug %}">{{item.title}}</a></h3>
+										<div class="d-flex align-items-center justify-content-between">
+											<div class="rating m-0">
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<span class="d-inline-block average-rating"><span>5.0</span> ({{item.five_star_rating}})</span>
+											</div>
+											<div class="all-btn all-category d-flex align-items-center">
+												<a href="{% url 'digi_product' item.slug %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "BUY NOW" %}</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+            {% endfor %}
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /Feature Course -->
+
+
+      <!-- Commuprenair  -->
+      <section class="section how-it-works">
+        <div class="container">
+          <div class="workprenair-container" style="background: linear-gradient(to right, #7984ba, #98d9d5); color: white;">
+            <div class="row align-items-center">
+              <!-- Content Section -->
+              <div class="col-md-6 mb-4 mb-md-0" style="padding-left: 3rem;">
+                <div class="workprenair-content">
+                  <h1 class="workprenair-title" style="color: white">CommuPrenair</h1>
+                  <h2 class="workprenair-heading" style="color: white;">
+                    {% trans "Connect, Collaborate," %} <br />
+                    <span class="workprenair-highlight" style="color: rgb(222, 187, 12)">{% trans "Grow Globally." %}</span>
+                  </h2>
+                  <p class="workprenair-description" style="color: white;">
+                    {% trans "Expand your network and discover new opportunities with CommuPrenair. Build meaningful connections and collaborate globally." %}
+                  </p>
+                  <ul class="workprenair-feature-list">
+                    <li class="workprenair-feature-item">
+                      <span class="workprenair-icon">
+                        <i class="fa-solid fa-user-group" style="color: white"></i>
+                      </span>
+                      {% trans "Professional Networking: Meet and engage with industry leaders." %}
+                    </li>
+                    <li class="workprenair-feature-item">
+                      <span class="workprenair-icon">
+                        <i class="fa-solid fa-robot" style="color: white"></i>
+                      </span>
+                      {% trans "AI-Powered Matches: Find collaborators tailored to your goals." %}
+                    </li>
+                    <li class="workprenair-feature-item">
+                      <span class="workprenair-icon">
+                        <i class="fa-solid fa-calendar-check" style="color: white"></i>
+                      </span>
+                      {% trans "Host & Join Events: Create or attend impactful workshops and discussions." %}
+                    </li>
+                  </ul>
+                  <button onclick="location.href='/?register=true'" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">
+                    {% trans "Get Started" %}
+                  </button>
+                </div>
+              </div>
+              <!-- Image Section -->
+              <div class="col-md-6 text-center">
+                <img src="{% static 'home/images/work_ban.png' %}" alt="CommuPrenair" class="img-fluid" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Top Categories Commuprenir -->
+      <section class="section how-it-works">
+        <div class="container">
+          <div class="section-header aos" data-aos="fade-up">
+            <div class="section-sub-head">
+                <span>{% trans "Professional Networking" %}</span>
+                <h2>Commuprenair {% trans "Highlights" %}</h2>
+            </div>
+            <div class="all-btn all-category d-flex align-items-center">
+                <a href="{% url 'commu_groups' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "Explore Community" %}</a>
+            </div>
+        </div>
+        <div class="section-text aos" data-aos="fade-up">
+            <p>{% trans "Commuprenair is the ultimate platform for professionals to network, collaborate, and grow. Build meaningful connections, share your expertise, and unlock new opportunities within a thriving community." %}</p>
+        </div>
+        
+          <div class="owl-carousel mentoring-course owl-theme aos" data-aos="fade-up">
+            {% for category in commu_featured_categories %}
+            <a target="_blank" href="{% url 'commu_groups' %}?category={{category.id}}"><div class="feature-box text-center ">
+              <div class="feature-bg">
+                <div class="feature-header">
+                  <div class="feature-icon">
+                    {% if category.img %}
+                    <img src="{{category.img.url}}" alt="Img">
+                    {% else %}
+                    <img src="{% static 'home/images/prog_tech.png' %}" alt="Img">
+                    {% endif %}
+                  </div>
+                  <div class="feature-cont">
+                    <div class="feature-text">{{category.name}}</div>
+                  </div>
+                </div>
+                <p>{{category.group_count}} Groups</p>
+              </div>
+            </div></a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- commuprenair top services -->
+    <!-- Feature Course -->
+		<section class="section new-course" style="background: url({% static 'home/images/banner.png' %});">
+			<div class="container">
+				<div class="section-header aos" data-aos="fade-up">
+					<div class="section-sub-head">
+						<span>{% trans "What’s New" %}</span>
+						<h2>{% trans "Featured Groups" %}</h2>
+					</div>
+					<div class="all-btn all-category d-flex align-items-center">
+						<a href="{% url 'commu_groups' %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "All Groups" %}</a>
+					</div>
+				</div>
+				<div class="section-text aos" data-aos="fade-up">
+          <p class="mb-0">{% trans "Commuprenair connects professionals and entrepreneurs in a dynamic digital community. Build meaningful networks, share insights, and collaborate to drive innovation and growth in your field." %}</p>
+      </div>
+      
+				<div class="course-feature">
+					<div class="row">
+            {% for group in best_groups %}
+						<div class="col-lg-3 col-md-6 d-flex">
+							<div class="course-box d-flex aos" data-aos="fade-up">
+								<div class="product">
+									<div class="product-img">
+										<a href="{% url 'group_detail' group.slug %}">
+											<img class="img-fluid" alt="Img" src="{{group.profile_img.url}}">
+										</a>
+									</div>
+									<div class="product-content">
+										<div class="course-group d-flex">
+											<div class="course-group-img d-flex">
+												<a href="{% url 'group_detail' group.slug %}"><img src="{{group.admin.profile_pic.url}}"
+														alt="Img" class="img-fluid"></a>
+												<div class="course-name">
+													<h4><a href="{% url 'group_detail' group.slug %}">{{group.admin.username}}</a></h4>
+													<p>{{group.category_l_1.name}}</p>
+												</div>
+											</div>
+										</div>
+										<h3 class="title instructor-text"><a href="{% url 'group_detail' group.slug %}">{{group.name}}</a></h3>
+										<div class="d-flex align-items-center justify-content-between">
+											<div class="all-btn all-category d-flex align-items-center">
+												<a href="{% url 'group_detail' group.slug %}" class="category-btn-final" style="background-color: #ff6f61; color: white; padding: 12px;">{% trans "Join NOW" %}</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+            {% endfor %}
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /Feature Course -->
+
+     <!-- How It Works -->
+<section class="hiw-section py-5">
+  <div class="container">
+    <div class="workprenair-container bg-light p-5 shadow-sm rounded">
+      <div class="row align-items-center">
+        <!-- Content Section -->
+        <div class="col-md-6">
+          <div class="workprenair-content">
+            <div class="hiw-content">
+              <h2 class="hiw-heading mb-4 text-primary fw-bold">Get Started with FirePrenair in 3 Easy Steps</h2>
+              <p class="hiw-description text-secondary mb-4">
+                Begin your journey with FirePrenair and take advantage of powerful tools to grow and succeed. Here's how it works:
+              </p>
+              <ul class="workprenair-feature-list list-unstyled">
+                <li class="workprenair-feature-item mb-3 d-flex align-items-start">
+                  <span class="workprenair-icon me-3">
+                    <i class="fa-solid fa-user-plus text-primary fs-4"></i>
+                  </span>
+                  <div style="color: black;">
+                    <strong>Sign Up:</strong> Create your free account and personalize your profile.
+                  </div>
+                </li>
+                <li class="workprenair-feature-item mb-3 d-flex align-items-start">
+                  <span class="workprenair-icon me-3">
+                    <i class="fa-solid fa-tools text-primary fs-4"></i>
+                  </span>
+                  <div style="color: black;">
+                    <strong>Set Up:</strong> Choose your focus—Freelancing, Digital Products, E-Learning, or Networking—and use powerful tools to build your workspace.
+                  </div>
+                </li>
+                <li class="workprenair-feature-item d-flex align-items-start">
+                  <span class="workprenair-icon me-3">
+                    <i class="fa-solid fa-rocket text-primary fs-4"></i>
+                  </span>
+                  <div style="color: black;">
+                    <strong>Launch:</strong> Start selling, teaching, or collaborating globally and grow with FirePrenair’s AI-driven insights.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Section -->
+        <div class="col-md-6 text-center">
+          <img
+            class="hiw-image img-fluid rounded shadow-lg"
+            src="{% static 'home/images/how_it_works.png' %}"
+            alt="How it works"
+            style="max-width: 100%; height: auto; object-fit: cover;"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="trusted-companies">
+  <div class="swiper company-logos-container">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <img style="max-height: 150px;" class="company-logos" src="{% static 'home/images/vaio.png' %}" alt="Vaio Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img class="company-logos" src="{% static 'home/images/sharp.png' %}" alt="Sharp Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img class="company-logos" src="{% static 'home/images/microsoft.png' %}" alt="Microsoft Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img style="max-height: 150px;" class="company-logos" src="{% static 'home/images/sony.png' %}" alt="Sony Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img style="max-height: 150px;" class="company-logos" src="{% static 'home/images/acer.png' %}" alt="Acer Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img class="company-logos" src="{% static 'home/images/nokia.png' %}" alt="Nokia Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img class="company-logos" src="{% static 'home/images/asus.png' %}" alt="Asus Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img style="max-height: 150px;" class="company-logos" src="{% static 'home/images/casio.png' %}" alt="Casio Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img class="company-logos" src="{% static 'home/images/dell.png' %}" alt="Dell Logo" />
+      </div>
+      <div class="swiper-slide">
+        <img style="max-height: 150px;" class="company-logos" src="{% static 'home/images/panasonic.png' %}" alt="Panasonic Logo" />
+      </div>
+    </div>
+  </div>
+</section>
+
+      
+
+      <!-- FAQS  -->
+      <section class="unique-faq-container" style="background: url({% static 'home/images/banner.png' %});">
+        <div class="container">
+					<div class="row">
+						<div class="col-lg-12">
+							<div class="help-title">
+								<h1 style="display: flex; justify-content: center; color: #ff6f61;">Most frequently asked questions</h1>
+								<p style="display: flex; justify-content: center;">Here are the most frequently asked questions you may check before getting started</p>
+							</div>
+						</div>
+					</div>
+					
+					<div class="row">
+            <div class="col-lg-6">
+            
+              <!-- Faq -->							
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqone" aria-expanded="false">Is there a free trial for FirePrenair?</a>
+                </h6>
+                <div id="faqone" class="collapse">
+                  <div class="faq-detail">
+                    <p>Yes, FirePrenair offers a 14-day free trial for all new users. During this period, you can explore all the premium features and tools to understand how they can benefit your business or learning journey.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqtwo" aria-expanded="false">How much time will I need to learn to use FirePrenair?</a>
+                </h6>
+                <div id="faqtwo" class="collapse">
+                  <div class="faq-detail">
+                    <p>FirePrenair is designed with simplicity and user-friendliness in mind. Most users get comfortable with the platform within a few hours. Additionally, we provide video tutorials and a guided onboarding process to help you get started quickly.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqthree" aria-expanded="false">Can I choose a monthly subscription plan?</a>
+                </h6>
+                <div id="faqthree" class="collapse">
+                  <div class="faq-detail">
+                    <p>Yes, FirePrenair offers flexible subscription options, including monthly and annual plans. You can choose the plan that best suits your needs and switch between plans at any time.</p>
+                  </div>
+                </div>
+              </div>
+              <!-- /Faq -->
+            
+            </div>	
+            
+            <div class="col-lg-6">
+            
+              <!-- Faq -->							
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqfour" aria-expanded="false">What are the benefits of the Premium Membership?</a>
+                </h6>
+                <div id="faqfour" class="collapse">
+                  <div class="faq-detail">
+                    <p>Premium Membership gives you access to advanced tools, including AI-driven analytics, unlimited product listings, enhanced collaboration features, and priority support. It's the perfect choice for professionals looking to scale their projects effectively.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqfive" aria-expanded="false">Are there tutorials available to learn FirePrenair?</a>
+                </h6>
+                <div id="faqfive" class="collapse">
+                  <div class="faq-detail">
+                    <p>Yes, we provide a comprehensive library of tutorials and guides for all aspects of FirePrenair, including setting up your workspace, using AI tools, and managing your account. Our support team is also available to assist you.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="faq-card">
+                <h6 class="faq-title">
+                  <a class="collapsed" data-bs-toggle="collapse" href="#faqsix" aria-expanded="false">How can I cancel my subscription?</a>
+                </h6>
+                <div id="faqsix" class="collapse">
+                  <div class="faq-detail">
+                    <p>You can cancel your subscription anytime from your account settings. Once canceled, you’ll continue to have access to premium features until the end of your billing period.</p>
+                  </div>
+                </div>
+              </div>
+              <!-- /Faq -->
+            
+            </div>	
+          </div>
+          
+				</div>
+      </section>
+      <!-- FAQ -->
+
+      <!-- Master Skill -->
+		<section class="section master-skill">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-7 col-md-12">
+						<div class="section-header aos" data-aos="fade-up">
+							<div class="section-sub-head">
+								<span style="color: #1e3a8a;">What’s New</span>
+								<h2 style="color: #ff6f61;">Fuel Your Business with FirePrenair</h2>
+							</div>
+						</div>
+						<div class="section-text aos" data-aos="fade-up">
+							<p>Launch, grow, and scale your business with our all-in-one platform. Whether selling digital products, offering services, learning new skills, or networking globally—FirePrenair powers your success.
+              </p>
+						</div>
+						<div class="career-group aos" data-aos="fade-up">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 d-flex">
+									<div class="certified-group blur-border d-flex">
+										<div class="get-certified d-flex align-items-center">
+											<div class="blur-box">
+                        <div class="certified-img ">
+                          <img src="{% static 'edu_prenair/assets/img/temp/icon-4.svg' %}" alt="Img" class="img-fluid">
+												</div>
+											</div>
+											<p>Launch and manage products seamlessly with powerful tools</p>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 d-flex">
+									<div class="certified-group blur-border d-flex">
+										<div class="get-certified d-flex align-items-center">
+                      <div class="blur-box">
+												<div class="certified-img ">
+													<img src="{% static 'edu_prenair/assets/img/temp/icon-2.svg' %}" alt="Img" class="img-fluid">
+												</div>
+											</div>
+											<p>Connect with clients and grow your freelance business.
+                      </p>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 d-flex">
+                  <div class="certified-group blur-border d-flex">
+                    <div class="get-certified d-flex align-items-center">
+                      <div class="blur-box">
+                        <div class="certified-img ">
+                          <img src="{% static 'edu_prenair/assets/img/temp/icon-1.svg' %}" alt="Img" class="img-fluid">
+												</div>
+											</div>
+											<p>Create and access interactive, expert-led courses.</p>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 d-flex">
+									<div class="certified-group blur-border d-flex">
+                    <div class="get-certified d-flex align-items-center">
+                      <div class="blur-box">
+                        <div class="certified-img ">
+                          <img src="{% static 'edu_prenair/assets/img/temp/icon-3.svg' %}" alt="Img" class="img-fluid">
+												</div>
+											</div>
+											<p>Join vibrant communities and expand your network.</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-5 col-md-12 d-flex align-items-end">
+						<div class="career-img aos" data-aos="fade-up">
+							<img src="{% static 'home/images/features.png' %}" alt="Img" class="img-fluid">
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /Master Skill -->
+
+
+      <!-- Testimonials  -->
+      <section class="custom_testimonial_container" style="background: url({% static 'home/images/banner.png' %});">
+        <div class="container">
+          <div class="custom-testimonial-container">
+            <!-- Custom Testimonial Card 1 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                WorkPrenair connected me with top-tier clients! I landed high-value projects that grew my freelance income by 60%. The secure payment system and user-friendly workflow make it the best freelancing platform I’ve used!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Michael Lee</span>
+                  <span class="custom-testimonial-user-designation">Freelance Web Developer</span>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Custom Testimonial Card 2 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                Selling my digital products on DigiPrenair was a game-changer! My eBooks and design templates reached thousands, and the AI tools helped me optimize my sales strategy. My revenue doubled in just 3 months!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Aisha Bello</span>
+                  <span class="custom-testimonial-user-designation">Digital Creator</span>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Custom Testimonial Card 3 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                EduPrenair made launching my online courses effortless! The drag-and-drop course builder and AI-powered learning insights helped me scale my coaching business to over 1,000 students in less than a year!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Daniel Rivera</span>
+                  <span class="custom-testimonial-user-designation">Business Coach</span>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Custom Testimonial Card 4 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                CommuPrenair connected me with industry leaders and collaborators I wouldn’t have met elsewhere. I’ve grown my professional network, landed partnerships, and expanded my consulting firm!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Sofia Dimitrov</span>
+                  <span class="custom-testimonial-user-designation">Marketing Consultant</span>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Custom Testimonial Card 5 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                FirePrenair’s complete ecosystem has revolutionized how I run my business. From selling digital products to networking with entrepreneurs, it’s the perfect platform for growth and success!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Liam O'Connor</span>
+                  <span class="custom-testimonial-user-designation">Entrepreneur & Startup Founder</span>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Custom Testimonial Card 6 -->
+            <div class="custom-testimonial-card">
+              <div class="custom-testimonial-rating">★★★★★</div>
+              <div class="custom-testimonial-body">
+                FirePrenair’s AI tools helped me streamline my workflow and automate repetitive tasks. Now I can focus on creating high-quality content and growing my business faster than ever!
+              </div>
+              <div class="custom-testimonial-footer">
+                <div class="custom-testimonial-user-info">
+                  <span class="custom-testimonial-user-name">Emily Carter</span>
+                  <span class="custom-testimonial-user-designation">Content Creator & Designer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Security Code Popup -->
+<div class="popup-overlay" id="securityCodePopupOverlay" style="display: none;"></div>
+<div class="signup-popup" id="securityCodePopup" style="display: none;">
+    <button  class="close-popup" id="closeSecurityPopup">&times;</button>
+    <div class="row align-items-center" style="margin-top: 40px;">
+        <!-- Form Section -->
+        <div class="col-md-12 form-section">
+            <h1 style="margin-right: 20px;">Verify Your Email</h1>
+            <p style="color: #ff6f61;">Enter the verification code sent to your email, You may have to check your spam folder.</p>
+            <form method="post" action="{% url 'verify_email' %}">
+                {% csrf_token %}
+                <div class="input-block">
+                    <label><i style="color: #ff6f61;" class="fas fa-lock"></i> Verification Code</label>
+                    <input type="text" name="verification_code" placeholder="Enter the verification code" required>
+                </div>
+                <button class="category-btn-final" type="submit">Verify</button>
+            </form>
+        </div>
+    </div>
+</div>
+      {% include 'profiles/register.html' %}
+      {% include 'profiles/login.html' %}
+
+      <!-- Footer -->
+     {% include 'home/partials/footer.html' %}
+    </div>
+    <!-- /Main Wrapper -->
+
+    <!-- plyr -->
+    <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="{% static "home/assets/js/jquery-3.7.1.min.js" %}"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="{% static "home/assets/js/bootstrap.bundle.min.js" %}"></script>
+
+    <!-- counterup JS -->
+    <script src="{% static "home/assets/js/jquery.waypoints.js" %}"></script>
+    <script src="{% static "home/assets/js/jquery.counterup.min.js" %}"></script>
+
+    <!-- Select2 JS -->
+    <script src="{% static "home/assets/plugins/select2/js/select2.min.js" %}"></script>
+
+    <!-- Owl Carousel -->
+    <script src="{% static "home/assets/js/owl.carousel.min.js" %}"></script>
+
+    <!-- Slick Slider -->
+    <script src="{% static "home/assets/plugins/slick/slick.js" %}"></script>
+
+    <!-- Aos -->
+    <script src="{% static "home/assets/plugins/aos/aos.js" %}"></script>
+
+    <!-- JS -->
+    <script src="{% static "home/assets/js/script.js" %}"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static "home/js/custom.js" %}"></script>
+    <script src="{% static "home/js/notify.js" %}"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper('.company-logos-container', {
+         slidesPerView: 'auto',
+         spaceBetween: 30,
+         loop: true,
+         autoplay: {
+           delay: 3000,
+           disableOnInteraction: false,
+         },
+         breakpoints: {
+           768: {
+             slidesPerView: 3,
+             spaceBetween: 20,
+           },
+           1024: {
+             slidesPerView: 5,
+             spaceBetween: 30,
+           },
+         },
+       });
+        
+      document.addEventListener('DOMContentLoaded', () => {
+        const securityCodePopupOverlay = document.getElementById('securityCodePopupOverlay');
+        const securityCodePopup = document.getElementById('securityCodePopup');
+        const closeSecurityPopup = document.getElementById('closeSecurityPopup');
+      
+        if (securityCodePopupOverlay && securityCodePopup && closeSecurityPopup) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const showVerifyPopup = urlParams.get('verify') === 'true';
+        
+            if (showVerifyPopup) {
+                securityCodePopupOverlay.style.display = 'block';
+                securityCodePopup.style.display = 'block';
+            }
+          
+            closeSecurityPopup.addEventListener('click', () => {
+                securityCodePopupOverlay.style.display = 'none';
+                securityCodePopup.style.display = 'none';
+            });
+          
+            securityCodePopupOverlay.addEventListener('click', () => {
+                securityCodePopupOverlay.style.display = 'none';
+                securityCodePopup.style.display = 'none';
+            });
+        }
+      });
+
+      
+    let player = null;
+    let videoModal = document.getElementById('videoModal');
+    function openVideoModal() {
+    const videoModal = document.getElementById('videoModal');
+    const videoElement = document.getElementById('modalVideo');
+      
+    if (!player) {
+      player = new Plyr(videoElement, {
+        ratio: '16:9',
+        tooltips: { controls: true, seek: true },
+        keyboard: { focused: true, global: true },
+        fullscreen: { enabled: true, fallback: true, iosNative: true }
+      });
+    }
+
+    videoModal.style.display = 'block';
+    setTimeout(() => {
+      player.play().catch(error => {
+      });
+      player.resize();
+    }, 100);
+  }
+
+
+
+  function closeVideoModal() {
+    const videoModal = document.getElementById('videoModal');
+    videoModal.style.display = 'none';
+    if (player) player.pause();
+  }
+      window.onclick = function(event) {
+        if (event.target == videoModal) {
+          closeVideoModal();
+        }
+      }
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === "Escape") {
+          closeVideoModal();
+        }
+      });
+  </script>
+      <script>
+        const tooltip = document.getElementById('tooltip-chart');
+        const tooltipElements = document.querySelectorAll('[data-tooltip]');
+
+        function showTooltip(event) {
+            const element = event.currentTarget;
+            const tooltipText = element.getAttribute('data-tooltip');
+            
+            tooltip.innerHTML = tooltipText;
+            
+            const rect = element.getBoundingClientRect();
+            
+            const elementCenterX = rect.left + rect.width / 2;
+            const elementTop = rect.top;
+            
+            tooltip.style.position = 'fixed';
+            tooltip.style.left = elementCenterX + 'px';
+            tooltip.style.top = (elementTop - 35) + 'px';
+            
+            tooltip.classList.add('show');
+            
+            setTimeout(() => {
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                let adjustedLeft = elementCenterX - (tooltipRect.width / 2);
+                
+                if (adjustedLeft < 10) {
+                    adjustedLeft = 10;
+                }
+                
+                if (adjustedLeft + tooltipRect.width > window.innerWidth - 10) {
+                    adjustedLeft = window.innerWidth - tooltipRect.width - 10;
+                }
+                
+                tooltip.style.left = adjustedLeft + 'px';
+                
+                const arrowOffset = elementCenterX - adjustedLeft;
+                const arrowPosition = Math.max(15, Math.min(arrowOffset, tooltipRect.width - 15));
+                tooltip.style.setProperty('--arrow-left', arrowPosition + 'px');
+            }, 50);
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove('show');
+        }
+
+        tooltipElements.forEach(element => {
+            element.addEventListener('mouseenter', showTooltip);
+            element.addEventListener('mouseleave', hideTooltip);
+            
+            element.addEventListener('mousemove', (event) => {
+                if (tooltip.classList.contains('show')) {
+                    showTooltip(event);
+                }
+            });
+        });
+        document.querySelector('.demo-container').addEventListener('mouseleave', hideTooltip);
+        const style = document.createElement('style');
+        style.textContent = `
+            .tooltip-chart::after {
+                left: var(--arrow-left, 50%) !important;
+                margin-left: -6px;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+  </body>
+  
+  </html>

@@ -1,0 +1,146 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Training{% endblock %}
+
+
+{% block content %}
+<style>
+    .list-unstyled{
+        margin-bottom: 20px;
+    }
+
+    li{
+        margin: 10px;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/training.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<!-- Training Section -->
+<div class="training-sec py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Training</h1>
+                        <p class="hero-text">
+                            At FirePrenair, we equip you with the skills and knowledge to thrive in the entrepreneurial world. From free resources to premium programs, our training is tailored for freelancers, creators, educators, and business professionals.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Free Training -->
+        <div class="row my-5">
+            <div class="col-lg-6">
+                <h3 class="section-title">1. Free Training on YouTube</h3>
+                <p class="text-muted">
+                    FirePrenair’s free training resources are available on our YouTube channel, offering accessible content for users at all levels.
+                </p>
+                <ul class="list-unstyled">
+                    <li><strong>What You’ll Learn:</strong></li>
+                    <ul>
+                        <li>Step-by-step guides for setting up and using the FirePrenair platform.</li>
+                        <li>Tutorials on WorkPrenair, DigiPrenair, EduPrenair, and CommuPrenair tools.</li>
+                        <li>AI-focused sessions on automating tasks and scaling your business.</li>
+                        <li>Insights into freelancing, course creation, and professional networking.</li>
+                    </ul>
+                </ul>
+                <ul class="list-unstyled">
+                    <li><strong>Why Choose Free Training?</strong></li>
+                    <ul>
+                        <li>No cost to start learning valuable skills.</li>
+                        <li>Regular updates featuring the latest tips and trends.</li>
+                        <li>Simple, actionable videos to get the most out of FirePrenair.</li>
+                    </ul>
+                </ul>
+                <p>
+                    <strong>Subscribe Now:</strong> Explore our <a target="_blank" href="https://www.youtube.com/@fireprenair1" class="text-primary">YouTube Channel</a> and stay updated with new uploads and live sessions.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'home/images/footer/training.png' %}" alt="Free Training on YouTube" class="img-fluid rounded">
+            </div>
+        </div>
+        
+        <!-- Premium Training -->
+        <div class="row my-5">
+            <div class="col-lg-6">
+                <img src="{% static 'home/images/footer/training.png' %}" alt="Premium Training on Firetrainr" class="img-fluid rounded">
+            </div>
+            <div class="col-lg-6">
+                <h3 class="section-title">2. Premium Training on Firetrainr.com</h3>
+                <p class="text-muted">
+                    For those looking to master their skills and achieve entrepreneurial excellence, FirePrenair offers premium training services through Firetrainr.com.
+                </p>
+                <ul class="list-unstyled">
+                    <li><strong>Featured Premium Programs:</strong></li>
+                    <ul>
+                        <li><strong>InnoPrenair:</strong> A flagship course focusing on AI-powered entrepreneurship to help you innovate and scale your business.</li>
+                        <li><strong>Coregency AI Automation:</strong> Learn to optimize operations using AI tools to boost efficiency and productivity.</li>
+                        <li><strong>Omnicore AI Automation:</strong> Discover how to create and scale digital products using AI with real-world case studies.</li>
+                    </ul>
+                </ul>
+                <ul class="list-unstyled">
+                    <li><strong>What Makes Premium Training Unique?</strong></li>
+                    <ul>
+                        <li>Advanced AI Tools for automation, content creation, and analytics.</li>
+                        <li>Interactive Modules with quizzes, resources, and real-time feedback.</li>
+                        <li>Expert-Led Webinars with industry leaders and experienced mentors.</li>
+                        <li>Certifications to showcase your expertise and credibility.</li>
+                    </ul>
+                </ul>
+                <p>
+                    <strong>Flexible Enrollment:</strong> Choose individual courses or bundle them with a <a href="{% url 'pricing' %}" class="text-primary">FirePrenair Pro subscription</a> for enhanced value.
+                </p>
+            </div>
+        </div>
+
+        <!-- Get Started Section -->
+        <div class="row mt-5 text-center">
+            <div class="col-lg-12">
+                <h3 class="section-title mb-3">How to Get Started?</h3>
+                <p><strong>Free Training:</strong> Visit our <a href="https://www.youtube.com/@fireprenair1" target="_blank" class="text-primary">YouTube channel</a> for tutorials and how-to guides.</p>
+                <p><strong>Premium Training:</strong> Enroll in transformative courses at <a target="_blank" href="https://firetrainr.com" class="text-primary">Firetrainr.com</a>.</p>
+            </div>
+        </div>
+
+        <!-- Why FirePrenair Training -->
+        <div class="row mt-5">
+            <div class="col-lg-12 text-center">
+                <h3 class="section-title mb-3">Why FirePrenair Training?</h3>
+                <p class="text-muted">
+                    Accessible resources, AI-centric learning, and global strategies make FirePrenair training the ultimate choice for growth.
+                </p>
+                <ul class="list-inline">
+                    <li class="list-inline-item px-3"><strong>Accessible to All:</strong> From free YouTube videos to advanced programs, there’s something for everyone.</li>
+                    <li class="list-inline-item px-3"><strong>AI-Centric:</strong> Learn to leverage AI for transforming workflows and results.</li>
+                    <li class="list-inline-item px-3"><strong>Global Impact:</strong> Explore strategies used by top entrepreneurs and businesses worldwide.</li>
+                </ul>
+                <p class="mt-3" style="display: flex; justify-content: center;">
+                    <a href="{% url 'home' %}?register=true" class="category-btn-final" style="color: white;">Start Learning Today</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Training Section -->
+
+
+
+{% endblock content %}

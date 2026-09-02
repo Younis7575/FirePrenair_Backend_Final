@@ -1,0 +1,184 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Fireprenair - License Agreement{% endblock %}
+
+{% block content %}
+
+<style>
+    .terms-content {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.terms-header {
+    margin-bottom: 40px;
+}
+
+.terms-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.terms-subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.section-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #555;
+}
+
+.nested-list {
+    list-style: circle;
+    margin-left: 40px;
+}
+
+.terms-intro {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+p{
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/License agreement.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+
+</style>
+
+<!-- License Agreement Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="terms-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">License Agreement</h1>
+                            <p class="hero-text">
+                                This License Agreement governs your use of FirePrenair’s platform, services, and tools. By accessing FirePrenair, you agree to this License Agreement, which grants you a limited, non-exclusive, non-transferable license to use the platform for personal or business purposes, subject to the terms outlined below.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Scope of License -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Scope of License</h3>
+                        <ul class="section-list">
+                            <li><strong>Usage Rights:</strong> FirePrenair grants you a limited license to access and use its services, tools, and resources for:
+                                <ul class="nested-list">
+                                    <li>Listing services and products.</li>
+                                    <li>Selling digital products.</li>
+                                    <li>Participating in courses or creating educational content.</li>
+                                    <li>Networking and collaboration.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Non-Commercial Use:</strong> Unless expressly authorized, you may not use FirePrenair for purposes beyond personal or business operations, such as reselling or redistributing platform content.</li>
+                            <li><strong>Third-Party Integrations:</strong> Users may access approved third-party tools integrated with FirePrenair, subject to compliance with this agreement and the third-party’s terms of use.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Restrictions -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Restrictions</h3>
+                        <ul class="section-list">
+                            <li><strong>Prohibited Actions:</strong> You agree not to:
+                                <ul class="nested-list">
+                                    <li>Copy, reproduce, or distribute platform content without written permission.</li>
+                                    <li>Reverse engineer, disassemble, or attempt to extract the platform’s source code.</li>
+                                    <li>Bypass security measures or interfere with FirePrenair’s systems.</li>
+                                    <li>Share your access credentials with unauthorized users.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Intellectual Property Compliance:</strong> All materials, tools, and resources provided by FirePrenair are protected by copyright, trademark, and intellectual property laws. Any unauthorized use will result in termination of your license and potential legal action.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Ownership -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Ownership</h3>
+                        <ul class="section-list">
+                            <li><strong>FirePrenair’s Property:</strong> All content, features, and functionalities of the platform, including software, text, images, and trademarks, remain the sole property of FirePrenair or its licensors.</li>
+                            <li><strong>User-Generated Content:</strong> Users retain ownership of their uploaded content but grant FirePrenair a license to use, host, and display this content for services. This license ends when the user deletes their content or account, except for data required to comply with legal or contractual obligations.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Modifications and Updates -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Modifications and Updates</h3>
+                        <ul class="section-list">
+                            <li><strong>Platform Updates:</strong> FirePrenair reserves the right to modify its tools, features, or services at any time to improve functionality or comply with regulations.</li>
+                            <li><strong>License Modifications:</strong> FirePrenair may revise this License Agreement periodically. Users will be notified of changes, and continued use constitutes acceptance of updated terms.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Termination -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Termination</h3>
+                        <ul class="section-list">
+                            <li><strong>Breach of Terms:</strong> Violation of this License Agreement may result in immediate suspension or termination of your access to FirePrenair.</li>
+                            <li><strong>User-Initiated Termination:</strong> You may terminate your license by discontinuing platform use and deleting your account.</li>
+                            <li><strong>Effect of Termination:</strong> Upon termination, your access to the platform will cease, and any remaining obligations (e.g., payments owed) must be fulfilled.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Liability Disclaimer -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Liability Disclaimer</h3>
+                        <p>FirePrenair provides its services “as is” and does not warrant error-free operation or uninterrupted access. FirePrenair is not responsible for losses arising from improper or unauthorized use of the platform.</p>
+                    </div>
+
+                    <!-- Dispute Resolution -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Dispute Resolution</h3>
+                        <ul class="section-list">
+                            <li><strong>Mediation or Arbitration:</strong> Users agree to resolve disputes through mediation or arbitration before pursuing legal action.</li>
+                            <li><strong>Jurisdiction:</strong> Disputes will be governed by the laws of the state of Delaware, USA.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Acceptance -->
+                    <div class="terms-section">
+                        <h3 class="section-title">Acceptance</h3>
+                        <p>By using FirePrenair, you acknowledge and agree to the terms outlined in this License Agreement. For questions or clarification, contact us at <a href="mailto:support@fireprenair.com">support@fireprenair.com</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /License Agreement Content -->
+
+{% endblock content %}

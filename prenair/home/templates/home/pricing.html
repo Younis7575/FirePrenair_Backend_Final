@@ -1,0 +1,942 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Pricing{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+.plan-b{
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+    border-radius: 0px 30px 30px 30px;
+}
+
+.p-table{
+    width: 100%;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    font-size: 14px;
+    color: white;
+    background-color: white;
+
+}
+
+
+.free{
+    background-color: rgb(237, 139, 3);
+    color: white;
+}
+
+.biz{
+    background-color: #d74961;
+    color: white;
+}
+.start{
+    background-color: #9bc65c;
+    color: white;
+}
+
+.entree{
+    background-color: #ff956b;
+    color: white;
+}
+.free-f{
+    background-color: rgb(238 172 80 / 77%);
+    color: white;
+}
+
+.biz-f{
+    background-color: #ef7f92;
+    color: white;
+}
+
+.start-f{
+    background-color: #aec38e;
+    color: white;
+}
+
+.entree-f{
+    background-color: #f89c78;;
+    color: white;
+}
+
+.f-title{
+    background-color: rgb(234, 141, 75);;
+    color: white;
+    width: fit-content;
+}
+td{
+    padding: 10px;
+}
+
+.hero-section {
+    position: relative;
+    height: 400px;
+    background: url('{% static 'home/images/footer/pricing1.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 70px;
+    border-radius: 15px;
+}
+
+.price-int {
+    font-size: 2.5rem;
+    font-weight: bold;
+    line-height: 1;
+    position: relative;
+}
+
+.price-dec {
+    font-size: 1rem;
+    position: absolute;
+    top: 0.2em;
+    left: calc(100% - 0.2em);
+    font-weight: bold;
+}
+
+.price-currency {
+    font-size: 1.8rem;
+    align-self: flex-start;
+    margin-right: 2px;
+    padding-top: 0.15em;
+}
+
+.plan-price {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.pricing .card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border-color: #e0e0e0;
+    }
+    
+    .pricing .hover-shadow:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .popular-card {
+        border: 2px solid #dc3545 !important;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    
+    .popular-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .pricing .bi-check-circle-fill {
+        font-size: 1.2rem;
+        min-width: 24px;
+    }
+    
+    .pricing .bi-circle {
+        font-size: 1.2rem;
+        min-width: 24px;
+        color: #e0e0e0;
+    }
+    
+    .pricing .card-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    
+.price_span{
+    font-size: 30px;
+    line-height: 44px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: flex;
+    align-items: flex-start;
+}
+.integer-part {
+    font-size: 30px; 
+}
+
+.decimal-part {
+    font-size: 20px; 
+    line-height: 1; 
+    position: relative;
+    top: -5px;
+}
+
+.monthly-price, .annual-price {
+    display: none;
+}
+.monthly-price.active, .annual-price.active {
+    display: flex;
+}
+.text-placehover{
+    color: rgb(177 177 177 / var(--tw-text-opacity));
+}
+
+.price-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.price1 {
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  text-align: center;
+}
+
+.gray-circle {
+  background: linear-gradient(135deg, #9ca3af, #4b5563);
+}
+
+.pink-circle {
+  background: linear-gradient(135deg, #f87171, #ec4899);
+}
+
+.blue-circle {
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+}
+
+.green-circle {
+  background: linear-gradient(135deg, #4ade80, #10b981);
+}
+
+.price_btn{
+    border-radius: 0px 22px 22px 22px;
+    padding: 12px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    line-height: 1 !important;
+    color: white;
+}
+
+.gray-btn {
+  background: linear-gradient(135deg, #9ca3af, #4b5563);
+}
+
+.pink-btn {
+  background: linear-gradient(135deg, #f87171, #ec4899);
+}
+
+.blue-btn {
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+}
+
+.green-btn {
+  background: linear-gradient(135deg, #4ade80, #8b5cf6);
+}
+
+.pricing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.free_icon{
+    color: #4b5563;
+}
+
+.start_icon{
+    color: #ec4899;
+}
+
+.biz_icon{
+    color: #8b5cf6;
+}
+
+.entree_icon{
+    color: #4ade80;
+}
+
+.pricing_item{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.card-body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title-font{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.enable-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge1 {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.save-badge {
+    position: absolute;
+    top: -60px;
+    left: 57%;
+    transform: translateX(-50%);
+    background-color: #ff6f61;
+    color: white;
+    font-size: 16px;
+    padding: 7px 10px;
+    border-radius: 12px;
+}
+
+.save-arrow {
+    color: #ff6f61;
+    position: absolute;
+    top: -30px;
+    left: 56%;
+    font-size: 30px;
+}
+
+
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-5px);}
+    60% {transform: translateY(-3px);}
+}
+
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Pricing Plan -->
+<section class="course-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mx-auto">
+                <!-- <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Choose The Right Plan</h1>
+                        <p class="hero-text">
+                            Improve the way your work, discover a brand new tool and drop the hassle once and for all.
+                        </p>
+                    </div>
+                </div> -->
+                <!-- <div class="text-end">
+                    <img src="{% static 'edu_prenair/assets/img/plan.png' %}" alt="icon">
+                </div> -->
+                <div class="enable-item" style="font-size: 20px; position: relative;">
+                    <label class="mb-0 me-2">Monthly</label>
+                    <div class="form-check form-switch check-on m-0">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" unchecked>
+                        <span class="badge1 save-badge">Save 20%</span>
+                        <div class="save-arrow"> <i class="fa-solid fa-angles-down fa-beat"></i></div>
+                    </div>
+                    <label class="mb-0 ms-2">Annual</label>
+                </div>
+            </div>	
+        </div>	
+        
+       
+        
+        <!-- Compare our plans -->
+<section class="pricing py-5">
+    <div class="container">
+    
+        <h3 style="text-align: center; margin-bottom: 3rem;">Compare Our Plans</h3>
+        
+        <div class="row g-4">
+            <!-- Free Tier -->
+            <div class="col-md-6 col-xl-3 free_plan">
+                <div class="card h-100 border hover-shadow transition">
+                    <div class="card-body p-4">
+                        <span class="title-font">Free Tier</span>
+                        <div class="pricing_type price-circle gray-circle">
+                            <span class="price1">Free</span>
+                        </div>
+                        
+                        <ul class="list-unstyled">
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>3 Products</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>3 Services</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>Limited Marketplace Exposure</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>Email Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>Limited Community Access</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>Payout via Paypal & Payoneer</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle free_icon me-2 mt-1"></i>
+                                <strong>AI Chatbot for Business Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Course Creation</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Support in Chat</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Service Optimization</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI SEO Optimization</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Sentiment Analysis</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Advanced Analytics</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Verified Badge</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Priority Support</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Exams</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Advanced Security & Fraud Protection</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Early Access to New Features</span>
+                            </li>
+                        </ul>
+                        
+                        
+                        
+                        <a href="/?register=true" class="price_btn gray-btn" style="width: fit-content; color: white;">Get Started</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Starter Plan -->
+            <div class="col-md-6 col-xl-3 starter_plan">
+                <div class="card h-100 border hover-shadow transition">
+                    <div class="card-body p-4">
+                        <span class="title-font">StartPrenair</span>
+                        <div class="price-circle pink-circle">
+                            <span class="price1">
+                                <span class="monthly-price active price_span">
+                                    $<span class="integer-part">{{start_plan.int_monthly_price}}</span><sup class="decimal-part">.{{start_plan.dec_monthly_price}}</sup>
+                                </span>
+                                <span class="annual-price price_span">
+                                    $<span class="integer-part">{{start_plan.int_annual_price}}</span><sup class="decimal-part">.{{start_plan.dec_annual_price}}</sup>
+                                </span>
+                            </span>
+                        </div>
+                        
+                        <ul class="list-unstyled">
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>25 Products</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>25 Services</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>Featured Marketplace Exposure</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>VIP Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>Featured Community Access</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>Payout via Paypal & Payoneer</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>AI Chatbot for Business Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>Course Creation</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>AI Support in Chat</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>AI Service Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle start_icon me-2 mt-1"></i>
+                                <strong>AI SEO Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Sentiment Analysis</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Advanced Analytics</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Verified Badge</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Priority Support</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>AI Exams</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Advanced Security & Fraud Protection</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Early Access to New Features</span>
+                            </li>
+                        </ul>
+                        
+                        
+                        <form action="{% url 'create_checkout_session' start_plan.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                            <button type="submit" class="price_btn pink-btn" style="border: none;">Choose Plan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Plan (Most Popular) -->
+            <div class="col-md-6 col-xl-3 biz_plan">
+                <div class="card h-100 border hover-shadow transition popular-card">
+                    <div class="position-relative">
+                        <div class="popular-badge bg-danger text-white text-center py-1">MOST POPULAR</div>
+                    </div>
+                    <div class="card-body p-4">
+                        <span class="title-font">BizPrenair</span>
+                        <div class="price-circle blue-circle">
+                            <span class="price1">
+                                <span class="monthly-price active price_span">
+                                    $<span class="integer-part">{{biz_plan.int_monthly_price}}</span><sup class="decimal-part">.{{biz_plan.dec_monthly_price}}</sup>
+                                </span>
+                                <span class="annual-price price_span">
+                                    $<span class="integer-part">{{biz_plan.int_annual_price}}</span><sup class="decimal-part">.{{biz_plan.dec_annual_price}}</sup>
+                                </span>
+                            </span>
+                        </div>
+                        
+                        <ul class="list-unstyled">
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>500 Products</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>500 Services</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Featured Marketplace Exposure</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>VIP Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Featured Community Access</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Payout via Paypal & Payoneer</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI Chatbot for Business Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Course Creation</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI Support in Chat</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI Service Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI SEO Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI Sentiment Analysis</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Advanced Analytics</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Verified Badge</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>Priority Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle biz_icon me-2 mt-1"></i>
+                                <strong>AI Exams</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Advanced Security & Fraud Protection</span>
+                            </li>
+                            <li class="d-flex align-items-start mb-3 text-muted">
+                                <i class="fas fa-check-circle text-muted me-2 mt-1"></i>
+                                <span>Early Access to New Features</span>
+                            </li>
+                        </ul>
+                        
+                        
+                        <form action="{% url 'create_checkout_session' biz_plan.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                            <button type="submit" class="price_btn blue-btn" style="border: none;">Choose Plan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Plan -->
+            <div class="col-md-6 col-xl-3 entre_plan">
+                <div class="card h-100 border hover-shadow transition">
+                    <div class="card-body p-4">
+                        <span class="title-font">EntrePrenair</span>
+                        <div class="price-circle green-circle">
+                            <span class="price1">
+                                <span class="monthly-price active price_span">
+                                    $<span class="integer-part">{{entre_plan.int_monthly_price}}</span><sup class="decimal-part">.{{entre_plan.dec_monthly_price}}</sup>
+                                </span>
+                                <span class="annual-price price_span">
+                                    $<span class="integer-part">{{entre_plan.int_annual_price}}</span><sup class="decimal-part">.{{entre_plan.dec_annual_price}}</sup>
+                                </span>
+                            </span>
+                        </div>
+                        
+                        <ul class="list-unstyled">
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Unlimited Products</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Unlimited Services</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Featured Marketplace Exposure</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>VVIP Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Featured Community Access</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Payout via Paypal & Payoneer</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI Chatbot for Business Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Course Creation</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI Support in Chat</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI Service Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI SEO Optimization</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI Sentiment Analysis</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Advanced Analytics</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Verified Badge</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Priority Support</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>AI Exams</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Advanced Security & Fraud Protection</strong>
+                            </li>
+                            <li class="d-flex align-items-start mb-3">
+                                <i class="fas fa-check-circle entree_icon me-2 mt-1"></i>
+                                <strong>Early Access to New Features</strong>
+                            </li>
+                        </ul>
+                        
+                        
+                        <form action="{% url 'create_checkout_session' entre_plan.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                            <button type="submit" class="price_btn green-btn" style="border: none;">Choose Plan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+        <!-- /Compare our plans -->
+
+        <div class="container mt-4 mb-5">
+            <h3 class="text-center mb-4" style="font-size: 2rem; font-weight: bold;">Key Features Across All Plans</h3>
+            
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <div class="bg-white p-4 rounded shadow-sm mb-4">
+                        <div class="feature-list">
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📈</span>
+                                <span class="fw-bold">All-in-One Hub for Business Growth</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">💡</span>
+                                <span class="fw-bold">Turn Ideas into Profitable Digital Assets</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🎯</span>
+                                <span class="fw-bold">In-depth Course Analytics & Tracking</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🏆</span>
+                                <span class="fw-bold">Certifications on Completion</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">⚡</span>
+                                <span class="fw-bold">Transform Ideas into Assets</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🤝</span>
+                                <span class="fw-bold">Network & Collaborate Together</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📚</span>
+                                <span class="fw-bold">AI-Powered Teaching & Earning</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">💳</span>
+                                <span class="fw-bold">Secure Transactions & Growth</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🛍️</span>
+                                <span class="fw-bold">Pro Digital Product Sales</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3">
+                                <span class="me-3 fs-4">💼</span>
+                                <span class="fw-bold">Smart Freelancing Tools</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <div class="bg-white p-4 rounded shadow-sm mb-4">
+                        <div class="feature-list">
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🤖</span>
+                                <span class="fw-bold">AI Business Automation</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">💱</span>
+                                <span class="fw-bold">Multi-Currency Transactions</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🏢</span>
+                                <span class="fw-bold">Unified Dashboard Ecosystem</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📝</span>
+                                <span class="fw-bold">AI Content Generation</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📦</span>
+                                <span class="fw-bold">Subscription Products</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🌐</span>
+                                <span class="fw-bold">Virtual Networking Forums</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📊</span>
+                                <span class="fw-bold">Real-Time Analytics</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">📦</span>
+                                <span class="fw-bold">Smart Product Bundling</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3 border-bottom">
+                                <span class="me-3 fs-4">🎓</span>
+                                <span class="fw-bold">AI Course Creation</span>
+                            </div>
+                            <div class="d-flex align-items-start p-3">
+                                <span class="me-3 fs-4">⭐</span>
+                                <span class="fw-bold">Customer Reviews & Social Proof</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- /Pricing Plan -->
+
+{% endblock content %}
+
+
+{% block extra_javascript %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleSwitch = document.getElementById('flexSwitchCheckChecked');
+        const planPrices = document.querySelectorAll('.plan-price');
+        const subscriptionInputs = document.querySelectorAll('.subscription-type');
+        const monthlyLabels = document.querySelectorAll('.monthly-label');
+        const annualLabels = document.querySelectorAll('.annual-label');
+    
+        function updatePrices(isAnnual) {
+            // Update colored plan boxes
+            planPrices.forEach(price => {
+                const intPriceSpan = price.querySelector('.price-int');
+                const decPriceSup = price.querySelector('.price-dec');
+    
+                if (isAnnual) {
+                    intPriceSpan.textContent = price.getAttribute('data-annually-int');
+                    decPriceSup.textContent = '.' + price.getAttribute('data-annually-dec');
+                } else {
+                    intPriceSpan.textContent = price.getAttribute('data-monthly-int');
+                    decPriceSup.textContent = '.' + price.getAttribute('data-monthly-dec');
+                }
+            });
+    
+            // Update pricing cards
+            document.querySelectorAll('.monthly-price').forEach(el => {
+                el.classList.toggle('d-none', isAnnual);
+                el.classList.toggle('active', !isAnnual);
+            });
+            document.querySelectorAll('.annual-price').forEach(el => {
+                el.classList.toggle('d-none', !isAnnual);
+                el.classList.toggle('active', isAnnual);
+            });
+    
+            // Update subscription inputs
+            subscriptionInputs.forEach(input => {
+                input.value = isAnnual ? 'annual' : 'monthly';
+            });
+    
+            // Update labels
+            monthlyLabels.forEach(label => label.classList.toggle('active', !isAnnual));
+            annualLabels.forEach(label => label.classList.toggle('active', isAnnual));
+        }
+    
+        toggleSwitch.addEventListener('change', function () {
+            updatePrices(this.checked);
+        });
+    
+        // Initial state
+        updatePrices(toggleSwitch.checked);
+    });
+    </script>
+
+{% endblock extra_javascript %}

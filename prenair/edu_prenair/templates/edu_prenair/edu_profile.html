@@ -1,0 +1,106 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - My Courses{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+   <!-- Breadcrumb -->
+   <div class="breadcrumb-bar breadcrumb-bar-info">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="breadcrumb-list">
+                    {% if request.user == profile %}
+                    <h2 class="breadcrumb-title">My Profile</h2>
+                    {% else %}
+                    <h2 class="breadcrumb-title">{{profile.name}}</h2>
+                    {% endif %}
+                    <nav aria-label="breadcrumb" class="page-breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'edu_home' %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->	
+
+<!-- Page Content -->
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            
+            {% if request.user.is_edu_instructor %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+            {% else %}
+            {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+            {% endif %}
+            
+            <!-- Instructor profile -->
+            <div class="col-xl-9 col-lg-9">	
+
+                <div class="settings-widget card-details mb-0">
+                    <div class="settings-menu p-0">
+                        <div class="profile-heading">
+                            <h3>My Profile</h3>
+                        </div>
+                        <div class="checkout-form personal-address">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="contact-info">
+                                        <h6>Name</h6>
+                                        <p>{{profile.name}}</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="contact-info">
+                                        <h6>Registerion Date</h6>
+                                        <p>{{profile.created_at}}</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="contact-info">
+                                        <h6>User Name</h6>
+                                        <p>{{profile.username}}</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="contact-info">
+                                        <h6>Email</h6>
+                                        <p>{{profile.email}}</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="contact-info mb-0">
+                                        <h6>Bio</h6>
+                                        <p>{{profile.edu_bio}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>	
+            <!-- /Instructor profile -->
+            
+        </div>
+    </div>
+</div>	
+<!-- /Page Content -->
+
+
+{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

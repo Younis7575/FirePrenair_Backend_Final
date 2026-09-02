@@ -1,0 +1,1264 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Corporate Solutions — Fireprenair{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── CSS Variables ── */
+  :root {
+    --navy: #1e3a8a;
+    --navy-dark: #162e70;
+    --navy-light: #2d4fa3;
+    --coral: #ff6f61;
+    --coral-dark: #e85d50;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-500: #64748b;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+  }
+
+  /* ── HERO ── */
+  .cs-hero {
+    background: url('{% static "home/images/banner.png" %}') center center / cover no-repeat;
+    padding: 100px 0 80px;
+    position: relative;
+    overflow: hidden;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .cs-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,111,97,0.12);
+    border: 1px solid rgba(255,111,97,0.4);
+    color: #e85d50;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 24px;
+  }
+
+  .cs-hero-badge i { font-size: 10px; }
+
+  .cs-hero-headline {
+    font-size: clamp(36px, 5vw, 58px);
+    font-weight: 800;
+    color: #1e3a8a;
+    line-height: 1.12;
+    letter-spacing: -1.5px;
+    margin-bottom: 22px;
+  }
+
+  .cs-hero-headline .accent {
+    background: linear-gradient(90deg, #ff6f61, #ff9a50);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cs-hero-sub {
+    font-size: 17px;
+    color: #475569;
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .cs-hero-ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 56px;
+  }
+
+  .btn-coral {
+    background: linear-gradient(135deg, #ff6f61, #ff5245);
+    color: #ffffff;
+    border: none;
+    padding: 15px 32px;
+    border-radius: 0 14px 14px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 30px rgba(255,111,97,0.35);
+  }
+
+  .btn-coral:hover {
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(255,111,97,0.45);
+  }
+
+  .btn-outline-navy {
+    background: transparent;
+    color: #1e3a8a;
+    border: 2px solid rgba(30,58,138,0.4);
+    padding: 13px 30px;
+    border-radius: 0 14px 14px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-navy:hover {
+    color: #1e3a8a;
+    border-color: #1e3a8a;
+    background: rgba(30,58,138,0.06);
+    transform: translateY(-3px);
+  }
+
+  .cs-hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .cs-hero-trust-avatars {
+    display: flex;
+  }
+
+  .cs-hero-trust-avatars span {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    background: linear-gradient(135deg, #ff6f61, #ff9a50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    margin-left: -10px;
+  }
+
+  .cs-hero-trust-avatars span:first-child { margin-left: 0; }
+
+  .cs-hero-trust p {
+    color: #475569;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .cs-hero-trust strong { color: #1e3a8a; }
+
+  /* ── FLOATING STAT CARDS ── */
+  .cs-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cs-stat-card {
+    background: #ffffff;
+    border: 1px solid rgba(30,58,138,0.1);
+    border-radius: 0 20px 20px 20px;
+    padding: 24px 20px;
+    box-shadow: 0 8px 32px rgba(30,58,138,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cs-stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(30,58,138,0.18);
+    border-color: rgba(255,111,97,0.3);
+  }
+
+  .cs-stat-card.card-float-1 { animation: csFloat 4s ease-in-out infinite; }
+  .cs-stat-card.card-float-2 { animation: csFloat 4s ease-in-out infinite 0.8s; }
+  .cs-stat-card.card-float-3 { animation: csFloat 4s ease-in-out infinite 1.6s; }
+  .cs-stat-card.card-float-4 { animation: csFloat 4s ease-in-out infinite 2.4s; }
+
+  @keyframes csFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .cs-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+  }
+
+  .cs-stat-number {
+    font-size: 34px;
+    font-weight: 800;
+    color: #1e3a8a;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -1px;
+  }
+
+  .cs-stat-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .cs-stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(34,197,94,0.15);
+    color: #4ade80;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  /* ── TRUSTED STRIP ── */
+  .cs-trusted {
+    background: var(--gray-50);
+    padding: 48px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .cs-trusted-label {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .cs-trusted-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .cs-trusted-logo-item {
+    font-size: 15px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: -0.3px;
+    transition: color 0.3s ease;
+  }
+
+  .cs-trusted-logo-item:hover { color: var(--navy); }
+
+  /* ── SECTION COMMONS ── */
+  .cs-section {
+    padding: 96px 0;
+  }
+
+  .cs-section-alt {
+    background: var(--gray-50);
+  }
+
+  .cs-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 12px;
+  }
+
+  .cs-section-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    color: var(--gray-900);
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .cs-section-sub {
+    font-size: 17px;
+    color: var(--gray-500);
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* ── PROBLEM → SOLUTION ── */
+  .cs-ps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 60px;
+  }
+
+  .cs-problem-col {
+    background: #fff7f6;
+    border: 1px solid #fde8e6;
+    border-radius: 0 20px 20px 20px;
+    padding: 36px;
+  }
+
+  .cs-solution-col {
+    background: linear-gradient(135deg, #1e3a8a, #2d4fa3);
+    border-radius: 0 20px 20px 20px;
+    padding: 36px;
+  }
+
+  .cs-col-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .cs-col-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .cs-col-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .cs-problem-col .cs-col-header h3 { color: #c0392b; }
+  .cs-solution-col .cs-col-header h3 { color: #ffffff; }
+
+  .cs-pain-item, .cs-solve-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .cs-pain-item:last-child, .cs-solve-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .cs-solve-item { border-bottom-color: rgba(255,255,255,0.12); }
+
+  .cs-pain-dot {
+    width: 28px;
+    height: 28px;
+    background: #fde8e6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .cs-pain-dot i { color: #e85d50; font-size: 11px; }
+
+  .cs-solve-dot {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,111,97,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .cs-solve-dot i { color: #ff9a8d; font-size: 11px; }
+
+  .cs-pain-item h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+
+  .cs-pain-item p {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .cs-solve-item h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+  }
+
+  .cs-solve-item p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .cs-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+    margin-top: 64px;
+  }
+
+  .cs-steps::before {
+    content: '';
+    position: absolute;
+    top: 38px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--coral), var(--navy));
+    z-index: 0;
+  }
+
+  .cs-step {
+    text-align: center;
+    padding: 0 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cs-step-number {
+    width: 76px;
+    height: 76px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+    margin: 0 auto 24px;
+    border: 4px solid #ffffff;
+    box-shadow: 0 8px 30px rgba(30,58,138,0.25);
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cs-step:hover .cs-step-number {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  }
+
+  .cs-step-icon-wrap {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #fff0ee, #ffe4e1);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 20px;
+    color: var(--coral);
+  }
+
+  .cs-step h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+  }
+
+  .cs-step p {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── PROJECT CATEGORIES ── */
+  .cs-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 56px;
+  }
+
+  .cs-cat-card {
+    background: #ffffff;
+    border: 1px solid var(--gray-200);
+    border-radius: 0 16px 16px 16px;
+    padding: 28px 22px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cs-cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 0 0 0 0;
+    transition: height 0.3s ease;
+  }
+
+  .cs-cat-card:hover {
+    box-shadow: 0 14px 44px rgba(0,0,0,0.1);
+    transform: translateY(-7px);
+    border-color: transparent;
+  }
+
+  .cs-cat-card:hover::before { height: 5px; }
+
+  .cs-cat-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .cs-cat-card:hover .cs-cat-icon { transform: scale(1.12) rotate(-4deg); }
+
+  .cs-cat-card h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+
+  .cs-cat-card p {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .cs-cat-badge {
+    display: inline-block;
+    margin-top: 11px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* per-card color themes */
+  .cc-blue   { background: #eff6ff; border-color: #bfdbfe; }
+  .cc-blue::before   { background: #3b82f6; }
+  .cc-blue   .cs-cat-icon { background: #dbeafe; color: #1d4ed8; }
+  .cc-blue   .cs-cat-badge { background: #dbeafe; color: #1d4ed8; }
+
+  .cc-purple { background: #f5f3ff; border-color: #ddd6fe; }
+  .cc-purple::before { background: #8b5cf6; }
+  .cc-purple .cs-cat-icon { background: #ede9fe; color: #7c3aed; }
+  .cc-purple .cs-cat-badge { background: #ede9fe; color: #7c3aed; }
+
+  .cc-pink   { background: #fdf2f8; border-color: #fbcfe8; }
+  .cc-pink::before   { background: #ec4899; }
+  .cc-pink   .cs-cat-icon { background: #fce7f3; color: #db2777; }
+  .cc-pink   .cs-cat-badge { background: #fce7f3; color: #db2777; }
+
+  .cc-indigo { background: #eef2ff; border-color: #c7d2fe; }
+  .cc-indigo::before { background: #6366f1; }
+  .cc-indigo .cs-cat-icon { background: #e0e7ff; color: #4338ca; }
+  .cc-indigo .cs-cat-badge { background: #e0e7ff; color: #4338ca; }
+
+  .cc-orange { background: #fff7ed; border-color: #fed7aa; }
+  .cc-orange::before { background: #f97316; }
+  .cc-orange .cs-cat-icon { background: #ffedd5; color: #ea580c; }
+  .cc-orange .cs-cat-badge { background: #ffedd5; color: #ea580c; }
+
+  .cc-teal   { background: #f0fdfa; border-color: #99f6e4; }
+  .cc-teal::before   { background: #14b8a6; }
+  .cc-teal   .cs-cat-icon { background: #ccfbf1; color: #0f766e; }
+  .cc-teal   .cs-cat-badge { background: #ccfbf1; color: #0f766e; }
+
+  .cc-green  { background: #f0fdf4; border-color: #bbf7d0; }
+  .cc-green::before  { background: #22c55e; }
+  .cc-green  .cs-cat-icon { background: #dcfce7; color: #15803d; }
+  .cc-green  .cs-cat-badge { background: #dcfce7; color: #15803d; }
+
+  .cc-cyan   { background: #ecfeff; border-color: #a5f3fc; }
+  .cc-cyan::before   { background: #06b6d4; }
+  .cc-cyan   .cs-cat-icon { background: #cffafe; color: #0e7490; }
+  .cc-cyan   .cs-cat-badge { background: #cffafe; color: #0e7490; }
+
+  .cc-red    { background: #fff1f2; border-color: #fecdd3; }
+  .cc-red::before    { background: #ef4444; }
+  .cc-red    .cs-cat-icon { background: #fee2e2; color: #dc2626; }
+  .cc-red    .cs-cat-badge { background: #fee2e2; color: #dc2626; }
+
+  .cc-amber  { background: #fffbeb; border-color: #fde68a; }
+  .cc-amber::before  { background: #f59e0b; }
+  .cc-amber  .cs-cat-icon { background: #fef3c7; color: #d97706; }
+  .cc-amber  .cs-cat-badge { background: #fef3c7; color: #d97706; }
+
+  .cc-sky    { background: #f0f9ff; border-color: #bae6fd; }
+  .cc-sky::before    { background: #0ea5e9; }
+  .cc-sky    .cs-cat-icon { background: #e0f2fe; color: #0369a1; }
+  .cc-sky    .cs-cat-badge { background: #e0f2fe; color: #0369a1; }
+
+  .cc-navy   { background: #eff3ff; border-color: #c7d2fe; }
+  .cc-navy::before   { background: #1e3a8a; }
+  .cc-navy   .cs-cat-icon { background: #dde3f8; color: #1e3a8a; }
+  .cc-navy   .cs-cat-badge { background: #dde3f8; color: #1e3a8a; }
+
+  /* ── IMPACT ── */
+  .cs-impact-numbers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 80px;
+    background: var(--gray-200);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .cs-impact-num-item {
+    background: #ffffff;
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  .cs-impact-num-item:first-child { border-radius: 20px 0 0 20px; }
+  .cs-impact-num-item:last-child { border-radius: 0 20px 20px 0; }
+
+  .cs-impact-big {
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .cs-impact-big span {
+    color: var(--coral);
+  }
+
+  .cs-impact-label {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin-top: 8px;
+  }
+
+  /* ── TESTIMONIALS ── */
+  .cs-testimonials {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .cs-testi-card {
+    background: #ffffff;
+    border: 1px solid var(--gray-200);
+    border-radius: 0 20px 20px 20px;
+    padding: 32px 28px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .cs-testi-card:hover {
+    box-shadow: 0 16px 50px rgba(30,58,138,0.1);
+    transform: translateY(-4px);
+  }
+
+  .cs-testi-stars {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 16px;
+  }
+
+  .cs-testi-stars i { color: #f59e0b; font-size: 14px; }
+
+  .cs-testi-text {
+    font-size: 15px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .cs-testi-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cs-testi-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .cs-testi-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+
+  .cs-testi-role {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 991px) {
+    .cs-ps-grid { grid-template-columns: 1fr; }
+    .cs-steps { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+    .cs-steps::before { display: none; }
+    .cs-categories-grid { grid-template-columns: repeat(3, 1fr); }
+    .cs-impact-numbers { grid-template-columns: repeat(2, 1fr); }
+    .cs-impact-num-item:first-child { border-radius: 20px 0 0 0; }
+    .cs-impact-num-item:nth-child(2) { border-radius: 0 20px 0 0; }
+    .cs-impact-num-item:nth-child(3) { border-radius: 0 0 0 20px; }
+    .cs-impact-num-item:last-child { border-radius: 0 0 20px 0; }
+    .cs-testimonials { grid-template-columns: 1fr; }
+    .cs-stats-grid { grid-template-columns: 1fr 1fr; }
+    .cs-hero { min-height: auto; padding: 80px 0 60px; }
+  }
+
+  @media (max-width: 767px) {
+    .cs-hero { padding: 60px 0 50px; }
+    .cs-section { padding: 64px 0; }
+    .cs-categories-grid { grid-template-columns: repeat(2, 1fr); }
+    .cs-impact-numbers { grid-template-columns: 1fr 1fr; }
+    .cs-cta-banner { padding: 48px 24px; }
+    .cs-trusted-logos { gap: 24px; }
+    .cs-steps { grid-template-columns: 1fr; }
+    .cs-stats-grid { margin-top: 48px; }
+  }
+
+  @media (max-width: 480px) {
+    .cs-categories-grid { grid-template-columns: 1fr 1fr; }
+    .cs-impact-numbers { grid-template-columns: 1fr 1fr; }
+    .cs-hero-headline { font-size: 32px; }
+  }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════════════ -->
+<section class="cs-hero">
+  <div class="container position-relative">
+    <div class="row align-items-center">
+
+      <!-- Left: Copy -->
+      <div class="col-lg-6 col-md-12 mb-5 mb-lg-0">
+        <div class="aos" data-aos="fade-up">
+          <div class="cs-hero-badge">
+            <i class="fas fa-building"></i>
+            Enterprise-Grade Solutions
+          </div>
+          <h1 class="cs-hero-headline">
+            Entire Teams.<br>
+            <span class="accent">Delivered Fast.</span><br>
+            Zero Overhead.
+          </h1>
+          <p class="cs-hero-sub">
+            Fireprenair assigns battle-tested, cross-functional teams to your corporate projects within 48 hours — web, mobile, design, AI, and beyond — at a fraction of the cost of hiring in-house.
+          </p>
+          <div class="cs-hero-ctas">
+            <button type="button" class="btn-coral" onclick="openCorporateModal()">
+              <i class="fas fa-rocket"></i> Start a Project
+            </button>
+            <a href="{% url 'how_it_works' %}" class="btn-outline-navy">
+              <i class="fas fa-play-circle"></i> See How It Works
+            </a>
+          </div>
+          <div class="cs-hero-trust">
+            <div class="cs-hero-trust-avatars">
+              <span>C</span>
+              <span>M</span>
+              <span>A</span>
+              <span>R</span>
+              <span>+</span>
+            </div>
+            <p><strong>500+ enterprise teams</strong> already deployed across 45+ industries</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Floating Stat Cards -->
+      <div class="col-lg-6 col-md-12">
+        <div class="cs-stats-grid aos" data-aos="fade-left" data-aos-delay="100">
+
+          <div class="cs-stat-card card-float-1">
+            <div class="cs-stat-icon" style="background: rgba(255,111,97,0.15);">
+              <i class="fas fa-check-circle" style="color: #ff6f61;"></i>
+            </div>
+            <div class="cs-stat-number">1,200<span style="color:#ff6f61;font-size:22px;">+</span></div>
+            <div class="cs-stat-label">Projects Delivered</div>
+            <div class="cs-stat-trend"><i class="fas fa-arrow-up"></i> 38% this quarter</div>
+          </div>
+
+          <div class="cs-stat-card card-float-2">
+            <div class="cs-stat-icon" style="background: rgba(99,179,237,0.15);">
+              <i class="fas fa-users" style="color: #63b3ed;"></i>
+            </div>
+            <div class="cs-stat-number">500<span style="color:#63b3ed;font-size:22px;">+</span></div>
+            <div class="cs-stat-label">Teams Deployed</div>
+            <div class="cs-stat-trend"><i class="fas fa-arrow-up"></i> Active across 45+ industries</div>
+          </div>
+
+          <div class="cs-stat-card card-float-3">
+            <div class="cs-stat-icon" style="background: rgba(74,222,128,0.12);">
+              <i class="fas fa-star" style="color: #4ade80;"></i>
+            </div>
+            <div class="cs-stat-number">98<span style="color:#4ade80;font-size:22px;">%</span></div>
+            <div class="cs-stat-label">Client Satisfaction</div>
+            <div class="cs-stat-trend"><i class="fas fa-arrow-up"></i> Based on 800+ reviews</div>
+          </div>
+
+          <div class="cs-stat-card card-float-4">
+            <div class="cs-stat-icon" style="background: rgba(251,191,36,0.15);">
+              <i class="fas fa-bolt" style="color: #fbbf24;"></i>
+            </div>
+            <div class="cs-stat-number">48<span style="color:#fbbf24;font-size:22px;">hr</span></div>
+            <div class="cs-stat-label">Team Onboarding</div>
+            <div class="cs-stat-trend"><i class="fas fa-clock"></i> Average kickoff time</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     TRUSTED BY STRIP
+══════════════════════════════════════════════ -->
+<section class="cs-trusted">
+  <div class="container">
+    <p class="cs-trusted-label">Trusted by forward-thinking companies worldwide</p>
+    <div class="cs-trusted-logos">
+      <span class="cs-trusted-logo-item">NexaCorp</span>
+      <span class="cs-trusted-logo-item">VaultWave</span>
+      <span class="cs-trusted-logo-item">OrbitTech</span>
+      <span class="cs-trusted-logo-item">BluePeak</span>
+      <span class="cs-trusted-logo-item">Scalify</span>
+      <span class="cs-trusted-logo-item">FusionLabs</span>
+      <span class="cs-trusted-logo-item">ZenithGlobal</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PROBLEM → SOLUTION
+══════════════════════════════════════════════ -->
+<section class="cs-section">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 aos" data-aos="fade-up">
+        <span class="cs-eyebrow">The Corporate Reality</span>
+        <h2 class="cs-section-title">We fix what's slowing your business down</h2>
+        <p class="cs-section-sub mx-auto">Traditional hiring is slow, expensive, and fragmented. Fireprenair's on-demand corporate teams change that — permanently.</p>
+      </div>
+    </div>
+
+    <div class="cs-ps-grid">
+
+      <!-- Pain Points -->
+      <div class="cs-problem-col aos" data-aos="fade-right">
+        <div class="cs-col-header">
+          <div class="cs-col-icon" style="background: #fde8e6;">
+            <i class="fas fa-exclamation-triangle" style="color: #e85d50;"></i>
+          </div>
+          <h3>What Most Corporations Face</h3>
+        </div>
+
+        <div class="cs-pain-item">
+          <div class="cs-pain-dot"><i class="fas fa-times"></i></div>
+          <div>
+            <h5>Months of Recruitment, Wasted</h5>
+            <p>Hiring a full-stack dev team takes 3–6 months. By then, your window of opportunity has closed.</p>
+          </div>
+        </div>
+
+        <div class="cs-pain-item">
+          <div class="cs-pain-dot"><i class="fas fa-times"></i></div>
+          <div>
+            <h5>Fragmented Vendors, Broken Handoffs</h5>
+            <p>One agency for design, another for dev, another for content. Coordination overhead kills timelines.</p>
+          </div>
+        </div>
+
+        <div class="cs-pain-item">
+          <div class="cs-pain-dot"><i class="fas fa-times"></i></div>
+          <div>
+            <h5>Unpredictable Quality &amp; Delivery</h5>
+            <p>Freelancer marketplaces offer no guarantees. Scope creep, missed deadlines, and quality roulette are the norm.</p>
+          </div>
+        </div>
+
+        <div class="cs-pain-item">
+          <div class="cs-pain-dot"><i class="fas fa-times"></i></div>
+          <div>
+            <h5>High Fixed Costs, Low Flexibility</h5>
+            <p>Full-time salaries, benefits, and infrastructure for project-based needs drain your operating budget.</p>
+          </div>
+        </div>
+
+        <div class="cs-pain-item">
+          <div class="cs-pain-dot"><i class="fas fa-times"></i></div>
+          <div>
+            <h5>Zero Visibility Into Progress</h5>
+            <p>Status updates stuck in email chains. Stakeholders flying blind. No real-time project dashboards.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solutions -->
+      <div class="cs-solution-col aos" data-aos="fade-left">
+        <div class="cs-col-header">
+          <div class="cs-col-icon" style="background: rgba(255,111,97,0.2);">
+            <i class="fas fa-shield-alt" style="color: #ff9a8d;"></i>
+          </div>
+          <h3>The Fireprenair Advantage</h3>
+        </div>
+
+        <div class="cs-solve-item">
+          <div class="cs-solve-dot"><i class="fas fa-check"></i></div>
+          <div>
+            <h5>Teams Ready in 48 Hours</h5>
+            <p>Pre-vetted, cross-functional teams assembled and briefed on your project within two business days.</p>
+          </div>
+        </div>
+
+        <div class="cs-solve-item">
+          <div class="cs-solve-dot"><i class="fas fa-check"></i></div>
+          <div>
+            <h5>One Platform, Every Skill</h5>
+            <p>Dev, design, content, marketing, AI — all sourced, coordinated, and delivered through a single account manager.</p>
+          </div>
+        </div>
+
+        <div class="cs-solve-item">
+          <div class="cs-solve-dot"><i class="fas fa-check"></i></div>
+          <div>
+            <h5>Delivery Guarantees, Not Promises</h5>
+            <p>Milestone-based contracts with defined deliverables, acceptance criteria, and revision rounds built in.</p>
+          </div>
+        </div>
+
+        <div class="cs-solve-item">
+          <div class="cs-solve-dot"><i class="fas fa-check"></i></div>
+          <div>
+            <h5>Scale Up or Down Instantly</h5>
+            <p>Pay only for active project capacity. Scale from a solo specialist to a 15-person team as demand changes.</p>
+          </div>
+        </div>
+
+        <div class="cs-solve-item">
+          <div class="cs-solve-dot"><i class="fas fa-check"></i></div>
+          <div>
+            <h5>Live Dashboard &amp; Weekly Reports</h5>
+            <p>Full project transparency for stakeholders — progress tracking, deliverable reviews, and burn rate visibility.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════════ -->
+<section class="cs-section cs-section-alt">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-7 aos" data-aos="fade-up">
+        <span class="cs-eyebrow">The Process</span>
+        <h2 class="cs-section-title">From brief to delivery in four steps</h2>
+        <p class="cs-section-sub mx-auto">No procurement nightmares. No lengthy onboarding. Just fast, structured execution.</p>
+      </div>
+    </div>
+
+    <div class="cs-steps">
+
+      <div class="cs-step aos" data-aos="fade-up" data-aos-delay="0">
+        <div class="cs-step-number">01</div>
+        <div class="cs-step-icon-wrap">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h4>Submit Your Brief</h4>
+        <p>Tell us what you need — scope, timeline, budget range, and success criteria. Takes under 10 minutes.</p>
+      </div>
+
+      <div class="cs-step aos" data-aos="fade-up" data-aos-delay="100">
+        <div class="cs-step-number">02</div>
+        <div class="cs-step-icon-wrap">
+          <i class="fas fa-search"></i>
+        </div>
+        <h4>We Scope &amp; Match</h4>
+        <p>Our solutions team reviews your brief, defines the technical scope, and matches you with the optimal team composition.</p>
+      </div>
+
+      <div class="cs-step aos" data-aos="fade-up" data-aos-delay="200">
+        <div class="cs-step-number">03</div>
+        <div class="cs-step-icon-wrap">
+          <i class="fas fa-users-cog"></i>
+        </div>
+        <h4>Team Gets to Work</h4>
+        <p>Your dedicated team kicks off with a structured sprint plan, milestone map, and a dedicated project manager keeping everything on track.</p>
+      </div>
+
+      <div class="cs-step aos" data-aos="fade-up" data-aos-delay="300">
+        <div class="cs-step-number">04</div>
+        <div class="cs-step-icon-wrap">
+          <i class="fas fa-flag-checkered"></i>
+        </div>
+        <h4>Review &amp; Deliver</h4>
+        <p>You review each milestone, request revisions, and approve final delivery. Payment released only on satisfaction.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PROJECT CATEGORIES
+══════════════════════════════════════════════ -->
+<section class="cs-section">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8 aos" data-aos="fade-up">
+        <span class="cs-eyebrow">Capabilities</span>
+        <h2 class="cs-section-title">Whatever your project demands, we cover it</h2>
+        <p class="cs-section-sub mx-auto">From cutting-edge AI to classic brand strategy — our talent network spans every digital and creative discipline.</p>
+      </div>
+    </div>
+
+    <div class="cs-categories-grid">
+
+      <div class="cs-cat-card cc-blue aos" data-aos="fade-up" data-aos-delay="0">
+        <div class="cs-cat-icon"><i class="fas fa-code"></i></div>
+        <h5>Web Development</h5>
+        <p>Full-stack apps, portals, SaaS platforms, and enterprise dashboards</p>
+        <span class="cs-cat-badge">React · Django · Node.js</span>
+      </div>
+
+      <div class="cs-cat-card cc-purple aos" data-aos="fade-up" data-aos-delay="50">
+        <div class="cs-cat-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h5>Mobile Applications</h5>
+        <p>iOS, Android, and cross-platform apps built for enterprise scale</p>
+        <span class="cs-cat-badge">Flutter · React Native · Swift</span>
+      </div>
+
+      <div class="cs-cat-card cc-pink aos" data-aos="fade-up" data-aos-delay="100">
+        <div class="cs-cat-icon"><i class="fas fa-pencil-ruler"></i></div>
+        <h5>UI/UX Design</h5>
+        <p>Research-backed product design, prototyping, and design systems</p>
+        <span class="cs-cat-badge">Figma · Adobe XD · Research</span>
+      </div>
+
+      <div class="cs-cat-card cc-indigo aos" data-aos="fade-up" data-aos-delay="150">
+        <div class="cs-cat-icon"><i class="fas fa-robot"></i></div>
+        <h5>AI &amp; Automation</h5>
+        <p>Custom LLM integrations, ML pipelines, RPA, and intelligent agents</p>
+        <span class="cs-cat-badge">GPT-4 · Python · LangChain</span>
+      </div>
+
+      <div class="cs-cat-card cc-orange aos" data-aos="fade-up" data-aos-delay="200">
+        <div class="cs-cat-icon"><i class="fas fa-bullhorn"></i></div>
+        <h5>Digital Marketing</h5>
+        <p>Paid media, SEO, email campaigns, and full-funnel growth strategies</p>
+        <span class="cs-cat-badge">Google Ads · Meta · HubSpot</span>
+      </div>
+
+      <div class="cs-cat-card cc-teal aos" data-aos="fade-up" data-aos-delay="250">
+        <div class="cs-cat-icon"><i class="fas fa-pen-fancy"></i></div>
+        <h5>Content &amp; Copywriting</h5>
+        <p>Brand voice, long-form content, technical writing, and localization</p>
+        <span class="cs-cat-badge">SEO Content · Technical Docs</span>
+      </div>
+
+      <div class="cs-cat-card cc-green aos" data-aos="fade-up" data-aos-delay="300">
+        <div class="cs-cat-icon"><i class="fas fa-shopping-cart"></i></div>
+        <h5>E-Commerce</h5>
+        <p>Headless commerce builds, Shopify customization, and conversion optimization</p>
+        <span class="cs-cat-badge">Shopify · WooCommerce · Stripe</span>
+      </div>
+
+      <div class="cs-cat-card cc-cyan aos" data-aos="fade-up" data-aos-delay="350">
+        <div class="cs-cat-icon"><i class="fas fa-chart-bar"></i></div>
+        <h5>Data &amp; Analytics</h5>
+        <p>BI dashboards, data pipelines, and advanced reporting for stakeholders</p>
+        <span class="cs-cat-badge">Power BI · BigQuery · dbt</span>
+      </div>
+
+      <div class="cs-cat-card cc-red aos" data-aos="fade-up" data-aos-delay="400">
+        <div class="cs-cat-icon"><i class="fas fa-palette"></i></div>
+        <h5>Brand Identity</h5>
+        <p>Logo systems, brand guidelines, visual identity, and full rebrands</p>
+        <span class="cs-cat-badge">Strategy · Visual Design</span>
+      </div>
+
+      <div class="cs-cat-card cc-amber aos" data-aos="fade-up" data-aos-delay="450">
+        <div class="cs-cat-icon"><i class="fas fa-video"></i></div>
+        <h5>Video &amp; Motion</h5>
+        <p>Explainer videos, product demos, corporate reels, and motion graphics</p>
+        <span class="cs-cat-badge">After Effects · Premiere Pro</span>
+      </div>
+
+      <div class="cs-cat-card cc-sky aos" data-aos="fade-up" data-aos-delay="500">
+        <div class="cs-cat-icon"><i class="fas fa-cloud"></i></div>
+        <h5>Cloud &amp; DevOps</h5>
+        <p>Infrastructure setup, CI/CD pipelines, Kubernetes, and cloud migration</p>
+        <span class="cs-cat-badge">AWS · GCP · Docker · K8s</span>
+      </div>
+
+      <div class="cs-cat-card cc-navy aos" data-aos="fade-up" data-aos-delay="550">
+        <div class="cs-cat-icon"><i class="fas fa-briefcase"></i></div>
+        <h5>Business Consulting</h5>
+        <p>Digital transformation strategy, operational audits, and market entry plans</p>
+        <span class="cs-cat-badge">Strategy · Growth · Ops</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     OUR IMPACT
+══════════════════════════════════════════════ -->
+<section class="cs-section cs-section-alt">
+  <div class="container">
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-7 aos" data-aos="fade-up">
+        <span class="cs-eyebrow">Our Impact</span>
+        <h2 class="cs-section-title">Numbers that speak for themselves</h2>
+      </div>
+    </div>
+
+    <!-- Big Numbers -->
+    <div class="cs-impact-numbers aos" data-aos="fade-up">
+      <div class="cs-impact-num-item">
+        <div class="cs-impact-big">1.2K<span>+</span></div>
+        <div class="cs-impact-label">Projects Completed</div>
+      </div>
+      <div class="cs-impact-num-item">
+        <div class="cs-impact-big">98<span>%</span></div>
+        <div class="cs-impact-label">On-Time Delivery Rate</div>
+      </div>
+      <div class="cs-impact-num-item">
+        <div class="cs-impact-big">45<span>+</span></div>
+        <div class="cs-impact-label">Industries Served</div>
+      </div>
+      <div class="cs-impact-num-item">
+        <div class="cs-impact-big">3×<span></span></div>
+        <div class="cs-impact-label">Faster Than In-House Hiring</div>
+      </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="row justify-content-center text-center mb-5">
+      <div class="col-lg-6">
+        <span class="cs-eyebrow">Client Stories</span>
+        <h3 class="cs-section-title" style="font-size: 30px;">What corporate clients are saying</h3>
+      </div>
+    </div>
+
+    <div class="cs-testimonials aos" data-aos="fade-up">
+
+      <div class="cs-testi-card">
+        <div class="cs-testi-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p class="cs-testi-text">"We needed a full e-commerce rebuild in 6 weeks — an impossible ask internally. Fireprenair assembled a team of 8 within 48 hours and delivered on day 38. Genuinely remarkable."</p>
+        <div class="cs-testi-author">
+          <div class="cs-testi-avatar" style="background: linear-gradient(135deg, #1e3a8a, #2d4fa3);">CM</div>
+          <div>
+            <div class="cs-testi-name">Catherine M.</div>
+            <div class="cs-testi-role">VP of Digital, NexaCorp</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cs-testi-card">
+        <div class="cs-testi-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p class="cs-testi-text">"Our AI pipeline was a mess of disconnected scripts. The Fireprenair data team restructured everything, added automation, and cut our processing time by 70%. The ROI was instant."</p>
+        <div class="cs-testi-author">
+          <div class="cs-testi-avatar" style="background: linear-gradient(135deg, #ff6f61, #ff9a50);">AR</div>
+          <div>
+            <div class="cs-testi-name">Amir R.</div>
+            <div class="cs-testi-role">CTO, OrbitTech Solutions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cs-testi-card">
+        <div class="cs-testi-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p class="cs-testi-text">"Three brand identity projects, two mobile apps, and an ongoing content retainer — all handled through one Fireprenair account. The consolidation alone saved us 20 hours a month in vendor management."</p>
+        <div class="cs-testi-author">
+          <div class="cs-testi-avatar" style="background: linear-gradient(135deg, #059669, #10b981);">SL</div>
+          <div>
+            <div class="cs-testi-name">Sophie L.</div>
+            <div class="cs-testi-role">Head of Operations, Scalify Group</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<section style="padding: 60px 0 48px;">
+  {% include "home/partials/subscribe.html" %}
+</section>
+
+{% include "home/partials/corporate_modal.html" %}
+{% endblock content %}

@@ -1,0 +1,81 @@
+<style>
+    .footer_cta_menu {
+        margin-top: 2rem;
+        padding: 1rem 0;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .quick-actions-container {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1rem;
+    }
+
+    .quick-action-link {
+    background: linear-gradient(145deg, #ff6f61, #ff6f61);
+    color: white;
+    text-align: center;
+    border-radius: 0px 22px 22px 22px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .quick-action-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+        background: linear-gradient(145deg, #ff6f61, #ff6f61);
+    }
+
+    @media (max-width: 1440px) {
+        .quick-actions-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .quick-actions-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .quick-actions-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-action-link {
+            padding: 1rem;
+            min-height: 60px;
+            font-size: 0.9rem;
+        }
+    }
+
+    .quick-action-link::before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+</style>
+
+
+<div class="footer_cta_menu bg-white rounded-lg">
+    <div class="quick-actions-container">
+        <a href="{% url 'payout_request' %}" class="quick-action-link get-paid">Get Paid Now</a>
+        <a href="{% url 'payout_settings' %}" class="quick-action-link payment-settings">Payment Settings</a>
+        <a href="{% url 'course_create_eduprenair' %}" class="quick-action-link">Create Course</a>
+        <a href="{% url 'upload_item_digiprenair' %}" class="quick-action-link">Add Product</a>
+        <a href="{% url 'create_gig' %}" class="quick-action-link">Start New Service</a>
+        <a href="{% url 'billings' %}" class="quick-action-link">Upgrade Account</a>
+    </div>
+</div>

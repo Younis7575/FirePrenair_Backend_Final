@@ -1,0 +1,44 @@
+.filter_price,
+.filter_age,
+.filter_radius {
+    .tow_bar_block {
+        position: relative;
+        background: #ECECEC;
+        height: 5px;
+        border-radius: 5px;
+
+        .progress {
+            position: absolute;
+            height: 5px;
+            background: var(--black);
+            left: 1px;
+            right: 1px;
+        }
+    }
+
+    .range_input {
+        position: relative;
+
+        .input {
+            position: absolute;
+            top: -5px;
+            height: 5px;
+            width: 100%;
+            background: none;
+            outline: none;
+            border: none;
+            pointer-events: none;
+            appearance: none;
+
+            &::-webkit-slider-thumb {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                outline: none;
+                pointer-events: auto;
+                -webkit-appearance: none;
+                background: var(--black);
+            }
+        }
+    }
+}

@@ -1,0 +1,172 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Community{% endblock %}
+
+{% block content %}
+
+<style>
+    .community-container {
+        padding: 30px;
+        background-color: #f7f8fa;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .community-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .community-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+
+    .interactive-section {
+        margin-bottom: 30px;
+    }
+
+    .interactive-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .interactive-content {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    .cta-box {
+        background-color: #1e3a8a;
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .cta-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .cta-text {
+        color: white;
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .interactive-button {
+        background-color: #ff6f61;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    p {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    li{
+        margin: 10px;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/community.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/community-banner.png' %});">
+    <div class="container">
+        <div class="community-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Welcome to the FirePrenair Community</h1>
+                    <p class="hero-text">
+                        Join a global network of entrepreneurs, freelancers, creators, and educators. Together, we grow, collaborate, and succeed.
+                    </p>
+                </div>
+            </div>
+
+            
+
+            <!-- Why Join the Community -->
+            <div id="why-join" class="interactive-section">
+                <h2 class="interactive-title">Why Join the Community?</h2>
+                <ul>
+                    <li><span class="highlight">Global Networking:</span> Connect with professionals from 50+ countries to exchange ideas and opportunities.</li>
+                    <li><span class="highlight">Collaboration Opportunities:</span> Work with others on exciting joint projects.</li>
+                    <li><span class="highlight">Knowledge Sharing:</span> Learn from peers and experts through discussions, webinars, and shared resources.</li>
+                    <li><span class="highlight">Supportive Environment:</span> Engage in a community that supports your growth and success.</li>
+                </ul>
+            </div>
+
+            <!-- Key Features -->
+            <div class="interactive-section">
+                <h2 class="interactive-title">Key Features</h2>
+                <ul>
+                    <li><span class="highlight">Discussion Boards:</span> Participate in topic-specific conversations to share and gain insights.</li>
+                    <li><span class="highlight">Virtual Events:</span> Attend expert-led webinars and networking meetups.</li>
+                    <li><span class="highlight">Mentorship:</span> Connect with seasoned professionals for career and project guidance.</li>
+                    <li><span class="highlight">Collaboration Tools:</span> Use shared workspaces to manage team projects seamlessly.</li>
+                    <li><span class="highlight">AI-Powered Matchmaking:</span> Get personalized recommendations for connections, events, and collaboration opportunities.</li>
+                </ul>
+            </div>
+
+            <!-- Get Involved -->
+            <div class="interactive-section">
+                <h2 class="interactive-title">Get Involved</h2>
+                <ul>
+                    <li><span class="highlight">Join Discussions:</span> Dive into forums to share your insights and learn from others.</li>
+                    <li><span class="highlight">Attend Events:</span> Participate in workshops and networking sessions tailored to your interests.</li>
+                    <li><span class="highlight">Collaborate:</span> Use AI tools to find partners and take your projects to the next level.</li>
+                </ul>
+                <button class="interactive-button" onclick="location.href='/?register=true'">Join Now</button>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="cta-box">
+                <h3 class="cta-title">Ready to Join?</h3>
+                <p class="cta-text">Become part of the FirePrenair Community and connect with like-minded professionals worldwide. Together, we achieve more!</p>
+                <button class="interactive-button" onclick="location.href='/?register=true'">Get Started</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+{% endblock content %}

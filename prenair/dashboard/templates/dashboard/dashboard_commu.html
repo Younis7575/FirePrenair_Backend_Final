@@ -1,0 +1,319 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Commuprenair Dashboard{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+<link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
+<link href="https://unpkg.com/video.js@7/dist/video-js.min.css" rel="stylesheet"/>
+
+<link href="https://unpkg.com/@videojs/themes@1/dist/city/index.css" rel="stylesheet"/>
+
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+{% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">Dashboard</h4>
+                <ul class="list_counter grid 2xl:grid-cols-4 grid-cols-2 sm:gap-7.5 gap-5 mt-7.5 w-full">
+                    <li class="counter_item applied_job flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white">
+                        <div class="counter_content">
+                            <span class="text-secondary">Active Orders</span>
+                            <h4 class="number heading4 mt-1">{{active_orders.count}}</h4>
+                        </div>
+                        <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient">
+                            <span class="ph-fill ph-briefcase sm:text-3xl text-2xl text-white"></span>
+                        </div>
+                    </li>
+                    <li class="counter_item services_offered flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white">
+                        <div class="counter_content">
+                            <span class="text-secondary">Completed Orders</span>
+                            <h4 class="number heading4 mt-1">{{completed_orders.count}}</h4>
+                        </div>
+                        <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient">
+                            <span class="ph-fill ph-notepad sm:text-3xl text-2xl text-white"></span>
+                        </div>
+                    </li>
+                    <li class="counter_item views_profile flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white">
+                        <div class="counter_content">
+                            <span class="text-secondary">Application</span>
+                            <h4 class="number heading4 mt-1">1280</h4>
+                        </div>
+                        <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient">
+                            <span class="ph-fill ph-eye sm:text-3xl text-2xl text-white"></span>
+                        </div>
+                    </li>
+                    <li class="counter_item total_reviews flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white">
+                        <div class="counter_content">
+                            <span class="text-secondary">Total Reviews</span>
+                            <h4 class="number heading4 mt-1">4214</h4>
+                        </div>
+                        <div class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient">
+                            <span class="ph-fill ph-thumbs-up sm:text-3xl text-2xl text-white"></span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="chart_overview flex max-xl:flex-col gap-7.5 mt-7.5">
+                    <div class="w-full h-full rounded-lg bg-white">
+                        <div class="flex flex-wrap justify-between gap-6 p-6">
+                            <h5 class="heading5">Page Views</h5>
+                            <div class="menu_time flex flex-wrap gap-7.5">
+                                <button id="one_week" class="button_time line-before line-black line-2px text-button text-secondary">Week</button>
+                                <button id="one_month" class="button_time line-before line-black line-2px text-button text-secondary">Month</button>
+                                <button id="one_year" class="button_time line-before line-black line-2px text-button text-secondary active">Year</button>
+                            </div>
+                        </div>
+                        <div class="chart md:px-6 pb-6">
+                            <div id="chart-timeline"></div>
+                        </div>
+                    </div>
+                    <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-6">
+                        <h5 class="heading5 px-6">Notifications</h5>
+                        <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                            <li class="item flex gap-2">
+                                <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                                    <span class="ph-fill ph-bell text-lg"></span>
+                                </span>
+                                <div class="content flex flex-col gap-2">
+                                    <p class="title text-secondary"><a href="candidates-detail1.html" class="text-black hover:underline">John Smith</a> applied for a job <a href="jobs-detail1.html" class="text-black hover:underline">UX/UI Design</a></p>
+                                    <span class="date caption1 text-secondary">25 mins ago</span>
+                                </div>
+                            </li>
+                            <li class="item flex gap-2">
+                                <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                                    <span class="ph-fill ph-bell text-lg"></span>
+                                </span>
+                                <div class="content flex flex-col gap-2">
+                                    <p class="title text-secondary"><a href="candidates-detail1.html" class="text-black hover:underline">John Hawkins</a> applied for a job <a href="jobs-detail1.html" class="text-black hover:underline">Project Manager</a></p>
+                                    <span class="date caption1 text-secondary">25 mins ago</span>
+                                </div>
+                            </li>
+                            <li class="item flex gap-2">
+                                <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                                    <span class="ph-fill ph-bell text-lg"></span>
+                                </span>
+                                <div class="content flex flex-col gap-2">
+                                    <p class="title text-secondary"><a href="candidates-detail1.html" class="text-black hover:underline">Dianne Russell</a> applied for a job <a href="jobs-detail1.html" class="text-black hover:underline">Web Developement</a></p>
+                                    <span class="date caption1 text-secondary">25 mins ago</span>
+                                </div>
+                            </li>
+                            <li class="item flex gap-2">
+                                <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                                    <span class="ph-fill ph-bell text-lg"></span>
+                                </span>
+                                <div class="content flex flex-col gap-2">
+                                    <p class="title text-secondary"><a href="candidates-detail1.html" class="text-black hover:underline">Arlene McCoy</a> applied for a job <a href="jobs-detail1.html" class="text-black hover:underline">UX/UI Design</a></p>
+                                    <span class="date caption1 text-secondary">25 mins ago</span>
+                                </div>
+                            </li>
+                            <li class="item flex gap-2">
+                                <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                                    <span class="ph-fill ph-bell text-lg"></span>
+                                </span>
+                                <div class="content flex flex-col gap-2">
+                                    <p class="title text-secondary"><a href="candidates-detail1.html" class="text-black hover:underline">John Hawkins</a> applied for a job <a href="jobs-detail1.html" class="text-black hover:underline">Project Manager</a></p>
+                                    <span class="date caption1 text-secondary">25 mins ago</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bookmarks_block mt-7.5 rounded-lg bg-white">
+                    <div
+                      class="list_category flex items-center h-20 px-6 border-b border-line"
+                    >
+                      <div class="menu_tab overflow-unset max-w-none">
+                        <ul class="menu flex gap-7" role="tablist">
+                          <li
+                            class="indicator absolute bottom-0 h-0.5 bg-primary rounded-full duration-300"
+                          ></li>
+                          <li class="tab_item" role="presentation">
+                            <button
+                              class="tab_btn -before py-1 text-button hover:text-primary duration-300 active"
+                            >
+                              Your Recent Posts
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div>
+                      <ul class="list grid xl:grid-cols-4 sm:grid-cols-2 gap-6 p-6">
+                        {% for post in recent_posts %}
+                        <li class="item">
+                          <div
+                            class="service_item relative rounded-lg bg-white shadow-md duration-300 hover:shadow-xl"
+                          >
+                          {% if post.image %}
+                            <a href="" class="service_thumb rounded-t-lg overflow-hidden block">
+                              <img src="{{ post.image.url }}" alt="{{ course.title }}" class="w-full"/>
+                            </a>
+                            {% endif %}
+
+                            {% if post.video %}
+                            <a href="" class="service_thumb rounded-t-lg overflow-hidden block">
+                            <video 
+                                id="video-{{ post.slug }}" 
+                                class="video-js vjs-theme-city vjs-big-play-centered" 
+                                controls 
+                                preload="auto" 
+                                width="640" 
+                                height="264"
+                                data-lesson-id="{{ post.slug }}" 
+                                data-course-id="{{ post.slug }}">
+                                <source src="{{ post.video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            {% endif %}
+                            <div class="service_info py-5 px-4">
+                              <a href="" class="service_title text-title pt-2 duration-300 hover:text-primary">{{ post.title }}</a>
+                              <p>{{post.content}}</p>
+                              <div class="service_more_info flex items-center justify-between gap-1 mt-4 pt-4 border-t border-line">
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                      {% if not published_courses %}
+                      <p class="text-center py-6 text-gray-500">
+                        No published courses found.
+                      </p>
+                      {% endif %}
+                    </div>
+                  </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+
+        <!-- modal_create_meeting -->
+        <div class="modal_item modal_create_meeting relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_create_meeting">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Create Meeting</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <form class="form grid sm:grid-cols-2 gap-5 md:p-7.5 p-6">
+                <div class="date col-span-full">
+                    <label for="date">Date <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="date" type="date" required />
+                </div>
+                <div class="time">
+                    <label>Time <span class="text-red">*</span></label>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-4 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="10:00 AM">10:00 AM</span>
+                            <ul class="list_option scrollbar_custom w-full max-h-[200px] bg-white">
+                                <li class="capitalize" data-item="8:00 AM">8:00 AM</li>
+                                <li class="capitalize" data-item="8:30 AM">8:30 AM</li>
+                                <li class="capitalize" data-item="9:00 AM">9:00 AM</li>
+                                <li class="capitalize" data-item="9:30 AM">9:30 AM</li>
+                                <li class="capitalize" data-item="10:00 AM">10:00 AM</li>
+                                <li class="capitalize" data-item="10:30 AM">10:30 AM</li>
+                                <li class="capitalize" data-item="11:00 AM">11:00 AM</li>
+                                <li class="capitalize" data-item="11:30 AM">11:30 AM</li>
+                                <li class="capitalize" data-item="1:00 PM">1:00 PM</li>
+                                <li class="capitalize" data-item="1:30 PM">1:30 PM</li>
+                                <li class="capitalize" data-item="2:00 PM">2:00 PM</li>
+                                <li class="capitalize" data-item="2:30 PM">2:30 PM</li>
+                                <li class="capitalize" data-item="3:00 PM">3:00 PM</li>
+                                <li class="capitalize" data-item="3:30 PM">3:30 PM</li>
+                                <li class="capitalize" data-item="4:00 PM">4:00 PM</li>
+                                <li class="capitalize" data-item="4:30 PM">4:30 PM</li>
+                            </ul>
+                        </div>
+                        <span class="icon_down ph ph-caret-down right-3"></span>
+                    </div>
+                </div>
+                <div class="duration">
+                    <label for="duration">Duration <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="duration" type="text" placeholder="Duration" required />
+                </div>
+                <div class="col-span-full message">
+                    <label for="message">Message <span class="text-red">*</span></label>
+                    <textarea class="border w-full px-4 py-3 mt-2 border-line rounded-lg" id="message" name="message" rows="4" placeholder="Message" required></textarea>
+                </div>
+                <div class="flex items-center justify-end col-span-full gap-5 sm:mt-2">
+                    <button class="button-main bg-primary" type="submit">Re-schedule Meeting</button>
+                    <button class="button-main -border close_popup_btn" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- modal_delete -->
+        <div class="modal_item modal_delete relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_delete">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Delete</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <div class="flex flex-col items-center py-7 md:px-10 px-6">
+                <h5 class="heading5 text-center">Are you sure you want to delete?</h5>
+                <p class="mt-3 text-secondary text-center">Do you really want to delete your these record? <br class="max-sm:hidden" />This process can't be undo.</p>
+                <div class="flex items-center gap-5 mt-6">
+                    <button class="button-main bg-red btn_confirm_delete">Confirm</button>
+                    <button class="button-main -border close_popup_btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+        const player = new Plyr('.player', {
+            // Plyr options
+            controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        });
+
+
+        const videoElements = document.querySelectorAll('.video-js');
+
+        videoElements.forEach(videoElement => {
+            videojs(videoElement, {
+                controls: true,
+                preload: 'auto',
+                playbackRates: [0.5, 1, 1.5, 2],
+                fluid: true // Makes the video player responsive
+        });
+    });
+});
+</script>
+
+{% endblock extra_javascript %}

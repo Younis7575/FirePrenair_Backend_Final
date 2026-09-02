@@ -1,0 +1,169 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Fireprenair - Help & Support{% endblock %}
+
+{% block content %}
+
+<style>
+    .help-container {
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .help-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .help-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .help-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .section-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/support.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="help-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Help & Support</h1>
+                    <p class="hero-text">
+                        At FirePrenair, we understand that navigating a comprehensive platform can sometimes feel overwhelming. That’s why we offer an extensive Help & Support system designed to address your needs quickly and efficiently.
+                    </p>
+                </div>
+            </div>
+
+            <!-- What’s in the Help & Support Section? -->
+            <div class="help-section">
+                <h2 class="section-title">What’s in the Help & Support Section?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Comprehensive Help Center:</span>
+                        <ul class="nested-list">
+                            <li>Browse through categorized articles, guides, and FAQs tailored to help you maximize your FirePrenair experience.</li>
+                            <li>Popular topics include:
+                                <ul class="nested-list">
+                                    <li>How to list products or services.</li>
+                                    <li>Managing subscriptions and payments.</li>
+                                    <li>Troubleshooting technical issues.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">Step-by-Step Tutorials:</span>
+                        <ul class="nested-list">
+                            <li>Access easy-to-follow video tutorials and walkthroughs for using platform tools, such as:</li>
+                            <li>Setting up your first course on EduPrenair.</li>
+                            <li>Creating digital products on DigiPrenair.</li>
+                            <li>Networking effectively on CommuPrenair.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">Live Chat Support:</span> Instantly connect with our support team via live chat, available 24/7 for all users.</li>
+                    <li><span class="highlight">Ticketing System:</span> Submit detailed queries through our ticketing system and track progress until resolution. Ideal for complex issues requiring more time.</li>
+                </ul>
+            </div>
+
+            <!-- How to Access Help & Support -->
+            <div class="help-section">
+                <h2 class="section-title">How to Access Help & Support</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">From the Dashboard:</span> Click on the “Help & Support” button in the navigation bar for immediate access to all resources.</li>
+                    <li><span class="highlight">Search Functionality:</span> Use the built-in search bar in the Help Center to quickly find answers to your questions.</li>
+                    <li><span class="highlight">Mobile App Assistance:</span> Access the Help & Support section directly from the FirePrenair mobile app for on-the-go solutions.</li>
+                </ul>
+            </div>
+
+            <!-- Specialized Support for Pro Users -->
+            <div class="help-section">
+                <h2 class="section-title">Specialized Support for Pro Users</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Dedicated Account Manager:</span> Pro-tier users can request personalized assistance from their dedicated account manager.</li>
+                    <li><span class="highlight">Priority Support:</span> Pro users receive faster response times and escalated issue resolution.</li>
+                </ul>
+            </div>
+
+            <!-- Community Support -->
+            <div class="help-section">
+                <h2 class="section-title">Community Support</h2>
+                <p class="section-content">
+                    Join our active community of users through forums and discussion boards. Share knowledge, ask for tips, and collaborate with other entrepreneurs who use FirePrenair.
+                </p>
+            </div>
+
+            <!-- Why Choose FirePrenair Support? -->
+            <div class="help-section">
+                <h2 class="section-title">Why Choose FirePrenair Support?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Fast Response Times:</span> We aim to resolve most queries within 24-48 hours.</li>
+                    <li><span class="highlight">Expert Assistance:</span> Our support team is knowledgeable about all platform features and tools, ensuring accurate solutions.</li>
+                    <li><span class="highlight">Multi-Language Options:</span> Support is available in multiple languages to serve our global community effectively.</li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="help-section">
+                <p class="section-content">
+                    No matter where you are or what assistance you need, FirePrenair’s Help & Support team is just a click away. Explore the tools, resolve issues, and succeed with ease!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

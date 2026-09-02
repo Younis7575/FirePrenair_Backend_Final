@@ -1,0 +1,156 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}Fireprenair - Contact Support{% endblock %}
+
+{% block content %}
+
+<style>
+    .support-container {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .support-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .support-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .support-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .section-content {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p{
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/support.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="support-container">
+          <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Contact Support</h1>
+                    <p class="hero-text">
+                        At FirePrenair, we’re committed to ensuring your experience on our platform is smooth, productive, and successful. Whether you have a question, need technical assistance, or simply want to provide feedback, our dedicated support team is here to help.
+                    </p>
+                </div>
+            </div>
+
+            <!-- How to Reach Us -->
+            <div class="support-section">
+                <h2 class="section-title">How to Reach Us</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Email Support:</span>
+                        <ul class="nested-list">
+                            <li>For detailed inquiries, send us an email at <a href="mailto:support@fireprenair.com">support@fireprenair.com</a>. We aim to respond within 24-48 hours for most issues.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">Live Chat:</span>
+                        <ul class="nested-list">
+                            <li>Use our 24/7 live chat support for immediate assistance. Access it directly from your dashboard or the Help & Support page.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">Help Center:</span>
+                        <ul class="nested-list">
+                            <li>Visit our self-service Help Center for guides, FAQs, and troubleshooting tips. It’s your one-stop solution for common questions and platform tutorials.</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">Phone Support (Pro Users):</span>
+                        <ul class="nested-list">
+                            <li>Pro-tier users can access dedicated phone support for urgent matters. Details are available in the dashboard under “Support Options.”</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Types of Issues We Handle -->
+            <div class="support-section">
+                <h2 class="section-title">Types of Issues We Handle</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Account Assistance:</span> Problems with login, registration, or account settings.</li>
+                    <li><span class="highlight">Platform Navigation:</span> Help with using tools, managing projects, or accessing courses.</li>
+                    <li><span class="highlight">Technical Issues:</span> Troubleshooting bugs, errors, or system downtime.</li>
+                    <li><span class="highlight">Transaction Queries:</span> Questions about payments, refunds, or subscriptions.</li>
+                    <li><span class="highlight">Feedback and Suggestions:</span> Share your ideas to help us improve FirePrenair.</li>
+                </ul>
+            </div>
+
+            <!-- Additional Support Resources -->
+            <div class="support-section">
+                <h2 class="section-title">Additional Support Resources</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Community Forums:</span> Engage with other users, share knowledge, and find solutions through our community-driven forums.</li>
+                    <li><span class="highlight">Video Tutorials:</span> Watch step-by-step guides on using FirePrenair’s tools and features.</li>
+                    <li><span class="highlight">System Updates:</span> Stay informed about platform upgrades, scheduled maintenance, or feature launches through the Announcements section.</li>
+                </ul>
+            </div>
+
+            <!-- Our Commitment -->
+            <div class="support-section">
+                <h2 class="section-title">Our Commitment</h2>
+                <p class="section-content">
+                    Your success is our priority. Our support team is trained to resolve your issues efficiently while providing exceptional service. FirePrenair thrives on feedback, so don’t hesitate to let us know how we can serve you better.
+                </p>
+                <p class="section-content">
+                    Need help? Contact us today and experience support that truly cares!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

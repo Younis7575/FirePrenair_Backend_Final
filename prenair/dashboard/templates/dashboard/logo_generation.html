@@ -1,0 +1,613 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | AI Logo Generation{% endblock title %}
+{% load static %}
+
+
+{% block content %}
+<style>
+.logo-gen-form {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-in-out;
+}
+
+.logo-gen-form:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(79, 70, 229, 0.15);
+}
+.heading-title {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.75rem;
+}
+
+.heading-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #4F46E5, #818cf8);
+    border-radius: 3px;
+}
+
+
+.form-group {
+    margin-bottom: 1.75rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #ff6f61;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    background-color: #fff;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #ff6f61, #6366F1);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 0 42px 42px 42px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #4338CA, #ff6f61);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+.generator-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-in-out;
+}
+
+.generator-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(79, 70, 229, 0.15);
+}
+
+.step-container {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+.step-container.active {
+    opacity: 1;
+    max-height: 2000px; /* Large enough to contain all content */
+    overflow: visible;
+}
+
+/* Results Container */
+#result-container {
+    text-align: center;
+    transition: all 0.5s ease;
+}
+
+#generated-logo {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease;
+}
+
+#generated-logo:hover {
+    transform: scale(1.02);
+}
+
+.buttons-container {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.download-label {
+    color: #64748b;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    display: block;
+    text-align: center;
+}
+
+/* Enhanced Loading Animation */
+.loading-container {
+    text-align: center;
+    max-width: 320px;
+    margin: 2rem auto;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.loading-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.loading-steps::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.loading-step {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #94a3b8;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.loading-step.active {
+    background: #ff6f61;
+    border-color: #ff6f61;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.25);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff6f61, #818cf8);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.status-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    text-align: center;
+    min-height: 1.5rem;
+}
+
+/* Animation for form elements on page load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+.delay-3 {
+    animation-delay: 0.3s;
+}
+
+.delay-4 {
+    animation-delay: 0.4s;
+}
+
+.delay-5 {
+    animation-delay: 0.5s;
+}
+
+/* Tooltip style */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    margin-left: 0.5rem;
+    cursor: help;
+}
+
+.tooltip-icon {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #1e293b;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.75rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.8rem;
+    font-weight: normal;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1e293b transparent transparent transparent;
+}
+</style>
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_content scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                
+                <div class="ai-image-generation-container">
+                    <h4 class="heading4 max-lg:mt-3 mb-8 animate-in">AI Logo Generator</h4>
+                    
+                    <div class="generator-container">
+                        <!-- Step 1: Form Input -->
+                        <div id="step-form" class="step-container active">
+                            <form id="logoGenForm" class="logo-gen-form animate-in delay-1">
+                                {% csrf_token %}
+                                
+                                <h5 class="section-title animate-in delay-2 heading-title">Brand Details</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in delay-2">
+                                    <div class="form-group">
+                                        <label for="companyName">
+                                            Company Name
+                                            <div class="tooltip">
+                                                <span class="tooltip-icon">ⓘ</span>
+                                                <span class="tooltip-text">Enter your company or brand name exactly as you want it to appear in the logo</span>
+                                            </div>
+                                        </label>
+                                        <input type="text" class="form-control" id="companyName" name="companyName" placeholder="Enter your company name" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="industry">
+                                            Industry
+                                            <div class="tooltip">
+                                                <span class="tooltip-icon">ⓘ</span>
+                                                <span class="tooltip-text">Specifying your industry helps our AI create more relevant designs</span>
+                                            </div>
+                                        </label>
+                                        <input type="text" class="form-control" id="industry" name="industry" placeholder="e.g. Technology, Food, Fashion" required>
+                                    </div>
+                                </div>
+                        
+                                <h5 class="section-title animate-in delay-3 heading-title">Design Preferences</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in delay-3">
+                                    <div class="form-group">
+                                        <label for="colorScheme">
+                                            Color Scheme
+                                            <div class="tooltip">
+                                                <span class="tooltip-icon">ⓘ</span>
+                                                <span class="tooltip-text">Choose a color palette that matches your brand personality</span>
+                                            </div>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select class="form-control" id="colorScheme" name="colorScheme" required>
+                                                <option value="" disabled selected>Select color scheme</option>
+                                                <option value="Vibrant">Vibrant</option>
+                                                <option value="Pastel">Pastel</option>
+                                                <option value="Monochromatic">Monochromatic</option>
+                                                <option value="Warm Tones">Warm Tones</option>
+                                                <option value="Cool Tones">Cool Tones</option>
+                                                <option value="Earth Tones">Earth Tones</option>
+                                                <option value="Minimalist">Minimalist</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="form-group">
+                                        <label for="style">
+                                            Style
+                                            <div class="tooltip">
+                                                <span class="tooltip-icon">ⓘ</span>
+                                                <span class="tooltip-text">Select a design style that best represents your brand identity</span>
+                                            </div>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select class="form-control" id="style" name="style" required>
+                                                <option value="" disabled selected>Select logo style</option>
+                                                <option value="Modern Minimalist">Modern Minimalist</option>
+                                                <option value="Vintage">Vintage</option>
+                                                <option value="Hand-drawn">Hand-drawn</option>
+                                                <option value="3D">3D</option>
+                                                <option value="Geometric">Geometric</option>
+                                                <option value="Abstract">Abstract</option>
+                                                <option value="Typography-based">Typography-based</option>
+                                                <option value="Mascot">Mascot</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                                <div class="form-group animate-in delay-4">
+                                    <label for="tagline">
+                                        Tagline (optional)
+                                        <div class="tooltip">
+                                            <span class="tooltip-icon">ⓘ</span>
+                                            <span class="tooltip-text">A short slogan or phrase that captures your brand essence</span>
+                                        </div>
+                                    </label>
+                                    <input type="text" class="form-control" id="tagline" name="tagline" placeholder="Your brand slogan (if any)">
+                                </div>
+                        
+                                <div class="form-group animate-in delay-5">
+                                    <label for="additional_notes">
+                                        Additional Notes (optional)
+                                        <div class="tooltip">
+                                            <span class="tooltip-icon">ⓘ</span>
+                                            <span class="tooltip-text">Any specific design elements, symbols, or imagery you'd like to include</span>
+                                        </div>
+                                    </label>
+                                    <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" placeholder="Any specific design elements or imagery you want to include..."></textarea>
+                                </div>
+                        
+                                <div class="text-center animate-in delay-5">
+                                    <button type="submit" class="btn-submit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                                        </svg>
+                                        Generate Logo
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Step 2: Processing -->
+                        <div id="step-processing" class="step-container">
+                            <div class="loading-container">
+                                <h5 class="loading-text">Creating your unique logo</h5>
+                                
+                                <div class="loading-steps">
+                                    <div class="loading-step active" id="step1">1</div>
+                                    <div class="loading-step" id="step2">2</div>
+                                    <div class="loading-step" id="step3">3</div>
+                                    <div class="loading-step" id="step4">4</div>
+                                </div>
+                                
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                                </div>
+                                
+                                <div class="status-text" id="status-text">Analyzing your brand details...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Results -->
+                        <div id="step-result" class="step-container">
+                            <div id="result-container">
+                                <h5 class="section-title heading-title mb-6">Your Generated Logo</h5>
+                                <img id="generated-logo" src="" alt="Generated Logo">
+                                
+                                <div class="buttons-container">
+                                    <span class="download-label">Ready to use your new logo?</span>
+                                    <div class="flex gap-4 flex-wrap justify-center">
+                                        <a target="_blank" id="download-btn" href="#" class="btn-submit" download>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                                            </svg>
+                                            Download Logo
+                                        </a>
+                                        <button id="generate-new-btn" class="btn-submit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                                <path d="M21 3v5h-5"/>
+                                                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                                <path d="M8 16H3v5"/>
+                                            </svg>
+                                            Generate New Logo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2025 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <div class="modal">
+        {% include "work_prenair/partials/menu-modal.html" %}
+    </div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    function showStep(stepId) {
+        document.querySelectorAll('.step-container').forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        document.getElementById(stepId).classList.add('active');
+        
+        document.querySelector('.generator-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    const loadingStages = [
+        { step: 1, text: "Analyzing your brand details...", percentage: 25 },
+        { step: 2, text: "Generating design concepts...", percentage: 50 },
+        { step: 3, text: "Refining selected concept...", percentage: 75 },
+        { step: 4, text: "Finalizing your logo...", percentage: 100 }
+    ];
+    
+    function updateLoadingState(stageIndex) {
+        if (stageIndex >= loadingStages.length) return;
+        
+        const stage = loadingStages[stageIndex];
+        
+        document.querySelectorAll('.loading-step').forEach(step => step.classList.remove('active'));
+        document.getElementById(`step${stage.step}`).classList.add('active');
+        
+        document.getElementById('progress-bar-fill').style.width = `${stage.percentage}%`;
+        document.getElementById('status-text').textContent = stage.text;
+        setTimeout(() => updateLoadingState(stageIndex + 1), 2000);
+        
+    }
+
+    document.getElementById('logoGenForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        showStep('step-processing');
+        
+        updateLoadingState(0);
+        
+        try {
+            const response = await fetch('{% url "logo_generation" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            });
+    
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Something went wrong');
+            }
+    
+            document.getElementById('generated-logo').src = data.image_url;
+            document.getElementById('download-btn').href = data.image_url;
+            showStep('step-result');
+            
+            
+        } catch (error) {
+            alert(error.message);
+            showStep('step-form');
+        }
+    });
+    
+    document.getElementById('generate-new-btn').addEventListener('click', () => {
+        showStep('step-form');
+    });
+    
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', () => {
+            input.parentElement.classList.remove('focused');
+        });
+    });
+</script>
+{% endblock extra_javascript %}

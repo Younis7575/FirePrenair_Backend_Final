@@ -1,0 +1,153 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Digital Products{% endblock %}
+
+{% block content %}
+
+<style>
+    .digital-container {
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .digital-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .digital-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .digital-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .section-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    .highlight {
+        font-weight: bold;
+        color: #444;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    li{
+        margin: 10px;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/product.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="digital-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Digital Products</h1>
+                    <p class="hero-text">
+                        FirePrenair’s Digital Products section empowers you to create, showcase, and sell high-quality digital assets. Whether you’re a seasoned creator or exploring new horizons, our platform provides the tools you need to transform ideas into profitable ventures.
+                    </p>
+                </div>
+            </div>
+
+            <!-- What Can You Create and Sell? -->
+            <div class="digital-section">
+                <h2 class="section-title">What Can You Create and Sell?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">eBooks and Guides:</span> Write, design, and sell professional eBooks and educational guides tailored for authors, educators, and niche experts.</li>
+                    <li><span class="highlight">Templates:</span> Provide customizable templates for resumes, presentations, design projects, or business needs.</li>
+                    <li><span class="highlight">Music and Audio Files:</span> Upload royalty-free music tracks, sound effects, and audio clips for content creators.</li>
+                    <li><span class="highlight">Software and Apps:</span> Share innovative software tools, plugins, or mobile apps to address user needs and boost productivity.</li>
+                    <li><span class="highlight">Stock Media:</span> Offer high-resolution stock photos, videos, and illustrations to creative professionals.</li>
+                    <li><span class="highlight">Online Courses:</span> Bundle your e-learning materials into a digital product to share your expertise with the world.</li>
+                </ul>
+            </div>
+
+            <!-- AI Features for Digital Products -->
+            <div class="digital-section">
+                <h2 class="section-title">AI Features for Digital Products</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Product Idea Generator:</span> Leverage AI to brainstorm innovative product ideas based on market trends.</li>
+                    <li><span class="highlight">Content Enhancer:</span> Refine product descriptions, titles, and marketing copy with AI tools for maximum impact.</li>
+                    <li><span class="highlight">Pricing Insights:</span> Get AI-driven pricing recommendations to attract buyers competitively.</li>
+                    <li><span class="highlight">Design Templates:</span> Access AI-generated design options to create visually appealing products quickly.</li>
+                    <li><span class="highlight">Audience Targeting:</span> Identify and reach your ideal customers with analytics and AI-powered insights.</li>
+                </ul>
+            </div>
+
+            <!-- Why Choose FirePrenair for Selling Digital Products? -->
+            <div class="digital-section">
+                <h2 class="section-title">Why Choose FirePrenair for Selling Digital Products?</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Global Marketplace:</span> Reach buyers worldwide and effortlessly scale your sales.</li>
+                    <li><span class="highlight">Seamless Payment Integration:</span> Accept payments securely in multiple currencies through trusted gateways.</li>
+                    <li><span class="highlight">AI-Driven Tools:</span> Simplify creation, marketing, and analytics with advanced AI features.</li>
+                    <li><span class="highlight">Custom Branding:</span> Add your unique branding, including logos and color schemes, to stand out in the marketplace.</li>
+                </ul>
+            </div>
+
+            <!-- How It Works -->
+            <div class="digital-section">
+                <h2 class="section-title">How It Works</h2>
+                <ul class="section-list">
+                    <li><span class="highlight">Create:</span> Use FirePrenair’s tools to develop your digital product, from eBooks to templates.</li>
+                    <li><span class="highlight">Upload:</span> List your product in the DigiPrenair marketplace with eye-catching visuals and descriptions.</li>
+                    <li><span class="highlight">Sell & Earn:</span> Promote your product, track performance with analytics, and receive payments seamlessly.</li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="digital-section">
+                <p class="section-content">
+                    With FirePrenair, the possibilities for digital products are limitless. Transform your creativity into a revenue-generating business and connect with a global audience eager to buy. Start creating and selling today—your next big success is just a click away!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

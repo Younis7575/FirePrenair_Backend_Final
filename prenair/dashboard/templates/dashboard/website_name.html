@@ -1,0 +1,452 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Choose Name{% endblock title %}
+
+{% block extra_css %}
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        margin-right: 0.5rem;
+        z-index: 2;
+        position: relative;
+    }
+    
+    .step-active .step-number {
+        background-color: #1e3a8a;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.2);
+    }
+    
+    .step-inactive .step-number {
+        background-color: #d1d5db;
+        color: #6b7280;
+    }
+    
+    .step-completed .step-number {
+        background-color: #ff6f61;
+    }
+    
+    .step-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    
+    .step-active .step-text {
+        color: #1e3a8a;
+    }
+    
+    .step-inactive .step-text {
+        color: #6b7280;
+    }
+    
+    .step-completed .step-text {
+        color: #ff6f61;
+    }
+    
+    .step-connector {
+        width: 80px;
+        height: 2px;
+        background-color: #d1d5db;
+        margin: 0 1rem;
+    }
+    
+    .step-connector.active {
+        background-color: #ff6f61;
+    }
+    
+    .form-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        padding: 2.5rem;
+        border: 1px solid #f3f4f6;
+    }
+    
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .input-field {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+    }
+    
+    .input-field:focus {
+        outline: none;
+        border-color: #1e3a8a;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+    
+    .input-label {
+        position: absolute;
+        left: 1.25rem;
+        top: 1rem;
+        color: #6b7280;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        background: white;
+        padding: 0 0.5rem;
+    }
+    
+    .input-field:focus + .input-label,
+    .input-field:not(:placeholder-shown) + .input-label {
+        top: -0.5rem;
+        font-size: 0.75rem;
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+    
+    .btn-primary {
+        width: fit-content;
+        padding: 1rem 1.5rem;
+        background: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 0px 42px 42px 42px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+    }
+    
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+    
+    .main-content {
+        flex: 1;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: calc(100vh - 100px);
+    }
+    
+    .page-title {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .page-title h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color:  #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 1.125rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .tips-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .tips-title {
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .tips-title::before {
+        content: "💡";
+        margin-right: 0.5rem;
+    }
+    
+    .tips-list {
+        color: #64748b;
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+    
+    .tips-list li {
+        margin-bottom: 0.5rem;
+    }
+
+    .select-field {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
+    }
+    
+    .select-field:focus {
+        outline: none;
+        border-color: #1e3a8a;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+
+    .category-selector {
+        margin-bottom: 1.5rem;
+    }
+    
+    .child-category-selector {
+        display: none;
+        margin-top: 1rem;
+    }
+    
+    .category-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .no-child-categories {
+        color: #6b7280;
+        font-style: italic;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 1rem;
+        }
+        
+        .form-container {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+        
+        .page-title h1 {
+            font-size: 2rem;
+        }
+        
+        .step-connector {
+            width: 60px;
+        }
+        
+        .step-text {
+            display: none;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex" >
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %}); background-size: cover; background-position: center;">
+          <div class="container h-fit lg:px-15 lg:pb-30 max-lg:px-12 max-sm:px-8">
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+              <span class="ph ph-squares-four text-xl"></span>
+              <strong class="text-button">Menu</strong>
+            </button>
+        
+        <div class="main-content">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step step-active">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Choose Name and Category</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step step-inactive">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Select Template</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step step-inactive">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Edit & Customize</div>
+                </div>
+            </div>
+            
+            <!-- Page Title -->
+            <div class="page-title">
+                <h1>Name and Categorize Your Website</h1>
+                <p class="page-subtitle">Give your website a memorable name that represents your brand</p>
+            </div>
+            
+            <!-- Form Container -->
+            <div class="form-container">
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="input-group">
+                        <input id="website_name" name="website_name" type="text" required class="input-field" placeholder=" "
+                            autocomplete="off">
+                        <label for="website_name" class="input-label">Website Name</label>
+                    </div>
+                    
+                    <div class="category-selector">
+                        <label for="parent_category" class="category-label">Parent Category</label>
+                        <select id="parent_category" name="parent_category" required class="select-field">
+                            <option value="" disabled selected>Select a parent category</option>
+                            {% for category in parent_categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="child_category_selector" class="child-category-selector">
+                        <label for="child_category" class="category-label">Child Category</label>
+                        <select id="child_category" name="child_category" required class="select-field" disabled>
+                            <option value="" disabled selected>Select a child category</option>
+                        </select>
+                        <div id="no_child_categories" class="no-child-categories">
+                            No sub-categories available for this category.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <span>Next: Choose Template</span>
+                    </button>
+                </form>
+                
+                <!-- Tips Section -->
+                <div class="tips-section">
+                    <div class="tips-title">Naming Tips</div>
+                    <ul class="tips-list">
+                        <li>Keep it short and memorable (2-3 words max)</li>
+                        <li>Make it relevant to your business or brand</li>
+                        <li>Avoid special characters and numbers</li>
+                        <li>Consider your target audience</li>
+                        <li>Check if the domain is available</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </body>
+
+        {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+</div>
+
+
+{% endblock %}
+
+{% block extra_javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const parentCategory = document.getElementById('parent_category');
+    const childCategory = document.getElementById('child_category');
+    const childCategorySelector = document.getElementById('child_category_selector');
+    const noChildCategories = document.getElementById('no_child_categories');
+    
+    parentCategory.addEventListener('change', function() {
+        const parentId = this.value;
+        
+        if (!parentId) {
+            childCategorySelector.style.display = 'none';
+            return;
+        }
+        
+        // Show loading state
+        childCategory.disabled = true;
+        childCategory.innerHTML = '<option value="" disabled selected>Loading...</option>';
+        childCategorySelector.style.display = 'block';
+        noChildCategories.style.display = 'none';
+        
+        // Fetch child categories via AJAX
+        fetch(`/dashboard/get_template_categories/?parent_id=${parentId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                if (data.length > 0) {
+                    childCategory.innerHTML = '<option value="" disabled selected>Select a child category</option>';
+                    data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        childCategory.appendChild(option);
+                    });
+                    childCategory.disabled = false;
+                } else {
+                    childCategory.innerHTML = '<option value="" disabled selected>No sub-categories</option>';
+                    childCategory.disabled = true;
+                    noChildCategories.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching child categories:', error);
+                childCategory.innerHTML = '<option value="" disabled selected>Error loading categories</option>';
+            });
+    });
+    
+    // Form validation to ensure child category is selected when available
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const parentSelected = parentCategory.value;
+        const childSelected = childCategory.value;
+        const childCategoriesExist = childCategory.options.length > 1; // More than just the default option
+        
+        if (parentSelected && childCategoriesExist && !childSelected) {
+            e.preventDefault();
+            alert('Please select a child category');
+        }
+    });
+});
+</script>
+
+{% endblock extra_javascript %}

@@ -1,0 +1,164 @@
+{% load static %}
+<style>
+    .categories-container {
+    display: flex;
+    flex-direction: column;
+    gap:10px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .category-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 7px;
+  }
+
+  .dropdown-menu-final {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .dropdown-item-final {
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .dropdown-item-final:hover {
+    color: #ff6f61;
+  }
+
+  .category-item-top-cat:hover {
+      background-color: #f1f1f1;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .cat-title{
+      font-family: 'Poppins', sans-serif;
+    }
+</style>
+
+<div class="search-container-final">
+    <button class="category-btn-final" style="margin: 3px;">
+      <span><img src="{% static 'images/navbar/icons.png' %}" alt="Category Icon" /></span>
+      Categories
+    </button>
+    <div class="dropdown-menu-final dropdown-large-final p-3" aria-labelledby="navbarDropdown">
+      <div class="row">
+        <div class="col-md-3">
+          <h6 class="cat-title" style="margin-bottom: 10px; font-size: 1.1rem; color: black;">Workprenair</h6>
+          <div id="work-categories" class="categories-container"></div>
+          <div style="margin-top: 40px;">
+            <a class="category-btn-final" href="{% url 'gigs' %}" style="color: white; position: absolute; bottom: 10px;">View More</a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <h6 class="cat-title" style="margin-bottom: 10px; font-size: 1.1rem; color: black;">Eduprenair</h6>
+          <div id="edu-categories" class="categories-container"></div>
+          <div style="margin-top: 40px;">
+            <a class="category-btn-final" href="{% url 'courses' %}" style="color: white; position: absolute; bottom: 10px;">View More</a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <h6 class="cat-title" style="margin-bottom: 10px; font-size: 1.1rem; color: black;">Digiprenair</h6>
+          <div id="digi-categories" class="categories-container"></div>
+          <div style="margin-top: 40px;">
+            <a class="category-btn-final" href="{% url 'digi_explore' %}" style="color: white; position: absolute; bottom: 10px;">View More</a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <h6 class="cat-title" style="margin-bottom: 10px; font-size: 1.1rem; color: black;">Commuprenair</h6>
+          <div id="commu-categories" class="categories-container"></div>
+          <div style="margin-top: 40px;">
+            <a class="category-btn-final" href="{% url 'commu_groups' %}" style="color: white; position: absolute; bottom: 10px;">View More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form action="{% url 'gigs' %}" class="search-form">
+      <input type="text" name="keyword" placeholder="Search services, Products, Networking, etc" class="search-input" />
+      <button class="search-btn-final">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </form>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.querySelector('.category-btn-final');
+
+    dropdown.addEventListener('mouseenter', () => {
+      const menu = document.querySelector('.dropdown-menu-final');
+      menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', () => {
+      const menu = document.querySelector('.dropdown-menu-final');
+      menu.classList.remove('show');
+    });
+
+    const categoriesEndpoints = {
+      work: {
+        endpoint: '/work-parent-categories/',
+        prefix: '/workprenair/services/?category_id='
+      },
+      edu: {
+        endpoint: '/edu-parent-categories/',
+        prefix: '/eduprenair/courses/?category_id='
+      },
+      digi: {
+        endpoint: '/digi-parent-categories/',
+        prefix: '/digiprenair/explore/?category='
+      },
+      commu: {
+        endpoint: '/commu-parent-categories/',
+        prefix: '/commuprenair/groups/?category='
+      }
+    };
+
+    const renderCategories = (endpoint, prefix, containerId) => {
+      fetch(endpoint)
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to fetch categories');
+          return response.json();
+        })
+        .then(data => {
+          const container = document.getElementById(containerId);
+          container.innerHTML = '';
+          data.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category-item-top-cat';
+
+            const link = document.createElement('a');
+            link.className = 'dropdown-item-final';
+            link.href = `${prefix}${category.id}`;
+            link.textContent = category.name;
+
+            const description = document.createElement('p');
+            description.className = 'category-description';
+            description.textContent = category.description || 'No description available';
+            description.style = 'margin-bottom: 0; margin-top: 0;';
+
+            
+
+            categoryDiv.appendChild(link);
+            categoryDiv.appendChild(description);
+            container.appendChild(categoryDiv);
+          });
+        })
+        .catch(error => {
+          console.error('Error loading categories:', error);
+        });
+    };
+
+    renderCategories(categoriesEndpoints.work.endpoint, categoriesEndpoints.work.prefix, 'work-categories');
+    renderCategories(categoriesEndpoints.edu.endpoint, categoriesEndpoints.edu.prefix, 'edu-categories');
+    renderCategories(categoriesEndpoints.digi.endpoint, categoriesEndpoints.digi.prefix, 'digi-categories');
+    renderCategories(categoriesEndpoints.commu.endpoint, categoriesEndpoints.commu.prefix, 'commu-categories');
+  });
+  </script>

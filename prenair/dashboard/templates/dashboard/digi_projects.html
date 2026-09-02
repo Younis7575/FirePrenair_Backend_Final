@@ -1,0 +1,501 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Digiprenair - My Projects{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --secondary: #ff6f61;
+    --primary-light: #2e4a9a;
+    --secondary-light: #ff8a7d;
+    --surface: #f8fafc;
+    --dark: #1e293b;
+  }
+
+  /* Modern card design */
+  .project-card {
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  
+  .project-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--secondary);
+    transition: width 0.3s ease;
+    z-index: -1;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  }
+  
+  .project-card:hover::before {
+    width: 100%;
+    opacity: 0.05;
+  }
+  
+  /* Button styles */
+  .btn-primary, .btn-secondary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    z-index: 1;
+    font-weight: 600;
+  }
+  
+  .btn-primary::after, .btn-secondary::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -10%;
+    width: 120%;
+    height: 200%;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: scale(0);
+    z-index: -1;
+  }
+  
+  .btn-primary:hover::after, .btn-secondary:hover::after {
+    transform: scale(1);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-light);
+    box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
+  }
+  
+  .btn-secondary {
+    background-color: var(--secondary);
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--secondary-light);
+    box-shadow: 0 5px 15px rgba(255, 111, 97, 0.3);
+  }
+  
+  /* Badge Styles */
+  .badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .badge-primary {
+    background-color: rgba(30, 58, 138, 0.1);
+    color: var(--primary);
+  }
+  
+  .badge-secondary {
+    background-color: rgba(255, 111, 97, 0.1);
+    color: var(--secondary);
+  }
+  
+  /* Search bar animation */
+  .search-container {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .search-input {
+    transition: all 0.3s ease;
+    width: 200px;
+  }
+  
+  .search-input:focus {
+    width: 270px;
+    box-shadow: 0 5px 15px rgba(255, 111, 97, 0.2);
+  }
+  
+  /* Empty state */
+  .project-empty {
+    border: 2px dashed #e2e8f0;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .project-empty::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,111,97,0.05) 0%, rgba(30,58,138,0.05) 100%);
+    transform: translateY(100%);
+    transition: transform 0.5s ease;
+  }
+  
+  .project-empty:hover {
+    border-color: var(--secondary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+  
+  .project-empty:hover::before {
+    transform: translateY(0);
+  }
+  
+  /* Header styles */
+  .page-header {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .page-header::after {
+    content: '';
+    position: absolute;
+    top: -150px;
+    right: -150px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,111,97,0.1) 0%, rgba(255,111,97,0) 70%);
+    z-index: 0;
+  }
+  
+  /* Filter pill styles */
+  .filter-pill {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+  
+  .filter-pill:hover {
+    background-color: rgba(30, 58, 138, 0.08);
+  }
+  
+  .filter-pill.active {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  /* Custom scrollbar */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-light);
+  }
+  
+  /* Project stats bubble */
+  .stat-bubble {
+    transition: all 0.3s ease;
+  }
+  
+  .stat-bubble:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+  }
+  
+  /* Animated icons */
+  .animated-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .project-card:hover .animated-icon {
+    transform: scale(1.2);
+    color: var(--secondary);
+  }
+  
+  /* Project card content area */
+  .card-content {
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+  
+  /* Animated badge */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .badge-new {
+    animation: pulse 2s infinite;
+  }
+  
+  /* Loading animation */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  .loading-shimmer {
+    background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+  
+  /* Floating label */
+  .floating-label {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .floating-label input {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .floating-label label {
+    position: absolute;
+    top: 0;
+    left: 0.75rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+  
+  /* Animations */
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s forwards;
+  }
+  
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden bg-surface">
+
+{% include "dashboard/partials/header.html" %}
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+    <div class="content_dashboard scrollbar-custom max-h-full w-full h-fit bg-surface">
+        <div class="container h-full lg:py-15 sm:py-12 py-8">
+            <!-- Mobile Menu Button -->
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                <span class="ph ph-squares-four text-xl"></span>
+                <strong class="text-button">Menu</strong>
+            </button>
+            <!-- Project Collection -->
+            <div class="mt-6 rounded-xl bg-white p-6 shadow-sm animate-slide-in delay-2">
+                <div class="project-header flex flex-col md:flex-row justify-between items-start md:items-center pb-4 mb-6 border-b border-gray-100">
+                    <div class="flex items-center gap-2 mb-4 md:mb-0">
+                        <span class="ph ph-folder text-2xl text-primary"></span>
+                        <h5 class="text-xl font-semibold text-dark">Your Project Collection</h5>
+                        <span class="badge badge-secondary ml-2">{{ user.projects.count }} Projects</span>
+                    </div>
+                   
+                </div>
+                
+                <!-- Project Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for project in user.projects.all %}
+                    <div class="project-card animate-slide-in delay-{{ forloop.counter|divisibleby:3|yesno:'3,2,1' }}">
+                        <div class="card-content p-5 flex flex-col h-full">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h6 class="font-bold text-lg text-primary truncate">{{ project.name }}</h6>
+                                </div>
+                                <!-- <div class="dropdown relative">
+                                    <button class="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+                                        <span class="ph ph-dots-three-vertical text-gray-500"></span>
+                                    </button>
+                                    <div class="dropdown-menu hidden absolute right-0 top-full bg-white shadow-lg rounded-lg py-2 w-52 z-10">
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2">
+                                            <span class="ph ph-pencil"></span>Edit Project
+                                        </a>
+                                        <div class="border-t border-gray-100 my-1"></div>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors flex items-center gap-2">
+                                            <span class="ph ph-trash"></span>Delete Project
+                                        </a>
+                                    </div>
+                                </div> -->
+                            </div>
+                            
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">{{ project.description|default:"No description provided." }}</p>
+                            <div class="flex flex-wrap gap-4 mb-4">
+                                <div class="stat-bubble bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                                    <span class="ph ph-shopping-bag text-secondary animated-icon"></span>
+                                    <span class="text-sm font-medium">{{ project.order_items.count }} Products</span>
+                                </div>
+                                <div class="stat-bubble bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                                    <span class="ph ph-clock text-secondary animated-icon"></span>
+                                    <span class="text-sm text-gray-500">{{ project.updated_at|timesince }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if project.order_items.count > 0 %}
+                            <div class="product-preview mb-4 overflow-hidden">
+                                <div class="flex items-center gap-2 overflow-x-auto scrollbar-custom pb-2">
+                                    {% for item in project.order_items.all|slice:":3" %}
+                                    <div class="h-16 w-16 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="w-full h-full object-cover transition-transform hover:scale-110 duration-300">
+                                    </div>
+                                    {% endfor %}
+                                    {% if project.order_items.count > 3 %}
+                                    <div class="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-100 flex items-center justify-center shadow-sm hover:bg-gray-200 transition-colors">
+                                        <span class="text-sm font-medium">+{{ project.order_items.count|add:"-3" }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="flex gap-3 mt-auto pt-6">
+                                <a href="{% url 'digi_project' project.id %}" class="category-btn-final flex-1 text-center py-2.5 rounded-lg text-sm font-medium">Open Project</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="project-empty col-span-full flex flex-col items-center justify-center py-20 px-6 rounded-xl text-center animate-slide-in delay-1">
+                        <div class="relative mb-6">
+                            <div class="absolute inset-0 bg-secondary rounded-full opacity-10 animate-pulse"></div>
+                            <span class="ph ph-folder-open text-7xl text-secondary relative z-10"></span>
+                        </div>
+                        <h6 class="text-2xl font-semibold text-dark mb-3">Start Your First Project</h6>
+                        <p class="text-gray-500 mb-8 max-w-md">Create your first project to organize your digital products and track your creative journey with Fireprenair</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Quick Tips -->
+            <div class="mt-6 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 p-6 animate-slide-in delay-3">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 bg-white rounded-lg shadow-sm">
+                        <span class="ph ph-lightbulb text-2xl text-secondary"></span>
+                    </div>
+                    <div>
+                        <h6 class="text-lg font-semibold text-dark mb-1">Quick Tips</h6>
+                        <p class="text-gray-600 text-sm mb-2">Organize your projects more effectively:</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li class="flex items-center gap-2">
+                                <span class="ph ph-check-circle text-primary"></span>
+                                Group related products in a single project
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="ph ph-check-circle text-primary"></span>
+                                Use descriptive project names for easy searching
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            {% include "dashboard/partials/footer_cta.html" %}
+        </div>
+        <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+            <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+        </div>
+    </div>
+</div>
+{% include 'work_prenair/partials/mb-menu.html' %}
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+</div>
+ 
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add staggered animation to project cards
+        const projectCards = document.querySelectorAll('.project-card');
+        projectCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+            }, 100 * (index + 1));
+        });
+        
+        // Toggle dropdown menus
+        const dropdownButtons = document.querySelectorAll('.dropdown button');
+        dropdownButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = this.nextElementSibling;
+                dropdown.classList.toggle('hidden');
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        // document.addEventListener('click', function() {
+        //     document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        //         menu.classList.add('hidden');
+        //     });
+        // });
+        
+        // Filter pills click handler
+        const filterPills = document.querySelectorAll('.filter-pill');
+        filterPills.forEach(pill => {
+            pill.addEventListener('click', function() {
+                filterPills.forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Enhanced search input interactions
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('ring-2', 'ring-secondary', 'ring-opacity-50');
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('ring-2', 'ring-secondary', 'ring-opacity-50');
+        });
+        
+        // Add hover effects to project cards
+        projectCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('.card-content').classList.add('bg-gray-50');
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('.card-content').classList.remove('bg-gray-50');
+            });
+        });
+    });
+</script>
+{% endblock extra_javascript %}

@@ -1,0 +1,652 @@
+{% load static %}
+
+<style>
+   
+    
+    .other-section{
+        background-color: white;
+        color: black;
+        letter-spacing: 0.05em;
+        font-size: 0.9em;
+    }
+
+    .title-font {
+        font-size: 16px;
+    }
+
+    .link {
+        transition: all 0.3s ease;
+    }
+
+    .management-section .link {
+        color: #0c4a6e;
+    }
+
+    .management-section .link:hover {
+        background-color: #cffafe;
+        color: #093548;
+    }
+
+    .user-section .link {
+        color: purple;
+    }
+
+    .user-section .link:hover {
+        background-color: #CBC3E3;
+        color: #1f2937;
+    }
+
+    .dropdown-menu {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+
+    .section-title {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .section-title {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+        margin: 8px 0;
+        background: white;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        transform: translateY(-1px);
+        border-color: #d1d5db;
+    }
+
+    .ph-caret-down {
+        color: #1e3a8a;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+
+    .workprenair-section .ph-caret-down {
+        color: white;
+    }
+
+    .eduprenair-section .ph-caret-down {
+        color: white;
+    }
+
+    .digiprenair-section .ph-caret-down {
+        color: white;
+    }
+
+    .commuprenair-section .ph-caret-down {
+        color: white;
+    }
+
+    .workprenair-section .link {
+        color: #1e40af;
+    }
+
+    .workprenair-section .link:hover {
+        background: linear-gradient(135deg, #9ca3af, #4b5563);
+        color: #1e3a8a;
+    }
+
+    .workprenair-section .section-title {
+        background: linear-gradient(135deg, #9ca3af, #4b5563);
+        color: white; 
+    }
+    .workprenair-section .dropdown-menu li {
+        background-color: #D3D3D3;
+    }
+    .workprenair-section .dropdown-menu li:hover {
+        background-color: #C0C0C0; 
+    }
+
+    .eduprenair-section .section-title {
+        background: linear-gradient(135deg, #f87171, #ec4899);
+        color: white;
+    }
+    .eduprenair-section .dropdown-menu li {
+        background-color: #FFE4E1; 
+    }
+    .eduprenair-section .dropdown-menu li:hover {
+        background-color: #FFD1D1; 
+    }
+
+    .digiprenair-section .section-title {
+        background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+        color: white;
+    }
+    .digiprenair-section .dropdown-menu li {
+        background-color: #bae3e8; 
+    }
+    .digiprenair-section .dropdown-menu li:hover {
+        background-color: #B2EBF2; 
+    }
+
+    .commuprenair-section .section-title {
+        background: linear-gradient(135deg, #4ade80, #10b981);
+        color: white;
+    }
+    .commuprenair-section .dropdown-menu li {
+        background-color: #b7ebbb;
+    }
+    .commuprenair-section .dropdown-menu li:hover {
+        background-color: #C8E6C9; 
+    }
+    
+</style>
+
+<div
+    class="menu_dashboard overflow-hidden flex-shrink-0 min-[320px]:w-[280px] w-[80vw] h-full bg-white relative z-[2] max-lg:hidden">
+    {% if request.user.role != 'admin' %}
+    <div class="inner scrollbar_custom max-h-full py-6 px-3">
+        <div class="area other-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="Dashboard">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        Dashboard
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url 'dashboard_home' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Overview</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_notifications" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/notifications/' %}active{% endif %}">
+                        <span class="ph-duotone ph-article text-2xl text-secondary"></span>
+                        <strong class="text-title">Notifications</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area workprenair-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="workprenair">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        WorkPrenair
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                {% if request.user.is_work_freelancer %}
+                <li>
+                    <a href="{% url 'sellor_dashboard' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/seller-dashboard/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Dashboard</strong>
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{% url 'buyer_dashboard' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/buyer-dashboard/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Dashboard</strong>
+                    </a>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{% url 'user_chats' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/messages/' %}active{% endif %}">
+                        <span class="ph-duotone ph-chats text-2xl text-secondary"></span>
+                        <strong class="text-title">Messages</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'user_orders' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/my_orders/' %}active{% endif %}">
+                        <span class="ph-duotone ph-briefcase text-2xl text-secondary"></span>
+                        <strong class="text-title">My Orders</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'todos' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/my_todos/' %}active{% endif %}">
+                        <span class="ph-duotone ph-list-numbers text-2xl text-secondary"></span>
+                        <strong class="text-title">My Todos</strong>
+                    </a>
+                </li>
+                {% if request.user.is_work_freelancer %}
+                <li>
+                    <a href="{% url "user_gigs" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/gigs/' %}active{% endif %}">
+                        <span class="ph-duotone ph-chalkboard-teacher text-2xl text-secondary"></span>
+                        <strong class="text-title">My Gigs</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "create_gig" %}" data-url="{% url 'create_gig' %}"
+                        class="link open-gig-popup flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/gig/create/' %}active{% endif %}">
+                        <span class="ph-duotone ph-plus text-2xl text-secondary"></span>
+                        <strong class="text-title">Create Gig</strong>
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{% url "become_seller" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/become-seller/' %}active{% endif %}">
+                        <span class="ph-duotone ph-user-circle-gear text-2xl text-secondary"></span>
+                        <strong class="text-title">Become Seller</strong>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li>
+                    <a href="{% url "custom_offers_list" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/workprenair/offers/' %}active{% endif %}">
+                        <span class="ph-duotone ph-chalkboard-teacher text-2xl text-secondary"></span>
+                        <strong class="text-title">My Offers</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area eduprenair-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="eduprenair">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        EduPrenair
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url "dashboard_eduprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/eduprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Dashboard</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "manage_courses_eduprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/eduprenair/manage_courses/' %}active{% endif %}">
+                        <span class="ph-duotone ph-article text-2xl text-secondary"></span>
+                        <strong class="text-title">Manage Courses</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_eduprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/eduprenairr/' %}active{% endif %}">
+                        <span class="ph-duotone ph-book-open text-2xl text-secondary"></span>
+                        <strong class="text-title">Enrolled Courses</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "course_create_eduprenair" %}" data-url="{% url 'course_create_eduprenair' %}"
+                        class="link open-course-popup flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/eduprenair/manage_courses/' %}active{% endif %}">
+                        <span class="ph-duotone ph-plus text-2xl text-secondary"></span>
+                        <strong class="text-title">Create Course</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area digiprenair-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="digiprenair">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        Digiprenair
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url "dashboard_digiprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digiprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Dashboard</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "upload_item_digiprenair" %}" data-url="{% url 'upload_item_digiprenair' %}"
+                        class="link open-product-popup flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digiprenair/manage_item/' %}active{% endif %}">
+                        <span class="ph-duotone ph-plus text-2xl text-secondary"></span>
+                        <strong class="text-title">Create Product</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "manage_item_digiprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digiprenair/manage_item/' %}active{% endif %}">
+                        <span class="ph-duotone ph-note-pencil text-2xl text-secondary"></span>
+                        <strong class="text-title">Manage Items</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_digiprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digiprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-book-open text-2xl text-secondary"></span>
+                        <strong class="text-title">Purchase History</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "digi_projects" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digiprenair/projects/' %}active{% endif %}">
+                        <span class="ph-duotone ph-briefcase text-2xl text-secondary"></span>
+                        <strong class="text-title">My Projects</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "digi_reviews" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/digi-reviews/' %}active{% endif %}">
+                        <span class="ph-duotone ph-sparkle text-2xl text-secondary"></span>
+                        <strong class="text-title">Reviews</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "image_generation" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-30hover:bg-background {% if request.path == '/dashboard/image_generation/' %}active{% endif %}">
+                        <span class="ph-duotone ph-image text-2xl text-secondary"></span>
+                        <strong class="text-title">Image Generation</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "logo_generation" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-30hover:bg-background {% if request.path == '/dashboard/logo_generation/' %}active{% endif %}">
+                        <span class="ph ph-file-image text-2xl text-secondary"></span>
+                        <strong class="text-title">Logo Generation</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "ebook_generation" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-30hover:bg-background {% if request.path == '/dashboard/ebook_generation/' %}active{% endif %}">
+                        <span class="ph ph-book-bookmark text-2xl text-secondary"></span>
+                        <strong class="text-title">Generate E-Books</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area commuprenair-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="commuprenair">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        Commuprenair
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url "dashboard_commuprenair" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/commuprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Dashboard</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area mt-6 other-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="billing">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        Billing & Payments
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url 'payout_settings' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/payout-settings/' %}active{% endif %}">
+                        <span class="ph-duotone ph-credit-card text-2xl text-secondary"></span>
+                        <strong class="text-title">Payment Settings</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'payment_history' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/payment-history/' %}active{% endif %}">
+                        <span class="ph-duotone ph-clock-counter-clockwise text-2xl text-secondary"></span>
+                        <strong class="text-title">Payment History</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'billings' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/billing/' %}active{% endif %}">
+                        <span class="ph-duotone ph-notepad text-2xl text-secondary"></span>
+                        <strong class="text-title">Pricing and Subscription</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'billings' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/redeem/' %}active{% endif %}">
+                        <span class="ph-duotone ph-ticket text-2xl text-secondary"></span>
+                        <strong class="text-title">Redeem</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area mt-6 other-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="user">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase title-font">
+                        User
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url "my_referrals" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/my_refrerrals/' %}active{% endif %}">
+                        <span class="ph ph-handshake text-2xl text-secondary"></span>
+                        <strong class="text-title">My Referrals</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_edit_profile" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/edit_profile/' %}active{% endif %}">
+                        <span class="ph-duotone ph-read-cv-logo text-2xl text-secondary"></span>
+                        <strong class="text-title">Profile Settings</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "access_token" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/my_access_token/' %}active{% endif %}">
+                        <span class="ph-duotone ph-key text-2xl text-secondary"></span>
+                        <strong class="text-title">Access Token</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_change_password" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/change_password/' %}active{% endif %}">
+                        <span class="ph-duotone ph-lock-key-open text-2xl text-secondary"></span>
+                        <strong class="text-title">Change Passwords</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background">
+                        <span class="ph-duotone ph-sign-out text-2xl text-secondary"></span>
+                        <strong class="text-title">Log Out</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="inner scrollbar_custom max-h-full py-6 px-3">
+        <div class="area workprenair-section" style="margin-bottom: 10px;">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="Dashboard">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-secondary uppercase">
+                        Dashboard
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url 'admin_dashboard' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/' %}active{% endif %}">
+                        <span class="ph-duotone ph-squares-four text-2xl text-secondary"></span>
+                        <strong class="text-title">Profiles</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_stats' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/statistics/' %}active{% endif %}">
+                        <span class="ph-duotone ph-chart-bar text-2xl text-secondary"></span>
+                        <strong class="text-title">Statistics</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_traffic_logs' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/traffic-logs/' %}active{% endif %}">
+                        <span class="ph-duotone ph-chart-bar text-2xl text-secondary"></span>
+                        <strong class="text-title">Web Traffic</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_users' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/online-users/' %}active{% endif %}">
+                        <span class="ph-duotone ph-users-three text-2xl text-secondary"></span>
+                        <strong class="text-title">Online Users</strong>
+
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area mt-6 management-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="Management">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-secondary uppercase">
+                        Management
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url 'admin_withdrawal_requests' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/withdrawal_requests/' %}active{% endif %}">
+                        <span class="ph-duotone ph-notepad text-2xl text-secondary"></span>
+                        <strong class="text-title">Payout Request</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area mt-6 management-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="Management">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-secondary uppercase">
+                        Department Sales
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url 'admin_digi_sales' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/sales/digiprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-notepad text-2xl text-secondary"></span>
+                        <strong class="text-title">Digiprenair Sales</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_work_sales' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/admin/sales/workprenair/' %}active{% endif %}">
+                        <span class="ph-duotone ph-notepad text-2xl text-secondary"></span>
+                        <strong class="text-title">Workprenair Sales</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="area mt-6 user-section">
+            <div class="section-title flex items-center justify-between w-full px-6 py-3 rounded-lg cursor-pointer hover:bg-gray-100"
+                data-section="User">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-secondary uppercase">
+                        User
+                    </span>
+                </div>
+                <span class="ph-duotone ph-caret-down text-xl transition-transform"></span>
+            </div>
+            <ul class="list_link flex-col gap-2 mt-2 dropdown-menu hidden">
+                <li>
+                    <a href="{% url "dashboard_edit_profile" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/edit_profile/' %}active{% endif %}">
+                        <span class="ph-duotone ph-read-cv-logo text-2xl text-secondary"></span>
+                        <strong class="text-title">Profile Settings</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "dashboard_change_password" %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background {% if request.path == '/dashboard/change_password/' %}active{% endif %}">
+                        <span class="ph-duotone ph-lock-key-open text-2xl text-secondary"></span>
+                        <strong class="text-title">Change Passwords</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}"
+                        class="link flex items-center gap-3 w-full py-3 px-6 rounded-lg duration-300 hover:bg-background">
+                        <span class="ph-duotone ph-sign-out text-2xl text-secondary"></span>
+                        <strong class="text-title">Log Out</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sections = document.querySelectorAll('.section-title');
+
+        document.querySelectorAll('.link.active').forEach(activeLink => {
+            const section = activeLink.closest('.area');
+            if (section) {
+                const dropdown = section.querySelector('.dropdown-menu');
+                const chevron = section.querySelector('.ph-caret-down');
+                if (dropdown && chevron) {
+                    dropdown.classList.remove('hidden');
+                    chevron.classList.add('rotate-180');
+                }
+            }
+        });
+
+        sections.forEach(section => {
+            section.addEventListener('click', function () {
+                const dropdown = this.nextElementSibling;
+                const chevron = this.querySelector('.ph-caret-down');
+                const isOpen = !dropdown.classList.contains('hidden');
+
+                // Close all sections
+                document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.add('hidden'));
+                document.querySelectorAll('.ph-caret-down').forEach(c => c.classList.remove('rotate-180'));
+
+                // Open clicked section if it was closed
+                if (!isOpen) {
+                    dropdown.classList.remove('hidden');
+                    chevron.classList.add('rotate-180');
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,520 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Generate eBook{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<style>
+/* Modern CSS Variables for Brand Colors */
+:root {
+    --primary-color: #1e3a8a;
+    --accent-color: #ff6f61;
+    --primary-light: #3b82f6;
+    --accent-light: #ff8a80;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --surface: #ffffff;
+    --surface-alt: #f7fafc;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-heavy: 0 20px 25px rgba(0, 0, 0, 0.1);
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+}
+
+/* Enhanced Form Container */
+.form-container-gen {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 3rem;
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-container-gen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+/* Header Styling */
+.header-form {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-primary);
+}
+
+.header-form h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-form p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Form Labels */
+.form-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    position: relative;
+}
+
+.form-label::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--accent-color);
+    border-radius: 1px;
+}
+
+/* Enhanced Input Fields */
+.form-control {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--surface-alt);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--surface);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Radio Button Group */
+.radio-group-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.radio-option-form {
+    position: relative;
+    text-align: center;
+}
+
+.radio-option-form input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-option-form label {
+    display: block;
+    padding: 10px;
+    background: var(--surface-alt);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: var(--text-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-option-form label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.radio-option-form input[type="radio"]:checked + label {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.radio-option-form input[type="radio"]:checked + label::before {
+    left: 0;
+}
+
+.radio-option-form label:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+/* Form Groups */
+.mb-3 {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+/* Enhanced Submit Button */
+.btn-primary {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-accent);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+}
+
+.btn-primary:hover::before {
+    left: 0;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Loading Animation */
+.btn-primary.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-primary.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.processing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.processing-content {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--shadow-heavy);
+    max-width: 400px;
+    width: 90%;
+}
+
+.processing-content h3 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.processing-content p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.loader {
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-container-gen {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+    
+    .header-form h1 {
+        font-size: 2rem;
+    }
+    
+    .radio-group-form {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .radio-option-form label {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .radio-group-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-container-gen {
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* Add subtle animations */
+.form-container-gen {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus indicators for accessibility */
+.form-control:focus,
+.radio-option-form input[type="radio"]:focus + label,
+.btn-primary:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="h-fit lg:pb-30">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <div class="container">
+                    <div class="form-container-gen">
+                        <div class="header-form">
+                        <h1>eBook Builder</h1>
+                            <p>Create professional eBooks, planners, and worksheets with ease</p>
+                        </div>
+                        <form method="post" id="ebookForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Topic</label>
+                                <input type="text" class="form-control" name="title" required
+                                    placeholder="e.g., Mindset for Entrepreneurs">
+                            </div>
+                
+                            <div class="mb-3">
+                                <label class="form-label">Type</label>
+                                <div class="radio-group-form">
+                                    <div class="radio-option-form">
+                                        <input type="radio" id="type_ebook" name="ebook_type" value="ebook" checked
+                                            class="form-check-input">
+                                        <label for="type_ebook" class="form-check-label">📖 Ebook</label>
+                                    </div>
+                                    <div class="radio-option-form">
+                                        <input type="radio" id="type_printable" name="ebook_type" value="printable"
+                                            class="form-check-input">
+                                        <label for="type_printable" class="form-check-label">🖨️ Printable</label>
+                                    </div>
+                                    <div class="radio-option-form">
+                                        <input type="radio" id="type_planner" name="ebook_type" value="planner"
+                                            class="form-check-input">
+                                        <label for="type_planner" class="form-check-label">📅 Planner</label>
+                                    </div>
+                                    <div class="radio-option-form">
+                                        <input type="radio" id="type_worksheet" name="ebook_type" value="worksheet"
+                                            class="form-check-input">
+                                        <label for="type_worksheet" class="form-check-label">📝 Worksheet</label>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <div class="mb-3">
+                                <label class="form-label">Style</label>
+                                <input type="text" class="form-control" name="style" required
+                                    placeholder="e.g., Motivational, Professional, Creative">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Additional Comments</label>
+                                <input type="text" class="form-control" name="additional_comments" required
+                                    placeholder="e.g., Include case studies, personal stories, or specific examples">
+                            </div>
+                
+                            <button type="submit" class="category-btn-final btn-generate">
+                                <span class="btn-text">Generate eBook</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2025 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-content">
+            <h3>Processing Your eBook</h3>
+            <p>This may take a few minutes. Please do not refresh or close this window.</p>
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+    </div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+// Handle form submission with AJAX
+document.getElementById('ebookForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const submitBtn = this.querySelector('.btn-generate');
+    const processingOverlay = document.getElementById('processingOverlay');
+    const formData = new FormData(this);
+
+    // Show processing overlay
+    processingOverlay.style.display = 'flex';
+    submitBtn.classList.add('loading');
+    submitBtn.querySelector('.btn-text').textContent = 'Generating...';
+    submitBtn.disabled = true;
+
+    // Perform AJAX request
+    fetch("{% url 'ebook_generation' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Redirect to preview page
+            window.location.href = data.redirect_url;
+        } else {
+            // Handle error
+            alert(data.error || 'An error occurred while generating the eBook.');
+            processingOverlay.style.display = 'none';
+            submitBtn.classList.remove('loading');
+            submitBtn.querySelector('.btn-text').textContent = 'Generate eBook';
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        // Handle network or other errors
+        alert('An error occurred: ' + error.message);
+        processingOverlay.style.display = 'none';
+        submitBtn.classList.remove('loading');
+        submitBtn.querySelector('.btn-text').textContent = 'Generate eBook';
+        submitBtn.disabled = false;
+    });
+});
+
+// Add smooth focus transitions (retained from original)
+document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+    });
+});
+</script>
+{% endblock extra_javascript %}

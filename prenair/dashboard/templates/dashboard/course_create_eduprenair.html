@@ -1,0 +1,1392 @@
+{% load static %}
+<style>
+    /* ── Overlay & popup shell ── */
+    .course-creation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .course-popup-content {
+        background-color: #fff;
+        border-radius: 18px;
+        width: 92%;
+        max-width: 980px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+    }
+
+    .course-popup-layout {
+        display: flex;
+        height: 100%;
+        max-height: 90vh;
+    }
+
+    /* ── Left sidebar (same treatment as the gig popup) ── */
+    .course-popup-left {
+        width: 34%;
+        min-width: 280px;
+        background: linear-gradient(170deg, #f5a062 0%, #e8735c 42%, #d4587a 100%);
+        border-radius: 18px 90px 90px 18px;
+        padding: 26px 20px 20px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+    }
+
+    .course-popup-left::before {
+        content: '';
+        position: absolute;
+        width: 210px; height: 210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.10);
+        top: -40px; right: -60px;
+        z-index: 0;
+    }
+    .course-popup-left::after {
+        content: '';
+        position: absolute;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        top: 140px; right: -25px;
+        z-index: 0;
+    }
+    .course-deco-yellow {
+        position: absolute;
+        bottom: -10px; right: 10px;
+        width: 85px; height: 85px;
+        border-radius: 50%;
+        background: #f4c542;
+        z-index: 0;
+    }
+
+    .course-popup-left-logo { position: relative; z-index: 2; }
+
+    .course-steps-sidebar {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        gap: 0;
+    }
+
+    .course-step-item {
+        display: flex;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .course-step-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 40px;
+    }
+
+    .course-step-badge {
+        width: 40px; height: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.18);
+        transition: all 0.35s ease;
+        flex-shrink: 0;
+    }
+    .course-step-item.active .course-step-badge {
+        background: rgba(255,255,255,0.92);
+        color: #e8735c;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: scale(1.08);
+    }
+    .course-step-item.completed .course-step-badge {
+        background: rgba(255,255,255,0.92);
+        color: #27ae60;
+    }
+    .course-step-item.completed .course-step-info h4 { color: #f4c542; }
+    .course-step-item.completed .course-step-desc-box { background: rgba(244,197,66,0.30); }
+
+    .course-step-connector {
+        flex: 1;
+        width: 2.5px;
+        min-height: 12px;
+        background: rgba(255,255,255,0.25);
+        margin: 3px 0;
+        border-radius: 2px;
+        transition: background 0.3s;
+    }
+    .course-step-item.completed .course-step-connector { background: rgba(255,255,255,0.55); }
+
+    .course-step-info { padding-bottom: 14px; flex: 1; }
+    .course-step-info h4 {
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 5px;
+        letter-spacing: 0.2px;
+    }
+    .course-step-desc-box {
+        background: rgba(255,240,210,0.22);
+        border-radius: 22px 0px 22px 22px;
+        padding: 8px 12px;
+    }
+    .course-step-desc-box p {
+        margin: 0;
+        font-size: 11px;
+        color: rgba(255,255,255,0.88);
+        line-height: 1.45;
+    }
+
+    .course-popup-left-bottom {
+        position: relative;
+        z-index: 2;
+        margin-top: 8px;
+    }
+    .course-progress-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+    .course-progress-dots .dot {
+        width: 22px; height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.30);
+        transition: all 0.35s;
+    }
+    .course-progress-dots .dot.active {
+        background: #fff;
+        width: 32px;
+    }
+
+    /* ── Right panel ── */
+    .course-popup-right {
+        flex: 1;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        padding: 16px 28px 8px;
+        overflow-y: auto;
+        max-height: 90vh;
+        position: relative;
+    }
+    .course-popup-right::-webkit-scrollbar { width: 6px; }
+    .course-popup-right::-webkit-scrollbar-thumb { background: #e8735c; border-radius: 3px; }
+
+    .course-close-popup {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: linear-gradient(135deg, #e8735c 0%, #f4a261 100%);
+        color: #fff;
+        border: none;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 3px 12px rgba(232,115,92,0.3);
+        line-height: 1;
+    }
+    .course-close-popup:hover {
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 5px 18px rgba(232,115,92,0.4);
+    }
+
+    .course-popup-title {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        font-size: 26px;
+        color: #e8735c;
+        margin: 0 0 4px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    .course-popup-tagline {
+        font-size: 12.5px;
+        color: #666;
+        margin: 0 0 14px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* ── Form box ── */
+    .course-form-box {
+        position: relative;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 12px 24px 20px;
+        margin-bottom: 26px;
+        background: #fff;
+        overflow: visible;
+    }
+
+    .course-form-step { display: none; }
+    .course-form-step.active {
+        display: block;
+        animation: courseFadeIn 0.35s ease;
+    }
+    @keyframes courseFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .course-form-step-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    .course-form-step-desc {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 14px;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    /* ── Field rows ── */
+    .field-row, .course-grid-2 { display: flex; gap: 16px; }
+    .field-row > .g-field, .course-grid-2 > .g-field { flex: 1; min-width: 0; }
+
+    .g-field { margin-bottom: 10px; position: relative; }
+    .g-field.full-width { width: 100%; }
+
+    .g-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+
+    .course-form-control,
+    .course-category-dropdown {
+        width: 100%;
+        padding: 8px 14px;
+        border: 1.5px solid #ddd;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.25s, box-shadow 0.25s;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .course-form-control:focus,
+    .course-category-dropdown:focus {
+        border-color: #e8735c;
+        box-shadow: 0 0 0 3px rgba(232,115,92,0.10);
+    }
+    .course-form-control.course-field-error,
+    .course-category-dropdown.course-field-error {
+        border-color: #e74c3c !important;
+    }
+
+    textarea.course-form-control {
+        min-height: 78px;
+        max-height: 78px;
+        border-radius: 16px;
+        resize: none;
+        line-height: 1.4;
+    }
+
+    .helper-text {
+        font-size: 11px;
+        color: #999;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .ai-generate-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+    }
+    .btn-ai-generate {
+        background: #fff8f6;
+        border: 1.5px solid #f4a261;
+        color: #e8735c;
+        border-radius: 16px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
+    .btn-ai-generate:hover { background: #fdeee9; }
+    .btn-ai-generate:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-ai-generate i { margin-right: 6px; }
+
+    .category-row .g-field { min-width: 0; }
+
+    .course-hidden, .hidden { display: none !important; }
+
+    /* ── File dropzone (compact) ── */
+    .course-file-upload-wrapper { position: relative; }
+    .course-file-upload-area {
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 14px;
+        padding: 14px 10px;
+        text-align: center;
+        background-color: #f9fafb;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    .course-file-upload-area:hover {
+        border-color: #e8735c;
+        background-color: #fff8f6;
+    }
+    .course-file-upload-area.dragover {
+        border-color: #e8735c;
+        background-color: #fde0db;
+        transform: scale(1.02);
+    }
+    .course-file-upload-area.has-file {
+        border-color: #22c55e;
+        background-color: #f0fdf4;
+    }
+    .course-file-upload-icon {
+        font-size: 1.5rem;
+        color: #9ca3af;
+        margin-bottom: 4px;
+    }
+    .course-file-upload-area:hover .course-file-upload-icon,
+    .course-file-upload-area.dragover .course-file-upload-icon {
+        color: #e8735c;
+    }
+    .course-file-upload-area.has-file .course-file-upload-icon { color: #22c55e; }
+    .course-file-upload-text {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+    .course-file-upload-hint {
+        font-size: 10.5px;
+        color: #9ca3af;
+    }
+    .course-file-upload-input {
+        position: absolute;
+        width: 100%; height: 100%;
+        top: 0; left: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .course-file-info {
+        display: none;
+        margin-top: 8px;
+        padding: 8px 10px;
+        background-color: #f0fdf4;
+        border: 1px solid #22c55e;
+        border-radius: 10px;
+        align-items: center;
+        gap: 8px;
+    }
+    .course-file-info.show { display: flex; }
+    .course-file-icon { font-size: 1.1rem; color: #22c55e; }
+    .course-file-details { flex: 1; min-width: 0; }
+    .course-file-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 11.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .course-file-size { font-size: 10.5px; color: #6b7280; }
+    .course-file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 3px;
+        line-height: 1;
+        transition: transform 0.2s;
+    }
+    .course-file-remove:hover { transform: scale(1.2); }
+
+    .course-image-preview-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .course-image-preview {
+        width: 110px; height: 70px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid #ddd;
+    }
+    .course-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .course-remove-image {
+        position: absolute;
+        top: 3px; right: 3px;
+        background: rgba(0,0,0,0.65);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 18px; height: 18px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* ── Checkboxes ── */
+    .course-checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f9fafb;
+        border: 1.5px solid #eee;
+        border-radius: 14px;
+        padding: 8px 14px;
+    }
+    .course-checkbox-group input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        accent-color: #e8735c;
+    }
+    .course-checkbox-group label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #444;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    /* ── Loading spinner ── */
+    .course-loading-spinner { display: flex; align-items: center; }
+    .course-loading-spinner.course-hidden { display: none; }
+    .course-spinner {
+        border: 3px solid rgba(0,0,0,0.1);
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        border-left-color: #e8735c;
+        animation: courseSpin 1s linear infinite;
+    }
+    @keyframes courseSpin { to { transform: rotate(360deg); } }
+
+    .course-error-message {
+        color: #e74c3c;
+        font-size: 11px;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+    .course-text-red { color: #e74c3c; }
+
+    /* ── Nav buttons (straddle bottom border of form-box) ── */
+    .course-form-actions {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 50%);
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        width: calc(100% - 48px);
+        max-width: 380px;
+        pointer-events: none;
+    }
+    .course-form-actions button { pointer-events: auto; }
+
+    .course-btn-next, .course-btn-submit {
+        background: #ff6f61;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 30px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .course-btn-next:hover, .course-btn-submit:hover {
+        box-shadow: 0 4px 16px rgba(232,115,92,0.35);
+        transform: translateY(-1px);
+    }
+
+    .course-btn-prev {
+        background: #1e3a8a;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 26px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .course-btn-prev:hover {
+        box-shadow: 0 4px 14px rgba(30,58,138,0.30);
+        transform: translateY(-1px);
+    }
+    .course-btn-prev:disabled {
+        background: #ccc;
+        color: #888;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    #course-step-1 .course-form-actions > button:first-child { visibility: hidden; }
+
+    /* ── Responsive ── */
+    @media (max-width: 991px) {
+        .course-popup-left { display: none; }
+        .course-popup-right { border-radius: 18px; }
+        .course-popup-content { max-width: 600px; }
+    }
+    @media (max-width: 576px) {
+        .course-popup-content { width: 98%; border-radius: 14px; }
+        .course-popup-right { padding: 18px 16px 16px; border-radius: 14px; }
+        .course-form-box { padding: 16px 14px 46px; margin-bottom: 28px; border-radius: 16px; }
+        .field-row, .course-grid-2 { flex-direction: column; gap: 0; }
+        .field-row > .g-field, .course-grid-2 > .g-field { flex: none; }
+        .course-popup-title { font-size: 21px; }
+        .course-form-actions {
+            flex-direction: column-reverse;
+            gap: 10px;
+            width: calc(100% - 28px);
+            max-width: none;
+        }
+        .course-btn-next, .course-btn-submit, .course-btn-prev { width: 100%; text-align: center; }
+    }
+</style>
+
+<!-- Popup Content -->
+<div
+    class="course-creation-popup course-hidden"
+    data-mode="{% if course %}edit{% else %}create{% endif %}"
+    data-has-thumbnail="{% if course and course.thumbnail %}1{% else %}0{% endif %}"
+    data-existing-thumbnail-url="{% if course and course.thumbnail %}{{ course.thumbnail.url }}{% endif %}"
+>
+    <div class="course-popup-content">
+        <div class="course-popup-layout">
+
+            <!-- ═══ Left Sidebar ═══ -->
+            <div class="course-popup-left">
+                <div class="course-deco-yellow"></div>
+
+                <div class="course-popup-left-logo">
+                    <img src="{% static 'images/navbar/fireprenair_logo_no_bg.png' %}" alt="logo" style="max-width: 35%;">
+                </div>
+
+                <div class="course-steps-sidebar" id="courseSidebarSteps">
+                    <div class="course-step-item active" data-step="1">
+                        <div class="course-step-marker">
+                            <div class="course-step-badge"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="course-step-connector"></div>
+                        </div>
+                        <div class="course-step-info">
+                            <h4>Basic Info</h4>
+                            <div class="course-step-desc-box">
+                                <p>Title, description and requirements for your course.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="course-step-item" data-step="2">
+                        <div class="course-step-marker">
+                            <div class="course-step-badge"><i class="fas fa-sitemap"></i></div>
+                            <div class="course-step-connector"></div>
+                        </div>
+                        <div class="course-step-info">
+                            <h4>Categories &amp; Details</h4>
+                            <div class="course-step-desc-box">
+                                <p>Category, level, language and duration.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="course-step-item" data-step="3">
+                        <div class="course-step-marker">
+                            <div class="course-step-badge"><i class="fas fa-tags"></i></div>
+                        </div>
+                        <div class="course-step-info">
+                            <h4>Media &amp; Pricing</h4>
+                            <div class="course-step-desc-box">
+                                <p>Thumbnail, pricing and subscription options.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-popup-left-bottom">
+                    <div class="course-progress-dots" id="courseProgressDots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Right Panel ═══ -->
+            <div class="course-popup-right">
+                <button id="close-course-popup" class="course-close-popup">&times;</button>
+
+                <h3 class="course-popup-title">
+                    {% if course %}Edit Course{% else %}Create New Course{% endif %}
+                </h3>
+                <p class="course-popup-tagline">Set up your course in three quick steps and start teaching on Eduprenair.</p>
+
+                <div class="course-form-box">
+                    <form
+                        id="course-creation-form"
+                        action="{% if course %}{% url 'course_edit_eduprenair' course.slug %}{% else %}{% url 'course_create_eduprenair' %}{% endif %}"
+                        method="post"
+                        enctype="multipart/form-data"
+                    >
+                        {% csrf_token %}
+
+                        <!-- Step 1: Basic Information -->
+                        <div id="course-step-1" class="course-form-step active">
+                            <h4 class="course-form-step-title">Basic Information</h4>
+                            <p class="course-form-step-desc">Give your course a clear title and description.</p>
+
+                            <div class="g-field full-width">
+                                <label for="course_id_title">Course Title <span class="course-text-red">*</span></label>
+                                <input
+                                    type="text"
+                                    id="course_id_title"
+                                    name="title"
+                                    class="course-form-control"
+                                    required
+                                    placeholder="Enter your course title"
+                                    value="{% if form %}{{ form.title.value|default:'' }}{% endif %}"
+                                >
+                                <div class="course-error-message" id="course-title-error"></div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="course_id_description">Course Description <span class="course-text-red">*</span></label>
+                                <textarea
+                                    id="course_id_description"
+                                    name="description"
+                                    class="course-form-control"
+                                    required
+                                    placeholder="Describe your course in detail"
+                                >{% if form %}{{ form.description.value|default:'' }}{% endif %}</textarea>
+                                <div class="course-error-message" id="course-description-error"></div>
+                                <div class="ai-generate-row">
+                                    <button
+                                        type="button"
+                                        id="generate-course-description-btn"
+                                        class="btn-ai-generate"
+                                        onclick="generateCourseDescription()"
+                                    >
+                                        <i class="fas fa-wand-magic-sparkles"></i>Generate with AI
+                                    </button>
+                                    <div id="course-loading-spinner" class="course-loading-spinner course-hidden">
+                                        <div class="course-spinner"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="course_id_requirements">Requirements <span class="course-text-red">*</span></label>
+                                <input
+                                    type="text"
+                                    id="course_id_requirements"
+                                    name="requirements"
+                                    class="course-form-control"
+                                    required
+                                    placeholder="e.g., Basic knowledge of programming"
+                                    value="{% if form %}{{ form.requirements.value|default:'' }}{% endif %}"
+                                >
+                                <div class="course-error-message" id="course-requirements-error"></div>
+                            </div>
+
+                            <div class="course-form-actions">
+                                <button type="button" class="course-btn-prev" disabled>Previous</button>
+                                <button type="button" class="course-btn-next" data-next="2" onclick="validateCourseStep1()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Categories & Details -->
+                        <div id="course-step-2" class="course-form-step">
+                            <h4 class="course-form-step-title">Categories &amp; Details</h4>
+                            <p class="course-form-step-desc">Help learners find and understand your course.</p>
+
+                            <div class="field-row category-row" id="course-category-selector">
+                                <div class="g-field">
+                                    <label>Category <span class="course-text-red">*</span></label>
+                                    <select id="course_id_category_l_1" name="category_l_1" class="course-category-dropdown" required>
+                                        <option value="">Select Category</option>
+                                        {% if level_1_categories %}
+                                            {% if form and form.category_l_1.value %}
+                                                {% with selected_l1=selected_category_l_1|default:form.category_l_1.value %}
+                                                {% for category in level_1_categories %}
+                                                <option value="{{ category.id }}" {% if selected_l1|stringformat:"s" == category.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ category.name }}
+                                                </option>
+                                                {% endfor %}
+                                                {% endwith %}
+                                            {% else %}
+                                                {% for category in level_1_categories %}
+                                                <option value="{{ category.id }}">
+                                                    {{ category.name }}
+                                                </option>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </select>
+                                    <div class="course-error-message" id="course-category-l1-error"></div>
+                                </div>
+
+                                <div class="g-field course-hidden">
+                                    <label>Subcategory</label>
+                                    <select id="course_id_category_l_2" name="category_l_2" class="course-category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+
+                                <div class="g-field course-hidden">
+                                    <label>Specialty</label>
+                                    <select id="course_id_category_l_3" name="category_l_3" class="course-category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="course-grid-2">
+                                <div class="g-field">
+                                    <label for="course_id_level">Level <span class="course-text-red">*</span></label>
+                                    <select id="course_id_level" name="level" class="course-form-control" required>
+                                        <option value="">Select Level</option>
+                                        <option value="Beginner" {% if form and form.level.value == 'Beginner' %}selected{% endif %}>Beginner</option>
+                                        <option value="Intermediate" {% if form and form.level.value == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                                        <option value="Advanced" {% if form and form.level.value == 'Advanced' %}selected{% endif %}>Advanced</option>
+                                    </select>
+                                    <div class="course-error-message" id="course-level-error"></div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="course_id_language">Language <span class="course-text-red">*</span></label>
+                                    <input
+                                        type="text"
+                                        id="course_id_language"
+                                        name="language"
+                                        class="course-form-control"
+                                        required
+                                        placeholder="e.g., English"
+                                        value="{% if form %}{{ form.language.value|default:'' }}{% endif %}"
+                                    >
+                                    <div class="course-error-message" id="course-language-error"></div>
+                                </div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="course_id_duration">Duration <span class="course-text-red">*</span></label>
+                                <input
+                                    type="text"
+                                    id="course_id_duration"
+                                    name="duration"
+                                    class="course-form-control"
+                                    required
+                                    placeholder="e.g., 5 hours, 10 weeks"
+                                    value="{% if form %}{{ form.duration.value|default:'' }}{% endif %}"
+                                >
+                                <div class="course-error-message" id="course-duration-error"></div>
+                            </div>
+
+                            <div class="course-form-actions">
+                                <button type="button" class="course-btn-prev" data-prev="1">Previous</button>
+                                <button type="button" class="course-btn-next" data-next="3" onclick="validateCourseStep2()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Media & Pricing -->
+                        <div id="course-step-3" class="course-form-step">
+                            <h4 class="course-form-step-title">Media &amp; Pricing</h4>
+                            <p class="course-form-step-desc">Add a thumbnail and set your pricing.</p>
+
+                            <div class="g-field full-width">
+                                <label for="course_id_thumbnail">Course Thumbnail</label>
+                                <div class="course-file-upload-wrapper">
+                                    <div class="course-file-upload-area" id="course-thumbnail-upload-area">
+                                        <div class="course-file-upload-icon">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                        <div class="course-file-upload-text">Click or drag to upload</div>
+                                        <div class="course-file-upload-hint">JPG/PNG, recommended ratio 16:9</div>
+                                        <input
+                                            type="file"
+                                            id="course_id_thumbnail"
+                                            name="thumbnail"
+                                            accept="image/*"
+                                            class="course-file-upload-input"
+                                            {% if not course %}required{% endif %}
+                                        >
+                                    </div>
+
+                                    <div class="course-file-info" id="course-thumbnail-info">
+                                        <i class="fas fa-check-circle course-file-icon"></i>
+                                        <div class="course-file-details">
+                                            <div class="course-file-name" id="course-thumbnail-name"></div>
+                                            <div class="course-file-size" id="course-thumbnail-size"></div>
+                                        </div>
+                                        <button type="button" class="course-file-remove" id="course-thumbnail-remove" title="Remove file">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {% if course %}
+                                <span class="helper-text">Leave blank to keep your current thumbnail.</span>
+                                {% endif %}
+                                <div class="course-error-message" id="course-thumbnail-error"></div>
+
+                                <div class="course-image-preview-container">
+                                    <div id="course-thumbnail-preview" class="course-image-preview {% if not course or not course.thumbnail %}course-hidden{% endif %}">
+                                        <img src="{% if course and course.thumbnail %}{{ course.thumbnail.url }}{% else %}#{% endif %}" alt="Course thumbnail preview">
+                                        <button type="button" class="course-remove-image">&times;</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="course-grid-2">
+                                <div class="g-field">
+                                    <label for="course_id_price">Price ($) <span class="course-text-red">*</span></label>
+                                    <input
+                                        type="number"
+                                        id="course_id_price"
+                                        name="price"
+                                        class="course-form-control"
+                                        required
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        value="{% if form %}{{ form.price.value|default:'' }}{% endif %}"
+                                    >
+                                    <div class="course-error-message" id="course-price-error"></div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="course_id_discount_price">Discount Price ($)</label>
+                                    <input
+                                        type="number"
+                                        id="course_id_discount_price"
+                                        name="discount_price"
+                                        class="course-form-control"
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        value="{% if form %}{{ form.discount_price.value|default:'' }}{% endif %}"
+                                    >
+                                    <div class="course-error-message" id="course-discount-price-error"></div>
+                                </div>
+                            </div>
+
+                            <div class="field-row">
+                                <div class="g-field course-checkbox-group">
+                                    <input
+                                        type="checkbox"
+                                        id="course_id_is_free"
+                                        name="is_free"
+                                        {% if form and form.is_free.value %}checked{% elif course and course.is_free %}checked{% endif %}
+                                    >
+                                    <label for="course_id_is_free">Is the course free?</label>
+                                </div>
+
+                                <div class="g-field course-checkbox-group">
+                                    <input
+                                        type="checkbox"
+                                        id="course_id_monthly_subscription"
+                                        name="monthly_subscription"
+                                        {% if form and form.monthly_subscription.value %}checked{% elif course and course.monthly_subscription %}checked{% endif %}
+                                    >
+                                    <label for="course_id_monthly_subscription">Monthly Subscription</label>
+                                </div>
+                            </div>
+
+                            <div class="course-form-actions">
+                                <button type="button" class="course-btn-prev" data-prev="2">Previous</button>
+                                <button type="submit" class="course-btn-submit">{% if course %}Update Course{% else %}Create Course{% endif %}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the course creation form functionality
+    function initializeCourseCreationForm() {
+        const popup = document.querySelector('.course-creation-popup');
+        const closeBtn = document.getElementById('close-course-popup');
+        const form = document.getElementById('course-creation-form');
+
+        if (!popup || !closeBtn) return;
+
+        // Close popup when close button is clicked
+        closeBtn.addEventListener('click', () => {
+            popup.classList.add('course-hidden');
+        });
+
+        // Close popup when clicking outside
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) {
+                popup.classList.add('course-hidden');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('course-hidden')) {
+                popup.classList.add('course-hidden');
+            }
+        });
+
+        // Multi-step navigation
+        const stepButtons = document.querySelectorAll('.course-btn-next, .course-btn-prev');
+
+        stepButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (button.classList.contains('course-btn-prev')) {
+                    const prevStep = button.getAttribute('data-prev');
+                    if (prevStep) {
+                        navigateToCourseStep(prevStep);
+                    }
+                }
+                // Validation for next is handled by onclick handlers
+            });
+        });
+
+        // File upload functionality
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function handleFileUpload(input, uploadArea, fileInfo, fileNameEl, fileSizeEl, removeBtn, previewEl = null) {
+            const handleFile = (file) => {
+                if (!file) return;
+
+                fileNameEl.textContent = file.name;
+                fileSizeEl.textContent = formatFileSize(file.size);
+                fileInfo.classList.add('show');
+                uploadArea.classList.add('has-file');
+
+                if (previewEl && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewEl.querySelector('img').src = e.target.result;
+                        previewEl.classList.remove('course-hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            input.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            uploadArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    input.files = files;
+                    handleFile(files[0]);
+                    const event = new Event('change', { bubbles: true });
+                    input.dispatchEvent(event);
+                }
+            });
+
+            removeBtn.addEventListener('click', function () {
+                input.value = '';
+                fileInfo.classList.remove('show');
+                uploadArea.classList.remove('has-file');
+                if (previewEl) {
+                    const isEditMode = popup.dataset.mode === 'edit';
+                    const existingThumbnailUrl = popup.dataset.existingThumbnailUrl || '';
+                    if (isEditMode && existingThumbnailUrl) {
+                        previewEl.querySelector('img').src = existingThumbnailUrl;
+                        previewEl.classList.remove('course-hidden');
+                    } else {
+                        previewEl.classList.add('course-hidden');
+                    }
+                }
+            });
+        }
+
+        // Thumbnail upload
+        const courseThumbnailInput = document.getElementById('course_id_thumbnail');
+        const courseThumbnailUploadArea = document.getElementById('course-thumbnail-upload-area');
+        const courseThumbnailInfo = document.getElementById('course-thumbnail-info');
+        const courseThumbnailName = document.getElementById('course-thumbnail-name');
+        const courseThumbnailSize = document.getElementById('course-thumbnail-size');
+        const courseThumbnailRemove = document.getElementById('course-thumbnail-remove');
+        const courseThumbnailPreview = document.getElementById('course-thumbnail-preview');
+        const isEditMode = popup.dataset.mode === 'edit';
+        const existingThumbnailUrl = popup.dataset.existingThumbnailUrl || '';
+
+        if (courseThumbnailInput && courseThumbnailUploadArea) {
+            handleFileUpload(
+                courseThumbnailInput,
+                courseThumbnailUploadArea,
+                courseThumbnailInfo,
+                courseThumbnailName,
+                courseThumbnailSize,
+                courseThumbnailRemove,
+                courseThumbnailPreview
+            );
+        }
+
+        // Category functionality
+        const categoryLevel1 = document.getElementById('course_id_category_l_1');
+        const categoryLevel2 = document.getElementById('course_id_category_l_2');
+        const categoryLevel3 = document.getElementById('course_id_category_l_3');
+
+        async function fetchCategories(parentId, targetDropdown) {
+            targetDropdown.innerHTML = '<option value="">Loading...</option>';
+            try {
+                const response = await fetch(`/dashboard/get-child-categories/?parent_id=${parentId}`);
+                const data = await response.json();
+                if (data.categories && data.categories.length > 0) {
+                    targetDropdown.innerHTML = '<option value="">Select Category</option>';
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        targetDropdown.appendChild(option);
+                    });
+                    targetDropdown.parentElement.classList.remove('course-hidden');
+                } else {
+                    targetDropdown.innerHTML = '<option value="">No Categories Found</option>';
+                    targetDropdown.parentElement.classList.remove('course-hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                targetDropdown.innerHTML = '<option value="">Error Loading Categories</option>';
+            }
+        }
+
+        categoryLevel1.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            categoryLevel2.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel2.parentElement.classList.add('course-hidden');
+            categoryLevel3.parentElement.classList.add('course-hidden');
+
+            if (selectedId) {
+                fetchCategories(selectedId, categoryLevel2);
+            }
+        });
+
+        categoryLevel2.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel3.parentElement.classList.add('course-hidden');
+
+            if (selectedId) {
+                fetchCategories(selectedId, categoryLevel3);
+            }
+        });
+
+        // Pre-populate categories in edit mode
+        const selectedCategoryL1 = "{{ selected_category_l_1|default:'' }}";
+        const selectedCategoryL2 = "{{ selected_category_l_2|default:'' }}";
+        const selectedCategoryL3 = "{{ selected_category_l_3|default:'' }}";
+
+        if (selectedCategoryL1 && categoryLevel1 && categoryLevel1.value === selectedCategoryL1) {
+            // Category already selected in template, just load children
+            if (selectedCategoryL2) {
+                fetchCategories(selectedCategoryL1, categoryLevel2).then(() => {
+                    categoryLevel2.value = selectedCategoryL2;
+                    if (selectedCategoryL3) {
+                        fetchCategories(selectedCategoryL2, categoryLevel3).then(() => {
+                            categoryLevel3.value = selectedCategoryL3;
+                        });
+                    }
+                });
+            }
+        } else if (selectedCategoryL1 && categoryLevel1) {
+            categoryLevel1.value = selectedCategoryL1;
+            fetchCategories(selectedCategoryL1, categoryLevel2).then(() => {
+                if (selectedCategoryL2) {
+                    categoryLevel2.value = selectedCategoryL2;
+                    fetchCategories(selectedCategoryL2, categoryLevel3).then(() => {
+                        if (selectedCategoryL3) {
+                            categoryLevel3.value = selectedCategoryL3;
+                        }
+                    });
+                }
+            });
+        }
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!validateCourseStep1() || !validateCourseStep2() || !validateCourseStep3()) {
+                alert('Please complete all required fields before submitting.');
+                return;
+            }
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        window.location.href = data.redirect_url;
+                    } else {
+                        if (data.form_errors) {
+                            // Display form errors
+                            Object.keys(data.form_errors).forEach(field => {
+                                const errorEl = document.getElementById(`course-${field.replace('_', '-')}-error`);
+                                if (errorEl) {
+                                    errorEl.textContent = data.form_errors[field][0];
+                                }
+                            });
+                        } else {
+                            alert(data.error || 'An error occurred. Please try again.');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        });
+    }
+
+    function navigateToCourseStep(step) {
+        step = parseInt(step);
+
+        // Hide all steps
+        document.querySelectorAll('.course-form-step').forEach(stepEl => {
+            stepEl.classList.remove('active');
+        });
+
+        // Show the target step
+        const targetStep = document.getElementById(`course-step-${step}`);
+        if (targetStep) {
+            targetStep.classList.add('active');
+        }
+
+        // Update sidebar step indicators and progress dots
+        document.querySelectorAll('.course-step-item').forEach((stepEl) => {
+            const stepNum = parseInt(stepEl.getAttribute('data-step'));
+            stepEl.classList.remove('active', 'completed');
+
+            if (stepNum < step) {
+                stepEl.classList.add('completed');
+            } else if (stepNum === step) {
+                stepEl.classList.add('active');
+            }
+        });
+
+        const dots = document.querySelectorAll('#courseProgressDots .dot');
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === step - 1);
+        });
+    }
+
+    function validateCourseStep1() {
+        const title = document.getElementById('course_id_title').value.trim();
+        const description = document.getElementById('course_id_description').value.trim();
+        const requirements = document.getElementById('course_id_requirements').value.trim();
+
+        let isValid = true;
+
+        if (!title) {
+            document.getElementById('course-title-error').textContent = 'Title is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-title-error').textContent = '';
+        }
+
+        if (!description) {
+            document.getElementById('course-description-error').textContent = 'Description is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-description-error').textContent = '';
+        }
+
+        if (!requirements) {
+            document.getElementById('course-requirements-error').textContent = 'Requirements are required';
+            isValid = false;
+        } else {
+            document.getElementById('course-requirements-error').textContent = '';
+        }
+
+        if (isValid) {
+            navigateToCourseStep(2);
+        }
+
+        return isValid;
+    }
+
+    function validateCourseStep2() {
+        const categoryL1 = document.getElementById('course_id_category_l_1').value;
+        const level = document.getElementById('course_id_level').value;
+        const language = document.getElementById('course_id_language').value.trim();
+        const duration = document.getElementById('course_id_duration').value.trim();
+
+        let isValid = true;
+
+        if (!categoryL1) {
+            document.getElementById('course-category-l1-error').textContent = 'Category is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-category-l1-error').textContent = '';
+        }
+
+        if (!level) {
+            document.getElementById('course-level-error').textContent = 'Level is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-level-error').textContent = '';
+        }
+
+        if (!language) {
+            document.getElementById('course-language-error').textContent = 'Language is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-language-error').textContent = '';
+        }
+
+        if (!duration) {
+            document.getElementById('course-duration-error').textContent = 'Duration is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-duration-error').textContent = '';
+        }
+
+        if (isValid) {
+            navigateToCourseStep(3);
+        }
+
+        return isValid;
+    }
+
+    function validateCourseStep3() {
+        const price = document.getElementById('course_id_price').value;
+        const isFree = document.getElementById('course_id_is_free').checked;
+        const thumbnail = document.getElementById('course_id_thumbnail').files[0];
+        const isEditMode = document.querySelector('.course-creation-popup').dataset.mode === 'edit';
+        const hasThumbnail = document.querySelector('.course-creation-popup').dataset.hasThumbnail === '1';
+
+        let isValid = true;
+
+        if (!isFree && !price) {
+            document.getElementById('course-price-error').textContent = 'Price is required for paid courses';
+            isValid = false;
+        } else {
+            document.getElementById('course-price-error').textContent = '';
+        }
+
+        if (!isEditMode && !thumbnail) {
+            document.getElementById('course-thumbnail-error').textContent = 'Thumbnail is required';
+            isValid = false;
+        } else if (isEditMode && !hasThumbnail && !thumbnail) {
+            document.getElementById('course-thumbnail-error').textContent = 'Thumbnail is required';
+            isValid = false;
+        } else {
+            document.getElementById('course-thumbnail-error').textContent = '';
+        }
+
+        return isValid;
+    }
+
+    function generateCourseDescription() {
+        const title = document.getElementById('course_id_title').value;
+        const button = document.getElementById('generate-course-description-btn');
+        const descriptionField = document.getElementById('course_id_description');
+        const loadingSpinner = document.getElementById('course-loading-spinner');
+
+        if (!title.trim()) {
+            alert('Please enter a course title first.');
+            return;
+        }
+
+        button.disabled = true;
+        loadingSpinner.classList.remove('course-hidden');
+
+        fetch("{% url 'generate_description_eduprenair' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ title: title })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.description) {
+                    descriptionField.value = data.description;
+                } else {
+                    alert(data.error || 'Failed to generate description.');
+                }
+            })
+            .catch(error => {
+                console.error('Error generating description:', error);
+                alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                loadingSpinner.classList.add('course-hidden');
+            });
+    }
+</script>

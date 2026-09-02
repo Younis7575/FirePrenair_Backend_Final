@@ -1,0 +1,933 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard -  Pricing{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+    table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    white-space: nowrap;
+}
+
+tr:not(:last-child) td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+td, th {
+    padding: 10px;
+}
+
+.rotate-3 {
+    transform: rotate(3deg);
+}
+
+.shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+
+.popular-badge {
+    position: absolute;
+    top: -29px;
+    left: 13%;
+    transform: translateY(-50%) rotate(5deg);
+    background: #1e3a8a;
+    color: white;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    white-space: nowrap;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(-50%) rotate(5deg) translateX(0); }
+    50% { transform: translateY(-50%) rotate(5deg) translateX(10px); }
+}
+
+.f-title {
+    font-weight: 700;
+    font-size: 16px;
+    background-color: rgb(234, 141, 75);
+    color: white;
+}
+
+.text-danger{
+    color: red;
+}
+
+.price_table td{
+    border: 0.5px solid #e1d9d9;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 10px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .slider {
+    background-color: #ff5364;
+    border-color: #ff5364;
+}
+
+.toggle-input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-label {
+    font-size: 16px;
+    color: #666;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.toggle-label.active {
+    color: #ff5364;
+    font-weight: 600;
+}
+.monthly-price, .annual-price {
+    display: none;
+    font-size: 16px;
+}
+
+
+.price_span{
+    font-size: 30px;
+    line-height: 44px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: flex;
+    align-items: flex-start;
+}
+.integer-part {
+    font-size: 30px; 
+}
+
+.decimal-part {
+    font-size: 20px; 
+    line-height: 1; 
+    position: relative;
+    top: -5px;
+}
+
+.monthly-price, .annual-price {
+    display: none;
+}
+.monthly-price.active, .annual-price.active {
+    display: flex;
+}
+.text-placehover{
+    color: rgb(177 177 177 / var(--tw-text-opacity));
+}
+
+.price-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.price {
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  text-align: center;
+}
+
+.gray-circle {
+  background: linear-gradient(135deg, #9ca3af, #4b5563);
+}
+
+.pink-circle {
+  background: linear-gradient(135deg, #f87171, #ec4899);
+}
+
+.blue-circle {
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+}
+
+.green-circle {
+  background: linear-gradient(135deg, #4ade80, #10b981);
+}
+
+.price_btn{
+    border-radius: 0px 22px 22px 22px;
+    padding: 12px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    line-height: 1 !important;
+    color: white;
+}
+
+.gray-btn {
+  background: linear-gradient(135deg, #9ca3af, #4b5563);
+}
+
+.pink-btn {
+  background: linear-gradient(135deg, #f87171, #ec4899);
+}
+
+.blue-btn {
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+}
+
+.green-btn {
+  background: linear-gradient(135deg, #4ade80, #8b5cf6);
+}
+
+.pricing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.free_icon{
+    color: #4b5563;
+}
+
+.start_icon{
+    color: #ec4899;
+}
+
+.biz_icon{
+    color: #8b5cf6;
+}
+
+.entree_icon{
+    color: #4ade80;
+}
+
+.pricing_item{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.feature-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-column {
+    transition: transform 0.3s ease;
+}
+
+.feature-column:hover {
+    transform: translateY(-5px);
+}
+
+.feature-item {
+    transition: background-color 0.2s ease;
+}
+
+.feature-item:hover {
+    background-color: #f8fafc;
+}
+
+.save-badge {
+    position: absolute;
+    top: -75px;
+    left: 57%;
+    transform: translateX(-50%);
+    background-color: #ff6f61;
+    color: white;
+    font-size: 16px;
+    padding: 7px 10px;
+    border-radius: 12px;
+}
+
+.save-arrow {
+    color: #ff6f61;
+    position: absolute;
+    top: -30px;
+    left: 56%;
+    font-size: 30px;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Add transition for smooth toggle */
+.form-check-input {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .feature-column {
+        padding: 1.5rem;
+    }
+    
+    .feature-item {
+        padding: 0.75rem;
+    }
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_alert scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-fit lg:pt-15 lg:pb-20 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <h4 class="heading4 max-lg:mt-3">Your Plans</h4>
+                    <button class="category-btn-final" onclick="document.getElementById('price_table_dash').scrollIntoView({behavior: 'smooth'})">Upgrade Plan</button>
+                  </div>
+                <div class="earning_block mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5 pt-6 px-6">Subscription History</h5>
+                    <div class="flex flex-wrap items-center justify-between gap-5 pt-5 px-6">
+                        <a href="{% url 'billing_portal' %}" class="category-btn-final">View Details</a>
+                    </div>
+                    <div class="list overflow-x-auto w-full py-5 px-6 rounded-xl">
+                        <table class="w-full max-md:w-[600px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Plan</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Start Date</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">End Date</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Type</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if user_plans %}
+                                {% for plan in user_plans %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left whitespace-nowrap">{{plan.plan.title}}</th>
+                                    <td class="p-5 text-title whitespace-nowrap">{{plan.start_date.date}}</td>
+                                    <td class="p-5 text-title whitespace-nowrap">{{plan.end_date.date}}</td>
+                                    <td class="p-5 text-title whitespace-nowrap">{{plan.type}}</td>
+                                    <td class="p-5 text-title whitespace-nowrap">${{plan.amount}}</td>
+                                    <td class="p-5 text-right">
+                                        {% if plan.is_active %}
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">{{plan.status}}</span>
+
+                                        {% else %}
+
+                                        <span class="tag bg-opacity-10 bg-yellow text-yellow text-button">{{plan.status}}</span>
+
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">No Active Plans</td>
+                                </tr>
+
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="container h-fit lg:pb-30  max-sm:py-8">
+                <div class="mb-12">
+                    <h4 class="heading4" style="text-align: center; margin-bottom: 6rem;">Compare our plans</h4>
+                    
+                    <div class="toggle-container enable-item" style="position: relative;">
+                        <span class="toggle-label monthly active me-2">Monthly</span>
+                        <div class="form-check form-switch check-on m-0">
+                            <label class="toggle-switch">
+                            <input type="checkbox" id="priceToggle" class="toggle-input">
+                            <span class="slider"></span>
+                        </label>
+                            <span class="badge1 save-badge">Save 20%</span>
+                            <div class="save-arrow"><i class="fa-solid fa-angles-down fa-beat"></i></div>
+                        </div>
+                        <span class="toggle-label annual ms-2">Annual</span>
+                    </div>
+                    <!-- Pricing Table -->
+                    <section class="pricing">
+                        <div class="container">
+                            <ul class="list_pricing grid xl:grid-cols-4 sm:grid-cols-2 lg:gap-7.5 gap-6 md:mt-10 mt-7">
+                                <!-- Free Tier -->
+                                <li class="pricing_item relative p-6 border border-line rounded-lg bg-white duration-300 shadow-md hover:hover:shadow-2xl free_plan">
+                                    <span class="pricing_type text-title text-secondary">Free Tier</span>
+                                    <div class="price-circle gray-circle">
+                                        <span class="price">Free</span>
+                                    </div>
+                                    <ul class="list_feature mt-3">
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">5 Products</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">5 Services</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">Limited Marketplace Exposure</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">Email Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">Limited Community Access</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">Payout via Paypal & Payoneer</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl free_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Chatbot for Business Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Course Creation</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Support in Chat</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Service Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI SEO Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Sentiment Analysis</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Advanced Analytics</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Verified Badge</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Priority Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Exams</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Advanced Security & Fraud Protection</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Early Access to New Features</strong>
+                                        </li>
+                                    </ul>
+                                    <button class="price_btn gray-btn mt-5" onclick="location.href='/?register=true'">Get Started</button>
+                                </li>
+                    
+                                <!-- Starter Plan -->
+                                <li class="pricing_item relative p-6 border border-line rounded-lg bg-white duration-300 shadow-md hover:hover:shadow-2xl starter_plan">
+                                    <span class="pricing_type text-title text-secondary">StartPrenair</span>
+                                    <div class="price-circle pink-circle">
+                                        <span class="price">
+                                            <span class="monthly-price active price_span">
+                                                $<span class="integer-part">{{start_plan.int_monthly_price}}</span><sup class="decimal-part">.{{start_plan.dec_monthly_price}}</sup>
+                                            </span>
+                                            <span class="annual-price price_span">
+                                                $<span class="integer-part">{{start_plan.int_annual_price}}</span><sup class="decimal-part">.{{start_plan.dec_annual_price}}</sup>
+                                            </span>
+                                        </span>
+                                    </div>
+                                    
+                                    <ul class="list_feature mt-3">
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">50 Products</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">50 Services</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Marketplace Exposure</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">VIP Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Community Access</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">Payout via Paypal & Payoneer</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Chatbot for Business Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">Course Creation</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Support in Chat</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Service Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl start_icon"></span>
+                                            <strong class="pricing_feature text-title">AI SEO Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Sentiment Analysis</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Advanced Analytics</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Verified Badge</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Priority Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">AI Exams</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Advanced Security & Fraud Protection</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Early Access to New Features</strong>
+                                        </li>
+                                    </ul>
+                                    <form class="mt-5" action="{% url 'create_checkout_session' start_plan.id %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                                        <button type="submit" class="price_btn pink-btn">Choose Plan</button>
+                                    </form>
+                                </li>
+                    
+                                <!-- Professional Plan (Most Popular) -->
+                                <li class="pricing_item relative p-6 border border-line rounded-xl bg-white duration-300 shadow-lg hover:hover:shadow-2xl biz_plan">
+                                    <span class="flag absolute top-0 left-1/2 -translate-x-1/2 text-label py-1 px-2.5 rounded-b-lg bg-red text-white">MOST POPULAR</span>
+                                    <span class="pricing_type text-title text-secondary">BizPrenair</span>
+                                    <div class="price-circle blue-circle">
+                                        <span class="price">
+                                            <span class="monthly-price active price_span">
+                                                $<span class="integer-part">{{biz_plan.int_monthly_price}}</span><sup class="decimal-part">.{{biz_plan.dec_monthly_price}}</sup>
+                                            </span>
+                                            <span class="annual-price price_span">
+                                                $<span class="integer-part">{{biz_plan.int_annual_price}}</span><sup class="decimal-part">.{{biz_plan.dec_annual_price}}</sup>
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <ul class="list_feature mt-3">
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">500 Products</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">500 Services</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Marketplace Exposure</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">VIP Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Community Access</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Payout via Paypal & Payoneer</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Chatbot for Business Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Course Creation</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Support in Chat</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Service Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI SEO Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Sentiment Analysis</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Advanced Analytics</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Verified Badge</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">Priority Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl biz_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Exams</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Advanced Security & Fraud Protection</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl text-placehover"></span>
+                                            <strong class="pricing_feature text-title text-placehover">Early Access to New Features</strong>
+                                        </li>
+                                    </ul>
+                                    <form class="mt-5" action="{% url 'create_checkout_session' biz_plan.id %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                                        <button type="submit" class="price_btn blue-btn">Choose Plan</button>
+                                    </form>
+                                </li>
+                    
+                                <!-- Executive Plan -->
+                                <li class="pricing_item relative p-6 border border-line rounded-lg bg-white duration-300 shadow-md hover:hover:shadow-2xl entre_plan">
+                                    <span class="pricing_type text-title text-secondary">EntrePrenair</span>
+                                    <div class="price-circle green-circle">
+                                        <span class="price">
+                                            <span class="monthly-price active price_span">
+                                                $<span class="integer-part">{{entre_plan.int_monthly_price}}</span><sup class="decimal-part">.{{entre_plan.dec_monthly_price}}</sup>
+                                            </span>
+                                            <span class="annual-price price_span">
+                                                $<span class="integer-part">{{entre_plan.int_annual_price}}</span><sup class="decimal-part">.{{entre_plan.dec_annual_price}}</sup>
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <ul class="list_feature mt-3">
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Unlimited Products</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Unlimited Services</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Marketplace Exposure</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">VVIP Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Featured Community Access</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Payout via Paypal & Payoneer</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Chatbot for Business Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Course Creation</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Support in Chat</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Service Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI SEO Optimization</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Sentiment Analysis</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Advanced Analytics</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Verified Badge</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Priority Support</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">AI Exams</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Advanced Security & Fraud Protection</strong>
+                                        </li>
+                                        <li class="feature_item flex items-start gap-2 py-2">
+                                            <span class="ph-fill ph-check-circle flex-shrink-0 pt-1 text-xl entree_icon"></span>
+                                            <strong class="pricing_feature text-title">Early Access to New Features</strong>
+                                        </li>
+                                    </ul>
+                                    <form class="mt-5" action="{% url 'create_checkout_session' entre_plan.id %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="subscription_type" class="subscription-type" value="monthly">
+                                        <button type="submit" class="price_btn green-btn">Choose Plan</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="container mt-16 mb-12" style="margin-top: 25px;">
+                    <h3 class="heading4 text-center mb-8">Key Features Across All Plans</h3>
+                    
+                    <div class="feature-grid grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Left Column -->
+                        <div class="feature-column bg-white p-6 rounded-lg shadow-md">
+                            <div class="space-y-4">
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📈</span>
+                                    <span class="text-title">All-in-One Hub for Business Growth</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">💡</span>
+                                    <span class="text-title">Turn Ideas into Profitable Digital Assets</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🎯</span>
+                                    <span class="text-title">In-depth Course Analytics & Tracking</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🏆</span>
+                                    <span class="text-title">Certifications on Completion</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">⚡</span>
+                                    <span class="text-title">Transform Ideas into Assets</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🤝</span>
+                                    <span class="text-title">Network & Collaborate Together</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📚</span>
+                                    <span class="text-title">AI-Powered Teaching & Earning</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">💳</span>
+                                    <span class="text-title">Secure Transactions & Growth</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🛍️</span>
+                                    <span class="text-title">Pro Digital Product Sales</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3">
+                                    <span class="text-xl">💼</span>
+                                    <span class="text-title">Smart Freelancing Tools</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Column -->
+                        <div class="feature-column bg-white p-6 rounded-lg shadow-md">
+                            <div class="space-y-4">
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🤖</span>
+                                    <span class="text-title">AI Business Automation</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">💱</span>
+                                    <span class="text-title">Multi-Currency Transactions</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🏢</span>
+                                    <span class="text-title">Unified Dashboard Ecosystem</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📝</span>
+                                    <span class="text-title">AI Content Generation</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📦</span>
+                                    <span class="text-title">Subscription Products</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🌐</span>
+                                    <span class="text-title">Virtual Networking Forums</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📊</span>
+                                    <span class="text-title">Real-Time Analytics</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">📦</span>
+                                    <span class="text-title">Smart Product Bundling</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3 border-b border-gray-100">
+                                    <span class="text-xl">🎓</span>
+                                    <span class="text-title">AI Course Creation</span>
+                                </div>
+                                <div class="feature-item flex items-start gap-3 p-3">
+                                    <span class="text-xl">⭐</span>
+                                    <span class="text-title">Customer Reviews & Social Proof</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+       
+    </div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script>
+  document.getElementById('priceToggle').addEventListener('change', function() {
+    const isAnnual = this.checked;
+    
+    // Toggle label colors
+    document.querySelectorAll('.toggle-label').forEach(label => {
+        label.classList.toggle('active');
+    });
+
+    // Toggle price visibility
+    document.querySelectorAll('.monthly-price').forEach(price => {
+        price.classList.toggle('active', !isAnnual);
+    });
+    document.querySelectorAll('.annual-price').forEach(price => {
+        price.classList.toggle('active', isAnnual);
+    });
+
+    // Update all subscription type inputs
+    document.querySelectorAll('.subscription-type').forEach(input => {
+        input.value = isAnnual ? 'annual' : 'monthly';
+    });
+});
+</script>
+
+{% endblock extra_javascript %}

@@ -1,0 +1,472 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - My Orders{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+{% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">My Orders</h4>
+                
+                {% if request.user.is_work_freelancer %}
+                <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Active Orders</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Gig</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Due on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if active_orders %}
+                                {% for order in active_orders %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info">
+                                            <a href="{% url 'gig_detail' order.gig.slug %}" class="title heading6 duration-300 hover:underline">{{order.gig.title|slice:":100"}}</a>
+                                            <div class="flex flex-wrap items-center gap-4 mt-2">
+                                                <a href="{% url 'work_user_profile' order.user.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                    <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                        <img src="{{order.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if order.user.is_online %}
+                                                        <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                        {% else %}
+                                                        <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <span class="employers_name font-normal">Order by {{order.user.name}}</span>
+                                                </a>
+                                                <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                                <div class="address flex items-center gap-2 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{order.user.country}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{order.price}}</td>
+                                    <td class="p-5">
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">{{order.status}}</span>
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{order.delivery_date.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                            </button></a>
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.user.slug }}"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_chat">
+                                                <span class="ph ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Send Message</span>
+                                            </button></a>
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                <span class="ph ph-file-arrow-up text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Submit Work</span>
+                                            </button></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="active_work p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Delivered Orders</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Gig</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Due on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if delivered_orders %}
+                                {% for order in delivered_orders %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info">
+                                            <a href="{% url 'gig_detail' order.gig.slug %}" class="title heading6 duration-300 hover:underline">{{order.gig.title|slice:":100"}}</a>
+                                            <div class="flex flex-wrap items-center gap-4 mt-2">
+                                                <a href="{% url 'work_user_profile' order.user.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                    <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                        <img src="{{order.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if order.user.is_online %}
+                                                        <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                        {% else %}
+                                                        <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <span class="employers_name font-normal">Order by {{order.user.name}}</span>
+                                                </a>
+                                                <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                                <div class="address flex items-center gap-2 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{order.user.country}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{order.price}}</td>
+                                    <td class="p-5">
+                                        <span class="tag bg-opacity-10 bg-primary text-primary text-button">{{order.status}}</span>
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{order.delivery_date.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                            </button></a>
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.user.slug }}"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_chat">
+                                                <span class="ph ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Send Message</span>
+                                            </button></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="recent_service_orders p-6 mt-7.5 rounded-lg bg-white">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <h5 class="heading5">Completed Orders</h5>
+                        <!-- <a href="#!" class="text-button underline duration-300 hover:text-primary">View orders</a> -->
+                    </div>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">gig</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Date Completed</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if completed_orders %}
+                               {% for order in completed_orders %}
+                               <tr class="item duration-300 hover:bg-background">
+                                <th scope="row" class="p-5 text-left">
+                                    <div class="info">
+                                        <a href="{% url 'gig_detail' order.gig.slug %}" class="title heading6 duration-300 hover:underline">{{order.gig.title|slice:":100"}}</a>
+                                        <div class="flex flex-wrap items-center gap-4 mt-2">
+                                            <a href="{% url 'work_user_profile' order.user.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
+                                                <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                    <img src="{{order.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                    {% if order.user.is_online %}
+                                                    <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                    {% else %}
+                                                    <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="employers_name font-normal">Order by {{order.user.name}}</span>
+                                            </a>
+                                            <div class="line flex-shrink-0 w-px h-4 bg-line"></div>
+                                            <div class="address flex items-center gap-2 text-secondary">
+                                                <span class="ph ph-map-pin text-xl"></span>
+                                                <span class="employers_address font-normal">{{order.user.country}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <td class="p-5">${{order.price}}</td>
+                                <td class="p-5">
+                                    <span class="tag bg-opacity-10 bg-success text-success text-button">{{order.status}}</span>
+                                </td>
+                                <td class="p-5 whitespace-nowrap">{{order.completed_on.date}}</td>
+                                <td class="p-5">
+                                    <div class="flex justify-end gap-2">
+                                       <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                            <span class="ph ph-eye text-xl"></span>
+                                            <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                        </button></a>
+                                        <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.user.slug }}"><button class="btn_action btn_chat flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_chat">
+                                            <span class="ph ph-chats text-xl"></span>
+                                            <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Message Buyer</span>
+                                        </button></a>
+                                    </div>
+                                </td>
+                            </tr>
+                               {% endfor %}
+                               {% else %}
+                               <tr>
+                                <td colspan="5" class="text-center py-5">Nothing to show here!</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% else %}
+                <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Active Orders</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Seller</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Due on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if active_orders %}
+                                {% for order in active_orders %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info flex items-center gap-3">
+                                            <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.is_online %}
+                                                <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                {% else %}
+                                                <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                {% endif %}
+                                            </div>
+                                            <a href="{% url 'work_user_profile' order.gig.user.username %}" class="block">
+                                                <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{order.gig.user.name}}</strong>
+                                                <div class="address flex items-center gap-2 mt-1 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{order.gig.user.country}}</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{order.price}}</td>
+                                    <td class="p-5">
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">{{order.status}}</span>
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{order.delivery_date.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                            </button></a>
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.gig.user.slug }}"><button class="btn_action btn_approved_application flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_approved_application">
+                                                <span class="ph-duotone ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Message Seller</span>
+                                            </button></a>
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">No active orders found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Delivered Orders</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Seller</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Due on</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if delivered_orders %}
+                                {% for order in delivered_orders %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info flex items-center gap-3">
+                                            <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.is_online %}
+                                                <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                {% else %}
+                                                <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                {% endif %}
+                                            </div>    
+                                            <a href="{% url 'work_user_profile' order.gig.user.username %}" class="block">
+                                                <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{order.gig.user.name}}</strong>
+                                                <div class="address flex items-center gap-2 mt-1 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{order.gig.user.country}}</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{order.price}}</td>
+                                    <td class="p-5">
+                                        <span class="tag bg-opacity-10 bg-primary text-primary text-button">{{order.status}}</span>
+                                    </td>
+                                    <td class="p-5 whitespace-nowrap">{{order.delivery_date.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                            </button></a>
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.gig.user.slug }}"><button class="btn_action btn_approved_application flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_approved_application">
+                                                <span class="ph-duotone ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Message Seller</span>
+                                            </button></a>
+                                            <!-- <button class="btn_action btn_open_popup btn_reject flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_reject">
+                                                <span class="ph ph-x text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Cancel Order</span>
+                                            </button> -->
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white">
+                                                <span class="ph ph-check text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Complete Order</span>
+                                            </button></a>
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">No delivered orders found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Completed Orders</h5>
+                    <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                        <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Seller</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Pricing</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Date Completed</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if completed_orders %}
+                                {% for order in completed_orders %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left">
+                                        <div class="info flex items-center gap-3">
+                                            <div class="avat relative flex-shrink-0 w-9 h-9">
+                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.is_online %}
+                                                <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                                {% else %}
+                                                <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                                {% endif %}
+                                            </div>
+                                            <a href="{% url 'work_user_profile' order.gig.user.username %}" class="block">
+                                                <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{order.gig.user.name}}</strong>
+                                                <div class="address flex items-center gap-2 mt-1 text-secondary">
+                                                    <span class="ph ph-map-pin text-xl"></span>
+                                                    <span class="employers_address font-normal">{{order.gig.user.country}}</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </th>
+                                    <td class="p-5">${{order.price}}</td>
+                                <td class="p-5">
+                                    <span class="tag bg-opacity-10 bg-success text-success text-button">{{order.status}}</span>
+                                </td>
+                                <td class="p-5 whitespace-nowrap">{{order.completed_on.date}}</td>
+                                    <td class="p-5">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{% url 'order_detail' order.slug %}"><button class="btn_action btn_view flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_view_job">
+                                                <span class="ph ph-eye text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">View Order</span>
+                                            </button></a>
+                                            <a href="{% url 'user_chat' chatSlug='start-chat' %}?user_slug={{ order.gig.user.slug }}"><button class="btn_action btn_approved_application flex items-center justify-center relative w-10 h-10 rounded border border-line duration-300 hover:bg-primary hover:text-white" data-type="modal_approved_application">
+                                                <span class="ph-duotone ph-chats text-xl"></span>
+                                                <span class="flag absolute -top-10 left-1/2 py-0.5 px-1.5 rounded border border-line bg-white caption1 capitalize text-black whitespace-nowrap">Message Seller</span>
+                                            </button></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">No completed orders found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+   <!-- Modal -->
+   <div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+   </div>
+   
+    
+
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+
+{% endblock extra_javascript %}

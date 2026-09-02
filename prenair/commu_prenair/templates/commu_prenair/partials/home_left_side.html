@@ -1,0 +1,99 @@
+{% load static %}
+{% load course_filters %}
+
+<div class="col-xxl-3 col-xl-3 col-lg-4 col-6 cus-z2">
+    <div class="d-inline-block d-lg-none">
+        <button class="button profile-active mb-4 mb-lg-0 d-flex align-items-center gap-2">
+            <i class="material-symbols-outlined mat-icon"> tune </i>
+            <span>My profile</span>
+        </button>
+    </div>
+    <div class="profile-sidebar cus-scrollbar p-5">
+        <div class="d-block d-lg-none position-absolute end-0 top-0">
+            <button class="button profile-close">
+                <i class="material-symbols-outlined mat-icon fs-xl"> close </i>
+            </button>
+        </div>
+        <div class="profile-pic d-flex gap-2 align-items-center">
+            
+            <div class="position-relative">
+                <img class="avatar-img max-un" src="{{request.user.profile_pic.url}}" style="width:50px; height:50px;" alt="avatar">
+                <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" 
+                             style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
+            </div>
+            <div class="text-area">
+                <h6 class="m-0 mb-1"><a href="{% url "commu_profile" request.user.slug %}">{{request.user.name}}</a></h6>
+                <p class="mdtxt">@{{request.user.username}}</p>
+            </div>
+        </div>
+        <ul class="profile-link mt-7 mb-7 pb-7">
+            <li>
+                <a href="{% url "commu_home" %}" class="d-flex gap-4 {% if request.path == '/commuprenair/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> home </i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url "connection_requests" %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/connection-requests/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> person </i>
+                    <span>Friend Requests</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url "search_people" %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/search/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> person </i>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'commu_events' %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/events/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> workspace_premium </i>
+                    <span>Events</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'commu_messages' %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/chat/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon">Chat</i>
+                    <span>Messages</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url "commu_groups" %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/groups/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> workspaces </i>
+                    <span>Groups</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url "commu_profile_groups" request.user.slug %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/profile/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> workspaces </i>
+                    <span>My Groups</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url "profile_settings" %}" class="d-flex gap-4 {% if request.path|startswith:'/commuprenair/profile-settings/' %}active{% endif %}">
+                    <i class="material-symbols-outlined mat-icon"> settings </i>
+                    <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+        <div class="your-shortcuts">
+            <h6>Your shortcuts</h6>
+            <ul>
+                {% if user.user_groups %}
+                {% for group in user.user_groups|slice:":3" %}
+                <li>
+                    <a href="{% url 'group_detail' group.slug %}" class="d-flex align-items-center gap-3">
+                        <img src="{{group.profile_img.url}}" class="rounded" style="width: 50px; height: 50px;"  alt="icon">
+                        <span>{{group.name}}</span>
+                    </a>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li>
+                    <p style="display: flex; justify-content: center;">No shortcuts!</p>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>

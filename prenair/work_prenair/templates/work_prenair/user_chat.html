@@ -1,0 +1,885 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Chat{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+    @media screen and (max-width: 639px) {
+        .left {
+            display: none;
+        }
+
+        .right {
+            width: 100%;
+        }
+    }
+
+    .avatar {
+        position: relative;
+    }
+
+    .avatar span {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 0.75rem;
+        height: 0.75rem;
+        border: 2px solid white;
+        border-radius: 50%;
+    }
+
+    .ai-assist-message {
+        position: relative;
+        width: 80%;
+    }
+
+    .ai-assist-button {
+        position: absolute;
+        top: -10px;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .ai-assist-message:hover .ai-assist-button {
+        opacity: 1;
+    }
+
+    .ai-suggestion {
+        background: #e3f2fd;
+        border-left: 3px solid #2196F3;
+        margin: 5px 0;
+        padding: 8px;
+        border-radius: 4px;
+        position: relative;
+    }
+
+    .ai-suggestion-badge {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        font-size: 0.7rem;
+        color: #2196F3;
+    }
+ /* Modal Overlay */
+ .popup-overlay-ai-suggestion {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+      transition: opacity 0.3s ease;
+      overflow-y: auto;
+    }
+
+    /* Modal Content */
+    .popup-content-ai-suggestion {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      transition: transform 0.3s ease;
+      animation: modalAppear 0.3s ease-out forwards;
+      max-height: 80vh;
+      overflow-y: auto;
+
+    }
+
+    .no-scroll {
+    overflow: hidden !important;
+    }
+
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Close Button */
+    .close-modal-ai-suggestion {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 24px;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: color 0.2s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-modal-ai-suggestion:hover {
+      color: #4b5563;
+      background-color: #f3f4f6;
+    }
+
+    /* Modal Header */
+    .popup-content-ai-suggestion h4 {
+      color: #111827;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      border: 0.25rem solid #1e3a8a;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner 0.75s linear infinite;
+    }
+
+    @keyframes spinner {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-spinner p {
+      margin-top: 1rem;
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    /* Analysis Result */
+    #aiSuggestionResult {
+      padding: 0.5rem 0;
+    }
+
+    #aiSuggestionResult h5 {
+      color: #111827;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    #aiSuggestionResult p {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    #aiSuggestionResult ul {
+      margin: 0.75rem 0 1.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    #aiSuggestionResult li {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+
+    #aiSuggestionResult li::before {
+      content: '';
+      position: absolute;
+      left: -1.25rem;
+      top: 0.5rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #1e3a8a;
+      border-radius: 50%;
+    }
+
+    /* Error Message */
+    #aiSuggestionError {
+      padding: 1rem;
+      background-color: #fee2e2;
+      border-radius: 8px;
+      color: #b91c1c;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .quick-response-category {
+    margin-bottom: 1.5rem;
+    }   
+
+    .category-title {
+        color: #1e3a8a;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }   
+
+    .response-option {
+        padding: 0.75rem;
+        margin: 0.25rem 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }   
+
+    .response-option:hover {
+        background: #e9ecef;
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #aiSuggestionResult, #aiSuggestionError {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Section styling */
+    .aiSuggestion-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .aiSuggestion-section ul {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 1rem 1rem 1rem 2.5rem;
+    }
+
+    .aiSuggestion-section p {
+      background-color: #f0f9ff;
+      border-left: 4px solid #1e3a8a;
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+    }
+
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="dashboard_message scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">Message</h4>
+                <div class="message_block flex max-h-[700px] overflow-hidden mt-7.5 rounded-lg bg-white">
+                    <div class="left overflow-hidden flex-shrink-0 xl:w-[400px] lg:w-[45%] sm:w-[40%] w-full">
+                        <div class="form_search flex items-center h-[5.5rem] px-6 border-b sm:border-r border-line">
+                            <form class="relative w-full h-12" method="get" action="{% url 'user_chats' %}">
+                                <input 
+                                    type="text" 
+                                    name="search" 
+                                    value="{{ search_query }}" 
+                                    class="w-full h-full pl-4 pr-12 border border-line rounded-lg overflow-hidden" 
+                                    placeholder="Search Users" 
+                                    required 
+                                />
+                                <button type="submit" class="absolute top-1/2 -translate-y-1/2 right-4">
+                                    <span class="ph ph-magnifying-glass text-xl block"></span>
+                                </button>
+                            </form>
+                            </form>
+                        </div>
+                        <ul class="list_chat flex flex-col gap-0.5 scrollbar_custom w-full sm:border-r border-line" role="tablist">
+                            {% for chat, last_message, time, unread_count in user_chats %}
+                            <a href="{% url 'user_chat' chat.slug %}">
+                            <li class="chat_item flex gap-5 w-full px-6 py-4 cursor-pointer duration-300 hover:bg-background hover:bg-opacity-80">
+                                <div class="relative flex-shrink-0 w-[3.25rem] h-[3.25rem]">
+                                    <img src="{% if chat.user1 == request.user %} {{ chat.user2.profile_pic.url }} {% else %} {{ chat.user1.profile_pic.url }} {% endif %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                    {% if chat.user1 == request.user %}
+                                    {% if chat.user2.is_online %}
+                                    <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                    {% else %}
+                                    <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                    {% endif %}
+                                    {% else %}
+                                    {% if chat.user1.is_online %}
+                                    <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
+                                    {% else %}
+                                    <span style="background-color: gray;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-red border-2 border-white"></span>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="chat_content w-full">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <strong class="chat_name text-button">{% if chat.user1 == request.user %} {{ chat.user2.name }} {% else %} {{ chat.user1.name }} {% endif %}</strong>
+                                        <span class="chat_time caption1 text-secondary">{{time.time}}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-4">
+                                        <p class="chat_text">
+                                            {% if last_message %}
+                                            {% if last_message.content %}
+                                                {{ last_message.content }}
+
+                                            {% elif last_message.file %}
+                                            {{last_message.file_name}}
+                                            
+                                            {% endif %}
+                                            {% else %}
+                                                No messages yet.
+                                            {% endif %}
+                                        </p>
+                                        {% if unread_count == 0 %}
+                                        <span></span>
+                                        {% else %}
+                                        <span class="chat_quantity flex items-center justify-center w-5 h-5 rounded-full bg-red text-xs font-semibold text-white">{{unread_count}}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                        </a>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="right w-full max-sm:flex-shrink-0">
+                        <div class="relative h-full pb-20" style="display: block;">
+                            <div class="heading flex items-center justify-between w-full h-[5.5rem] px-7 border-b border-line">
+                                <div class="flex items-center gap-3">
+                                    <a href="{% url 'user_chats' %}"><button class="back_to_list_btn sm:hidden">
+                                        <span class="ph-bold ph-caret-left text-2xl block"></span>
+                                    </button></a>
+                                    <div class="avatar relative flex-shrink-0 w-9 h-9">
+                                        <img src="{{other_user.profile_pic.url}}" alt="company/1" class="w-full h-full rounded-full object-cover" />
+                                        {% if other_user.is_online %}
+                                        <span style="background-color: green;" class="absolute bottom-0 right-0 block w-3 h-3 bg-green-500 rounded-full border border-white"></span>
+                                        {% else %}
+                                        <span style="background-color: gray;" class="absolute bottom-0 right-0 block w-3 h-3 bg-gray-400 rounded-full border border-white"></span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong class="text-button">{{other_user.name}}</strong>
+                                        <div class="flex items-center gap-1">
+                                            <span class="ph ph-map-pin text-lg text-secondary"></span>
+                                            <span class="caption1 text-secondary">{{other_user.country}} |
+                                                {% if not other_user.is_online %}
+                                               <strong> Last seen:</strong> {{ other_user.time_since_last_seen }}
+                                                {% else %}
+                                                Online
+                                                {% endif %}
+                                        </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="more_option_btn">
+                                    <span class="ph-bold ph-dots-three text-2xl block"></span>
+                                </button>
+                            </div>
+                            <div class="chat_content scrollbar_custom">
+                                <div class="content flex flex-col gap-5 w-full p-6 chat-mess">
+                                    {% for message in chat_messages %}
+                                        {% if message.sender == request.user %}
+                                            <!-- Message from current user (right-aligned) -->
+                                            <div class="message_item flex flex-col gap-1 items-end self-end xl:w-1/2 sm:w-2/3 w-5/6"  data-sender-role="{% if message.sender.is_work_freelancer %}Freelancer{% else %}Client{% endif %}">
+                                                <div class="inner flex items-center gap-2">
+                                                    {% if message.content %}
+                                                    <p class="content py-3 px-4 rounded-2xl rounded-br-none bg-background">
+                                                        {{ message.content }}
+                                                    </p>
+                                                    {% else %}
+                                                    <div class="file_message py-3 px-4 rounded-2xl rounded-br-none bg-background">
+                                                        <a href="{{ message.file.url }}" download="{{ message.file.name }}" class="download-link">
+                                                            {{ message.file_name }}
+                                                        </a>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="time_stamp text-secondary">
+                                                    {{ message.timestamp|date:"H:i A" }}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <!-- Message from other user (left-aligned) -->
+                                            <div class="ai-assist-message message_item flex flex-col gap-1 items-start self-start xl:w-1/2 sm:w-2/3 w-5/6" data-sender-role="{% if message.sender.is_work_freelancer %}Freelancer{% else %}Client{% endif %}">
+                                                <button class="ai-assist-button" 
+                                                data-message-id="{{ message.id }}"
+                                                data-context="{{ message.content|truncatechars:100 }}">
+                                                <i class="ph ph-sparkle"></i> Suggest Reply
+                                                </button>
+                                                <div class="inner flex flex-row-reverse items-center gap-2">
+                                                    {% if message.content %}
+                                                    <p class="content py-3 px-4 rounded-2xl rounded-bl-none bg-background">
+                                                        {{ message.content }}
+                                                    </p>
+                                                    {% else %}
+                                                    <div class="file_message py-3 px-4 rounded-2xl rounded-bl-none bg-background">
+                                                        <a href="{{ message.file.url }}" download="{{ message.file.name }}" class="download-link">
+                                                            {{ message.file_name }}
+                                                        </a>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="time_stamp text-secondary">
+                                                    {{ message.timestamp|date:"H:i A" }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>                                
+                            </div>
+                            <form class="form_chat flex items-center gap-3 absolute left-0 bottom-0 w-full h-20 px-6 border-t border-line bg-white">
+                                <!-- Message Input -->
+                                <div class="form_input relative w-full h-12">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Add a message..." 
+                                        id="chat-message-input" 
+                                        class="w-full h-full border border-line bg-surface rounded pl-4 pr-14" 
+                                        required 
+                                    />
+                                    
+                                    <!-- File Upload Icon -->
+                                    <label for="attachment-input" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer hover:text-black">
+                                        <span class="ph ph-paperclip text-xl"></span>
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        id="attachment-input" 
+                                        style="display: none;" 
+                                        accept=".jpg,.png,.pdf,.docx" 
+                                    />
+                                    <!-- Selected File Name -->
+                                    <span id="selected-file" class="absolute left-4 bottom-0 text-gray-500 text-sm"></span>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button 
+                                    id="chat-message-submit" style="background-color: #ff6f61;"
+                                    class="flex flex-shrink-0 items-center justify-center w-12 h-12 rounded bg-black text-white duration-300 hover:bg-primary"
+                                >
+                                    <span class="ph ph-paper-plane-tilt text-2xl"></span>
+                                </button>
+                                <a href="javascript:void(0)" 
+                                id="quickResponseBtn"
+                                class="flex flex-shrink-0 items-center justify-center w-12 h-12 rounded "
+                                >
+                                <span class="ph ph-paper-plane text-xl"></span>
+                                </a>
+                                {% if request.user.is_work_freelancer %}
+                                <a onclick="openOfferPopup('{{ other_user.username }}')" style="cursor: pointer; border: 1px solid black; width: fit-content; padding: 3px;"
+                                id="quickResponseBtn"
+                                class="flex flex-shrink-0 items-center justify-center w-12 h-12 rounded send-offer-btn">
+                                Create Offer
+                                </a>
+                                {% endif %}
+                                </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aiSuggestionModal" class="popup-overlay-ai-suggestion" style="display: none;">
+                <div class="popup-content-ai-suggestion">
+                    <span class="close-modal-ai-suggestion" onclick="closeAiSuggestionModal()">&times;</span>
+                    <h4>AI Response Suggestions</h4>
+                    <div id="aiSuggestionContent">
+                        <div class="loading-spinner">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden"></span>
+                            </div>
+                            <p>Analyzing messages...</p>
+                        </div>
+                        <div id="aiSuggestionResult" style="display: none;"></div>
+                        <div id="aiSuggestionError" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quickResponseModal" class="popup-overlay-ai-suggestion" style="display: none;">
+                <div class="popup-content-ai-suggestion">
+                    <span class="close-modal-ai-suggestion" onclick="closeQuickResponseModal()">&times;</span>
+                    <h4>Quick Responses</h4>
+                    <div id="quickResponseContent" class="mt-4">
+                        <!-- Responses will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+   
+    
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+    {% include 'work_prenair/partials/send_offer.html' %}
+
+ <!-- Modal -->
+ <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+</div>
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+<script>
+    const username = "{{ request.user.username }}";
+    const chatSlug = "{{ chatSlug }}"; 
+    const otherUser = "{{ chat_with.username }}";
+    const wsProtocolChat = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const chatSocket = new WebSocket(`${wsProtocolChat}${window.location.host}/ws/chat/${chatSlug}/`);
+
+document.querySelector('.form_chat button').onclick = function (e) {
+    e.preventDefault();
+
+    const messageInput = document.querySelector('#chat-message-input');
+    const fileInput = document.querySelector('#attachment-input');
+    const message = messageInput.value.trim();
+    const file = fileInput.files[0]; 
+
+    if (chatSocket.readyState === WebSocket.OPEN) {
+        if (message) {
+            chatSocket.send(JSON.stringify({
+                'type': 'chat_message',
+                'message': message,
+                'sender': username
+            }));
+            messageInput.value = '';
+        }
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                chatSocket.send(JSON.stringify({
+                    'type': 'file_message',
+                    'sender': username,
+                    'file_name': file.name,
+                    'file_data': event.target.result // Base64 encoded data
+                }));
+            };
+            reader.readAsDataURL(file);
+
+            fileInput.value = '';
+            document.querySelector('#selected-file').textContent = ''; // Clear file display
+        }
+    } else {
+        console.error("WebSocket is not open");
+    }
+};
+
+document.querySelector('#attachment-input').onchange = function () {
+    const file = this.files[0];
+    const fileNameDisplay = document.querySelector('#selected-file');
+    fileNameDisplay.textContent = file ? `Selected: ${file.name}` : '';
+};
+
+chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+
+    if (data.message) {
+        appendMessage(data.message, data.sender);
+    } else if (data.file_name) {
+        appendFile(data.file_name, data.sender, data.file_name);
+    }
+};
+
+function appendMessage(message, sender) {
+    const isCurrentUser = sender === username;
+    const messageHTML = `
+        <div class="message_item flex flex-col gap-1 ${isCurrentUser ? 'items-end self-end' : 'items-start self-start'} xl:w-1/2 sm:w-2/3 w-5/6">
+            <div class="inner flex ${isCurrentUser ? 'items-center' : 'flex-row-reverse items-center'} gap-2">
+                <p class="content py-3 px-4 rounded-2xl ${isCurrentUser ? 'rounded-br-none' : 'rounded-bl-none'} bg-background">
+                    ${message}
+                </p>
+            </div>
+            <div class="time_stamp text-secondary">${new Date().toLocaleTimeString()}</div>
+        </div>`;
+    document.querySelector('.chat-mess').insertAdjacentHTML('beforeend', messageHTML);
+}
+
+function appendFile(fileName, sender, fileData) {
+    const isCurrentUser = sender === username;
+    const file_Name = fileName.split('/').pop();
+    const fileHTML = `
+        <div class="message_item flex flex-col gap-1 ${isCurrentUser ? 'items-end self-end' : 'items-start self-start'} xl:w-1/2 sm:w-2/3 w-5/6">
+            <div class="inner flex ${isCurrentUser ? 'items-center' : 'flex-row-reverse items-center'} gap-2">
+                <div class="file_message py-3 px-4 rounded-2xl ${isCurrentUser ? 'rounded-br-none' : 'rounded-bl-none'} bg-background">
+                    <a href="${fileData}" download="${fileName}" class="download-link">
+                        ${file_Name}
+                    </a>
+                </div>
+            </div>
+            <div class="time_stamp text-secondary">${new Date().toLocaleTimeString()}</div>
+        </div>`;
+    document.querySelector('.chat-mess').insertAdjacentHTML('beforeend', fileHTML);
+}
+
+chatSocket.onclose = function () {
+    console.error('Chat socket closed unexpectedly');
+};
+
+
+    chatSocket.onerror = function (error) {
+        console.error('WebSocket Error:', error);
+    };
+
+    document.querySelectorAll('.ai-assist-button').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const messageId = e.target.dataset.messageId;
+        const context = e.target.dataset.context;
+        const modal = document.getElementById('aiSuggestionModal');
+        const resultDiv = document.getElementById('aiSuggestionResult');
+        const errorDiv = document.getElementById('aiSuggestionError');
+        
+        modal.style.display = 'flex';
+        resultDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+        document.querySelector('.loading-spinner').style.display = 'flex';
+
+        try {
+            const response = await fetch(`/workprenair/message/ai-suggestions/${chatSlug}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    context: context,
+                    recent_messages: getRecentMessages(),
+                    message_id: messageId
+                })
+            });
+
+            const responseData = await response.json();
+            document.querySelector('.loading-spinner').style.display = 'none';
+
+            if (responseData.error) {
+                errorDiv.textContent = responseData.error;
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const suggestions = responseData.suggestions || [];
+            showAISuggestionsInModal(suggestions);
+            resultDiv.style.display = 'block';
+
+        } catch (error) {
+            console.error('AI suggestion error:', error);
+            document.querySelector('.loading-spinner').style.display = 'none';
+            errorDiv.textContent = 'Failed to load suggestions. Please try again.';
+            errorDiv.style.display = 'block';
+        }
+    });
+});
+
+function showAISuggestionsInModal(suggestions) {
+    const resultDiv = document.getElementById('aiSuggestionResult');
+    resultDiv.innerHTML = '<h5>Suggested Responses</h5>';
+
+    const list = document.createElement('div');
+    list.className = 'aiSuggestion-section';
+
+    suggestions.forEach((text, index) => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'flex justify-between items-center p-3 mb-2 bg-white rounded-lg border border-gray-100 hover:bg-gray-50';
+        
+        suggestionItem.innerHTML = `
+            <div class="flex-1">
+                <div class="text-sm font-medium text-gray-700">Option ${index + 1}</div>
+                <div class="text-gray-600 text-sm">${text}</div>
+            </div>
+            <div class="flex items-center gap-2 ml-3">
+                <button class="copy-suggestion p-2 hover:bg-gray-200 rounded-md" 
+                        title="Copy to clipboard"
+                        data-text="${text}">
+                    <span class="ph ph-copy text-base text-gray-600"></span>
+                </button>
+                <button class="insert-suggestion p-2 hover:bg-gray-200 rounded-md"
+                        title="Insert into message"
+                        data-text="${text}">
+                    <span class="ph ph-arrow-square-in text-base text-gray-600"></span>
+                </button>
+            </div>
+        `;
+
+        suggestionItem.querySelector('.insert-suggestion').addEventListener('click', (e) => {
+            document.getElementById('chat-message-input').value = e.target.closest('button').dataset.text;
+        });
+
+        suggestionItem.querySelector('.copy-suggestion').addEventListener('click', async (e) => {
+            const textToCopy = e.target.closest('button').dataset.text;
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                const icon = e.target.querySelector('span');
+                icon.className = 'ph ph-check-circle text-base text-green-500';
+                setTimeout(() => {
+                    icon.className = 'ph ph-copy text-base text-gray-600';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text:', err);
+            }
+        });
+
+        list.appendChild(suggestionItem);
+    });
+
+    resultDiv.appendChild(list);
+}
+
+function closeAiSuggestionModal() {
+    document.getElementById('aiSuggestionModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('aiSuggestionModal');
+    if (event.target === modal) {
+        closeAiSuggestionModal();
+    }
+}
+
+function getRecentMessages() {
+    const messages = document.querySelectorAll('.message_item');
+    return Array.from(messages).slice(-5).map(message => {
+        const isCurrentUser = message.classList.contains('self-end');
+        const role = isCurrentUser ? 
+            "{% if request.user.is_work_freelancer %}Freelancer{% else %}Client{% endif %}" : 
+            "{% if other_user.is_work_freelancer %}Freelancer{% else %}Client{% endif %}";
+        const text = message.querySelector('.content')?.textContent || '';
+        return {
+            sender_role: role,
+            content: text
+        };
+    });
+}
+
+// ----------------------------- Quick Response -----------------------------
+const isFreelancer = {% if request.user.is_work_freelancer %}true{% else %}false{% endif %};
+
+const quickResponses = {
+    followUp: isFreelancer ? [
+        "Just following up on my previous message. Let me know your thoughts!",
+        "Wanted to check if you had a chance to review my latest submission?",
+        "Looking forward to your feedback when you get a moment."
+    ] : [
+        "Could you please provide an update on the project?",
+        "Just checking in to see how things are progressing.",
+        "When can we expect the next deliverable?"
+    ],
+    payment: isFreelancer ? [
+        "Friendly reminder that payment is due tomorrow.",
+        "The invoice for this milestone has been sent. Let me know if you need any changes.",
+        "Payment for the completed work would be appreciated at your earliest convenience."
+    ] : [
+        "The payment has been processed. Please confirm receipt.",
+        "Could you send the updated invoice for the latest changes?",
+        "Let me know if you need any additional information for payment processing."
+    ],
+    feedback: isFreelancer ? [
+        "How does this approach align with your expectations?",
+        "Would you like me to make any adjustments to the current version?",
+        "Please let me know if you need any clarifications on the delivered work."
+    ] : [
+        "Great work! Everything looks good to me.",
+        "Could we make a small adjustment to the color scheme?",
+        "The functionality works perfectly, thank you!"
+    ]
+};
+
+document.getElementById('quickResponseBtn').addEventListener('click', () => {
+    document.body.classList.add('no-scroll');
+    const modal = document.getElementById('quickResponseModal');
+    const contentDiv = document.getElementById('quickResponseContent');
+    
+    contentDiv.innerHTML = `
+        <div class="quick-response-category">
+            <div class="category-title">Follow-Up</div>
+            ${quickResponses.followUp.map((msg, i) => `
+                <div class="response-option" data-msg="${msg}">
+                    ${i+1}. ${msg}
+                </div>
+            `).join('')}
+        </div>
+        <div class="quick-response-category">
+            <div class="category-title">Payment</div>
+            ${quickResponses.payment.map((msg, i) => `
+                <div class="response-option" data-msg="${msg}">
+                    ${i+1}. ${msg}
+                </div>
+            `).join('')}
+        </div>
+        <div class="quick-response-category">
+            <div class="category-title">Feedback</div>
+            ${quickResponses.feedback.map((msg, i) => `
+                <div class="response-option" data-msg="${msg}">
+                    ${i+1}. ${msg}
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // Add click handlers for response options
+    document.querySelectorAll('.response-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            document.getElementById('chat-message-input').value = e.target.dataset.msg;
+            closeQuickResponseModal();
+        });
+    });
+
+    modal.style.display = 'flex';
+});
+
+function closeQuickResponseModal() {
+    document.body.classList.remove('no-scroll');
+    document.getElementById('quickResponseModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('quickResponseModal');
+    if (event.target === modal) {
+        closeQuickResponseModal();
+    }
+});
+</script>
+
+
+{% endblock extra_javascript %}

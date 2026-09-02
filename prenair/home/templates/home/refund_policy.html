@@ -1,0 +1,210 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Refund Policy{% endblock %}
+
+{% block content %}
+
+<style>
+    .policy-container {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-header {
+        margin-bottom: 30px;
+    }
+
+    .policy-title {
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+    }
+
+    .policy-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .policy-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    p{
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/refund policy.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="policy-container">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Refund Policy</h1>
+                    <p class="hero-text">
+                        FirePrenair is committed to providing high-quality services and ensuring customer satisfaction. This Refund Policy outlines the conditions under which users may request refunds for subscriptions, digital products, and services purchased on the platform.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Eligibility for Refunds -->
+            <div class="policy-section">
+                <h3 class="section-title">1. Eligibility for Refunds</h3>
+                <p>Refunds are available under the following circumstances:</p>
+                <ul class="policy-list">
+                    <li><strong>Subscription Plans:</strong>
+                        <ul class="nested-list">
+                            <li>Users can request a refund for subscription plans (Starter, Business, Pro) within 14 days of the initial purchase if they have not utilized any premium features, including:
+                                <ul class="nested-list">
+                                    <li>Listing products or services.</li>
+                                    <li>Accessing AI tools.</li>
+                                    <li>Enrolling in courses or participating in events.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Digital Products:</strong>
+                        <ul class="nested-list">
+                            <li>Refunds for digital products (e.g., eBooks, templates) are eligible only if:
+                                <ul class="nested-list">
+                                    <li>The product was not downloaded or accessed.</li>
+                                    <li>There was a technical issue that FirePrenair could not resolve.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Services:</strong>
+                        <ul class="nested-list">
+                            <li>Refunds for services (e.g., WorkPrenair projects) are available only if:
+                                <ul class="nested-list">
+                                    <li>The service was not delivered as described.</li>
+                                    <li>The freelancer failed to meet agreed-upon deadlines or quality standards.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Events:</strong>
+                        <ul class="nested-list">
+                            <li>Refunds for networking or educational events are eligible if:
+                                <ul class="nested-list">
+                                    <li>The event was canceled by FirePrenair.</li>
+                                    <li>The user was unable to attend due to technical issues caused by FirePrenair.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Non-Refundable Items -->
+            <div class="policy-section">
+                <h3 class="section-title">2. Non-Refundable Items</h3>
+                <p>The following are not eligible for refunds:</p>
+                <ul class="policy-list">
+                    <li>Completed services or projects.</li>
+                    <li>Subscription renewals if the cancellation request was not submitted before the renewal date.</li>
+                    <li>Custom services or products specifically tailored for the buyer.</li>
+                    <li>Promotional offers or discounts.</li>
+                </ul>
+            </div>
+
+            <!-- Refund Process -->
+            <div class="policy-section">
+                <h3 class="section-title">3. Refund Process</h3>
+                <p>To request a refund, follow these steps:</p>
+                <ul class="policy-list">
+                    <li><strong>Submit a Refund Request Form:</strong>
+                        <ul class="nested-list">
+                            <li>Go to the “Refund Requests” section in your account.</li>
+                            <li>Provide details about the purchase, including:
+                                <ul class="nested-list">
+                                    <li>Transaction ID.</li>
+                                    <li>Date of purchase.</li>
+                                    <li>Reason for the refund request.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Verification and Review:</strong> FirePrenair will review the request and verify the transaction details within 7 business days.</li>
+                    <li><strong>Refund Approval:</strong> If approved, the refund will be processed to the original payment method within 7-14 business days.</li>
+                    <li><strong>Notification:</strong> Users will receive an email confirmation once the refund is processed.</li>
+                </ul>
+            </div>
+
+            <!-- Partial Refunds -->
+            <div class="policy-section">
+                <h3 class="section-title">4. Partial Refunds</h3>
+                <p>In cases where a service or subscription was partially used, FirePrenair may provide a pro-rated refund based on the unused portion of the service.</p>
+            </div>
+
+            <!-- Refund Method -->
+            <div class="policy-section">
+                <h3 class="section-title">5. Refund Method</h3>
+                <p>Refunds will be issued to the original payment method used at the time of purchase. FirePrenair supports refunds through:</p>
+                <ul class="policy-list">
+                    <li>Credit/Debit Cards.</li>
+                    <li>PayPal.</li>
+                    <li>Bank Transfers (where applicable).</li>
+                </ul>
+            </div>
+
+            <!-- Dispute Resolution -->
+            <div class="policy-section">
+                <h3 class="section-title">6. Dispute Resolution</h3>
+                <ul class="policy-list">
+                    <li><strong>Direct Resolution:</strong> FirePrenair encourages users to resolve issues directly through our support team before initiating chargebacks or disputes with payment processors.</li>
+                    <li><strong>Escalation:</strong> If a resolution cannot be reached, disputes may be escalated to mediation or arbitration.</li>
+                </ul>
+            </div>
+
+            <!-- Changes to Refund Policy -->
+            <div class="policy-section">
+                <h3 class="section-title">7. Changes to Refund Policy</h3>
+                <p>FirePrenair reserves the right to modify this Refund Policy at any time. Updates will be communicated via email or platform announcements.</p>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="policy-section">
+                <h3 class="section-title">8. Contact Information</h3>
+                <p>For questions or assistance regarding refunds, contact us:</p>
+                <ul class="policy-list">
+                    <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

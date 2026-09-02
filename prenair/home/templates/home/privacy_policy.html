@@ -1,0 +1,170 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Privacy Policy{% endblock %}
+
+{% block content %}
+
+<style>
+    .terms-content {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.terms-header {
+    margin-bottom: 40px;
+}
+
+.terms-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.terms-subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.section-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #555;
+}
+
+.nested-list {
+    list-style: circle;
+    margin-left: 40px;
+}
+
+.terms-intro {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+p{
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/Privacy polixy.png' %}');
+        background-size: contain;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<!-- Privacy Policy Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="terms-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Privacy Policy</h1>
+                            <p class="hero-text">
+                                FirePrenair is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you access our platform or use our services. By using FirePrenair, you agree to the practices outlined in this policy.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Information We Collect -->
+                    <div class="terms-section">
+                        <h3 class="section-title">1. Information We Collect</h3>
+                        <ul class="section-list">
+                            <li><strong>Personal Information:</strong> Name, email address, phone number, billing address, and payment information provided during registration, subscription, or checkout.</li>
+                            <li><strong>Business Information:</strong> Company name, tax ID, industry type, and other relevant business details required for selling or participating in platform activities.</li>
+                            <li><strong>User Activity Data:</strong> Information on how you use the platform, such as projects created, products uploaded, courses published, and interactions with other users.</li>
+                            <li><strong>Device and Technical Data:</strong> IP address, browser type, operating system, device information, and cookies.</li>
+                            <li><strong>Third-Party Data:</strong> Information obtained from integrations with third-party services like Payoneer, Stripe, or Google Analytics.</li>
+                        </ul>
+                    </div>
+
+                    <!-- How We Use Your Information -->
+                    <div class="terms-section">
+                        <h3 class="section-title">2. How We Use Your Information</h3>
+                        <ul class="section-list">
+                            <li><strong>Platform Operations:</strong> To provide and enhance FirePrenair’s services, including user management, payment processing, and product delivery.</li>
+                            <li><strong>Personalization:</strong> To tailor recommendations, notifications, and user experiences using AI-driven insights.</li>
+                            <li><strong>Marketing and Communication:</strong> To send updates, promotions, and service announcements. Users can opt out of promotional communications at any time.</li>
+                            <li><strong>Legal Compliance:</strong> To meet legal, regulatory, or contractual obligations, such as tax reporting and anti-fraud measures.</li>
+                            <li><strong>Analytics and Improvement:</strong> To analyze user behavior and improve platform features, tools, and performance.</li>
+                        </ul>
+                    </div>
+
+                    <!-- How We Share Your Information -->
+                    <div class="terms-section">
+                        <h3 class="section-title">3. How We Share Your Information</h3>
+                        <ul class="section-list">
+                            <li><strong>Third-Party Service Providers:</strong> We may share your data with payment processors, cloud storage providers, and analytics platforms for operational purposes.</li>
+                            <li><strong>Compliance with Legal Requirements:</strong> Your information may be disclosed to comply with legal obligations or respond to lawful requests by public authorities.</li>
+                            <li><strong>Business Transactions:</strong> In the event of a merger, acquisition, or sale of assets, your data may be transferred to the new entity as part of the business continuity process.</li>
+                            <li><strong>Internal Collaboration:</strong> Shared among departments within FirePrenair to enhance user services and product offerings.</li>
+                        </ul>
+                    </div>
+
+                    <!-- User Rights -->
+                    <div class="terms-section">
+                        <h3 class="section-title">4. User Rights</h3>
+                        <ul class="section-list">
+                            <li><strong>Access and Portability:</strong> Users can request a copy of their personal data stored by FirePrenair.</li>
+                            <li><strong>Correction and Updates:</strong> Update or correct inaccurate or incomplete personal information via your account settings.</li>
+                            <li><strong>Deletion:</strong> Request the deletion of your account and personal data, subject to compliance with legal obligations.</li>
+                            <li><strong>Opt-Out of Data Sharing:</strong> Use our PrivacyChoice feature to manage preferences for data sharing and selling.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Data Security -->
+                    <div class="terms-section">
+                        <h3 class="section-title">6. Data Security</h3>
+                        <p><strong>Encryption:</strong> All personal data is encrypted during transmission and storage to prevent unauthorized access.</p>
+                        <p><strong>Access Control:</strong> Only authorized personnel have access to sensitive user data.</p>
+                        <p><strong>Regular Audits:</strong> FirePrenair conducts regular security audits to identify and address vulnerabilities.</p>
+                    </div>
+
+                    <!-- Changes to This Policy -->
+                    <div class="terms-section">
+                        <h3 class="section-title">8. Changes to This Policy</h3>
+                        <p>FirePrenair may update this Privacy Policy periodically to reflect changes in our practices or legal requirements. Users will be notified of significant updates via email or platform announcements.</p>
+                    </div>
+
+                    <!-- Contact Us -->
+                    <div class="terms-section">
+                        <h3 class="section-title">9. Contact Us</h3>
+                        <p>For questions or concerns about this Privacy Policy or your data rights, contact us at:</p>
+                        <ul class="section-list">
+                            <li><strong>Email:</strong> <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Privacy Policy Content -->
+
+{% endblock content %}

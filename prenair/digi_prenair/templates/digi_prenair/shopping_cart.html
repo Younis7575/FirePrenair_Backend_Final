@@ -1,0 +1,234 @@
+{% extends "digi_prenair/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* Overlay */
+  .checkout-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    display: none;
+  }
+
+  .checkout-popup {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .checkout-popup-header {
+    background: #ff6f61;
+    color: #fff;
+    padding: 15px;
+    font-size: 18px !important;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Close Button */
+  .checkout-popup-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* Body */
+  .checkout-popup-body {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .checkout-popup-body p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* Buttons */
+  .checkout-popup-buttons {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .checkout-popup-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .stripe-btn {
+    background-color: #6772e5;
+  }
+
+  .paypal-btn {
+    background-color: #ffc439;
+  }
+
+  /* Logo Styling */
+  .checkout-popup-logo {
+    display: block;
+    margin: 0 auto 10px;
+    height: 30px;
+  }
+</style>
+
+
+
+<!-- Add your shopping cart content here -->
+<div class="primary-content-area container content-padding shopping-cart-page">
+  <div class="page-title-section">
+    <h2>Shopping <span class="gradient-text">Cart</span></h2>
+  </div>
+  <div class="shopping-cart-area grid-right-sidebar">
+    <!--      shopping cart -->
+    <div class="shopping-cart">
+      {% if cart_items %}
+      <table class="content-table">
+        <thead>
+          <tr>
+            <th scope="col" class="heading-label">Item details</th>
+            <th scope="col" class="heading-label">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+          <tr>
+            <td data-label="Item details">
+              <div class="product-info">
+                {% if item.product.image %}
+                <div class="product-thumb"><a href="{% url 'digi_product' item.product.slug %}">
+                    <img src="{{ item.product.image.url }}" alt=""></a>
+                </div>
+                {% endif %}
+                <div class="product-details">
+                  <div class="product-name"><a href="{% url 'digi_product' item.product.slug %}">{{ item.product.title}}</a></div>
+                  <div class="product-meta">
+                    <div
+                      class="item-category {% if item.product.category.name == 'UI templates' %}ui-templates{% endif %} {% if item.product.category.name == 'Video tutorials' %}video-tutorials{% endif %} {% if item.product.category.name == 'Coded templates' %}coded-templates{% endif %} {% if item.product.category.name == 'Social graphics' %}social-graphics{% endif %}">
+                      {{ item.product.category.name }}</div>
+                    <div class="product-seller">
+                      @{{item.product.seller.username}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td data-label="price" class="price">
+              {% if item.product.discounted_price > 0 %}
+              ${{ item.product.discounted_price }}
+              {% else %}
+              ${{ item.product.price }}
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'remove_from_cart' item.product.slug %}"><svg class="crumina-icon">
+                  <use xlink:href="#close-circle-icon"></use>
+                </svg></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% comment %} <div class="discount-section">
+        <form class="cryptoki-form" id="discount-form">
+          <span class="label">Redeem Code</span>
+          <input type="text" placeholder="CRYP1258OFF" />
+          <button class="btn btn-normal btn-dark" type="submit">Redeem!</button>
+        </form>
+      </div> {% endcomment %}
+      {% else %}
+      <p>Your cart is empty. Start shopping to add items!</p>
+      {% endif %}
+    </div>
+    <!--    cart total box -->
+    <aside>
+      <div class="cart-total-box">
+        <div class="cart-total-wrapper">
+          <div class="small-title">Order Total</div>
+          <div class="total-price">${{ total_price }}</div>
+          {% if cart_items %}
+          <div class="to-checkout-button">
+            <a class="btn btn-wide gradient-background" onclick="openCheckoutPopup()">Proceed to Checkout</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+
+<div class="checkout-popup-overlay" id="checkoutPopupOverlay"></div>
+
+<!-- Popup -->
+<div class="checkout-popup" id="checkoutPopup">
+  <div class="checkout-popup-header">
+    <div>Select Payment Method</div>
+    <button class="checkout-popup-close" onclick="closeCheckoutPopup()">×</button>
+  </div>
+  <div class="checkout-popup-body">
+    <p>Please choose your preferred payment method</p>
+    <div class="checkout-popup-buttons">
+      <!-- Stripe -->
+      <a id="stripeCheckout" href="#" class="checkout-popup-btn stripe-btn">
+       
+        Pay with Card
+      </a>
+      <!-- PayPal -->
+      <a id="paypalCheckout" href="#" class="checkout-popup-btn paypal-btn">
+        
+        Pay with PayPal
+      </a>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+
+
+{% block extra_javascript %}
+
+<script>
+  function openCheckoutPopup() {
+    const stripeCheckoutUrl = `/digiprenair/checkout/`;
+    const paypalCheckoutUrl = `/digiprenair/paypal/checkout/`;
+
+    document.getElementById("stripeCheckout").href = stripeCheckoutUrl;
+    document.getElementById("paypalCheckout").href = paypalCheckoutUrl;
+
+    document.getElementById("checkoutPopupOverlay").style.display = "block";
+    document.getElementById("checkoutPopup").style.display = "block";
+  }
+
+  function closeCheckoutPopup() {
+    document.getElementById("checkoutPopupOverlay").style.display = "none";
+    document.getElementById("checkoutPopup").style.display = "none";
+  }
+
+
+</script>
+
+{% endblock extra_javascript %}

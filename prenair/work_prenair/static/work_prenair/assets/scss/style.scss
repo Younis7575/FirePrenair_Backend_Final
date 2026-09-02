@@ -1,0 +1,68 @@
+/********* Table of contents *********/
+/*** Reset CSS ***/
+/*** Font ***/
+/*** Main class use in app ***/
+/********* Components *********/
+/*** animation ***/
+/*** underline ***/
+/*** button ***/
+/*** select ***/
+/*** input ***/
+/*** checkbox ***/
+/*** price_range ***/
+/*** tag ***/
+/*** menu ***/
+/*** modal ***/
+/*** toastify ***/
+/*** scrollbar ***/
+/*** card_item ***/
+/*** list_social ***/
+/*** custom-slick ***/
+/*** custom-swiper ***/
+/*** scroll-to-top ***/
+/********* Section *********/
+/*** header ***/
+/*** slider ***/
+/*** banner ***/
+/*** map ***/
+/*** testimonial ***/
+/*** location ***/
+/*** process ***/
+/*** faqs ***/
+/*** video ***/
+/*** dashboard ***/
+/*** layout_filter ***/
+
+@import './base/reset.scss';
+@import './base/font.scss';
+@import './base/globals.scss';
+
+@import './components/animation.scss';
+@import './components/underline.scss';
+@import './components/button.scss';
+@import './components/select.scss';
+@import './components/input.scss';
+@import './components/checkbox.scss';
+@import './components/price_range.scss';
+@import './components/tag.scss';
+@import './components/menu.scss';
+@import './components/modal.scss';
+@import './components/toastify.scss';
+@import './components/scrollbar.scss';
+@import './components/card_item.scss';
+@import './components/list_social.scss';
+@import './components/custom-slick.scss';
+@import './components/custom-swiper.scss';
+@import './components/scroll-to-top.scss';
+
+@import './section/header.scss';
+@import './section/slider.scss';
+@import './section/banner.scss';
+@import './section/map.scss';
+@import './section/testimonial.scss';
+@import './section/location.scss';
+@import './section/process.scss';
+@import './section/faqs.scss';
+@import './section/video.scss';
+@import './section/dashboard.scss';
+@import './section/layout_filter.scss';

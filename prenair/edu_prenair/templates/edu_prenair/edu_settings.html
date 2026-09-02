@@ -1,0 +1,123 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Eduprenair - Settings{% endblock title %}
+{% block content %}
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+		
+    {% include 'edu_prenair/partials/header.html' %}
+
+   		<!-- Breadcrumb -->
+           <div class="breadcrumb-bar breadcrumb-bar-info">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-12">
+                        <div class="breadcrumb-list">
+                            <h2 class="breadcrumb-title">Settings</h2>
+                            <nav aria-label="breadcrumb" class="page-breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url "edu_home" %}">Home</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Edit Profile</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Breadcrumb -->	
+        
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+
+                    {% if request.user.is_edu_instructor %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar.html' %}
+
+                    {% else %}
+                    {% include 'edu_prenair/partials/edu_dashboard_leftbar_student.html' %}
+                    {% endif %}
+
+                    <!-- Instructor Settings -->
+                    <div class="col-xl-9 col-lg-9">	
+
+                        <div class="settings-widget card-details">
+                            <div class="settings-menu p-0">
+                                <div class="profile-heading">
+                                    <h3>Settings</h3>
+                                    <p>You have full control to manage your own account settings</p>
+                                </div>
+                                <div class="settings-page-head">
+                                    <ul class="settings-pg-links">
+                                        <li><a href="#" class="active"><i class="bx bx-edit"></i>Edit Profile</a></li>
+                                    </ul>
+                                </div>
+                                <form method="POST" action="{% url 'edu_settings' %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="course-group profile-upload-group mb-0 d-flex">
+                                        <div class="course-group-img profile-edit-field d-flex align-items-center">
+                                            <a href="{% url 'edu_profile' request.user.slug %}" class="profile-pic">
+                                                <img src="{{ user.profile_pic.url }}" alt="Img" class="img-fluid"> <!-- Display existing avatar -->
+                                            </a>
+                                            <div class="profile-upload-head">
+                                                <h4><a href="{% url 'edu_profile' request.user.slug %}">Your avatar</a></h4>
+                                                <p>PNG or JPG no bigger than 800px width and height</p>
+                                                <div class="new-employee-field">
+                                                    <div class="d-flex align-items-center mt-2">
+                                                        <div class="image-upload mb-0">
+                                                            <input type="file" name="profile_pic"> <!-- Avatar upload -->
+                                                            <div class="image-uploads">
+                                                                <i class="bx bx-cloud-upload"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="img-delete">
+                                                            <a href="#" class="delete-icon"><i class="bx bx-trash"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>											
+                                    </div>
+                                    <div class="checkout-form settings-wrap">
+                                        <div class="edit-profile-info">
+                                            <h5>Personal Details</h5>
+                                            <p>Edit your personal information</p>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="input-block">
+                                                    <label class="form-label">Name</label>
+                                                    <input type="text" class="form-control" name="name" value="{{ user.name }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="input-block">
+                                                    <label class="form-label">Bio</label>
+                                                    <textarea rows="4" class="form-control" name="bio">{{ user.edu_bio }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <button class="category-btn-final" type="submit">Update Profile</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>                                                        
+                            </div>
+                        </div>
+                    </div>	
+                    <!-- /Instructor Settings -->
+                    
+                </div>
+            </div>
+        </div>	
+        <!-- /Page Content -->
+
+
+        {% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+
+{% endblock content %}

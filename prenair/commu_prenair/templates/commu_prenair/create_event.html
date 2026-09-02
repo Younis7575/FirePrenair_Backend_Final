@@ -1,0 +1,499 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load static %}
+
+{% block title %}{% if edit_mode %}Edit{% else %}Create{% endif %} Event | Fireprenair{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #ff6f61;
+    --primary-light: #ffebe9;
+    --primary-dark: #e05a4d;
+    --secondary: #1e3a8a;
+    --secondary-light: #2d4ba0;
+    --secondary-dark: #15296a;
+    --white: #ffffff;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-800: #343a40;
+  }
+
+
+  .main-content {
+    padding: 4rem 0;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--secondary);
+    font-weight: 700;
+    position: relative;
+    font-size: 2rem;
+  }
+
+  .page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  .event-form-container {
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(30, 58, 138, 0.1);
+    padding: 2.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .event-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  }
+
+  .form-group {
+    margin-bottom: 1.8rem;
+    position: relative;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--secondary);
+    font-size: 0.95rem;
+  }
+
+  .form-control {
+    border: 2px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.15);
+    outline: none;
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+  }
+
+  .image-upload-container {
+    border: 2px dashed var(--gray-300);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: var(--gray-100);
+    margin-bottom: 1.5rem;
+    position: relative;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .image-upload-container:hover {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+  }
+
+  .image-upload-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .image-upload-text {
+    color: var(--gray-800);
+    margin-bottom: 1rem;
+  }
+
+  .image-upload-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .preview-image {
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: 10px;
+    margin-top: 1rem;
+    object-fit: contain;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 30px;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 111, 97, 0.4);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-300);
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .switch-slider {
+    background-color: var(--primary);
+  }
+
+  input:focus + .switch-slider {
+    box-shadow: 0 0 1px var(--primary);
+  }
+
+  input:checked + .switch-slider:before {
+    transform: translateX(26px);
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .toggle-label {
+    margin-left: 1rem;
+    font-weight: 600;
+  }
+
+  .input-group {
+    position: relative;
+  }
+
+  .input-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-800);
+    z-index: 10;
+  }
+
+  .event-details-title {
+    color: var(--secondary);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--gray-200);
+    font-size: 2rem;
+  }
+
+  .time-container {
+    background-color: var(--gray-100);
+    border-radius: 15px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .time-title {
+    color: var(--secondary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
+
+  /* Animation effects */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-group {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+  }
+
+  .form-group:nth-child(1) { animation-delay: 0.1s; }
+  .form-group:nth-child(2) { animation-delay: 0.2s; }
+  .form-group:nth-child(3) { animation-delay: 0.3s; }
+  .form-group:nth-child(4) { animation-delay: 0.4s; }
+  .form-group:nth-child(5) { animation-delay: 0.5s; }
+  .form-group:nth-child(6) { animation-delay: 0.6s; }
+  .form-group:nth-child(7) { animation-delay: 0.7s; }
+  
+  /* Custom select styling */
+  select.form-control {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 8px 10px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'commu_prenair/partials/header.html' %}
+
+<main class="main-content">
+    <div class="container">
+        <h1 class="page-title">{% if edit_mode %}Edit{% else %}Create New{% endif %} Event</h1>
+        <div class="event-form-container">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Image Upload -->
+                    <div class="col-md-6">
+                        <h3 class="event-details-title">Event Image</h3>
+                        <div class="image-upload-container">
+                            <div class="image-upload-content" {% if event.event_image %}style="display: none;"{% endif %}>
+                                <div class="image-upload-icon">
+                                    <i class="far fa-images"></i>
+                                </div>
+                                <h4 class="image-upload-text">Drag & drop an image or click to browse</h4>
+                                <p class="text-muted">Recommended size: 1200×630 pixels</p>
+                            </div>
+                            <input type="file" name="event_image" accept="image/*" {% if not edit_mode %}required{% endif %}>
+                            {% if event.event_image %}
+                            <img id="event-image-preview" class="preview-image" src="{{ event.event_image.url }}">
+                            {% else %}
+                            <img id="event-image-preview" class="preview-image" style="display: none;">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Event Details -->
+                    <div class="col-md-6">
+                        <h3 class="event-details-title">Event Details</h3>
+                        <div class="form-group">
+                            <label>Event Title</label>
+                            <div class="input-group">
+                                <input type="text" name="title" class="form-control" 
+                                       value="{{ event.title }}" required>
+                                <span class="input-icon"><i class="far fa-edit"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" class="form-control" 
+                                      rows="3" required>{{ event.description }}</textarea>
+                        </div>
+
+                        <div class="time-container">
+                            <h4 class="time-title"><i class="far fa-clock"></i> Event Timing</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Start Time</label>
+                                        <input type="datetime-local" name="start_time" 
+                                               value="{{ event.start_time|date:'Y-m-d\TH:i' }}" 
+                                               class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>End Time</label>
+                                        <input type="datetime-local" name="end_time" 
+                                               value="{{ event.end_time|date:'Y-m-d\TH:i' }}" 
+                                               class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" class="form-control">
+                                <option value="">Select Category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" 
+                                    {% if event.category.id == cat.id %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Event Type</label>
+                            <div class="toggle-container">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="is_virtual_toggle" 
+                                        {% if event.is_virtual %}checked{% endif %}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="toggle-label" id="event-type-label">
+                                    {% if event.is_virtual %}Virtual{% else %}Physical{% endif %} Event
+                                </span>
+                                <input type="hidden" name="is_virtual" 
+                                       value="{{ event.is_virtual|yesno:'True,False' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group virtual-link-field" 
+                            style="display: {% if event.is_virtual %}block{% else %}none{% endif %};">
+                            <label>Virtual Meeting Link</label>
+                            <div class="input-group">
+                                <input type="url" name="virtual_link" class="form-control meeting_link" 
+                                       value="{{ event.virtual_link|default_if_none:'' }}"
+                                       placeholder="https://meet.example.com/your-meeting">
+                                <span class="input-icon"><i class="fas fa-link"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group location-field" 
+                            style="display: {% if event.is_virtual %}none{% else %}block{% endif %};">
+                            <label>Physical Location</label>
+                            <div class="input-group">
+                                <input type="text" name="location" class="form-control event_location" 
+                                       value="{{ event.location|default_if_none:'' }}"
+                                       placeholder="Enter the venue address">
+                                <span class="input-icon"><i class="fas fa-map-marker-alt"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="category-btn-final btn-lg">
+                                {% if edit_mode %}Update{% else %}Create{% endif %} Event
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add FontAwesome if not already included
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+    }
+
+    // Add Google Font if not already included
+    if (!document.querySelector('link[href*="fonts.googleapis"]')) {
+        const googleFont = document.createElement('link');
+        googleFont.rel = 'stylesheet';
+        googleFont.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
+        document.head.appendChild(googleFont);
+    }
+
+    // Image preview
+    const imageInput = document.querySelector('input[name="event_image"]');
+    const preview = document.getElementById('event-image-preview');
+    const uploadContent = document.querySelector('.image-upload-content');
+
+    imageInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.style.display = 'block';
+                preview.src = e.target.result;
+                uploadContent.style.display = 'none';
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // Toggle virtual/physical fields with animated switch
+    const virtualToggle = document.getElementById('is_virtual_toggle');
+    const isVirtualInput = document.querySelector('input[name="is_virtual"]');
+    const eventTypeLabel = document.getElementById('event-type-label');
+    const virtualLinkField = document.querySelector('.virtual-link-field');
+    const locationField = document.querySelector('.location-field');
+
+    virtualToggle.addEventListener('change', function() {
+      document.getElementsByClassName('meeting_link')[0].value = ''; 
+      document.getElementsByClassName('meeting_link')[0].placeholder = 'https://meet.example.com/your-meeting';
+      document.getElementsByClassName('event_location')[0].value = ''; 
+      document.getElementsByClassName('event_location')[0].placeholder = 'Enter the venue address';
+        const isVirtual = this.checked;
+        isVirtualInput.value = isVirtual ? 'True' : 'False';
+        document.querySelector('input[name="virtual_link"]').value = isVirtual ? '' : document.querySelector('input[name="virtual_link"]').value;
+        eventTypeLabel.textContent = isVirtual ? 'Virtual Event' : 'Physical Event';
+        
+        virtualLinkField.style.display = isVirtual ? 'block' : 'none';
+        locationField.style.display = isVirtual ? 'none' : 'block';
+    });
+
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Workprenair - Edit Gig{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+
+<style>
+    .category-level {
+    margin-bottom: 15px;
+}
+
+.hidden {
+    display: none;
+}
+
+.category-dropdown {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.tag-list {
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #ff6f61;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 15px;
+    margin: 5px;
+    font-size: 14px;
+}
+
+
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                <span class="ph ph-squares-four text-xl"></span>
+                <strong class="text-button">Menu</strong>
+            </button>
+        
+            <div class="dashboard_profile scrollbar_custom w-full bg-surface" style="margin: 10px; background: url({% static 'home/images/banner.png' %});">
+                <form action="{% url 'edit_gig' slug=gig.slug %}" method="post" enctype="multipart/form-data" class="container h-fit">
+                    {% csrf_token %}
+                    <div class="heading flex items-center justify-between">
+                        <h4>Edit Gig</h4>
+                    </div>
+                
+                    <div class="gig-details p-8 mt-7 rounded-lg bg-white shadow-sm">
+                        <h5>Gig Details</h5>
+                        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+                
+                            <!-- Title -->
+                            <div class="col-span-full">
+                                <label for="title">Title:</label>
+                                <input type="text" id="title" name="title" value="{{ gig.title }}" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required>
+                            </div>
+                
+                            <!-- Description -->
+                            <div class="col-span-full">
+                                <label for="description">Description:</label>
+                                <textarea id="description" name="description" class="w-full h-24 px-4 mt-2 border rounded-lg border-line" required>{{ gig.description }}</textarea>
+                            </div>
+                
+                            <!-- Image -->
+                            <div class="col-span-full">
+                                <label for="uploadImage">Upload a new image:</label>
+                                <input type="file" id="image" name="image" accept="image/*" class="w-full px-4 mt-2 border rounded-lg border-line">
+                                <img src="{{ gig.image.url }}" alt="Current Image" class="w-32 mt-4" />
+                            </div>
+                
+                            <div id="category-selector">
+                                <!-- Level 1 -->
+                                <div class="category-level">
+                                    <label>Level 1 Category:</label>
+                                    <select id="categoryLevel1" name="category_level_1" class="category-dropdown" required>
+                                        <option value="">Select Category</option>
+                                        {% for category in categories %}
+                                            <option value="{{ category.id }}" {% if gig.category_level_1.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            
+                                <!-- Level 2 -->
+                                <div class="category-level hidden">
+                                    <label>Level 2 Category:</label>
+                                    <select id="categoryLevel2" name="category_level_2" class="category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                            
+                                <!-- Level 3 -->
+                                <div class="category-level hidden">
+                                    <label>Level 3 Category:</label>
+                                    <select id="categoryLevel3" name="category_level_3" class="category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                            
+                                <input type="hidden" name="selected_category_id" id="selectedCategoryId">
+                            </div>
+                            
+                            <!-- Tags -->
+                            <div class="col-span-full">
+                                <label>Tags:</label>
+                                <div id="tag-selector" class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="tagInput" 
+                                        placeholder="Add tags" 
+                                        class="tagInput w-full h-12 px-4 border rounded-lg border-line"
+                                    >
+                                    <ul id="tagList" class="tag-list bg-white border rounded mt-2 hidden"></ul>
+                                    <div id="selectedTags" class="selected-tags mt-2 flex gap-2 flex-wrap">
+                                        {% for tag in gig.tags.all %}
+                                            <span class="selected-tag flex items-center gap-2 bg-blue-500 text-white px-2 py-1 rounded">
+                                                {{ tag.name }}
+                                                <button type="button" class="remove-tag text-red-500" data-id="{{ tag.id }}">×</button>
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="tags" id="tags" value="">
+                                </div>
+                            </div>
+                            
+                
+                            <!-- Package Details (Basic, Standard, Premium) -->
+                            <!-- Basic Package -->
+                            <div class="col-span-full mt-5">
+                                <h6>Basic Package</h6>
+                                <input type="text" name="basic_name" placeholder="Basic Package Name" required 
+                                       value="{{ gig.basic_name }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <textarea name="basic_description" placeholder="Basic Package Description" required 
+                                          class="w-full h-24 px-4 mt-2 border rounded-lg border-line">{{ gig.basic_description }}</textarea>
+                                <input type="number" name="basic_delivery_time" placeholder="Delivery Time (days)" required 
+                                       value="{{ gig.basic_delivery_time }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="basic_revisions" placeholder="Revisions" required 
+                                       value="{{ gig.basic_revisions }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="basic_price" placeholder="Price" step="0.01" required 
+                                       value="{{ gig.basic_price }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                            </div>
+                
+                            <!-- Standard Package -->
+                            <div class="col-span-full mt-5">
+                                <h6>Standard Package</h6>
+                                <input type="text" name="standard_name" placeholder="Standard Package Name" required 
+                                       value="{{ gig.standard_name }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <textarea name="standard_description" placeholder="Standard Package Description" required 
+                                          class="w-full h-24 px-4 mt-2 border rounded-lg border-line">{{ gig.standard_description }}</textarea>
+                                <input type="number" name="standard_delivery_time" placeholder="Delivery Time (days)" required 
+                                       value="{{ gig.standard_delivery_time }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="standard_revisions" placeholder="Revisions" required 
+                                       value="{{ gig.standard_revisions }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="standard_price" placeholder="Price" step="0.01" required 
+                                       value="{{ gig.standard_price }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                            </div>
+                
+                            <!-- Premium Package -->
+                            <div class="col-span-full mt-5">
+                                <h6>Premium Package</h6>
+                                <input type="text" name="premium_name" placeholder="Premium Package Name" required 
+                                       value="{{ gig.premium_name }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <textarea name="premium_description" placeholder="Premium Package Description" required 
+                                          class="w-full h-24 px-4 mt-2 border rounded-lg border-line">{{ gig.premium_description }}</textarea>
+                                <input type="number" name="premium_delivery_time" placeholder="Delivery Time (days)" required 
+                                       value="{{ gig.premium_delivery_time }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="premium_revisions" placeholder="Revisions" required 
+                                       value="{{ gig.premium_revisions }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                                <input type="number" name="premium_price" placeholder="Price" step="0.01" required 
+                                       value="{{ gig.premium_price }}" 
+                                       class="w-full h-12 px-4 mt-2 border rounded-lg border-line" style="margin-bottom: 10px;">
+                            </div>
+                
+                        </div>
+                        <button type="submit" class="category-btn-final" style="padding: 10px 20px;">Publish</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+        </div>
+</div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+</div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', async () => {
+        const categoryLevel1 = document.getElementById('categoryLevel1');
+        const categoryLevel2 = document.getElementById('categoryLevel2');
+        const categoryLevel3 = document.getElementById('categoryLevel3');
+        const selectedCategoryId = document.getElementById('selectedCategoryId');
+        const gigSlug = '{{ gig.slug }}';
+    
+        const levels = [categoryLevel1, categoryLevel2, categoryLevel3];
+    
+        // Fetch and populate categories for a given parent ID
+        async function fetchCategories(parentId, targetDropdown, selectedValue = null) {
+        targetDropdown.innerHTML = '<option value="">Loading...</option>';
+        try {
+            const response = await fetch(`/workprenair/api/categories/${parentId}/`);
+            const data = await response.json();
+            if (data.status === 'success') {
+                targetDropdown.innerHTML = '<option value="">Select Category</option>';
+                data.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.text = category.name;
+                    if (category.id == selectedValue) {
+                        option.selected = true;
+                    }
+                    targetDropdown.appendChild(option);
+                });
+                targetDropdown.parentNode.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    }
+
+    
+        // Populate all levels based on the gig's current categories
+    async function populateCategoryDropdowns() {
+        const gigCategoryLevel1 = '{{ gig.category_level_1.id }}';
+        const gigCategoryLevel2 = '{{ gig.category_level_2.id|default:'' }}';
+        const gigCategoryLevel3 = '{{ gig.category_level_3.id|default:'' }}';
+
+        // Populate Level 2 based on Level 1
+        if (gigCategoryLevel1) {
+            await fetchCategories(gigCategoryLevel1, categoryLevel2, gigCategoryLevel2);
+        }
+
+        // Populate Level 3 based on Level 2
+        if (gigCategoryLevel2) {
+            await fetchCategories(gigCategoryLevel2, categoryLevel3, gigCategoryLevel3);
+        }
+
+        // Ensure the selectedCategoryId is set to the deepest level category
+        selectedCategoryId.value = gigCategoryLevel3 || gigCategoryLevel2 || gigCategoryLevel1;
+    }
+
+    
+        // Handle dropdown change events
+    levels.forEach((level, index) => {
+        level.addEventListener('change', () => {
+            const nextLevel = levels[index + 1];
+            if (nextLevel) {
+                nextLevel.parentNode.classList.add('hidden');
+                nextLevel.innerHTML = '<option value="">Select Category</option>';
+                if (level.value) {
+                    fetchCategories(level.value, nextLevel);
+                }
+            }
+            selectedCategoryId.value = levels[index].value || '';
+        });
+    });
+    
+        // Initial category setup
+    await populateCategoryDropdowns();
+
+    // Update selectedCategoryId before form submission
+    document.querySelector('form').addEventListener('submit', () => {
+        selectedCategoryId.value = categoryLevel3.value || categoryLevel2.value || categoryLevel1.value;
+    });
+    
+        // Tags
+        const tagInput = document.getElementById('tagInput');
+        const tagList = document.getElementById('tagList');
+        const selectedTagsContainer = document.getElementById('selectedTags');
+        const hiddenTagsInput = document.getElementById('tags');
+    
+        let selectedTags = [];
+    
+        // Fetch tags associated with the gig
+        async function fetchTagsForGig() {
+            try {
+                const response = await fetch(`/workprenair/api/gig-tags/${gigSlug}/`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    selectedTags = data.tags;
+                    selectedTags.forEach(tag => addTag(tag));
+                    updateTagsInput();
+                }
+            } catch (error) {
+                console.error('Error fetching tags:', error);
+            }
+        }
+    
+        fetchTagsForGig(); // Call the function to fetch existing tags
+    
+        // Update hidden input for tags
+        function updateTagsInput() {
+            const tagIds = selectedTags.map(tag => tag.id);
+            hiddenTagsInput.value = JSON.stringify(tagIds); // Store IDs as JSON
+        }
+    
+        // Add a tag to the UI and list
+        function addTag(tag) {
+            if (selectedTags.find(t => t.id === tag.id)) return;
+            selectedTags.push(tag);
+            const tagElement = document.createElement('span');
+            tagElement.classList.add('selected-tag', 'flex', 'items-center', 'gap-2', 'bg-blue-500', 'text-white', 'px-2', 'py-1', 'rounded');
+            tagElement.innerHTML = `${tag.name} <button type="button" class="remove-tag text-red-500" data-id="${tag.id}">×</button>`;
+            selectedTagsContainer.appendChild(tagElement);
+            updateTagsInput();
+        }
+    
+        // Remove a tag from the UI and list
+        function removeTag(tagId) {
+            selectedTags = selectedTags.filter(tag => tag.id !== tagId);
+            const tagElement = selectedTagsContainer.querySelector(`[data-id="${tagId}"]`).parentNode;
+            selectedTagsContainer.removeChild(tagElement);
+            updateTagsInput();
+        }
+    
+        // Fetch and display tag suggestions
+        tagInput.addEventListener('input', async () => {
+            const query = tagInput.value.trim();
+            if (query) {
+                try {
+                    const response = await fetch(`/workprenair/api/search_tags/?q=${query}`);
+                    const data = await response.json();
+                    tagList.innerHTML = '';
+                    data.tags.forEach(tag => {
+                        const li = document.createElement('li');
+                        li.textContent = tag.name;
+                        li.dataset.id = tag.id;
+                        li.classList.add('tag-suggestion');
+                        tagList.appendChild(li);
+                    });
+                    tagList.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching tags:', error);
+                }
+            } else {
+                tagList.classList.add('hidden');
+            }
+        });
+    
+        // Add a tag from suggestions
+        tagList.addEventListener('click', (e) => {
+            const tagId = parseInt(e.target.dataset.id);
+            const tagName = e.target.textContent;
+            if (tagId && tagName) {
+                addTag({ id: tagId, name: tagName });
+                tagInput.value = '';
+                tagList.classList.add('hidden');
+            }
+        });
+    
+        // Remove a tag on button click
+        selectedTagsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-tag')) {
+                const tagId = parseInt(e.target.dataset.id);
+                removeTag(tagId);
+            }
+        });
+    
+        // Ensure hidden tags input is updated before form submission
+        document.querySelector('form').addEventListener('submit', () => {
+            updateTagsInput();
+        });
+    });
+    </script>
+    
+{% endblock extra_javascript %}

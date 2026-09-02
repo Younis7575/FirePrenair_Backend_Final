@@ -1,0 +1,73 @@
+.line-before {
+    position: relative;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 0;
+        height: 1px;
+        background-color: var(--primary);
+        transition: all ease 0.3s;
+    }
+
+    &.active,
+    &:hover {
+        &::before {
+            width: 100%;
+        }
+    }
+
+    &.line-white {
+        &::before {
+            background-color: var(--white);
+        }
+    }
+
+    &.line-black {
+        &::before {
+            background-color: var(--black);
+        }
+    }
+
+    &.line-2px {
+        &::before {
+            height: 2px;
+            bottom: -1px;
+        }
+    }
+}
+
+.active {
+    >.line-before {
+        color: var(--primary);
+
+        &::before {
+            width: 100%;
+        }
+    }
+}
+
+.category_item {
+    .icon {
+        &.line-before {
+            &::before {
+                width: 100%;
+                border-radius: 1000px;
+                background-color: var(--line);
+            }
+        }
+    }
+
+    &:hover {
+        .icon {
+            &.line-before {
+                &::before {
+                    width: 100%;
+                    background-color: var(--primary);
+                }
+            }
+        }
+    }
+}

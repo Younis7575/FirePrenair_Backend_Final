@@ -1,0 +1,659 @@
+<style>
+.ai-optimizer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(5px);
+}
+
+.ai-optimizer-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    display: none;
+    max-height: 85vh;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Header */
+.ai-optimizer-header {
+    padding: 24px 30px;
+    background: #1e3a8a;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-optimizer-header h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.ai-optimizer-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.ai-optimizer-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Body */
+.ai-optimizer-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tabs */
+.ai-optimizer-tabs {
+    display: flex;
+    padding: 0 25px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.ai-tab {
+    padding: 18px 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: #666;
+    transition: all 0.3s;
+    position: relative;
+    letter-spacing: 0.5px;
+}
+
+.ai-tab:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff6f61, #ff4b5c);
+    transition: width 0.3s ease;
+    border-radius: 3px 3px 0 0;
+}
+
+.ai-tab:hover {
+    color: #ff6f61;
+}
+
+.ai-tab.active {
+    color: #ff6f61;
+}
+
+.ai-tab.active:after {
+    width: 70%;
+}
+
+/* Content Section */
+.ai-content-section {
+    display: none;
+    padding: 30px;
+    height: calc(65vh - 120px);
+    overflow-y: auto;
+}
+
+.ai-content-section.active {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+/* Content Panel Styling */
+.ai-original, .ai-suggestions {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-original h4, .ai-suggestions h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2d3748;
+    font-size: 18px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    position: relative;
+}
+
+.ai-original h4:after, .ai-suggestions h4:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #ff6f61, #ff4b5c);
+}
+
+.ai-current-content {
+    line-height: 1.6;
+    color: #4a5568;
+}
+
+/* Suggestion lists */
+.ai-suggestion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    padding-right: 5px;
+    flex: 1;
+}
+
+/* Scrollbar styling */
+.ai-suggestion-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-suggestion-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.ai-suggestion-list::-webkit-scrollbar-thumb {
+    background: #c8c8c8;
+    border-radius: 10px;
+}
+
+.ai-suggestion-list::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* Suggestion items */
+.ai-suggestion-item {
+    padding: 18px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 3px solid #ff6f61;
+    transition: all 0.2s ease;
+}
+
+.ai-suggestion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.ai-suggestion-item span, .ai-suggestion-item p {
+    flex: 1;
+    margin: 0;
+    line-height: 1.5;
+    color: #4a5568;
+}
+
+.ai-suggestion-item button {
+    background: linear-gradient(135deg, #ff6f61 0%, #ff4b5c 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 15px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(255, 111, 97, 0.3);
+}
+
+.ai-suggestion-item button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 111, 97, 0.4);
+}
+
+/* Tags styling */
+.ai-current-tags, .ai-suggestion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.ai-tag {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    color: #4a5568;
+    border: 1px solid #eaeaea;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.ai-suggestion-tags .ai-tag {
+    background: linear-gradient(135deg, rgba(255, 111, 97, 0.1) 0%, rgba(255, 75, 92, 0.1) 100%);
+    border: 1px solid rgba(255, 111, 97, 0.2);
+    padding-right: 12px;
+    cursor: pointer;
+}
+
+.ai-suggestion-tags .ai-tag:hover {
+    background: linear-gradient(135deg, rgba(255, 111, 97, 0.15) 0%, rgba(255, 75, 92, 0.15) 100%);
+    transform: translateY(-2px);
+}
+
+.ai-suggestion-tags .ai-tag:after {
+    content: '+';
+    display: inline-block;
+    margin-left: 8px;
+    font-weight: bold;
+    color: #ff6f61;
+    font-size: 14px;
+}
+
+/* Footer */
+.ai-optimizer-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+    text-align: right;
+    background: #f8f9fa;
+}
+
+/* Loading animation */
+.ai-loading-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #666;
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.ai-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(255, 111, 97, 0.1);
+    border-top: 3px solid #ff6f61;
+    border-radius: 50%;
+    animation: aiSpin 1s linear infinite;
+}
+
+@keyframes aiSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ai-error {
+    color: #e53e3e;
+    padding: 10px 15px;
+    background: rgba(229, 62, 62, 0.1);
+    border-radius: 6px;
+    font-size: 14px;
+    display: none;
+    text-align: left;
+    margin-top: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ai-content-section.active {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .ai-optimizer-tabs {
+        padding: 0 15px;
+    }
+    
+    .ai-tab {
+        padding: 15px 20px;
+        font-size: 14px;
+    }
+    
+    .ai-content-section {
+        padding: 20px;
+        height: auto;
+        max-height: 60vh;
+    }
+}
+</style>
+
+<!-- AI Optimizer Popup -->
+<div class="ai-optimizer-overlay" id="aiOptimizerOverlay"></div>
+<div class="ai-optimizer-popup" id="aiOptimizerPopup">
+    <div class="ai-optimizer-header">
+        <h3>AI Gig Optimization</h3>
+        <button class="ai-optimizer-close" onclick="closeAIOptimizer()">×</button>
+    </div>
+    <div class="ai-optimizer-body">
+        <div class="ai-optimizer-tabs">
+            <button class="ai-tab active" onclick="changeAITab('title')">Title</button>
+            <button class="ai-tab" onclick="changeAITab('description')">Description</button>
+            <button class="ai-tab" onclick="changeAITab('keywords')">Keywords</button>
+        </div>
+        
+        <div class="ai-content-section active" id="aiTitleSection">
+            <div class="ai-original">
+                <h4>Current Title</h4>
+                <p class="ai-current-content" id="aiCurrentTitle">{{ gig.title }}</p>
+            </div>
+            <div class="ai-suggestions">
+                <h4>AI Suggestions</h4>
+                <div class="ai-suggestion-list" id="aiTitleSuggestions"></div>
+            </div>
+        </div>
+
+        <div class="ai-content-section" id="aiDescriptionSection">
+            <div class="ai-original">
+                <h4>Current Description</h4>
+                <p class="ai-current-content" id="aiCurrentDescription">{{ gig.description_html|safe }}</p>
+            </div>
+            <div class="ai-suggestions">
+                <h4>AI Suggestions</h4>
+                <div class="ai-suggestion-list" id="aiDescSuggestions"></div>
+            </div>
+        </div>
+
+        <div class="ai-content-section" id="aiKeywordsSection">
+            <div class="ai-original">
+                <h4>Current Tags</h4>
+                <div class="ai-current-tags">
+                    {% for tag in gig.tags.all %}
+                    <span class="ai-tag">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ai-suggestions">
+                <h4>Suggested Keywords / Tags</h4>
+                <div class="ai-suggestion-tags" id="aiKeywordSuggestions"></div>
+            </div>
+        </div>
+
+        <div class="ai-optimizer-footer">
+            <button class="ai-loading-btn" id="aiLoading" style="display: none;">
+                <div class="ai-spinner"></div>
+                Analyzing...
+            </button>
+            <div class="ai-error" id="aiError"></div>
+        </div>
+    </div>
+</div>
+    
+
+<script>
+    
+function openAIOptimizer(gigSlug, singleGig = true, gigTitle = null) {
+    const popup = document.getElementById('aiOptimizerPopup');
+    const overlay = document.getElementById('aiOptimizerOverlay');
+    const loading = document.getElementById('aiLoading');
+    const error = document.getElementById('aiError');
+
+    if (gigTitle) {
+        document.getElementById('aiCurrentTitle').textContent = gigTitle;
+    }
+
+    loading.style.display = 'flex';
+    popup.style.display = 'block';
+    overlay.style.display = 'block';
+    error.style.display = 'none';
+    
+    setTimeout(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 10);
+
+    fetch(`/workprenair/gig/optimize/${gigSlug}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if(data.error) {
+            error.textContent = data.error;
+            error.style.display = 'block';
+            return;
+        }
+        
+        populateSuggestions(data, gigSlug, singleGig);
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        error.textContent = 'Failed to get AI suggestions. Please try again.';
+        error.style.display = 'block';
+    })
+    .finally(() => {
+        loading.style.display = 'none';
+    });
+}
+
+function populateSuggestions(data, gigSlug, singleGig) {
+    const titleContainer = document.getElementById('aiTitleSuggestions');
+    titleContainer.innerHTML = '';
+    
+    data.titles.forEach(title => {
+        const item = document.createElement('div');
+        item.className = 'ai-suggestion-item';
+        
+        const span = document.createElement('span');
+        span.textContent = title;
+        
+        const button = document.createElement('button');
+        button.textContent = 'Apply';
+        button.onclick = function() {
+            applySuggestion('title', title, gigSlug, singleGig);
+        };
+        
+        item.appendChild(span);
+        item.appendChild(button);
+        titleContainer.appendChild(item);
+    });
+
+    const descContainer = document.getElementById('aiDescSuggestions');
+    descContainer.innerHTML = '';
+    
+    data.descriptions.forEach(desc => {
+        const item = document.createElement('div');
+        item.className = 'ai-suggestion-item';
+        
+        const p = document.createElement('p');
+        p.textContent = desc;
+        
+        const button = document.createElement('button');
+        button.textContent = 'Apply';
+        button.onclick = function() {
+            applySuggestion('description', desc, gigSlug, singleGig);
+        };
+        
+        item.appendChild(p);
+        item.appendChild(button);
+        descContainer.appendChild(item);
+    });
+
+    const keywordContainer = document.getElementById('aiKeywordSuggestions');
+    keywordContainer.innerHTML = '';
+    
+    data.keywords.forEach(keyword => {
+        const tag = document.createElement('span');
+        tag.className = 'ai-tag';
+        tag.textContent = keyword;
+        tag.onclick = function() {
+            applySuggestion('keyword', keyword, gigSlug, singleGig);
+        };
+        keywordContainer.appendChild(tag);
+    });
+}
+
+function applySuggestion(type, value, gigSlug, singleGig) {
+    const feedback = document.createElement('div');
+    feedback.className = 'ai-feedback';
+    feedback.textContent = 'Applying changes...';
+    document.querySelector('.ai-optimizer-body').appendChild(feedback);
+    
+    fetch('/workprenair/gig/apply-suggestion/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: type,
+            value: value,
+            gig_slug: gigSlug
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'error') {
+            feedback.textContent = data.message;
+            feedback.style.backgroundColor = '#f44336';
+            setTimeout(() => feedback.remove(), 3000);
+            return;
+        }
+
+        feedback.textContent = 'Changes applied successfully!';
+        feedback.style.backgroundColor = '#4CAF50';
+        
+        if (type === 'title') {
+            if (singleGig) {
+                document.querySelector('.services_name').textContent = value;
+            }
+            else {
+                document.getElementById(`gig-title-${gigSlug}`).textContent = value;
+            }
+            document.querySelector('.ai-current-content').textContent = value;
+        } else if (type === 'description') {
+            document.querySelector('.ai-current-content').textContent = value;
+        } else if (type === 'keyword') {
+            const tagsContainer = document.querySelector('.ai-current-tags');
+            const tag = document.createElement('span');
+            tag.className = 'ai-tag';
+            tag.textContent = value;
+            tagsContainer.appendChild(tag);
+        }
+        
+        setTimeout(() => {
+            feedback.style.opacity = '0';
+            setTimeout(() => feedback.remove(), 300);
+        }, 2000);
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        feedback.textContent = 'Failed to apply changes';
+        feedback.style.backgroundColor = '#f44336';
+        
+        setTimeout(() => {
+            feedback.style.opacity = '0';
+            setTimeout(() => feedback.remove(), 300);
+        }, 2000);
+    });
+}
+
+function closeAIOptimizer() {
+    const popup = document.getElementById('aiOptimizerPopup');
+    const overlay = document.getElementById('aiOptimizerOverlay');
+    
+    popup.style.opacity = '0';
+    popup.style.transform = 'translate(-50%, -50%) scale(0.95)';
+    
+    setTimeout(() => {
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+    }, 300);
+}
+
+function changeAITab(tabName) {
+    document.querySelectorAll('.ai-content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.ai-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.getElementById(`ai${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Section`).classList.add('active');
+    
+    event.currentTarget.classList.add('active');
+    
+    const activeSection = document.querySelector('.ai-content-section.active');
+    activeSection.style.opacity = '0';
+    activeSection.style.transform = 'translateY(10px)';
+    
+    setTimeout(() => {
+        activeSection.style.opacity = '1';
+        activeSection.style.transform = 'translateY(0)';
+    }, 50);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .ai-optimizer-popup {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .ai-content-section.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .ai-feedback {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10001;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>

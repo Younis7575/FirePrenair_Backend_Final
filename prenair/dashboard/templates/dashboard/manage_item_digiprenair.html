@@ -1,0 +1,96 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Digiprenair Manage Items {% endblock title %} {% load static %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" >
+      <div class="container h-full lg:px-15 sm:px-12 py-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+        <h4 class="heading4 max-lg:mt-3">Manage Items</h4>
+        <a
+          href="{% url "upload_item_digiprenair" %}"
+          data-url="{% url "upload_item_digiprenair" %}"
+          class="category-btn-final open-product-popup"
+        >Upload Item</a>
+      </div>
+        <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+            <div class="list overflow-x-auto w-full p-5 rounded-xl">
+                <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+                    <thead class="border-b border-line">
+                        <tr>
+                            <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Action</th>
+                            <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Product</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %} 
+                        <tr class="item duration-300 hover:bg-background">
+                            <td class="p-5">
+                                <a
+                                  href="{% url 'edit_item_digiprenair' product.slug %}"
+                                  data-url="{% url 'edit_item_digiprenair' product.slug %}"
+                                  class="tag bg-opacity-10 bg-yellow text-yellow text-button flex items-center gap-1 open-product-popup"
+                                >Edit <i class="ph-duotone ph-note-pencil"></i></a>
+                            </td>
+                            <th scope="row" class="p-5 text-left">
+                                <div class="info flex items-center gap-3">
+                                    <a href="{% url 'digi_product' product.slug %}" class="flex-shrink-0 w-30 h-15 overflow-hidden">
+                                        <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-full object-cover" />
+                                    </a>
+                                    <a href="{% url 'digi_product' product.slug %}" class="block">
+                                        <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{ product.title }}</strong>
+                                        <div class="address flex items-center gap-2 mt-1 text-secondary">
+                                            <span class="employers_address font-normal">{{ product.category.name }}</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </th>
+                
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% include "dashboard/partials/footer_cta.html" %}
+      </div>
+      <div
+        class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+  {% endblock extra_javascript %}
+</body>

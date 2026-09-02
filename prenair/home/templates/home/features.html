@@ -1,0 +1,391 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Features{% endblock title %}
+
+{% block extra_css %}
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
+<style>
+    /* Features Page Styling */
+    .features-container {
+        display: flex;
+        flex-wrap: wrap;
+        background: linear-gradient(135deg, #ffefed, #ffffff);
+        padding: 40px 20px;
+        gap: 20px;
+    }
+
+    .features-sidebar {
+        flex: 1 1 20%;
+        background: #1e3a8a;
+        color: #fff;
+        border-radius: 0px 40px 40px 40px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+
+    .features-sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .features-sidebar li {
+        margin: 15px 0;
+        font-size: 18px;
+        text-transform: capitalize;
+    }
+
+    .features-sidebar a {
+        text-decoration: none;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .features-sidebar a i {
+        font-size: 24px;
+        margin-right: 10px;
+        color: #ff6f61;
+    }
+
+    .features-sidebar a:hover {
+        color: #ff6f61;
+        transform: translateX(5px);
+    }
+
+    .features-sidebar .active {
+        color: #ff6f61;
+    }
+
+    .features-content {
+        flex: 3 1 75%;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+
+    .feature-section {
+        margin-bottom: 50px;
+    }
+
+    .feature-section h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #ff6f61;
+        border-bottom: 3px solid #1e3a8a;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+    .feature-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .feature-card {
+        background: linear-gradient(135deg, #ffffff, #ffefed);
+        border-radius: 0px 40px 40px 40px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-card i {
+        font-size: 40px;
+        color: #ff6f61;
+        margin-bottom: 15px;
+    }
+
+    .feature-card h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #1e3a8a;
+    }
+
+    .feature-card p {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .feature-card a {
+        font-size: 14px;
+        color: #ff6f61;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .feature-card a:hover {
+        color: #d9534f;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="home-two">
+    {% include 'home/partials/new_header.html' %}
+    <div class="main-wrapper">
+
+		<div class="page-intro" style="background: #f8f9fa; padding: 20px 40px; text-align: center; margin-bottom: 30px;">
+            <h1 style="font-size: 36px; font-weight: bold; color: #ff6f61;">Explore the Features of Fireprenair</h1>
+            <p style="font-size: 18px; color: #555; margin-top: 10px;">
+                Fireprenair is your ultimate platform for freelancers, learners, entrepreneurs, and communities. 
+                Discover a comprehensive suite of tools and services tailored to meet your needs and help you achieve your goals.
+            </p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-container">
+            <!-- Sidebar -->
+            <div class="features-sidebar">
+                <ul>
+                    <li><a href="#workprenair" class="active"><i class="ri-briefcase-line"></i> Workprenair</a></li>
+                    <li><a href="#eduprenair"><i class="ri-book-open-line"></i> Eduprenair</a></li>
+                    <li><a href="#digiprenair"><i class="ri-shopping-cart-line"></i> Digiprenair</a></li>
+                    <li><a href="#commuprenair"><i class="ri-group-line"></i> Commuprenair</a></li>
+                </ul>
+            </div>
+
+            <!-- Features Content -->
+            <div class="features-content">
+                <!-- Workprenair -->
+                <div id="workprenair" class="feature-section">
+                    <h2>Workprenair</h2>
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <i class="ri-task-line"></i>
+                            <h3>Freelance Marketplace</h3>
+                            <p>Join a vibrant freelance ecosystem tailored for professionals.</p>
+							<a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                        <div class="feature-card">
+                            <i class="ri-customer-service-line"></i>
+                            <h3>Client Support Tools</h3>
+                            <p>Empower your freelance journey with tools designed for client success.</p>
+                            <a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                        <div class="feature-card">
+                            <i class="ri-bar-chart-box-line"></i>
+                            <h3>Advanced Analytics</h3>
+                            <p>Track and optimize your freelance earnings with powerful insights.</p>
+                            <a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                        <div class="feature-card">
+                            <i class="ri-wallet-line"></i>
+                            <h3>Instant Payments</h3>
+                            <p>Experience secure and fast payments for your hard work.</p>
+                            <a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                        <div class="feature-card">
+                            <i class="ri-calendar-check-line"></i>
+                            <h3>Project Management</h3>
+                            <p>Manage projects with intuitive tools for efficiency and clarity.</p>
+                            <a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                        <div class="feature-card">
+                            <i class="ri-globe-line"></i>
+                            <h3>Global Opportunities</h3>
+                            <p>Work with international clients and broaden your horizons.</p>
+                            <a href="{% url 'feature_detail' %}?feature=work">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eduprenair -->
+                <div id="eduprenair" class="feature-section">
+					<h2>Eduprenair</h2>
+					<div class="feature-cards">
+						<div class="feature-card">
+							<i class="ri-video-line"></i>
+							<h3>Online Courses</h3>
+							<p>Access a wide variety of courses tailored to help you upskill and grow in your career.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-live-line"></i>
+							<h3>Live Webinars</h3>
+							<p>Join live sessions with industry experts to gain valuable insights and knowledge.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-book-read-line"></i>
+							<h3>Expert Tutorials</h3>
+							<p>Learn from detailed step-by-step tutorials curated by professionals in the field.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-quill-pen-line"></i>
+							<h3>Certification Programs</h3>
+							<p>Boost your resume with certifications recognized by top companies worldwide.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-group-line"></i>
+							<h3>Student Communities</h3>
+							<p>Engage with peers, share knowledge, and grow together in an interactive learning environment.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-download-cloud-line"></i>
+							<h3>Downloadable Resources</h3>
+							<p>Access e-books, templates, and other learning materials to support your education.</p>
+							<a href="{% url 'feature_detail' %}?feature=edu">Learn More</a>
+						</div>
+					</div>
+				</div>
+				
+
+                <div id="digiprenair" class="feature-section">
+					<h2>Digiprenair</h2>
+					<div class="feature-cards">
+						<div class="feature-card">
+							<i class="ri-shopping-bag-line"></i>
+							<h3>Sell Digital Products</h3>
+							<p>Create and sell digital assets like templates, themes, and plugins to a global audience.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-upload-cloud-line"></i>
+							<h3>Easy Upload System</h3>
+							<p>Seamlessly upload your products and manage your listings with our user-friendly interface.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-bar-chart-box-line"></i>
+							<h3>Analytics Dashboard</h3>
+							<p>Track your sales, revenue, and customer insights with a comprehensive analytics tool.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-wallet-3-line"></i>
+							<h3>Secure Payment Options</h3>
+							<p>Receive payments instantly and securely with multiple payment gateways.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-global-line"></i>
+							<h3>Global Reach</h3>
+							<p>Expand your business to customers worldwide with our extensive marketplace reach.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-feedback-line"></i>
+							<h3>Customer Feedback</h3>
+							<p>Collect and analyze customer feedback to improve your products and services.</p>
+							<a href="{% url 'feature_detail' %}?feature=digi">Learn More</a>
+						</div>
+					</div>
+				</div>
+				
+
+				<div id="commuprenair" class="feature-section">
+					<h2>Commuprenair</h2>
+					<div class="feature-cards">
+						<div class="feature-card">
+							<i class="ri-group-line"></i>
+							<h3>Professional Networking</h3>
+							<p>Connect with professionals, mentors, and industry experts to grow your career.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-chat-3-line"></i>
+							<h3>Interactive Discussions</h3>
+							<p>Participate in topic-specific discussions and exchange valuable insights with peers.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-broadcast-line"></i>
+							<h3>Community Events</h3>
+							<p>Join webinars, meetups, and online events to enhance your knowledge and connections.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-mail-line"></i>
+							<h3>Direct Messaging</h3>
+							<p>Communicate directly with like-minded individuals to collaborate and share ideas.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-user-heart-line"></i>
+							<h3>Find Mentorship</h3>
+							<p>Seek guidance from experienced mentors and boost your career growth.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+						<div class="feature-card">
+							<i class="ri-building-line"></i>
+							<h3>Company Communities</h3>
+							<p>Engage with company communities to discover job opportunities and company culture.</p>
+							<a href="{% url 'feature_detail' %}?feature=commu">Learn More</a>
+						</div>
+					</div>
+				</div>
+				
+            </div>
+        </div>
+		{% include 'home/partials/footer.html' %}
+    </div>
+</body>
+{% endblock content %}
+
+
+
+{% block extra_javascript %}
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+    const sidebarLinks = document.querySelectorAll('.features-sidebar a');
+    const sections = document.querySelectorAll('.feature-section');
+
+    // Smooth scrolling
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').slice(1); // Get the ID (without #)
+            const targetElement = document.getElementById(targetId);
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Track scroll position
+    window.addEventListener('scroll', () => {
+        let currentSection = '';
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            if (pageYOffset >= sectionTop - sectionHeight / 3) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').slice(1) === currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+});
+
+</script>
+
+{% endblock extra_javascript %}

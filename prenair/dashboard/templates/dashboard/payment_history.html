@@ -1,0 +1,291 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard - Payment History{% endblock title %}
+{% load static %}
+
+{% load tz %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+<style>
+    /* Floating Button */
+    .unique-floating-btn {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 200px;
+        height: 60px;
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        z-index: 1000;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 0 20px;
+    }
+
+    .unique-floating-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .unique-floating-btn .unique-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+    }
+
+    .unique-floating-btn .unique-text {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    /* Modal */
+    .unique-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.7);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 1001;
+    }
+
+    .unique-modal.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Card Styling */
+    .unique-modal-content {
+        position: relative;
+        background: #ffffff;
+        width: 90%;
+        max-width: 450px;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        border: 1px solid #e0e0e0;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .unique-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .unique-modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333333;
+    }
+
+    .unique-close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999999;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .unique-close-btn:hover {
+        color: #ff4d4d;
+    }
+
+    /* Progress Bar */
+    .unique-progress-container {
+        margin: 20px 0;
+        background: #f9f9f9;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+    }
+
+    .unique-progress-bar {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        height: 20px;
+        color: white;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        transition: width 0.3s ease;
+    }
+
+    /* List Items */
+    .unique-missing-fields {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .unique-missing-fields li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .unique-missing-fields li:hover {
+        background: #f3f8ff;
+        transform: translateY(-2px);
+    }
+
+    .unique-missing-fields li.completed {
+        text-decoration: line-through;
+        color: #999999;
+    }
+
+    .unique-missing-fields li .complete-link {
+        font-size: 14px;
+        font-weight: bold;
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .unique-missing-fields li .complete-link:hover {
+        color: #0056b3;
+    }
+
+    /* Completed Message */
+    .unique-completed-message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #e6ffe6;
+        color: #007f00;
+        font-weight: bold;
+        text-align: center;
+        border: 1px solid #d4f5d4;
+    }
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:px-15 lg:pb-30 max-lg:px-12 max-sm:px-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">Payment History</h4>
+                
+                <div class="get_paid p-6 mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5">Get paid</h5>
+                    <p class="body2 mt-2 text-secondary">Choose the payout method of your ease!</p>
+                    <div class="flex flex-wrap gap-4 mt-5">
+                        <a href="{% url 'payout_request' %}" class="category-btn-final">Get paid Now</a>
+                        <!-- <a href="{% url 'paypal_transfer' %}" class="category-btn-final">Paypal</a> -->
+                        <a href="{% url 'payout_settings' %}" class="category-btn-final">View Payment Settings</a>
+                    </div>
+                </div>
+                <div class="earning_block mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5 pt-6 px-6">Payment History</h5>
+                    <div class="list overflow-x-auto w-full py-5 px-6 rounded-xl">
+                        <table class="w-full max-md:w-[600px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Date</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Type</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if withdrawals %}
+                                {% for withdraw in withdrawals %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left whitespace-nowrap">{{withdraw.created_at}}</th>
+                                    
+                                    <td class="p-5 heading6">{{withdraw.payout_type}}</td>
+                                    <td class="p-5 text-title whitespace-nowrap">${{withdraw.amount}}</td>
+                                    <td class="p-5 text-right">
+                                        {% if withdraw.status == 'PENDING' %}
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">{{withdraw.status}}</span>
+                                        {% elif withdraw.status == 'COMPLETED' %}
+                                        <span class="tag bg-opacity-10 bg-success text-success text-button">{{withdraw.status}}</span>
+                                        {% elif withdraw.status == 'PROCESSING' %}
+                                        <span class="tag bg-opacity-10 bg-primary text-primary text-button">{{withdraw.status}}</span>
+                                        {% else %}
+                                        <span class="tag bg-opacity-10 bg-red text-red text-button">{{withdraw.status}}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="p-5 text-center">No payment history found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% include "dashboard/partials/footer_cta.html" %}
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+       
+    </div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+     <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+{% endblock content %}
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+{% endblock extra_javascript %}

@@ -1,0 +1,33 @@
+/* slider */
+/*slider freelancer3*/
+.slider {
+    &.-style-3 {
+        .slider_bg {
+            .icon {
+
+                &_link,
+                &_like {
+                    animation: slide_1 20s linear 0s infinite;
+                }
+
+                &_heart {
+                    animation: slide_2 20s linear 0s infinite;
+                }
+            }
+        }
+    }
+
+    &.-style-9 {
+        animation-name: uicoreZoomOutUp, uicoreFadeIn !important;
+        animation-duration: 1.9s;
+        animation-timing-function: cubic-bezier(.22, 1, .36, 1), cubic-bezier(0, 0, .2, 1);
+    }
+
+    &.-style-reverse {
+        .slider_bg {
+            img {
+                transform: rotateY(180deg);
+            }
+        }
+    }
+}

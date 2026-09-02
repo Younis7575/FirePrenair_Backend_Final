@@ -1,0 +1,106 @@
+{% extends "commu_prenair/partials/base.html" %}
+{% load course_filters %}
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Users{% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <h4 style="display: flex; justify-content: center;">Network with Like Minded People</h4>
+        <div class="col-xl-12 col-lg-8 cus-mar">
+            <!-- Search and Filter Form (optional) -->
+            <form action="{% url 'search_people' %}" method="get" class="d-flex my-7 align-items-stretch justify-content-between gap-4">
+                <div class="input-area py-2 w-100 gap-2 d-flex align-items-center">
+                    <i class="material-symbols-outlined mat-icon">search</i>
+                    <input type="text" name="q" placeholder="Search" autocomplete="off">
+                </div>
+                <button type="submit" class="category-btn-final">
+                    <i class="material-symbols-outlined mat-icon">filter_alt</i>
+                    Filter
+                </button>
+            </form>
+            <div class="row">
+                {% include 'commu_prenair/partials/home_left_side.html' %}
+           
+            <div class="col-xl-9 col-lg-8">
+                <div class="row cus-mar friend-request">
+                    {% if people %}
+                    {% for person in people %}
+                    <div class="col-xl-4 col-sm-6 col-3">
+                        <div class="single-box p-5">
+                            <div class="avatar">
+                                <img class="avatar-img w-100" src="{{ person.profile_pic.url }}" alt="avatar">
+                            </div>
+                            <a href="{% url 'commu_profile' person.slug %}">
+                                <h6 class="m-0 mb-2 mt-3">{{ person.name }}</h6>
+                            </a>
+                            <div class="friends-list d-center gap-1 text-center">
+                                <ul class="d-center">
+                                    {% for friend in request.user|mutual_connections:person|slice:":3" %}
+                                    <li><img src="{{ friend.profile_pic.url }}" alt="image"></li>
+                                    {% endfor %}
+                                </ul>
+                                <span class="smtxt m-0">{{ request.user|mutual_connections_count:person }} mutual
+                                    friends</span>
+                            </div>
+                            <div class="d-center gap-2 mt-4">
+                                {% if request.user|is_friend_request_pending:person %}
+                                <a href="{% url 'withdraw_friend_request' person.slug %}"
+                                class="category-btn-final" style="color: white; padding: 10px 20px; background-color: #1e3a8a;">Withdraw</a>
+
+                                {% elif request.user|is_friend_request_received:person %}
+
+                                <a href="{% url 'handle_friend_request' person.slug 'accept' %}"
+                                class="category-btn-final" style="color: white; padding: 10px 20px;">Accept Request</a>
+
+                                {% elif request.user|is_already_connected:person %}
+                                <a href="{% url 'remove_connection' person.slug %}"
+                                class="category-btn-final" style="color: white; padding: 10px 20px; background-color: #1e3a8a;">Remove Connection</a>
+
+                                    {% else %}
+                                    <a href="{% url 'send_friend_request' person.slug %}"
+                                    class="category-btn-final" style="color: white; padding: 10px 20px;">Send Request</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-xl-12 col-lg-8 cus-mar">
+                        <div class="single-box p-5">
+                            <h6 class="m-0 mb-2 mt-3">No Match found for {{query}}</h6>   
+                        </div>
+                    </div>
+                    {% endif %}
+                
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+
+{% endblock javascript %}

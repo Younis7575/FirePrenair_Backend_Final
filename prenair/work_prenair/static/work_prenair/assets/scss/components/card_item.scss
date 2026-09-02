@@ -1,0 +1,131 @@
+.service,
+.project,
+.candidates,
+.employers,
+.jobs,
+.blog {
+
+    &_company,
+    &_title,
+    &_name,
+    &_desc,
+    &_author_name,
+    &_address {
+        display: block; //ie
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.-style-1 {
+            -webkit-line-clamp: 1;
+            word-break: break-all;
+        }
+    }
+}
+
+.service {
+    &_item {
+        &.-style-list {
+            .add_wishlist_btn {
+                right: 12px;
+                left: unset;
+            }
+        }
+    }
+}
+
+.candidates {
+
+    &_item,
+    &_breadcrumb {
+        &.is_top_rate {
+            .candidates_name {
+                position: relative;
+                padding-right: 24px;
+
+                &::before {
+                    content: "\e616";
+                    position: absolute;
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    font-size: 18px;
+                    color: var(--primary);
+                    font-family: "Phosphor-Fill" !important;
+                    speak: never;
+                    font-style: normal;
+                    font-weight: normal;
+                    font-variant: normal;
+                    text-transform: none;
+                    line-height: 1;
+                    letter-spacing: 0;
+                    -webkit-font-feature-settings: "liga";
+                    -moz-font-feature-settings: "liga=1";
+                    -moz-font-feature-settings: "liga";
+                    -ms-font-feature-settings: "liga" 1;
+                    font-feature-settings: "liga";
+                    -webkit-font-variant-ligatures: discretionary-ligatures;
+                    font-variant-ligatures: discretionary-ligatures;
+                    -webkit-font-smoothing: antialiased;
+                }
+            }
+        }
+
+        .add_wishlist_btn {
+            top: 24px;
+            right: 20px;
+            left: unset;
+
+            &.top-0 {
+                top: 0;
+            }
+
+            &.right-0 {
+                right: 0;
+            }
+        }
+    }
+
+    &_breadcrumb {
+        &.is_top_rate {
+            .candidates_name {
+                padding-right: 32px;
+
+                &::before {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
+}
+
+.jobs {
+    &_item {
+        &.-style-list {
+            &:hover {
+                .tag {
+                    background-color: #fff;
+                }
+            }
+        }
+    }
+}
+
+.blog {
+    &_thumb {
+        overflow: hidden;
+
+        &:hover {
+            .blog_img {
+                transform: translate(0) scale(1.05);
+            }
+        }
+    }
+
+    &_img {
+        transition: 1s;
+    }
+}

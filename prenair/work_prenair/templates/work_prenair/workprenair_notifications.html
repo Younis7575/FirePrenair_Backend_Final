@@ -1,0 +1,176 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Workprenair{% endblock title %} {% load static %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+<style>
+  .delete-icon {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.delete-icon:hover {
+    color: #dc3545;  /* Change to a hover color if desired */
+}
+
+</style>
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div
+      class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+    >
+      <div class="container h-full lg:py-15 sm:py-12 py-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Notifications</h4>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5 mt-7.5">
+          <div class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-3">
+              <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+                  {% for notification in notifications %}
+                      <li class="item flex gap-2">
+                          <span class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary">
+                              <span class="ph-fill ph-bell text-lg"></span>
+                          </span>
+                          <div class="content flex flex-col gap-2">
+                              <p class="title text-secondary">{{ notification.message }}</p>
+                              <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                          </div>
+                          <!-- Delete icon with delete functionality -->
+                          <a href="{% url 'delete_notification' notification.id %}" class="delete-icon">
+                              <i class="fas fa-trash-alt text-red-500"></i> <!-- FontAwesome trash icon -->
+                          </a>
+                      </li>
+                  {% empty %}
+                      <li class="item">
+                          <p class="text-center text-secondary">No notifications available.</p>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+      
+      </div>
+      <div class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get data from the template context
+      const courseTitles = {{ course_titles|safe }};
+      const enrollmentCounts = {{ enrollment_counts|safe }};
+    
+      // Get the canvas context before creating the gradient
+      const ctx = document.getElementById("course-enrollment-chart").getContext("2d");
+    
+      // Create the gradient outside of the dataset
+      const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+      gradient.addColorStop(0, "rgba(0, 172, 193, 0.8)");
+      gradient.addColorStop(1, "rgba(0, 172, 193, 0.3)");
+    
+      // Create the Chart.js Horizontal Bar Chart
+      const courseEnrollmentChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: courseTitles, // Course titles as labels
+          datasets: [
+            {
+              label: "Enrollments",
+              data: enrollmentCounts, // Enrollment counts
+              backgroundColor: gradient, // Use gradient directly here
+              borderColor: "#00ACC3",  // Matching border with gradient
+              borderWidth: 2,
+              hoverBackgroundColor: "#00B8D4",  // Hover effect color
+              hoverBorderColor: "#0288D1",
+              hoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y', // Horizontal bar chart
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)', // Subtle grid lines
+                borderDash: [5, 5], // Dashed grid lines for a cleaner look
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+            y: {
+              grid: {
+                display: false, // Hides vertical grid lines
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              displayColors: false,
+              callbacks: {
+                label: function (context) {
+                  return `${context.label}: ${context.raw} students`;
+                },
+              },
+            },
+            legend: {
+              display: false, // Hide legend if only one dataset
+            },
+          },
+          animation: {
+            duration: 1000,  // Smooth animation
+            easing: 'easeInOutQuad',
+          },
+        },
+      });
+    });
+  </script>
+
+  {% endblock extra_javascript %}
+</body>

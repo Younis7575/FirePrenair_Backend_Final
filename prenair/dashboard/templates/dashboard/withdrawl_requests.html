@@ -1,0 +1,171 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Dashboard{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">Withdrawl Requests awaiting your approvel</h4>
+                <div class="earning_block mt-7.5 rounded-lg bg-white">
+                    <h5 class="heading5 pt-6 px-6">Requests</h5>
+                    <div class="list overflow-x-auto w-full py-5 px-6 rounded-xl">
+                        <table class="w-full max-md:w-[600px]">
+                            <thead class="border-b border-line">
+                                <tr>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Date</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Type</th>
+                                    <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-5 py-4 text-right text-sm font-bold uppercase text-secondary whitespace-nowrap">View Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if pending_requests %}
+                                {% for withdraw in pending_requests %}
+                                <tr class="item duration-300 hover:bg-background">
+                                    <th scope="row" class="p-5 text-left whitespace-nowrap">{{withdraw.created_at}}</th>
+                                    <td class="p-5 heading6">{{withdraw.payout_type}}</td>
+                                    <td class="p-5 text-title whitespace-nowrap">${{withdraw.amount}}</td>
+                                    <td class="p-5 text-right">
+                                        {% if withdraw.status == 'PENDING' %}
+                                        <span class="tag bg-opacity-10 bg-features text-features text-button">{{withdraw.status}}</span>
+                                        {% elif withdraw.status == 'COMPLETED' %}
+                                        <span class="tag bg-opacity-10 bg-success text-success text-button">{{withdraw.status}}</span>
+                                        {% elif withdraw.status == 'PROCESSING' %}
+                                        <span class="tag bg-opacity-10 bg-primary text-primary text-button">{{withdraw.status}}</span>
+                                        {% else %}
+                                        <span class="tag bg-opacity-10 bg-red text-red text-button">{{withdraw.status}}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-5 text-right">
+                                        <a href="{% url 'withdraw_admin_detail' withdraw.id %}" class="text-white bg-yellow rounded-lg" style="padding: 10px 20px; border-radius: 0 22px 22px 22px; background-color: #ff6f61;">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="p-5 text-center">No requests found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+       
+    </div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+    <!-- Modal -->
+    <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+
+        <!-- modal_create_meeting -->
+        <div class="modal_item modal_create_meeting relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_create_meeting">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Create Meeting</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <form class="form grid sm:grid-cols-2 gap-5 md:p-7.5 p-6">
+                <div class="date col-span-full">
+                    <label for="date">Date <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="date" type="date" required />
+                </div>
+                <div class="time">
+                    <label>Time <span class="text-red">*</span></label>
+                    <div class="select_block flex items-center w-full h-12 pr-10 pl-4 mt-2 border border-line rounded-lg">
+                        <div class="select">
+                            <span class="selected capitalize" data-title="10:00 AM">10:00 AM</span>
+                            <ul class="list_option scrollbar_custom w-full max-h-[200px] bg-white">
+                                <li class="capitalize" data-item="8:00 AM">8:00 AM</li>
+                                <li class="capitalize" data-item="8:30 AM">8:30 AM</li>
+                                <li class="capitalize" data-item="9:00 AM">9:00 AM</li>
+                                <li class="capitalize" data-item="9:30 AM">9:30 AM</li>
+                                <li class="capitalize" data-item="10:00 AM">10:00 AM</li>
+                                <li class="capitalize" data-item="10:30 AM">10:30 AM</li>
+                                <li class="capitalize" data-item="11:00 AM">11:00 AM</li>
+                                <li class="capitalize" data-item="11:30 AM">11:30 AM</li>
+                                <li class="capitalize" data-item="1:00 PM">1:00 PM</li>
+                                <li class="capitalize" data-item="1:30 PM">1:30 PM</li>
+                                <li class="capitalize" data-item="2:00 PM">2:00 PM</li>
+                                <li class="capitalize" data-item="2:30 PM">2:30 PM</li>
+                                <li class="capitalize" data-item="3:00 PM">3:00 PM</li>
+                                <li class="capitalize" data-item="3:30 PM">3:30 PM</li>
+                                <li class="capitalize" data-item="4:00 PM">4:00 PM</li>
+                                <li class="capitalize" data-item="4:30 PM">4:30 PM</li>
+                            </ul>
+                        </div>
+                        <span class="icon_down ph ph-caret-down right-3"></span>
+                    </div>
+                </div>
+                <div class="duration">
+                    <label for="duration">Duration <span class="text-red">*</span></label>
+                    <input class="w-full h-12 px-4 mt-2 border-line rounded-lg" id="duration" type="text" placeholder="Duration" required />
+                </div>
+                <div class="col-span-full message">
+                    <label for="message">Message <span class="text-red">*</span></label>
+                    <textarea class="border w-full px-4 py-3 mt-2 border-line rounded-lg" id="message" name="message" rows="4" placeholder="Message" required></textarea>
+                </div>
+                <div class="flex items-center justify-end col-span-full gap-5 sm:mt-2">
+                    <button class="button-main bg-primary" type="submit">Re-schedule Meeting</button>
+                    <button class="button-main -border close_popup_btn" type="button">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- modal_delete -->
+        <div class="modal_item modal_delete relative flex-shrink-0 sm:w-[600px] w-[90vw] rounded-lg bg-white" data-type="modal_delete">
+            <div class="heading flex items-center justify-between py-6 px-7 border-b border-line">
+                <h5 class="heading5">Delete</h5>
+                <button class="close_popup_btn">
+                    <span class="ph ph-x text-2xl"></span>
+                </button>
+            </div>
+            <div class="flex flex-col items-center py-7 md:px-10 px-6">
+                <h5 class="heading5 text-center">Are you sure you want to delete?</h5>
+                <p class="mt-3 text-secondary text-center">Do you really want to delete your these record? <br class="max-sm:hidden" />This process can't be undo.</p>
+                <div class="flex items-center gap-5 mt-6">
+                    <button class="button-main bg-red btn_confirm_delete">Confirm</button>
+                    <button class="button-main -border close_popup_btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+{% endblock extra_javascript %}

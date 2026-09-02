@@ -1,0 +1,9 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>{{ plan_name }} Subscription Paused</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Your {{ plan_name }} subscription has been paused. You can resume it anytime from your account.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Resume Subscription</a>
+    </div>
+{% endblock %}

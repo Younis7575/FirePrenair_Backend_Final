@@ -1,0 +1,77 @@
+/* Reset */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    overflow-x: hidden;
+    font-family: "Albert Sans", sans-serif;
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--black);
+    font-weight: 400;
+
+    @media (max-width: 1024px) {
+        font-size: 15px;
+    }
+
+    @media (max-width: 640px) {
+        font-size: 14px;
+        line-height: 24px;
+    }
+}
+
+html {
+    &:has(body.scroll_locked) {
+        overflow: hidden;
+    }
+}
+
+body {
+    &.overflow-unset {
+        overflow-x: unset;
+    }
+
+    &.lg\:overflow-unset {
+        @media (min-width: 1024px) {
+            overflow-x: unset;
+        }
+    }
+}
+
+.blind,
+caption span,
+legend {
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    clip: rect(0, 0, 0, 0);
+}
+
+select {
+    appearance: none;
+    outline: none;
+}
+
+input[type="file"] {
+    outline: none;
+    border: none !important;
+
+    &::-webkit-file-upload-button {
+        display: none;
+    }
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}

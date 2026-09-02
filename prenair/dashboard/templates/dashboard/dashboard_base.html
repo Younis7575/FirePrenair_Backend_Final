@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html >
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <title>
+    {% block title %}Dashboard{% endblock title %}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+
+    {% block css %}
+    <link rel="stylesheet" href="{% static 'work_prenair/assets/css/swiper-bundle.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'work_prenair/assets/css/leaflet.css' %}" />
+    <link rel="stylesheet" href="{% static 'work_prenair/assets/css/slick.cs' %}s" />
+    <link rel="stylesheet" href="{% static 'work_prenair/assets/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'work_prenair/dist/output-tailwind.css' %}" />
+    <link rel="stylesheet" href="{% static 'work_prenair/dist/output-scss.css' %}" />
+    {% block extra_css %} {% endblock extra_css %}
+    
+    {% endblock css %}
+
+</head>
+<body>
+    {% include "dashboard/partials/chatbot.html" %}
+
+{% include "edu_prenair/partials/messages.html" %}
+
+
+
+{% block content %}{% endblock content %}
+
+{% block javascript %}
+<script src="{% static 'work_prenair/assets/js/jquery.min.js' %}"></script>
+<script src="{% static 'work_prenair/assets/js/phosphor-icons.js' %}"></script>
+<script src="{% static 'work_prenair/assets/js/slick.min.js' %}"></script>
+<script src="{% static 'work_prenair/assets/js/leaflet.js' %}"></script>
+<script src="{% static 'work_prenair/assets/js/swiper-bundle.min.js' %}"></script>
+<script src="{% static 'work_prenair/assets/js/main.js' %}"></script>
+<script src="{% static "home/js/notify.js" %}"></script>
+
+{% block extra_javascript %} {% endblock extra_javascript %}
+{% endblock javascript %}
+
+</body>
+</html>

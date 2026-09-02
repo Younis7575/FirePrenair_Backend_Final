@@ -1,0 +1,186 @@
+.jobs,
+.project,
+.employers,
+.candidates,
+.services {
+    &.-half-map {
+
+        .jobs_inner,
+        .project_inner,
+        .employers_inner,
+        .candidates_inner,
+        .services_inner {
+            overflow-x: hidden;
+            height: 100%;
+            max-height: calc(100% - 68px);
+
+            &::-webkit-scrollbar {
+                width: 8px;
+                background-color: #dddddd;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background-color: #afafaf;
+                border-radius: 8px;
+            }
+        }
+
+        .list_pagination {
+            max-width: unset;
+            box-shadow: 0px 5px 18px 5px rgba(64, 72, 87, 0.15);
+        }
+    }
+
+    &_sidebar {
+        .delivery {
+            .days {
+                input {
+                    max-width: 34px;
+                    text-align: center;
+                    field-sizing: content;
+                }
+            }
+        }
+    }
+}
+
+.list_layout {
+
+    .layout_btn,
+    .layout_link {
+        display: block;
+        position: relative;
+        width: 30px;
+        height: 30px;
+
+        &::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            content: '';
+        }
+
+        &.cols_2,
+        &.grid2 {
+            &::before {
+                background-image: url('../assets/images/icon/grid2.svg');
+            }
+
+            &.active {
+                &::before {
+                    background-image: url('../assets/images/icon/grid2-active.svg');
+                }
+            }
+        }
+
+        &.cols_3,
+        &.grid3 {
+            &::before {
+                background-image: url('../assets/images/icon/grid3.svg');
+            }
+
+            &.active {
+                &::before {
+                    background-image: url('../assets/images/icon/grid3-active.svg');
+                }
+            }
+        }
+
+        &.cols_4,
+        &.grid4 {
+            &::before {
+                background-image: url('../assets/images/icon/grid4.svg');
+            }
+
+            &.active {
+                &::before {
+                    background-image: url('../assets/images/icon/grid4-active.svg');
+                }
+            }
+        }
+
+        &.cols_5,
+        &.grid5 {
+            width: 38px;
+
+            &::before {
+                left: -8px;
+                background-position: left;
+                background-size: contain;
+                background-image: url('../assets/images/icon/grid2.svg');
+            }
+
+            &::after {
+                position: absolute;
+                top: 0;
+                left: 12px;
+                width: 100%;
+                height: 100%;
+                background-position: left;
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-image: url('../assets/images/icon/grid3.svg');
+                content: '';
+            }
+
+            &.active {
+                &::before {
+                    background-image: url('../assets/images/icon/grid2-active.svg');
+                }
+
+                &::after {
+                    background-image: url('../assets/images/icon/grid3-active.svg');
+                }
+            }
+        }
+
+        &.list {
+            &::before {
+                background-image: url('../assets/images/icon/list.svg');
+            }
+
+            &.active {
+                &::before {
+                    background-image: url('../assets/images/icon/list-active.svg');
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 1280px) {
+    .grid {
+        &.cols_5 {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        &.cols_4 {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        &.cols_3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        &.cols_2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &.cols_1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+    }
+}
+
+.list_filtered {
+    display: none;
+
+    &.open {
+        display: flex;
+    }
+}

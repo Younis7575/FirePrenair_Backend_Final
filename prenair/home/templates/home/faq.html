@@ -1,0 +1,208 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - FAQ{% endblock %}
+
+{% block content %}
+
+<style>
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/faq.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<!-- Breadcrumb -->
+<div class="mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="hero-section">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->
+
+<!-- FAQ Section -->
+<div class="help-sec">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="help-title">
+                    <h1 class="display-4 fw-bold" style="color: #ff6f61;">Frequently Asked Questions</h1>
+                    <p class="text-muted">
+                        Have questions? We have answers! Here are some of the most common queries to help you get started with FirePrenair.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- General Questions -->
+            <div class="col-lg-6">
+                <h3 class="section-title mb-4">General Questions</h3>
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-general-1">What is FirePrenair?</a>
+                    </h6>
+                    <div id="faq-general-1" class="collapse">
+                        <div class="faq-detail">
+                            <p>FirePrenair is an all-in-one platform that empowers entrepreneurs, freelancers, educators, and creators with tools for freelancing, digital products, e-learning, and networking.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-general-2">Who can use FirePrenair?</a>
+                    </h6>
+                    <div id="faq-general-2" class="collapse">
+                        <div class="faq-detail">
+                            <p>FirePrenair is designed for anyone looking to scale their business, from individual freelancers to large agencies and educators worldwide.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-general-3">Is there a free plan available?</a>
+                    </h6>
+                    <div id="faq-general-3" class="collapse">
+                        <div class="faq-detail">
+                            <p>Yes, FirePrenair offers a Free Tier with access to basic features, allowing you to explore the platform without commitment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account and Subscription Questions -->
+            <div class="col-lg-6">
+                <h3 class="section-title mb-4">Account and Subscription</h3>
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-account-1">How do I sign up for FirePrenair?</a>
+                    </h6>
+                    <div id="faq-account-1" class="collapse">
+                        <div class="faq-detail">
+                            <p>Click the “Sign Up” button on the homepage, choose your plan, and complete the registration process.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-account-2">Can I change my subscription plan later?</a>
+                    </h6>
+                    <div id="faq-account-2" class="collapse">
+                        <div class="faq-detail">
+                            <p>Yes, you can upgrade or downgrade your plan anytime through your dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-account-3">What payment methods are accepted?</a>
+                    </h6>
+                    <div id="faq-account-3" class="collapse">
+                        <div class="faq-detail">
+                            <p>We accept major credit cards, PayPal, and bank transfers for payments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <!-- Platform Features Questions -->
+            <div class="col-lg-6">
+                <h3 class="section-title mb-4">Platform Features</h3>
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-features-1">What are the main features of FirePrenair?</a>
+                    </h6>
+                    <div id="faq-features-1" class="collapse">
+                        <div class="faq-detail">
+                            <p>FirePrenair offers tools for freelancing, digital products, e-learning, and networking, all powered by AI for enhanced productivity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-features-2">Does FirePrenair support international payments?</a>
+                    </h6>
+                    <div id="faq-features-2" class="collapse">
+                        <div class="faq-detail">
+                            <p>Yes, we support cross-border payments in multiple currencies, ensuring seamless transactions for users worldwide.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-features-3">How does FirePrenair use AI?</a>
+                    </h6>
+                    <div id="faq-features-3" class="collapse">
+                        <div class="faq-detail">
+                            <p>Our AI tools assist with content creation, task automation, personalized recommendations, and advanced analytics to help you achieve your goals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support and Security Questions -->
+            <div class="col-lg-6">
+                <h3 class="section-title mb-4">Support & Security</h3>
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-support-1">How can I contact support?</a>
+                    </h6>
+                    <div id="faq-support-1" class="collapse">
+                        <div class="faq-detail">
+                            <p>You can reach support via email at support@fireprenair.com, live chat, or by submitting a ticket in your dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-support-2">What is your refund policy?</a>
+                    </h6>
+                    <div id="faq-support-2" class="collapse">
+                        <div class="faq-detail">
+                            <p>Refunds are available for eligible products and subscriptions within the specified time frame. Refer to our Refund Policy for details.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <h6 class="faq-title">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#faq-support-3">How does FirePrenair protect my data?</a>
+                    </h6>
+                    <div id="faq-support-3" class="collapse">
+                        <div class="faq-detail">
+                            <p>We use encryption and comply with GDPR and other data protection regulations to ensure your information is secure.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /FAQ Section -->
+
+
+{% endblock content %}

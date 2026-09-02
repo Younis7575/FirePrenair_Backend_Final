@@ -1,0 +1,1680 @@
+{% load static %}
+<style>
+    /* ── Overlay & popup shell ── */
+    .product-creation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .product-popup-content {
+        background-color: #fff;
+        border-radius: 18px;
+        width: 92%;
+        max-width: 980px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+    }
+
+    .product-popup-layout {
+        display: flex;
+        height: 100%;
+        max-height: 90vh;
+    }
+
+    /* ── Left sidebar (same treatment as the gig popup) ── */
+    .product-popup-left {
+        width: 34%;
+        min-width: 280px;
+        background: linear-gradient(170deg, #f5a062 0%, #e8735c 42%, #d4587a 100%);
+        border-radius: 18px 90px 90px 18px;
+        padding: 26px 20px 20px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+    }
+
+    .product-popup-left::before {
+        content: '';
+        position: absolute;
+        width: 210px; height: 210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.10);
+        top: -40px; right: -60px;
+        z-index: 0;
+    }
+    .product-popup-left::after {
+        content: '';
+        position: absolute;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        top: 140px; right: -25px;
+        z-index: 0;
+    }
+    .product-deco-yellow {
+        position: absolute;
+        bottom: -10px; right: 10px;
+        width: 85px; height: 85px;
+        border-radius: 50%;
+        background: #f4c542;
+        z-index: 0;
+    }
+
+    .product-popup-left-logo { position: relative; z-index: 2; }
+    .product-popup-tagline {
+        position: relative;
+        z-index: 2;
+        color: rgba(255,255,255,0.65);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin: 4px 0 0;
+    }
+
+    .product-steps-sidebar {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        gap: 0;
+    }
+
+    .product-step-item {
+        display: flex;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .product-step-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 40px;
+    }
+
+    .product-step-badge {
+        width: 40px; height: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.18);
+        transition: all 0.35s ease;
+        flex-shrink: 0;
+    }
+    .product-step-item.active .product-step-badge {
+        background: rgba(255,255,255,0.92);
+        color: #e8735c;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: scale(1.08);
+    }
+    .product-step-item.completed .product-step-badge {
+        background: rgba(255,255,255,0.92);
+        color: #27ae60;
+    }
+    .product-step-item.completed .product-step-info h4 { color: #f4c542; }
+    .product-step-item.completed .product-step-desc-box { background: rgba(244,197,66,0.30); }
+
+    .product-step-connector {
+        flex: 1;
+        width: 2.5px;
+        min-height: 12px;
+        background: rgba(255,255,255,0.25);
+        margin: 3px 0;
+        border-radius: 2px;
+        transition: background 0.3s;
+    }
+    .product-step-item.completed .product-step-connector { background: rgba(255,255,255,0.55); }
+
+    .product-step-info { padding-bottom: 14px; flex: 1; }
+    .product-step-info h4 {
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 5px;
+        letter-spacing: 0.2px;
+    }
+    .product-step-desc-box {
+        background: rgba(255,240,210,0.22);
+        border-radius: 22px 0px 22px 22px;
+        padding: 8px 12px;
+    }
+    .product-step-desc-box p {
+        margin: 0;
+        font-size: 11px;
+        color: rgba(255,255,255,0.88);
+        line-height: 1.45;
+    }
+
+    .product-popup-left-bottom {
+        position: relative;
+        z-index: 2;
+        margin-top: 8px;
+    }
+    .product-progress-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+    .product-progress-dots .dot {
+        width: 22px; height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.28);
+        transition: all 0.35s;
+    }
+    .product-progress-dots .dot.active {
+        background: #fff;
+        width: 32px;
+    }
+
+    /* ── Right panel ── */
+    .product-popup-right {
+        flex: 1;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        padding: 16px 28px 8px;
+        overflow-y: auto;
+        max-height: 90vh;
+        position: relative;
+    }
+    .product-popup-right::-webkit-scrollbar { width: 6px; }
+    .product-popup-right::-webkit-scrollbar-thumb { background: #e8735c; border-radius: 3px; }
+
+    .product-close-popup {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: linear-gradient(135deg, #e8735c 0%, #f4a261 100%);
+        color: #fff;
+        border: none;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 3px 12px rgba(232,115,92,0.3);
+        line-height: 1;
+    }
+    .product-close-popup:hover {
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 5px 18px rgba(232,115,92,0.4);
+    }
+
+    .product-popup-title {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        font-size: 26px;
+        color: #e8735c;
+        margin: 0 0 4px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    .product-popup-tagline-sub {
+        font-size: 12.5px;
+        color: #666;
+        margin: 0 0 14px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* ── Form box ── */
+    .product-form-box {
+        position: relative;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 12px 24px 20px;
+        margin-bottom: 26px;
+        background: #fff;
+        overflow: visible;
+    }
+
+    .product-form-step { display: none; }
+    .product-form-step.active {
+        display: block;
+        animation: productFadeIn 0.35s ease;
+    }
+    @keyframes productFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .product-form-step-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    .product-form-step-desc {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 14px;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    /* ── Field rows ── */
+    .field-row { display: flex; gap: 16px; }
+    .field-row > .g-field { flex: 1; min-width: 0; }
+
+    .g-field { margin-bottom: 10px; position: relative; }
+    .g-field.full-width { width: 100%; }
+
+    .g-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+
+    .product-form-control,
+    .product-category-dropdown {
+        width: 100%;
+        padding: 8px 14px;
+        border: 1.5px solid #ddd;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.25s, box-shadow 0.25s;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .product-form-control:focus,
+    .product-category-dropdown:focus {
+        border-color: #e8735c;
+        box-shadow: 0 0 0 3px rgba(232,115,92,0.10);
+    }
+    .product-form-control.product-field-error,
+    .product-category-dropdown.product-field-error {
+        border-color: #e74c3c !important;
+    }
+
+    textarea.product-form-control {
+        min-height: 78px;
+        max-height: 78px;
+        border-radius: 16px;
+        resize: none;
+        line-height: 1.4;
+    }
+
+    .product-char-counter {
+        text-align: right;
+        font-size: 0.72rem;
+        color: #999;
+        margin-top: 3px;
+    }
+
+    .helper-text {
+        font-size: 11px;
+        color: #999;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .ai-generate-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+    }
+    .btn-ai-generate {
+        background: #fff8f6;
+        border: 1.5px solid #f4a261;
+        color: #e8735c;
+        border-radius: 16px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
+    .btn-ai-generate:hover { background: #fdeee9; }
+    .btn-ai-generate i { margin-right: 6px; }
+
+    .category-row .g-field { min-width: 0; }
+
+    .hidden, .product-hidden { display: none !important; }
+
+    /* ── File dropzones (compact) ── */
+    .product-file-upload-wrapper { position: relative; }
+    .product-file-upload-area {
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 14px;
+        padding: 14px 10px;
+        text-align: center;
+        background-color: #f9fafb;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    .product-file-upload-area:hover {
+        border-color: #e8735c;
+        background-color: #fff8f6;
+    }
+    .product-file-upload-area.dragover {
+        border-color: #e8735c;
+        background-color: #fde0db;
+        transform: scale(1.02);
+    }
+    .product-file-upload-area.has-file {
+        border-color: #22c55e;
+        background-color: #f0fdf4;
+    }
+    .product-file-upload-icon {
+        font-size: 1.5rem;
+        color: #9ca3af;
+        margin-bottom: 4px;
+    }
+    .product-file-upload-area:hover .product-file-upload-icon,
+    .product-file-upload-area.dragover .product-file-upload-icon {
+        color: #e8735c;
+    }
+    .product-file-upload-area.has-file .product-file-upload-icon { color: #22c55e; }
+    .product-file-upload-text {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+    .product-file-upload-hint {
+        font-size: 10.5px;
+        color: #9ca3af;
+    }
+    .product-file-upload-input {
+        position: absolute;
+        width: 100%; height: 100%;
+        top: 0; left: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .product-file-info {
+        display: none;
+        margin-top: 8px;
+        padding: 8px 10px;
+        background-color: #f0fdf4;
+        border: 1px solid #22c55e;
+        border-radius: 10px;
+        align-items: center;
+        gap: 8px;
+    }
+    .product-file-info.show { display: flex; }
+    .product-file-icon { font-size: 1.1rem; color: #22c55e; }
+    .product-file-details { flex: 1; min-width: 0; }
+    .product-file-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 11.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .product-file-size { font-size: 10.5px; color: #6b7280; }
+    .product-file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 3px;
+        line-height: 1;
+        transition: transform 0.2s;
+    }
+    .product-file-remove:hover { transform: scale(1.2); }
+
+    .product-image-preview-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .product-image-preview {
+        width: 90px; height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid #ddd;
+    }
+    .product-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .product-remove-image {
+        position: absolute;
+        top: 3px; right: 3px;
+        background: rgba(0,0,0,0.65);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 18px; height: 18px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .product-downloadable-upload-progress {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+    .product-upload-progress-bar {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    .product-upload-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff6f61, #ff8a65);
+        transition: width 0.2s ease;
+    }
+    .product-upload-progress-text {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #e8735c;
+    }
+
+    /* ── Loading spinner ── */
+    .product-loading-spinner { display: flex; align-items: center; }
+    .product-loading-spinner.product-hidden { display: none; }
+    .product-spinner {
+        border: 3px solid rgba(0,0,0,0.1);
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        border-left-color: #e8735c;
+        animation: productSpin 1s linear infinite;
+    }
+    @keyframes productSpin { to { transform: rotate(360deg); } }
+
+    .product-error-message {
+        color: #e74c3c;
+        font-size: 11px;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+    .product-text-red { color: #e74c3c; }
+
+    /* ── Toast ── */
+    .product-toast {
+        position: fixed;
+        bottom: 24px; right: 24px;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        z-index: 1100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: productToastIn 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+    .product-toast.success { background: #10b981; color: #fff; }
+    .product-toast.error { background: #ef4444; color: #fff; }
+    @keyframes productToastIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Nav buttons (straddle bottom border of form-box) ── */
+    .product-form-actions {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 50%);
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        width: calc(100% - 48px);
+        max-width: 380px;
+        pointer-events: none;
+    }
+    .product-form-actions button { pointer-events: auto; }
+
+    .product-btn-next, .product-btn-submit {
+        background: #ff6f61;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 30px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .product-btn-next:hover, .product-btn-submit:hover {
+        box-shadow: 0 4px 16px rgba(232,115,92,0.35);
+        transform: translateY(-1px);
+    }
+    .product-btn-submit:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .product-btn-prev {
+        background: #1e3a8a;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 10px 26px;
+        font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .product-btn-prev:hover {
+        box-shadow: 0 4px 14px rgba(30,58,138,0.30);
+        transform: translateY(-1px);
+    }
+    .product-btn-prev:disabled {
+        background: #ccc;
+        color: #888;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    #product-step-1 .product-form-actions > button:first-child { visibility: hidden; }
+
+    /* ── Responsive ── */
+    @media (max-width: 991px) {
+        .product-popup-left { display: none; }
+        .product-popup-right { border-radius: 18px; }
+        .product-popup-content { max-width: 600px; }
+    }
+    @media (max-width: 576px) {
+        .product-popup-content { width: 98%; border-radius: 14px; }
+        .product-popup-right { padding: 18px 16px 16px; border-radius: 14px; }
+        .product-form-box { padding: 16px 14px 46px; margin-bottom: 28px; border-radius: 16px; }
+        .field-row { flex-direction: column; gap: 0; }
+        .field-row > .g-field { flex: none; }
+        .product-popup-title { font-size: 21px; }
+        .product-form-actions {
+            flex-direction: column-reverse;
+            gap: 10px;
+            width: calc(100% - 28px);
+            max-width: none;
+        }
+        .product-btn-next, .product-btn-submit, .product-btn-prev { width: 100%; text-align: center; }
+    }
+</style>
+
+<!-- Popup Content -->
+<div
+    class="product-creation-popup product-hidden"
+    data-mode="{% if product %}edit{% else %}create{% endif %}"
+    data-has-image="{% if product and product.image %}1{% else %}0{% endif %}"
+    data-has-downloadable="{% if product and product.downloadable_file %}1{% else %}0{% endif %}"
+    data-has-downloadable-s3="{% if product and product.downloadable_file_s3_key %}1{% else %}0{% endif %}"
+    data-existing-image-url="{% if product and product.image %}{{ product.image.url }}{% endif %}"
+    data-selected-category-l2="{{ selected_category_l_2|default:'' }}"
+    data-selected-category-l3="{{ selected_category_l_3|default:'' }}"
+    data-use-s3-upload="{% if USE_S3_UPLOAD %}1{% else %}0{% endif %}"
+    data-generate-upload-url="{% url 'generate_digiprenair_upload_url' %}"
+>
+    <div class="product-popup-content">
+        <div class="product-popup-layout">
+
+            <!-- ═══ Left Sidebar ═══ -->
+            <div class="product-popup-left">
+                <div class="product-deco-yellow"></div>
+
+                <div class="product-popup-left-logo">
+                    <img src="{% static 'images/navbar/fireprenair_logo_no_bg.png' %}" alt="logo" style="max-width: 35%;">
+                    <p class="product-popup-tagline">Digiprenair Seller Studio</p>
+                </div>
+
+                <div class="product-steps-sidebar" id="productSidebarSteps">
+                    <div class="product-step-item active" data-step="1">
+                        <div class="product-step-marker">
+                            <div class="product-step-badge"><i class="fas fa-lightbulb"></i></div>
+                            <div class="product-step-connector"></div>
+                        </div>
+                        <div class="product-step-info">
+                            <h4>Basic Info</h4>
+                            <div class="product-step-desc-box">
+                                <p>Title, description and price for your product.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-step-item" data-step="2">
+                        <div class="product-step-marker">
+                            <div class="product-step-badge"><i class="fas fa-sitemap"></i></div>
+                            <div class="product-step-connector"></div>
+                        </div>
+                        <div class="product-step-info">
+                            <h4>Categories</h4>
+                            <div class="product-step-desc-box">
+                                <p>Help buyers find your product in the marketplace.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-step-item" data-step="3">
+                        <div class="product-step-marker">
+                            <div class="product-step-badge"><i class="fas fa-cloud-upload-alt"></i></div>
+                        </div>
+                        <div class="product-step-info">
+                            <h4>Media &amp; Files</h4>
+                            <div class="product-step-desc-box">
+                                <p>Upload the product image and downloadable file.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-popup-left-bottom">
+                    <div class="product-progress-dots" id="productProgressDots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Right Panel ═══ -->
+            <div class="product-popup-right">
+                <button id="close-product-popup" class="product-close-popup">&times;</button>
+
+                <h3 class="product-popup-title">
+                    {% if product %}Edit Digital Product{% else %}Create New Digital Product{% endif %}
+                </h3>
+                <p class="product-popup-tagline-sub">List your digital product in three quick steps and start selling on Digiprenair.</p>
+
+                <div class="product-form-box">
+                    <form
+                        id="product-creation-form"
+                        action="{% if product %}{% url 'edit_item_digiprenair' product.slug %}{% else %}{% url 'upload_item_digiprenair' %}{% endif %}"
+                        method="post"
+                        enctype="multipart/form-data"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="downloadable_file_key" id="id_downloadable_file_key" value="{% if product and product.downloadable_file_s3_key %}{{ product.downloadable_file_s3_key }}{% endif %}">
+
+                        <!-- Step 1: Basic Information -->
+                        <div id="product-step-1" class="product-form-step active">
+                            <h4 class="product-form-step-title">Basic Information</h4>
+                            <p class="product-form-step-desc">Give your product a clear title, description and price.</p>
+
+                            <div class="g-field full-width">
+                                <label for="id_title">Product Title <span class="product-text-red">*</span></label>
+                                <input type="text" id="id_title" name="title" class="product-form-control" required
+                                    placeholder="Enter your product title" maxlength="200"
+                                    value="{% if form %}{{ form.title.value|default:'' }}{% endif %}">
+                                <div class="product-char-counter"><span id="product-title-chars">0</span>/200</div>
+                                <div class="product-error-message" id="product-title-error"></div>
+                            </div>
+
+                            <div class="g-field full-width">
+                                <label for="id_description">Product Description <span class="product-text-red">*</span></label>
+                                <textarea id="id_description" name="description" class="product-form-control" required
+                                    placeholder="Describe your product in detail">{% if form %}{{ form.description.value|default:'' }}{% endif %}</textarea>
+                                <div class="product-error-message" id="product-description-error"></div>
+                                <div class="ai-generate-row">
+                                    <button type="button" id="generate-product-description-btn" class="btn-ai-generate"
+                                        onclick="generateProductDescription()">
+                                        <i class="fas fa-wand-magic-sparkles"></i>Generate with AI
+                                    </button>
+                                    <div id="product-loading-spinner" class="product-loading-spinner product-hidden">
+                                        <div class="product-spinner"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="g-field" style="max-width: 220px;">
+                                <label for="id_price">Price ($) <span class="product-text-red">*</span></label>
+                                <input type="number" id="id_price" name="price" class="product-form-control" required
+                                    placeholder="0.00" step="0.01" min="0.01"
+                                    value="{% if form %}{{ form.price.value|default:'' }}{% endif %}">
+                                <div class="product-error-message" id="product-price-error"></div>
+                            </div>
+
+                            <div class="product-form-actions">
+                                <button type="button" class="product-btn-prev" disabled>Previous</button>
+                                <button type="button" class="product-btn-next" data-next="2" onclick="validateProductStep1()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Categories -->
+                        <div id="product-step-2" class="product-form-step">
+                            <h4 class="product-form-step-title">Categories</h4>
+                            <p class="product-form-step-desc">Choose the category that best fits your product.</p>
+
+                            <div class="field-row category-row" id="product-category-selector">
+                                <div class="g-field">
+                                    <label>Category <span class="product-text-red">*</span></label>
+                                    <select id="id_category" name="category" class="product-category-dropdown" required>
+                                        <option value="">Select Category</option>
+                                        {% if form and categories %}
+                                            {% with selected_l1=selected_category_l_1|default:form.category.value %}
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}" {% if selected_l1|stringformat:"s" == category.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ category.name }}
+                                            </option>
+                                            {% endfor %}
+                                            {% endwith %}
+                                        {% elif categories %}
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}">
+                                                {{ category.name }}
+                                            </option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                    <div class="product-error-message" id="product-category-error"></div>
+                                </div>
+
+                                <div class="g-field product-hidden">
+                                    <label>Subcategory</label>
+                                    <select id="id_category_l_2" name="category_l_2" class="product-category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+
+                                <div class="g-field product-hidden">
+                                    <label>Specialty</label>
+                                    <select id="id_category_l_3" name="category_l_3" class="product-category-dropdown">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="product-form-actions">
+                                <button type="button" class="product-btn-prev" data-prev="1">Previous</button>
+                                <button type="button" class="product-btn-next" data-next="3" onclick="validateProductStep2()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Media & Files -->
+                        <div id="product-step-3" class="product-form-step">
+                            <h4 class="product-form-step-title">Media &amp; Files</h4>
+                            <p class="product-form-step-desc">Upload what buyers will see and what they'll download.</p>
+
+                            <div class="field-row">
+                                <div class="g-field">
+                                    <label for="id_image">Product Image <span class="product-text-red">*</span></label>
+
+                                    <div class="product-file-upload-wrapper">
+                                        <div class="product-file-upload-area" id="product-image-upload-area">
+                                            <div class="product-file-upload-icon">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                            <div class="product-file-upload-text">Click or drag to upload</div>
+                                            <div class="product-file-upload-hint">JPG/PNG, 16:9, ≤ 5MB</div>
+                                            <input
+                                                type="file"
+                                                id="id_image"
+                                                name="image"
+                                                accept="image/*"
+                                                class="product-file-upload-input"
+                                                {% if not product %}required{% endif %}
+                                            >
+                                        </div>
+
+                                        <div class="product-file-info" id="product-image-info">
+                                            <i class="fas fa-check-circle product-file-icon"></i>
+                                            <div class="product-file-details">
+                                                <div class="product-file-name" id="product-image-name"></div>
+                                                <div class="product-file-size" id="product-image-size"></div>
+                                            </div>
+                                            <button type="button" class="product-file-remove" id="product-image-remove" title="Remove file">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {% if product %}
+                                    <span class="helper-text">Leave blank to keep your current image.</span>
+                                    {% endif %}
+                                    <div class="product-error-message" id="product-image-error"></div>
+
+                                    <div class="product-image-preview-container">
+                                        <div id="product-image-preview" class="product-image-preview {% if not product or not product.image %}product-hidden{% endif %}">
+                                            <img src="{% if product and product.image %}{{ product.image.url }}{% else %}#{% endif %}" alt="Product image preview">
+                                            <button type="button" class="product-remove-image">&times;</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="id_downloadable_file">Downloadable File <span class="product-text-red">*</span></label>
+
+                                    <div class="product-file-upload-wrapper">
+                                        <div class="product-file-upload-area" id="product-downloadable-upload-area">
+                                            <div class="product-file-upload-icon">
+                                                <i class="fas fa-file-archive"></i>
+                                            </div>
+                                            <div class="product-file-upload-text">Click or drag to upload</div>
+                                            <div class="product-file-upload-hint">ZIP, PDF, PSD, DOC... Max 100MB</div>
+                                            <input
+                                                type="file"
+                                                id="id_downloadable_file"
+                                                name="downloadable_file"
+                                                class="product-file-upload-input"
+                                                {% if not product and not USE_S3_UPLOAD %}required{% endif %}
+                                                accept=".zip,.rar,.7zip,.pdf,.psd,.ai,.eps,.doc,.docx,.png"
+                                            >
+                                        </div>
+
+                                        <div class="product-file-info" id="product-downloadable-info">
+                                            <i class="fas fa-check-circle product-file-icon"></i>
+                                            <div class="product-file-details">
+                                                <div class="product-file-name" id="product-downloadable-name"></div>
+                                                <div class="product-file-size" id="product-downloadable-size"></div>
+                                            </div>
+                                            <button type="button" class="product-file-remove" id="product-downloadable-remove" title="Remove file">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- S3 direct upload progress (shown only when uploading) -->
+                                    <div id="product-downloadable-upload-progress" class="product-downloadable-upload-progress product-hidden">
+                                        <div class="product-upload-progress-bar">
+                                            <div id="product-downloadable-progress-fill" class="product-upload-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                        <div id="product-downloadable-progress-text" class="product-upload-progress-text">0%</div>
+                                    </div>
+                                    {% if product and product.downloadable_file %}
+                                    <span class="helper-text">Current: <strong>{{ product.downloadable_file.name }}</strong>. Leave blank to keep.</span>
+                                    {% endif %}
+                                    {% if product and product.downloadable_file_s3_key %}
+                                    <span class="helper-text">Current (S3): <strong>{{ product.downloadable_file_s3_key|slice:":40" }}...</strong>. Upload new to replace.</span>
+                                    {% endif %}
+                                    <div class="product-error-message" id="product-downloadable_file-error"></div>
+                                </div>
+                            </div>
+
+                            <div class="field-row">
+                                <div class="g-field">
+                                    <label for="id_files_included">Files Included <span class="product-text-red">*</span></label>
+                                    <input type="text" id="id_files_included" name="files_included" class="product-form-control" required
+                                        placeholder=".png, .pdf, .zip"
+                                        value="{% if form %}{{ form.files_included.value|default:'' }}{% endif %}">
+                                    <div class="product-error-message" id="product-files_included-error"></div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="id_softwares">Softwares Used <span class="product-text-red">*</span></label>
+                                    <input type="text" id="id_softwares" name="softwares" class="product-form-control" required
+                                        placeholder="Adobe PS, Canva"
+                                        value="{% if form %}{{ form.softwares.value|default:'' }}{% endif %}">
+                                    <div class="product-error-message" id="product-softwares-error"></div>
+                                </div>
+
+                                <div class="g-field">
+                                    <label for="id_size">File Size <span class="product-text-red">*</span></label>
+                                    <input type="text" id="id_size" name="size" class="product-form-control" required
+                                        placeholder="200MB, 1GB"
+                                        value="{% if form %}{{ form.size.value|default:'' }}{% endif %}">
+                                    <div class="product-error-message" id="product-size-error"></div>
+                                </div>
+                            </div>
+
+                            <div class="product-form-actions">
+                                <button type="button" class="product-btn-prev" data-prev="2">Previous</button>
+                                <button type="submit" id="product-submit-btn" class="product-btn-submit">{% if product %}Update Product{% else %}Publish Product{% endif %}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the product creation form functionality
+    function initializeProductCreationForm() {
+        const popup = document.querySelector('.product-creation-popup');
+        const closeBtn = document.getElementById('close-product-popup');
+        const form = document.getElementById('product-creation-form');
+
+        if (!popup || !closeBtn) return;
+
+        // Close popup when close button is clicked
+        closeBtn.addEventListener('click', () => {
+            popup.classList.add('product-hidden');
+        });
+
+        // Close popup when clicking outside
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) {
+                popup.classList.add('product-hidden');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('product-hidden')) {
+                popup.classList.add('product-hidden');
+            }
+        });
+
+        // Multi-step navigation
+        const stepButtons = document.querySelectorAll('.product-btn-next, .product-btn-prev');
+
+        stepButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (button.classList.contains('product-btn-prev')) {
+                    const prevStep = button.getAttribute('data-prev');
+                    if (prevStep) {
+                        navigateToProductStep(prevStep);
+                    }
+                }
+                // Validation for next is handled by onclick handlers
+            });
+        });
+
+        // Character counters
+        const titleInput = document.getElementById('id_title');
+        const titleChars = document.getElementById('product-title-chars');
+
+        if (titleInput && titleChars) {
+            titleChars.textContent = titleInput.value.length;
+        }
+
+        titleInput.addEventListener('input', () => {
+            titleChars.textContent = titleInput.value.length;
+        });
+
+        // Enhanced File Upload Functionality
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function handleFileUpload(input, uploadArea, fileInfo, fileNameEl, fileSizeEl, removeBtn, previewEl = null) {
+            const handleFile = (file) => {
+                if (!file) return;
+
+                // Update file info display
+                fileNameEl.textContent = file.name;
+                fileSizeEl.textContent = formatFileSize(file.size);
+                fileInfo.classList.add('show');
+                uploadArea.classList.add('has-file');
+
+                // If it's an image, show preview
+                if (previewEl && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewEl.querySelector('img').src = e.target.result;
+                        previewEl.classList.remove('product-hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            // File input change
+            input.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    input.files = files;
+                    handleFile(files[0]);
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    input.dispatchEvent(event);
+                }
+            });
+
+            // Remove file
+            removeBtn.addEventListener('click', function () {
+                input.value = '';
+                fileInfo.classList.remove('show');
+                uploadArea.classList.remove('has-file');
+                if (previewEl) {
+                    const isEditMode = popup.dataset.mode === 'edit';
+                    const existingImageUrl = popup.dataset.existingImageUrl || '';
+                    if (isEditMode && existingImageUrl) {
+                        previewEl.querySelector('img').src = existingImageUrl;
+                        previewEl.classList.remove('product-hidden');
+                    } else {
+                        previewEl.classList.add('product-hidden');
+                    }
+                }
+            });
+        }
+
+        // Image upload
+        const productImageInput = document.getElementById('id_image');
+        const productImageUploadArea = document.getElementById('product-image-upload-area');
+        const productImageInfo = document.getElementById('product-image-info');
+        const productImageName = document.getElementById('product-image-name');
+        const productImageSize = document.getElementById('product-image-size');
+        const productImageRemove = document.getElementById('product-image-remove');
+        const productImagePreview = document.getElementById('product-image-preview');
+        const isEditMode = popup.dataset.mode === 'edit';
+        const existingImageUrl = popup.dataset.existingImageUrl || '';
+
+        if (productImageInput && productImageUploadArea) {
+            handleFileUpload(
+                productImageInput,
+                productImageUploadArea,
+                productImageInfo,
+                productImageName,
+                productImageSize,
+                productImageRemove,
+                productImagePreview
+            );
+        }
+
+        // Downloadable file upload (S3 direct upload in production, local file in dev)
+        const productDownloadableInput = document.getElementById('id_downloadable_file');
+        const productDownloadableUploadArea = document.getElementById('product-downloadable-upload-area');
+        const productDownloadableInfo = document.getElementById('product-downloadable-info');
+        const productDownloadableName = document.getElementById('product-downloadable-name');
+        const productDownloadableSize = document.getElementById('product-downloadable-size');
+        const productDownloadableRemove = document.getElementById('product-downloadable-remove');
+        const useS3Upload = popup.dataset.useS3Upload === '1';
+        const generateUploadUrl = (popup.dataset.generateUploadUrl || '').trim();
+        const progressContainer = document.getElementById('product-downloadable-upload-progress');
+        const progressFill = document.getElementById('product-downloadable-progress-fill');
+        const progressText = document.getElementById('product-downloadable-progress-text');
+        const fileKeyInput = document.getElementById('id_downloadable_file_key');
+        const downloadableErrorEl = document.getElementById('product-downloadable_file-error');
+
+        function showProductToast(message, type) {
+            const existing = document.getElementById('product-toast-msg');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.id = 'product-toast-msg';
+            toast.className = 'product-toast ' + (type === 'success' ? 'success' : 'error');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 4000);
+        }
+
+        if (productDownloadableInput && productDownloadableUploadArea) {
+            if (useS3Upload && generateUploadUrl) {
+                // S3 direct upload flow
+                function setDownloadableUploadProgress(percent, show) {
+                    if (!progressFill || !progressText || !progressContainer) return;
+                    progressFill.style.width = percent + '%';
+                    progressText.textContent = Math.round(percent) + '%';
+                    if (show) progressContainer.classList.remove('product-hidden');
+                    else progressContainer.classList.add('product-hidden');
+                }
+                function clearDownloadableError() {
+                    if (downloadableErrorEl) downloadableErrorEl.textContent = '';
+                }
+                function setDownloadableError(msg) {
+                    if (downloadableErrorEl) downloadableErrorEl.textContent = msg;
+                }
+                function onDownloadableFileSelected(file) {
+                    if (!file) return;
+                    clearDownloadableError();
+                    if (file.size > 100 * 1024 * 1024) {
+                        setDownloadableError('File size must be less than 100MB');
+                        return;
+                    }
+                    setDownloadableUploadProgress(0, true);
+                    const form = document.getElementById('product-creation-form');
+                    const csrfToken = form ? (form.querySelector('[name=csrfmiddlewaretoken]') || {}).value : '';
+                    fetch(generateUploadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ filename: file.name, file_size: file.size }),
+                        credentials: 'same-origin'
+                    })
+                        .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+                        .then(function (result) {
+                            if (!result.ok) {
+                                setDownloadableUploadProgress(0, false);
+                                setDownloadableError(result.data.error || 'Failed to get upload URL');
+                                return;
+                            }
+                            var uploadUrl = result.data.upload_url;
+                            var fileKey = result.data.file_key;
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('PUT', uploadUrl);
+                            xhr.upload.addEventListener('progress', function (e) {
+                                if (e.lengthComputable) {
+                                    var pct = (e.loaded / e.total) * 100;
+                                    setDownloadableUploadProgress(pct, true);
+                                }
+                            });
+                            xhr.onload = function () {
+                                setDownloadableUploadProgress(100, true);
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    if (fileKeyInput) fileKeyInput.value = fileKey;
+                                    productDownloadableName.textContent = file.name;
+                                    productDownloadableSize.textContent = formatFileSize(file.size);
+                                    productDownloadableInfo.classList.add('show');
+                                    productDownloadableUploadArea.classList.add('has-file');
+                                    productDownloadableInput.value = '';
+                                    setTimeout(function () { setDownloadableUploadProgress(0, false); }, 400);
+                                } else {
+                                    setDownloadableUploadProgress(0, false);
+                                    setDownloadableError('Upload failed. Please try again.');
+                                }
+                            };
+                            xhr.onerror = function () {
+                                setDownloadableUploadProgress(0, false);
+                                setDownloadableError('Upload failed. Please try again.');
+                            };
+                            xhr.send(file);
+                        })
+                        .catch(function () {
+                            setDownloadableUploadProgress(0, false);
+                            setDownloadableError('Failed to get upload URL');
+                        });
+                }
+                productDownloadableInput.addEventListener('change', function () {
+                    if (this.files && this.files[0]) onDownloadableFileSelected(this.files[0]);
+                });
+                productDownloadableUploadArea.addEventListener('dragover', function (e) { e.preventDefault(); e.stopPropagation(); this.classList.add('dragover'); });
+                productDownloadableUploadArea.addEventListener('dragleave', function (e) { e.preventDefault(); e.stopPropagation(); this.classList.remove('dragover'); });
+                productDownloadableUploadArea.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.remove('dragover');
+                    var files = e.dataTransfer.files;
+                    if (files && files.length > 0) {
+                        productDownloadableInput.files = files;
+                        onDownloadableFileSelected(files[0]);
+                    }
+                });
+                productDownloadableRemove.addEventListener('click', function () {
+                    productDownloadableInput.value = '';
+                    if (fileKeyInput) fileKeyInput.value = '';
+                    productDownloadableInfo.classList.remove('show');
+                    productDownloadableUploadArea.classList.remove('has-file');
+                    clearDownloadableError();
+                });
+            } else {
+                handleFileUpload(
+                    productDownloadableInput,
+                    productDownloadableUploadArea,
+                    productDownloadableInfo,
+                    productDownloadableName,
+                    productDownloadableSize,
+                    productDownloadableRemove
+                );
+                productDownloadableRemove.addEventListener('click', function () {
+                    if (fileKeyInput) fileKeyInput.value = '';
+                });
+            }
+
+            // Show existing downloadable file info in edit mode
+            if (isEditMode && (popup.dataset.hasDownloadable === '1' || popup.dataset.hasDownloadableS3 === '1')) {
+                var existingFileEl = productDownloadableInput.closest('.g-field').querySelector('.helper-text strong');
+                if (existingFileEl) {
+                    productDownloadableName.textContent = existingFileEl.textContent;
+                    productDownloadableSize.textContent = 'Current file';
+                    productDownloadableInfo.classList.add('show');
+                    productDownloadableUploadArea.classList.add('has-file');
+                }
+            }
+        }
+
+        // Show existing image info in edit mode if no new file is selected
+        if (isEditMode && existingImageUrl && productImagePreview) {
+            const img = productImagePreview.querySelector('img');
+            if (img && img.src === '#' || !img.src.includes('http')) {
+                img.src = existingImageUrl;
+                productImagePreview.classList.remove('product-hidden');
+            }
+        }
+
+        // Category functionality
+        const categoryLevel1 = document.getElementById('id_category');
+        const categoryLevel2 = document.getElementById('id_category_l_2');
+        const categoryLevel3 = document.getElementById('id_category_l_3');
+
+        // Function to fetch child categories
+        async function fetchCategories(parentId, targetDropdown) {
+            targetDropdown.innerHTML = '<option value="">Loading...</option>';
+            try {
+                const response = await fetch(`/dashboard/get-child-categories-digi/?parent_id=${parentId}`);
+                const data = await response.json();
+                if (data.categories && data.categories.length > 0) {
+                    targetDropdown.innerHTML = '<option value="">Select Category</option>';
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        targetDropdown.appendChild(option);
+                    });
+                    targetDropdown.parentElement.classList.remove('product-hidden');
+                    return data.categories;
+                } else {
+                    targetDropdown.innerHTML = '<option value="">No Categories Found</option>';
+                    targetDropdown.parentElement.classList.remove('product-hidden');
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                targetDropdown.innerHTML = '<option value="">Error Loading Categories</option>';
+                return [];
+            }
+        }
+
+        // Event Listeners for each level
+        categoryLevel1.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            categoryLevel2.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel2.parentElement.classList.add('product-hidden');
+            categoryLevel3.parentElement.classList.add('product-hidden');
+
+            if (selectedId) {
+                fetchCategories(selectedId, categoryLevel2);
+            }
+        });
+
+        categoryLevel2.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            categoryLevel3.innerHTML = '<option value="">Select Category</option>';
+            categoryLevel3.parentElement.classList.add('product-hidden');
+
+            if (selectedId) {
+                fetchCategories(selectedId, categoryLevel3);
+            }
+        });
+
+        // Pre-fill level 2/3 categories on edit
+        (async function hydrateEditCategories() {
+            if (!isEditMode) return;
+            const selectedL2 = (popup.dataset.selectedCategoryL2 || '').trim();
+            const selectedL3 = (popup.dataset.selectedCategoryL3 || '').trim();
+            const selectedL1 = categoryLevel1.value;
+
+            if (selectedL1 && selectedL2) {
+                await fetchCategories(selectedL1, categoryLevel2);
+                categoryLevel2.value = selectedL2;
+                categoryLevel2.parentElement.classList.remove('product-hidden');
+            }
+
+            if (selectedL2 && selectedL3) {
+                await fetchCategories(selectedL2, categoryLevel3);
+                categoryLevel3.value = selectedL3;
+                categoryLevel3.parentElement.classList.remove('product-hidden');
+            }
+        })();
+
+        // Form submission (disable button, prevent double submit, toast on success/error)
+        let productFormSubmitting = false;
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (productFormSubmitting) return;
+            if (!validateProductStep1() || !validateProductStep2() || !validateProductStep3()) {
+                if (typeof showProductToast === 'function') showProductToast('Please complete all required fields.', 'error');
+                else alert('Please complete all required fields before submitting.');
+                return;
+            }
+            const submitBtn = document.getElementById('product-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
+            }
+            productFormSubmitting = true;
+            const formData = new FormData(this);
+            const self = this;
+            fetch(self.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = (popup.dataset.mode === 'edit' ? 'Update Product' : 'Publish Product'); }
+                    productFormSubmitting = false;
+                    if (data.status === 'success') {
+                        if (typeof showProductToast === 'function') showProductToast(data.message || 'Product saved successfully.', 'success');
+                        else alert(data.message);
+                        window.location.href = data.redirect_url;
+                    } else {
+                        if (data.form_errors) displayProductFormErrors(data.form_errors);
+                        else if (typeof showProductToast === 'function') showProductToast('Error: ' + (data.error || 'Unknown error'), 'error');
+                        else alert('Error creating product: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = (popup.dataset.mode === 'edit' ? 'Update Product' : 'Publish Product'); }
+                    productFormSubmitting = false;
+                    if (typeof showProductToast === 'function') showProductToast('Error creating product. Please try again.', 'error');
+                    else alert('Error creating product. Please try again.');
+                });
+        });
+
+        function displayProductFormErrors(errors) {
+            // Clear all errors first
+            clearAllProductErrors();
+
+            // Display new errors
+            for (const field in errors) {
+                const errorElement = document.getElementById(`product-${field}-error`);
+                const inputElement = document.getElementById(`id_${field}`);
+
+                if (errorElement) {
+                    errorElement.textContent = errors[field][0];
+                }
+
+                if (inputElement) {
+                    inputElement.classList.add('product-field-error');
+                }
+            }
+        }
+    }
+
+    // Validation functions for each step
+    function validateProductStep1() {
+        let isValid = true;
+
+        // Clear previous errors
+        clearProductStepErrors(1);
+
+        // Validate title
+        const title = document.getElementById('id_title').value.trim();
+        if (!title) {
+            showProductError('title', 'Product title is required');
+            isValid = false;
+        } else if (title.length < 5) {
+            showProductError('title', 'Product title must be at least 5 characters');
+            isValid = false;
+        }
+
+        // Validate description
+        const description = document.getElementById('id_description').value.trim();
+        if (!description) {
+            showProductError('description', 'Product description is required');
+            isValid = false;
+        } else if (description.length < 50) {
+            showProductError('description', 'Product description must be at least 50 characters');
+            isValid = false;
+        }
+
+        // Validate price
+        const price = document.getElementById('id_price').value;
+        if (!price || parseFloat(price) < 0.01) {
+            showProductError('price', 'Price must be at least $0.01');
+            isValid = false;
+        }
+
+        if (isValid) {
+            navigateToProductStep(2);
+        }
+
+        return isValid;
+    }
+
+    function validateProductStep2() {
+        let isValid = true;
+
+        // Clear previous errors
+        clearProductStepErrors(2);
+
+        // Validate category level 1
+        const category = document.getElementById('id_category').value;
+        if (!category) {
+            showProductError('category', 'Please select a category');
+            isValid = false;
+        }
+
+        if (isValid) {
+            navigateToProductStep(3);
+        }
+
+        return isValid;
+    }
+
+    function validateProductStep3() {
+        let isValid = true;
+        const popup = document.querySelector('.product-creation-popup');
+        const isEditMode = popup && popup.dataset.mode === 'edit';
+        const hasExistingImage = popup && popup.dataset.hasImage === '1';
+        const hasExistingDownloadable = popup && popup.dataset.hasDownloadable === '1';
+
+        // Clear previous errors
+        clearProductStepErrors(3);
+
+        // Validate image
+        const image = document.getElementById('id_image').files[0];
+        if (!image && !(isEditMode && hasExistingImage)) {
+            showProductError('image', 'Product image is required');
+            isValid = false;
+        } else if (image) {
+            // Check file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(image.type)) {
+                showProductError('image', 'Please upload a JPG or PNG image');
+                isValid = false;
+            }
+
+            // Check file size (5MB max)
+            if (image.size > 5 * 1024 * 1024) {
+                showProductError('image', 'Image size must be less than 5MB');
+                isValid = false;
+            }
+        }
+
+        // Validate files included
+        const filesIncluded = document.getElementById('id_files_included').value.trim();
+        if (!filesIncluded) {
+            showProductError('files_included', 'Please specify files included');
+            isValid = false;
+        }
+
+        // Validate softwares
+        const softwares = document.getElementById('id_softwares').value.trim();
+        if (!softwares) {
+            showProductError('softwares', 'Please specify softwares used');
+            isValid = false;
+        }
+
+        // Validate size
+        const size = document.getElementById('id_size').value.trim();
+        if (!size) {
+            showProductError('size', 'Please specify file size');
+            isValid = false;
+        }
+
+        // Validate downloadable file (local file or S3 file_key)
+        const hasExistingDownloadableS3 = popup && popup.dataset.hasDownloadableS3 === '1';
+        const fileKeyInputVal = document.getElementById('id_downloadable_file_key');
+        const hasFileKey = fileKeyInputVal && fileKeyInputVal.value.trim().length > 0;
+        const useS3UploadVal = popup && popup.dataset.useS3Upload === '1';
+        const downloadableFile = document.getElementById('id_downloadable_file').files[0];
+        const hasDownloadable = useS3UploadVal ? hasFileKey : !!downloadableFile;
+        if (!hasDownloadable && !(isEditMode && (hasExistingDownloadable || hasExistingDownloadableS3))) {
+            showProductError('downloadable_file', 'Downloadable file is required');
+            isValid = false;
+        } else if (!useS3UploadVal && downloadableFile && downloadableFile.size > 100 * 1024 * 1024) {
+            showProductError('downloadable_file', 'File size must be less than 100MB');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showProductError(fieldId, message) {
+        const candidates = [
+            fieldId,
+            fieldId.replace(/-/g, '_'),
+            fieldId.replace(/_/g, '-'),
+        ];
+
+        let errorElement = null;
+        for (const c of candidates) {
+            errorElement = document.getElementById(`product-${c}-error`);
+            if (errorElement) break;
+        }
+
+        let inputElement = null;
+        for (const c of candidates) {
+            inputElement = document.getElementById(`id_${c}`);
+            if (inputElement) break;
+        }
+
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+
+        if (inputElement) {
+            inputElement.classList.add('product-field-error');
+        }
+    }
+
+    function clearProductStepErrors(stepNumber) {
+        const stepElement = document.getElementById(`product-step-${stepNumber}`);
+        const errorElements = stepElement.querySelectorAll('.product-error-message');
+        const fieldElements = stepElement.querySelectorAll('.product-form-control, .product-category-dropdown');
+
+        errorElements.forEach(element => {
+            element.textContent = '';
+        });
+
+        fieldElements.forEach(element => {
+            element.classList.remove('product-field-error');
+        });
+    }
+
+    function clearAllProductErrors() {
+        const errorElements = document.querySelectorAll('.product-error-message');
+        const fieldElements = document.querySelectorAll('.product-form-control, .product-category-dropdown');
+
+        errorElements.forEach(element => {
+            element.textContent = '';
+        });
+
+        fieldElements.forEach(element => {
+            element.classList.remove('product-field-error');
+        });
+    }
+
+    function navigateToProductStep(stepNumber) {
+        stepNumber = parseInt(stepNumber);
+        const steps = document.querySelectorAll('.product-form-step');
+
+        // Hide all steps
+        steps.forEach(step => {
+            step.classList.remove('active');
+        });
+
+        // Show target step
+        const targetStep = document.getElementById(`product-step-${stepNumber}`);
+        if (targetStep) {
+            targetStep.classList.add('active');
+        }
+
+        // Update sidebar step indicators, dots and step count
+        const sidebarItems = document.querySelectorAll('.product-step-item');
+        sidebarItems.forEach(item => {
+            const stepNum = parseInt(item.getAttribute('data-step'));
+            item.classList.remove('active', 'completed');
+
+            if (stepNum < stepNumber) {
+                item.classList.add('completed');
+            } else if (stepNum === stepNumber) {
+                item.classList.add('active');
+            }
+        });
+
+        const dots = document.querySelectorAll('#productProgressDots .dot');
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === stepNumber - 1);
+        });
+    }
+
+    // AI Description Generation for Products
+    function generateProductDescription() {
+        const title = document.getElementById("id_title").value.trim();
+        const descriptionTextArea = document.getElementById("id_description");
+        const loadingSpinner = document.getElementById("product-loading-spinner");
+
+        if (!title) {
+            alert("Please enter a product title to generate a description.");
+            return;
+        }
+
+        loadingSpinner.classList.remove("product-hidden");
+
+        fetch("{% url 'generate_description_digiprenair' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ title: title })
+        })
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.classList.add("product-hidden");
+
+                if (data.description) {
+                    descriptionTextArea.value = data.description;
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                loadingSpinner.classList.add("product-hidden");
+                alert(`Error: ${error.message}`);
+            });
+    }
+
+    // Initialize the form when the popup loads
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeProductCreationForm();
+    });
+</script>

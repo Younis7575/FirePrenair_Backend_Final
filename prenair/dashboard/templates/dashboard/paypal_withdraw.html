@@ -1,0 +1,62 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Payout Settings{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">PayPal Trasfer</h4>
+
+                <form id="withdraw-form" method="POST" action="{% url 'paypal_transfer' %}">
+                    {% csrf_token %}
+                    <label for="amount">Amount to Withdraw:</label>
+                    <input type="number" name="amount" step="0.01" min="0.01" required>
+                    <button type="submit">Withdraw</button>
+                </form>
+                
+                
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2025 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+       
+    </div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+     <!-- Modal -->
+     <div class="modal">
+        <!-- menu_dashboard -->
+        {% include "work_prenair/partials/menu-modal.html" %}
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+{% endblock extra_javascript %}

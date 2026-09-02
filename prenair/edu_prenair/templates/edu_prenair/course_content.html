@@ -1,0 +1,1237 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% block title %} Fireprenair | Eduprenair - {{ course.title }} {% endblock %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css">
+<style>
+    .content-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .sidebar-course {
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: fit-content;
+        border: 1px solid #eaeaea;
+    }
+
+
+    .progress-chart {
+        position: relative;
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .progress-icon {
+        position: absolute;
+        top: 40%;
+        left: 47%;
+        transform: translate(-50%, -50%);
+        font-size: 2.5rem;
+        z-index: 1;
+        color: #ff6f61;
+    }
+
+    .progress-chart h3 {
+        color: #1e293b;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 1rem;
+    }
+
+    .progress-chart canvas {
+        padding: 10px;
+    }
+
+
+
+    .module-list>li {
+        margin-bottom: 1.5rem;
+    }
+
+    .lesson-item {
+        padding: 0.75rem 1.25rem;
+        margin: 0.25rem 0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+
+    .lesson-item:hover {
+        background: #f8fafc;
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+
+    .module-list h4 {
+        color: #2d3748;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .module-list h4::before {
+        content: '📚';
+        font-size: 1.2em;
+    }
+
+
+    .lesson-description {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #1e3a8a;
+    }
+
+    .lesson-description h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-size: 1.25rem;
+    }
+
+    .lesson-description p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .lesson-item.completed {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .lesson-item.completed::after {
+        content: "\f058";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        color: #22c55e;
+        margin-left: auto;
+        font-size: 1.1rem;
+    }
+
+    .pdf-icon {
+        color: #ef4444;
+    }
+
+    .video-icon {
+        color: #3b82f6;
+    }
+
+
+    .content-area {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .pdf-viewer iframe {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .pdf-viewer-container {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .pdf-toolbar {
+        padding: 10px;
+        background: #f8f9fa;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .btn-pdf {
+        padding: 5px 10px;
+        background: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-pdf:hover {
+        background: #ff6f61;
+    }
+
+    .pdf-content {
+        height: 600px;
+        overflow: auto;
+    }
+
+    #pdf-object {
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+    }
+
+
+    .plyr--video {
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .plyr__controls {
+        border-radius: 0 0 8px 8px;
+    }
+
+    @keyframes celebrate {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .default-course-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .course-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #eaeaea;
+    }
+
+    .course-header h1 {
+        font-size: 2.25rem;
+        color: #1a365d;
+        margin-bottom: 1rem;
+    }
+
+    .course-meta {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .badge {
+        background: #1e3a8a;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+
+    .duration {
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-description {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #4a5568;
+        margin: 2rem 0;
+    }
+
+    .return-btn {
+        background: #ff6f61;
+        color: white !important;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .return-btn:hover {
+        background: #ff6f61;
+        transform: translateY(-2px);
+    }
+
+
+
+    .course-completed {
+        animation: celebrate 1s ease-in-out;
+        background: linear-gradient(135deg, #1e3a8a, #10369f);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 2rem;
+        text-align: center;
+        display: none;
+    }
+
+    .certificate-btn {
+        background: white;
+        color: #4CAF50 !important;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .certificate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .certificate-btn i {
+        font-size: 1.2em;
+    }
+
+    .mobile-menu-btn {
+        position: fixed;
+        top: 125px;
+        left: 20px;
+        z-index: 1000;
+        background: #ff6f61;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        display: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* quiz  */
+
+    .quiz-actions {
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .quiz-btn {
+        background: #1e3a8a;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .quiz-btn:hover {
+        background: #1e40af;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 600px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+    }
+
+    .close-modal:hover {
+        color: #333;
+    }
+
+    .quiz-form {
+        margin: 2rem 0;
+    }
+
+    .quiz-form textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+
+    .loading-indicator {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid #1e3a8a;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    .quiz-result {
+        text-align: center;
+        padding: 1rem;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* TTS */
+    .tts-controls {
+        position: relative;
+        margin: 1.5rem 0;
+        border-radius: 12px;
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .tts-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .tts-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .tts-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .tts-button {
+        background: #1e3a8a;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .tts-button:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+    }
+
+    .tts-button.loading {
+        background: #64748b;
+        pointer-events: none;
+    }
+
+    .tts-button i {
+        font-size: 1.1em;
+    }
+
+    .tts-player {
+        margin-top: 1rem;
+    }
+
+    .tts-audio {
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    /* Voice Selector */
+    .voice-selector {
+        position: relative;
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .voice-selector select {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-size: 0.9rem;
+    }
+
+    /* Loading Animation */
+    @keyframes pulse {
+        0% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0.5
+        }
+
+        100% {
+            opacity: 1
+        }
+    }
+
+    .tts-loading {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        color: #64748b;
+    }
+
+    .tts-loading.active {
+        display: flex;
+    }
+
+    .tts-loading-dot {
+        width: 8px;
+        height: 8px;
+        background: #1e3a8a;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    .tts-loading-dot:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .tts-loading-dot:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    /* Error State */
+    .tts-error {
+        color: #dc2626;
+        margin-top: 0.5rem;
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .highlight-container {
+        position: relative;
+        line-height: 1.8;
+        padding: 1rem;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .highlight-word {
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .highlight-word.active {
+        background: rgba(30, 58, 138, 0.15);
+        transform: scale(1.05);
+    }
+
+    .highlight-word.current {
+        background: #1e3a8a;
+        color: white;
+        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+    }
+
+    .progress-highlight {
+        position: absolute;
+        height: 3px;
+        background: #1e3a8a;
+        bottom: 0;
+        left: 0;
+        transition: width 0.1s linear;
+    }
+
+
+    @media (max-width: 768px) {
+        .content-container {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .sidebar-course {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85%;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-course.active {
+            left: 0;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+        }
+
+        .content-area {
+            margin-top: 60px;
+            padding: 1rem;
+        }
+
+        .progress-chart {
+            margin-top: 2rem;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            display: block;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .sidebar-close {
+            display: none;
+        }
+    }
+</style>
+
+<div class="main-wrapper">
+    {% include 'edu_prenair/partials/header.html' %}
+    <div class="content-container">
+
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <!-- Sidebar -->
+        <div class="sidebar-course" id="sidebarCourse">
+            <button class="sidebar-close" id="sidebarCloseCourse">
+                &times;
+            </button>
+            <div class="quiz-actions">
+                <button id="openQuizModal" class="quiz-btn">
+                    <i class="fas fa-question-circle"></i> Generate Quiz
+                </button>
+            </div>
+            <div class="progress-chart">
+                <canvas id="progressChart" width="200" height="200"></canvas>
+                <i class="fa-solid fa-graduation-cap progress-icon"></i>
+                <h3>{{ progress|floatformat }}% Complete</h3>
+            </div>
+            <div class="course-completed">
+                <h3 style="color: white;">🎉 Course Completed!</h3>
+                <p>Congratulations on finishing the course!</p>
+                <a href="{% url 'get_certificate' course.slug %}" class="certificate-btn">
+                    <i class="fas fa-download"></i>
+                    Download Certificate
+                </a>
+            </div>
+
+            <ul class="module-list">
+                {% for module in modules %}
+                <li>
+                    <h4>{{ module.title }}</h4>
+                    <ul>
+                        {% for lesson in module.lessons.all %}
+                        <li class="lesson-item {% if lesson in enrollment.completed_lessons.all %}completed{% endif %}"
+                            data-lesson-slug="{{ lesson.slug }}" data-description="{{ lesson.description }}">
+                            {% if lesson.is_pdf %}
+                            <span class="pdf-icon">📄</span>
+                            {% else %}
+                            <span class="video-icon">▶️</span>
+                            {% endif %}
+                            {{ lesson.title }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-area">
+            <!-- Video/PDF Viewer -->
+            <div id="content-viewer">
+                <!-- Default Content -->
+                <div class="default-course-content">
+                    <div class="course-header">
+                        <h1>{{ course.title }}</h1>
+                        <div class="course-meta">
+                            <span class="badge">{{ course.category_l_1.name }}</span>
+                            <span class="duration"><i class="fas fa-clock"></i> {{ course.duration }} Hours</span>
+                        </div>
+                    </div>
+
+                    <div class="course-description">
+                        {{ description_html|safe }}
+                    </div>
+
+                    <a href="{% url 'course_detail' course.slug %}" class="return-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Course Overview
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% include 'home/partials/footer.html' %}
+</div>
+
+<div id="quizModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Generate Custom Quiz</h2>
+        <p>Enter a topic or concept you'd like to be quizzed on:</p>
+
+        <div class="quiz-form">
+            <textarea required id="quizPrompt"
+                placeholder="E.g. 'Test me on the key concepts from module 2'"></textarea>
+            <button id="generateQuizBtn" class="generate-btn category-btn-final">
+                Generate Quiz
+            </button>
+        </div>
+
+        <div id="quizLoading" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Generating your custom quiz...</p>
+        </div>
+
+        <div id="quizResult" class="quiz-result" style="display: none;">
+            <h3 id="generatedQuizTitle"></h3>
+            <p id="generatedQuizDesc"></p>
+            <a id="takeQuizBtn" href="#" class="take-quiz-btn category-btn-final"
+                style="color: white; width: fit-content; display: inline-block;">
+                Take Quiz Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    let currentAudio = null;
+    let lessonPlayer = null;
+    let words = [];
+
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const progressChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [{{ progress }}, 100 - {{ progress }}],
+        backgroundColor: ['#22c55e', '#e2e8f0'],
+        borderWidth: 0,
+        borderRadius: 8,
+        spacing: 2
+    }]
+    },
+    options: {
+        cutout: '85%',
+            responsive: false,
+                plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+        }
+    }
+});
+
+    // -------------------- Lesson Handling --------------------
+    document.querySelectorAll('.lesson-item').forEach(item => {
+        item.addEventListener('click', function () {
+            const lessonSlug = this.dataset.lessonSlug;
+            const isPdf = this.querySelector('span').textContent.includes('📄');
+            if (isPdf) {
+                handlePdfLesson(lessonSlug);
+            } else {
+                loadVideoLesson(lessonSlug);
+            }
+        });
+    });
+
+    function handlePdfLesson(lessonSlug) {
+        const lessonItem = document.querySelector(`[data-lesson-slug="${lessonSlug}"]`);
+        const description = lessonItem.dataset.description;
+
+        const viewer = document.getElementById('content-viewer');
+        viewer.innerHTML = `
+        <div class="lesson-description">
+            <h3>${lessonItem.querySelector('span').nextSibling.textContent.trim()}</h3>
+            <p>${description}</p>
+        </div>
+        `;
+        fetch(`/eduprenair/lesson-complete/${lessonSlug}/{{ course.slug }}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(handleCompletionResponse(lessonSlug))
+            .catch(handleLessonError);
+
+        const pdfUrl = `/eduprenair/course/view_lesson/${lessonSlug}/`;
+        window.open(pdfUrl, '_blank');
+    }
+
+    function loadVideoLesson(lessonSlug) {
+        fetch(`/eduprenair/course/view_lesson/${lessonSlug}/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const viewer = document.getElementById('content-viewer');
+                viewer.innerHTML = createVideoLessonHTML(data, lessonSlug);
+                initializeVideoPlayer(data, lessonSlug);
+                setupTTSElements(data.description);
+            })
+            .catch(handleLessonError);
+    }
+
+    function handleLessonError(error) {
+        alert('Error loading lesson content');
+    }
+
+    // -------------------- Video & TTS Setup --------------------
+    function createVideoLessonHTML(data, lessonSlug) {
+    let html = '';
+
+    if (data.url) {
+        html += `
+            <div class="video-container">
+                <video id="lesson-video" playsinline controls>
+                    <source src="${data.url}" type="video/mp4">
+                </video>
+            </div>
+        `;
+    }
+    html += createHighlightContainer(data);
+    markLessonComplete(lessonSlug);
+    return html;
+}
+
+
+
+    function createHighlightContainer(data) {
+        return `
+        <div class="highlight-container">
+            <div class="progress-highlight"></div>
+            <div class="lesson-description">
+                <h3>${data.title}</h3>
+                <p>${data.description.split(' ').map(word =>
+            `<span class="highlight-word">${word}</span>`
+        ).join(' ')}</p>
+            </div>
+        </div>
+    `;
+    }
+
+    function initializeVideoPlayer(data, lessonSlug) {
+        lessonPlayer = new Plyr('#lesson-video', {
+            ratio: '16:9',
+            tooltips: { controls: true, seek: true },
+            keyboard: { focused: true, global: true },
+            fullscreen: { enabled: true, iosNative: true }
+        });
+        lessonPlayer.on('ended', () => markLessonComplete(lessonSlug));
+    }
+
+    // -------------------- TTS Handling --------------------
+    function setupTTSElements(description) {
+        const ttsHTML = `
+        <div class="tts-controls">
+            <div class="tts-header">
+                <div class="tts-title">
+                    <i class="fas fa-assistive-listening-systems"></i>
+                    Audio Assistant
+                </div>
+                <div class="tts-actions">
+                    <div class="voice-selector">
+                        <select id="voiceGender">
+                            <option value="male">Male Voice</option>
+                            <option value="female">Female Voice</option>
+                        </select>
+                    </div>
+                    <button class="tts-button" id="generateTTS">
+                        <i class="fas fa-headphones"></i>
+                        Generate Audio
+                    </button>
+                </div>
+            </div>
+            <div class="tts-loading">
+                <div class="tts-loading-dot"></div>
+                <div class="tts-loading-dot"></div>
+                <div class="tts-loading-dot"></div>
+                <span>Generating lifelike audio...</span>
+            </div>
+            <div class="tts-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="error-message"></span>
+            </div>
+            <div class="tts-player"></div>
+        </div>
+    `;
+        document.querySelector('.highlight-container').insertAdjacentHTML('afterend', ttsHTML);
+        words = Array.from(document.querySelectorAll('.highlight-word'));
+    }
+
+    document.addEventListener('click', async (e) => {
+        if (e.target.closest('#generateTTS')) {
+            const ttsButton = e.target.closest('#generateTTS');
+            const description = document.querySelector('.lesson-description p').textContent;
+            const voiceGender = document.getElementById('voiceGender').value;
+            const loading = document.querySelector('.tts-loading');
+            const errorDiv = document.querySelector('.tts-error');
+
+            resetAudioState();
+            ttsButton.classList.add('loading');
+            loading.classList.add('active');
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/eduprenair/course/lesson/generate_audio/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `text=${encodeURIComponent(description)}&gender=${voiceGender}`
+                });
+
+                if (!response.ok) throw new Error('API request failed');
+
+                const audioBlob = await response.blob();
+                handleAudioSuccess(audioBlob);
+            } catch (error) {
+                handleAudioError(error, errorDiv);
+            } finally {
+                ttsButton.classList.remove('loading');
+                loading.classList.remove('active');
+            }
+        }
+    });
+
+    function handleAudioSuccess(audioBlob) {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioHTML = `
+        <audio class="tts-audio" controls>
+            <source src="${audioUrl}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    `;
+        document.querySelector('.tts-player').innerHTML = audioHTML;
+        currentAudio = document.querySelector('.tts-audio');
+
+        currentAudio.addEventListener('timeupdate', handleAudioProgress);
+        currentAudio.addEventListener('ended', resetHighlighting);
+        currentAudio.play();
+    }
+
+    function handleAudioProgress() {
+        const progress = currentAudio.currentTime / currentAudio.duration;
+        const currentIndex = Math.floor(progress * words.length);
+
+        words.forEach(word => word.classList.remove('current', 'active'));
+        document.querySelector('.progress-highlight').style.width = `${progress * 100}%`;
+
+        words.slice(0, currentIndex).forEach(word => word.classList.add('active'));
+
+        if (words[currentIndex]) {
+            words[currentIndex].classList.add('current');
+            words[currentIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest'
+            });
+        }
+    }
+
+    function handleAudioError(error, errorDiv) {
+        errorDiv.querySelector('.error-message').textContent = `Error generating audio: ${error.message}`;
+        errorDiv.style.display = 'flex';
+    }
+
+
+    function resetHighlighting() {
+        words.forEach(word => word.classList.remove('current', 'active'));
+        document.querySelector('.progress-highlight').style.width = '0%';
+    }
+
+    function resetAudioState() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.removeEventListener('timeupdate', handleAudioProgress);
+            currentAudio.removeEventListener('ended', resetHighlighting);
+            currentAudio = null;
+        }
+        resetHighlighting();
+    }
+    // -------------------- Lesson Completion --------------------
+    function markLessonComplete(lessonSlug) {
+        fetch(`/eduprenair/lesson-complete/${lessonSlug}/{{ course.slug }}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(handleCompletionResponse(lessonSlug))
+            .catch(handleLessonError);
+    }
+
+    function handleCompletionResponse(lessonSlug) {
+        return data => {
+            if (data.progress) {
+                updateProgressChart(data.progress);
+                document.querySelector(`.lesson-item[data-lesson-slug="${lessonSlug}"]`)
+                    .classList.add('completed');
+                if (data.is_completed) handleCourseCompletion();
+            }
+        };
+    }
+
+    function updateProgressChart(progress) {
+        const numericProgress = parseFloat(progress);
+        progressChart.data.datasets[0].data = [numericProgress, 100 - numericProgress];
+        progressChart.update();
+        document.querySelector('.progress-chart h3').textContent = `${Math.round(numericProgress)}% Complete`;
+    }
+
+    // -------------------- Lesson Completion End --------------------
+
+
+    // -------------------- Course Completion --------------------
+    function handleCourseCompletion() {
+        const celebration = document.querySelector('.course-completed');
+        celebration.style.display = 'block';
+
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#4CAF50', '#45a049', '#3d8b40']
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#4CAF50', '#45a049', '#3d8b40']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+
+        celebration.style.animation = 'celebrate 1s ease-in-out';
+        setInterval(() => {
+            celebration.style.animation = 'celebrate 1s ease-in-out';
+        }, 5000);
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        if (parseFloat({{ progress }}) === 100) {
+        handleCourseCompletion();
+    }
+    });
+    // -------------------- Course Completion End --------------------
+
+
+    // -------------------- Mobile Menu --------------------
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebarCourse = document.getElementById('sidebarCourse');
+    const sidebarCloseCourse = document.getElementById('sidebarCloseCourse');
+
+    mobileMenuBtn.addEventListener('click', function () {
+        sidebarCourse.classList.toggle('active');
+    });
+
+    sidebarCloseCourse.addEventListener('click', function () {
+        sidebarCourse.classList.remove('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+        }
+    });
+    // -------------------- Mobile Menu End --------------------
+
+    // -------------------- Quiz Modal --------------------
+    const quizModal = document.getElementById('quizModal');
+    const openQuizModalBtn = document.getElementById('openQuizModal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const generateQuizBtn = document.getElementById('generateQuizBtn');
+    const quizPrompt = document.getElementById('quizPrompt');
+    const quizLoading = document.getElementById('quizLoading');
+    const quizResult = document.getElementById('quizResult');
+    const generatedQuizTitle = document.getElementById('generatedQuizTitle');
+    const generatedQuizDesc = document.getElementById('generatedQuizDesc');
+    const takeQuizBtn = document.getElementById('takeQuizBtn');
+
+    openQuizModalBtn.addEventListener('click', () => {
+        quizModal.style.display = 'block';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        quizModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === quizModal) {
+            quizModal.style.display = 'none';
+        }
+    });
+
+    generateQuizBtn.addEventListener('click', () => {
+        const prompt = quizPrompt.value.trim();
+        if (!prompt) {
+            alert('Please enter a quiz topic or concept');
+            return;
+        }
+
+        // Show loading, hide form
+        document.querySelector('.quiz-form').style.display = 'none';
+        quizLoading.style.display = 'block';
+
+        // Call API to generate quiz
+        fetch(`/eduprenair/generate-quiz/{{ course.slug }}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ prompt: prompt })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    document.querySelector('.quiz-form').style.display = 'block';
+                    quizLoading.style.display = 'none';
+                    return;
+                }
+
+                // Show quiz result
+                quizLoading.style.display = 'none';
+                generatedQuizTitle.textContent = data.title;
+                generatedQuizDesc.textContent = data.description;
+                takeQuizBtn.href = `/eduprenair/take-quiz/${data.quiz_id}/`;
+                quizResult.style.display = 'block';
+            })
+            .catch(error => {
+                alert('Error generating quiz. Please try again.');
+                document.querySelector('.quiz-form').style.display = 'block';
+                quizLoading.style.display = 'none';
+            });
+    });
+
+</script>
+{% endblock %}

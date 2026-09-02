@@ -1,0 +1,650 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Edit Profile{% endblock title %} {% load static %} 
+
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+<style>
+  /* Custom Select Styles */
+  .custom-select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  .custom-select-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e1e5eb;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #333;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  
+  .custom-select-trigger:hover,
+  .custom-select-trigger.active {
+    border-color: #ff6f61;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.15);
+  }
+  
+  .custom-select-trigger .selected-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  
+  .custom-select-trigger .flag {
+    font-size: 20px;
+  }
+  
+  .custom-select-trigger .arrow {
+    transition: transform 0.3s ease;
+    color: #666;
+  }
+  
+  .custom-select-trigger.active .arrow {
+    transform: rotate(180deg);
+  }
+  
+  .custom-select-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e1e5eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 320px;
+    overflow: hidden;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+  
+  .custom-select-dropdown.active {
+    display: block;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .custom-select-search {
+    padding: 12px;
+    border-bottom: 2px solid #f0f2f5;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+  }
+  
+  .custom-select-search input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e1e5eb;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  
+  .custom-select-search input:focus {
+    border-color: #ff6f61;
+  }
+  
+  .custom-select-options {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  
+  .custom-select-option {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f8f9fa;
+  }
+  
+  .custom-select-option:hover {
+    background: linear-gradient(90deg, rgba(255, 111, 97, 0.05) 0%, transparent 100%);
+  }
+  
+  .custom-select-option.selected {
+    background: linear-gradient(90deg, rgba(255, 111, 97, 0.1) 0%, transparent 100%);
+    font-weight: 600;
+    color: #ff6f61;
+  }
+  
+  .custom-select-option .flag {
+    font-size: 20px;
+    width: 28px;
+    text-align: center;
+  }
+  
+  .custom-select-option .name {
+    flex: 1;
+    font-size: 14px;
+  }
+  
+  .no-results {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+  }
+  
+  .custom-select-options::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-select-options::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .custom-select-options::-webkit-scrollbar-thumb {
+    background: #ff6f61;
+    border-radius: 10px;
+  }
+  
+  .custom-select-options::-webkit-scrollbar-thumb:hover {
+    background: #ff8e53;
+  }
+</style>
+
+
+
+{% endblock extra_css %} {% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="dashboard_applied scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+        <button
+        class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+        data-type="menu_dashboard"
+      >
+        <span class="ph ph-squares-four text-xl"></span>
+        <strong class="text-button">Menu</strong>
+      </button>
+        <form method="POST" enctype="multipart/form-data" class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+            {% csrf_token %}
+            <div class="heading flex flex-wrap items-center justify-between gap-4">
+                <h4 class="heading4 max-lg:mt-3">Edit Profile</h4>
+                <button class="category-btn-final" type="submit">Save & Publish</button>
+            </div>
+        
+            <!-- Loop through form fields -->
+            <div class="infomation p-8 mt-7.5 rounded-lg bg-white shadow-sm">
+                <h5 class="heading5">Information</h5>
+                <div class="grid sm:grid-cols-2 gap-5 mt-5">
+                    {% for field in form %}
+                        <div class="form-group">
+                            {% if field.name == "bio" %}
+                            <label for="{{ field.id_for_label }}">Something about you</label>
+
+                            {% elif field.name == "country" %}
+                            <label for="{{ field.id_for_label }}">Country</label>
+
+                            {% elif field.name == "date_of_birth" %}
+                            <label for="{{ field.id_for_label }}">Date of Birth</label>
+
+                            {% elif field.name == "identity_type" %}
+                            <label for="{{ field.id_for_label }}">Identity Type</label>
+
+                            {% elif field.name == "identity_number" %}
+                            <label for="{{ field.id_for_label }}">Identity Number</label>
+
+                            {% elif field.name == "phone_no" %}
+                            <label for="{{ field.id_for_label }}">Phone Number</label>
+                            {% else %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% endif %}
+                            {% if field.name == "country" %}
+                            <div id="countrySelect"></div>
+                            {{ field }}  {# Hidden field for form submission #}
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                      {% if field.name == "username" and user.is_username_changed %}
+                        <small style="color: red;">Username cannot be changed anymore.</small>
+                      {% endif %}
+                      {% if field.name == "username" and user.is_username_changed is False %}
+                        <small style="color: red;">*Username can be changed only once.</small>
+                      {% endif %}
+                            {% if field.errors %}
+                                <small class="text-red-500">{{ field.errors|striptags }}</small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+        
+        <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+            <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+        </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  {% endblock content %} 
+  
+  {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+  <script>
+    // Complete countries data with flags - matching signup page
+    const countriesData = [
+      { code: "AF", name: "Afghanistan", flag: "🇦🇫" },
+      { code: "AL", name: "Albania", flag: "🇦🇱" },
+      { code: "DZ", name: "Algeria", flag: "🇩🇿" },
+      { code: "AD", name: "Andorra", flag: "🇦🇩" },
+      { code: "AO", name: "Angola", flag: "🇦🇴" },
+      { code: "AG", name: "Antigua and Barbuda", flag: "🇦🇬" },
+      { code: "AR", name: "Argentina", flag: "🇦🇷" },
+      { code: "AM", name: "Armenia", flag: "🇦🇲" },
+      { code: "AU", name: "Australia", flag: "🇦🇺" },
+      { code: "AT", name: "Austria", flag: "🇦🇹" },
+      { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
+      { code: "BS", name: "Bahamas", flag: "🇧🇸" },
+      { code: "BH", name: "Bahrain", flag: "🇧🇭" },
+      { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
+      { code: "BB", name: "Barbados", flag: "🇧🇧" },
+      { code: "BY", name: "Belarus", flag: "🇧🇾" },
+      { code: "BE", name: "Belgium", flag: "🇧🇪" },
+      { code: "BZ", name: "Belize", flag: "🇧🇿" },
+      { code: "BJ", name: "Benin", flag: "🇧🇯" },
+      { code: "BT", name: "Bhutan", flag: "🇧🇹" },
+      { code: "BO", name: "Bolivia", flag: "🇧🇴" },
+      { code: "BA", name: "Bosnia and Herzegovina", flag: "🇧🇦" },
+      { code: "BW", name: "Botswana", flag: "🇧🇼" },
+      { code: "BR", name: "Brazil", flag: "🇧🇷" },
+      { code: "BN", name: "Brunei", flag: "🇧🇳" },
+      { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
+      { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
+      { code: "BI", name: "Burundi", flag: "🇧🇮" },
+      { code: "CV", name: "Cabo Verde", flag: "🇨🇻" },
+      { code: "KH", name: "Cambodia", flag: "🇰🇭" },
+      { code: "CM", name: "Cameroon", flag: "🇨🇲" },
+      { code: "CA", name: "Canada", flag: "🇨🇦" },
+      { code: "CF", name: "Central African Republic", flag: "🇨🇫" },
+      { code: "TD", name: "Chad", flag: "🇹🇩" },
+      { code: "CL", name: "Chile", flag: "🇨🇱" },
+      { code: "CN", name: "China", flag: "🇨🇳" },
+      { code: "CO", name: "Colombia", flag: "🇨🇴" },
+      { code: "KM", name: "Comoros", flag: "🇰🇲" },
+      { code: "CG", name: "Congo", flag: "🇨🇬" },
+      { code: "CD", name: "Congo, Democratic Republic", flag: "🇨🇩" },
+      { code: "CR", name: "Costa Rica", flag: "🇨🇷" },
+      { code: "CI", name: "Côte d'Ivoire", flag: "🇨🇮" },
+      { code: "HR", name: "Croatia", flag: "🇭🇷" },
+      { code: "CU", name: "Cuba", flag: "🇨🇺" },
+      { code: "CY", name: "Cyprus", flag: "🇨🇾" },
+      { code: "CZ", name: "Czech Republic", flag: "🇨🇿" },
+      { code: "DK", name: "Denmark", flag: "🇩🇰" },
+      { code: "DJ", name: "Djibouti", flag: "🇩🇯" },
+      { code: "DM", name: "Dominica", flag: "🇩🇲" },
+      { code: "DO", name: "Dominican Republic", flag: "🇩🇴" },
+      { code: "EC", name: "Ecuador", flag: "🇪🇨" },
+      { code: "EG", name: "Egypt", flag: "🇪🇬" },
+      { code: "SV", name: "El Salvador", flag: "🇸🇻" },
+      { code: "GQ", name: "Equatorial Guinea", flag: "🇬🇶" },
+      { code: "ER", name: "Eritrea", flag: "🇪🇷" },
+      { code: "EE", name: "Estonia", flag: "🇪🇪" },
+      { code: "SZ", name: "Eswatini", flag: "🇸🇿" },
+      { code: "ET", name: "Ethiopia", flag: "🇪🇹" },
+      { code: "FJ", name: "Fiji", flag: "🇫🇯" },
+      { code: "FI", name: "Finland", flag: "🇫🇮" },
+      { code: "FR", name: "France", flag: "🇫🇷" },
+      { code: "GA", name: "Gabon", flag: "🇬🇦" },
+      { code: "GM", name: "Gambia", flag: "🇬🇲" },
+      { code: "GE", name: "Georgia", flag: "🇬🇪" },
+      { code: "DE", name: "Germany", flag: "🇩🇪" },
+      { code: "GH", name: "Ghana", flag: "🇬🇭" },
+      { code: "GR", name: "Greece", flag: "🇬🇷" },
+      { code: "GD", name: "Grenada", flag: "🇬🇩" },
+      { code: "GT", name: "Guatemala", flag: "🇬🇹" },
+      { code: "GN", name: "Guinea", flag: "🇬🇳" },
+      { code: "GW", name: "Guinea-Bissau", flag: "🇬🇼" },
+      { code: "GY", name: "Guyana", flag: "🇬🇾" },
+      { code: "HT", name: "Haiti", flag: "🇭🇹" },
+      { code: "HN", name: "Honduras", flag: "🇭🇳" },
+      { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
+      { code: "HU", name: "Hungary", flag: "🇭🇺" },
+      { code: "IS", name: "Iceland", flag: "🇮🇸" },
+      { code: "IN", name: "India", flag: "🇮🇳" },
+      { code: "ID", name: "Indonesia", flag: "🇮🇩" },
+      { code: "IR", name: "Iran", flag: "🇮🇷" },
+      { code: "IQ", name: "Iraq", flag: "🇮🇶" },
+      { code: "IE", name: "Ireland", flag: "🇮🇪" },
+      { code: "IL", name: "Israel", flag: "🇮🇱" },
+      { code: "IT", name: "Italy", flag: "🇮🇹" },
+      { code: "JM", name: "Jamaica", flag: "🇯🇲" },
+      { code: "JP", name: "Japan", flag: "🇯🇵" },
+      { code: "JO", name: "Jordan", flag: "🇯🇴" },
+      { code: "KZ", name: "Kazakhstan", flag: "🇰🇿" },
+      { code: "KE", name: "Kenya", flag: "🇰🇪" },
+      { code: "KI", name: "Kiribati", flag: "🇰🇮" },
+      { code: "KP", name: "North Korea", flag: "🇰🇵" },
+      { code: "KR", name: "South Korea", flag: "🇰🇷" },
+      { code: "KW", name: "Kuwait", flag: "🇰🇼" },
+      { code: "KG", name: "Kyrgyzstan", flag: "🇰🇬" },
+      { code: "LA", name: "Laos", flag: "🇱🇦" },
+      { code: "LV", name: "Latvia", flag: "🇱🇻" },
+      { code: "LB", name: "Lebanon", flag: "🇱🇧" },
+      { code: "LS", name: "Lesotho", flag: "🇱🇸" },
+      { code: "LR", name: "Liberia", flag: "🇱🇷" },
+      { code: "LY", name: "Libya", flag: "🇱🇾" },
+      { code: "LI", name: "Liechtenstein", flag: "🇱🇮" },
+      { code: "LT", name: "Lithuania", flag: "🇱🇹" },
+      { code: "LU", name: "Luxembourg", flag: "🇱🇺" },
+      { code: "MG", name: "Madagascar", flag: "🇲🇬" },
+      { code: "MW", name: "Malawi", flag: "🇲🇼" },
+      { code: "MY", name: "Malaysia", flag: "🇲🇾" },
+      { code: "MV", name: "Maldives", flag: "🇲🇻" },
+      { code: "ML", name: "Mali", flag: "🇲🇱" },
+      { code: "MT", name: "Malta", flag: "🇲🇹" },
+      { code: "MH", name: "Marshall Islands", flag: "🇲🇭" },
+      { code: "MR", name: "Mauritania", flag: "🇲🇷" },
+      { code: "MU", name: "Mauritius", flag: "🇲🇺" },
+      { code: "MX", name: "Mexico", flag: "🇲🇽" },
+      { code: "FM", name: "Micronesia", flag: "🇫🇲" },
+      { code: "MD", name: "Moldova", flag: "🇲🇩" },
+      { code: "MC", name: "Monaco", flag: "🇲🇨" },
+      { code: "MN", name: "Mongolia", flag: "🇲🇳" },
+      { code: "ME", name: "Montenegro", flag: "🇲🇪" },
+      { code: "MA", name: "Morocco", flag: "🇲🇦" },
+      { code: "MZ", name: "Mozambique", flag: "🇲🇿" },
+      { code: "MM", name: "Myanmar", flag: "🇲🇲" },
+      { code: "NA", name: "Namibia", flag: "🇳🇦" },
+      { code: "NR", name: "Nauru", flag: "🇳🇷" },
+      { code: "NP", name: "Nepal", flag: "🇳🇵" },
+      { code: "NL", name: "Netherlands", flag: "🇳🇱" },
+      { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
+      { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
+      { code: "NE", name: "Niger", flag: "🇳🇪" },
+      { code: "NG", name: "Nigeria", flag: "🇳🇬" },
+      { code: "MK", name: "North Macedonia", flag: "🇲🇰" },
+      { code: "NO", name: "Norway", flag: "🇳🇴" },
+      { code: "OM", name: "Oman", flag: "🇴🇲" },
+      { code: "PK", name: "Pakistan", flag: "🇵🇰" },
+      { code: "PW", name: "Palau", flag: "🇵🇼" },
+      { code: "PS", name: "Palestine", flag: "🇵🇸" },
+      { code: "PA", name: "Panama", flag: "🇵🇦" },
+      { code: "PG", name: "Papua New Guinea", flag: "🇵🇬" },
+      { code: "PY", name: "Paraguay", flag: "🇵🇾" },
+      { code: "PE", name: "Peru", flag: "🇵🇪" },
+      { code: "PH", name: "Philippines", flag: "🇵🇭" },
+      { code: "PL", name: "Poland", flag: "🇵🇱" },
+      { code: "PT", name: "Portugal", flag: "🇵🇹" },
+      { code: "QA", name: "Qatar", flag: "🇶🇦" },
+      { code: "RO", name: "Romania", flag: "🇷🇴" },
+      { code: "RU", name: "Russia", flag: "🇷🇺" },
+      { code: "RW", name: "Rwanda", flag: "🇷🇼" },
+      { code: "KN", name: "Saint Kitts and Nevis", flag: "🇰🇳" },
+      { code: "LC", name: "Saint Lucia", flag: "🇱🇨" },
+      { code: "VC", name: "Saint Vincent and the Grenadines", flag: "🇻🇨" },
+      { code: "WS", name: "Samoa", flag: "🇼🇸" },
+      { code: "SM", name: "San Marino", flag: "🇸🇲" },
+      { code: "ST", name: "São Tomé and Príncipe", flag: "🇸🇹" },
+      { code: "SA", name: "Saudi Arabia", flag: "🇸🇦" },
+      { code: "SN", name: "Senegal", flag: "🇸🇳" },
+      { code: "RS", name: "Serbia", flag: "🇷🇸" },
+      { code: "SC", name: "Seychelles", flag: "🇸🇨" },
+      { code: "SL", name: "Sierra Leone", flag: "🇸🇱" },
+      { code: "SG", name: "Singapore", flag: "🇸🇬" },
+      { code: "SK", name: "Slovakia", flag: "🇸🇰" },
+      { code: "SI", name: "Slovenia", flag: "🇸🇮" },
+      { code: "SB", name: "Solomon Islands", flag: "🇸🇧" },
+      { code: "SO", name: "Somalia", flag: "🇸🇴" },
+      { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+      { code: "SS", name: "South Sudan", flag: "🇸🇸" },
+      { code: "ES", name: "Spain", flag: "🇪🇸" },
+      { code: "LK", name: "Sri Lanka", flag: "🇱🇰" },
+      { code: "SD", name: "Sudan", flag: "🇸🇩" },
+      { code: "SR", name: "Suriname", flag: "🇸🇷" },
+      { code: "SE", name: "Sweden", flag: "🇸🇪" },
+      { code: "CH", name: "Switzerland", flag: "🇨🇭" },
+      { code: "SY", name: "Syria", flag: "🇸🇾" },
+      { code: "TW", name: "Taiwan", flag: "🇹🇼" },
+      { code: "TJ", name: "Tajikistan", flag: "🇹🇯" },
+      { code: "TZ", name: "Tanzania", flag: "🇹🇿" },
+      { code: "TH", name: "Thailand", flag: "🇹🇭" },
+      { code: "TL", name: "Timor-Leste", flag: "🇹🇱" },
+      { code: "TG", name: "Togo", flag: "🇹🇬" },
+      { code: "TO", name: "Tonga", flag: "🇹🇴" },
+      { code: "TT", name: "Trinidad and Tobago", flag: "🇹🇹" },
+      { code: "TN", name: "Tunisia", flag: "🇹🇳" },
+      { code: "TR", name: "Turkey", flag: "🇹🇷" },
+      { code: "TM", name: "Turkmenistan", flag: "🇹🇲" },
+      { code: "TV", name: "Tuvalu", flag: "🇹🇻" },
+      { code: "UG", name: "Uganda", flag: "🇺🇬" },
+      { code: "UA", name: "Ukraine", flag: "🇺🇦" },
+      { code: "AE", name: "United Arab Emirates", flag: "🇦🇪" },
+      { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+      { code: "US", name: "United States", flag: "🇺🇸" },
+      { code: "UY", name: "Uruguay", flag: "🇺🇾" },
+      { code: "UZ", name: "Uzbekistan", flag: "🇺🇿" },
+      { code: "VU", name: "Vanuatu", flag: "🇻🇺" },
+      { code: "VA", name: "Vatican City", flag: "🇻🇦" },
+      { code: "VE", name: "Venezuela", flag: "🇻🇪" },
+      { code: "VN", name: "Vietnam", flag: "🇻🇳" },
+      { code: "YE", name: "Yemen", flag: "🇾🇪" },
+      { code: "ZM", name: "Zambia", flag: "🇿🇲" },
+      { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" },
+    ];
+
+    // Custom Select Component
+    class CustomSelect {
+      constructor(elementId, data, options = {}) {
+        this.elementId = elementId;
+        this.data = data;
+        this.options = options;
+        this.selectedValue = null;
+        this.isOpen = false;
+        this.filteredData = [...data];
+        
+        this.init();
+      }
+      
+      init() {
+        const container = document.getElementById(this.elementId);
+        if (!container) return;
+        
+        // Create custom select HTML
+        const html = `
+          <div class="custom-select-wrapper">
+            <div class="custom-select-trigger">
+              <div class="selected-option">
+                <span class="placeholder">${this.options.placeholder || 'Select an option'}</span>
+              </div>
+              <i class="fas fa-chevron-down arrow"></i>
+            </div>
+            <div class="custom-select-dropdown">
+              <div class="custom-select-search">
+                <input type="text" placeholder="${this.options.searchPlaceholder || 'Search...'}" autocomplete="off">
+              </div>
+              <div class="custom-select-options"></div>
+            </div>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        this.trigger = container.querySelector('.custom-select-trigger');
+        this.dropdown = container.querySelector('.custom-select-dropdown');
+        this.searchInput = container.querySelector('.custom-select-search input');
+        this.optionsContainer = container.querySelector('.custom-select-options');
+        
+        this.renderOptions();
+        this.attachEvents();
+      }
+      
+      renderOptions() {
+        if (this.filteredData.length === 0) {
+          this.optionsContainer.innerHTML = '<div class="no-results">No results found</div>';
+          return;
+        }
+        
+        const optionsHTML = this.filteredData.map(item => `
+          <div class="custom-select-option ${this.selectedValue === item.code ? 'selected' : ''}" data-value="${item.code}">
+            ${item.flag ? `<span class="flag">${item.flag}</span>` : ''}
+            <span class="name">${item.name}</span>
+          </div>
+        `).join('');
+        
+        this.optionsContainer.innerHTML = optionsHTML;
+        
+        // Attach click events to options
+        this.optionsContainer.querySelectorAll('.custom-select-option').forEach(option => {
+          option.addEventListener('click', () => {
+            this.selectOption(option.dataset.value);
+          });
+        });
+      }
+      
+      attachEvents() {
+        // Toggle dropdown
+        this.trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.toggle();
+        });
+        
+        // Search functionality
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase();
+          this.filteredData = this.data.filter(item => 
+            item.name.toLowerCase().includes(query) ||
+            item.code.toLowerCase().includes(query)
+          );
+          this.renderOptions();
+        });
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+          if (!this.trigger.contains(e.target) && !this.dropdown.contains(e.target)) {
+            this.close();
+          }
+        });
+        
+        // Prevent dropdown close when clicking search
+        this.searchInput.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+      
+      toggle() {
+        if (this.isOpen) {
+          this.close();
+        } else {
+          this.open();
+        }
+      }
+      
+      open() {
+        this.dropdown.classList.add('active');
+        this.trigger.classList.add('active');
+        this.isOpen = true;
+        this.searchInput.focus();
+      }
+      
+      close() {
+        this.dropdown.classList.remove('active');
+        this.trigger.classList.remove('active');
+        this.isOpen = false;
+        this.searchInput.value = '';
+        this.filteredData = [...this.data];
+        this.renderOptions();
+      }
+      
+      selectOption(value) {
+        this.selectedValue = value;
+        const selectedItem = this.data.find(item => item.code === value);
+        
+        if (selectedItem) {
+          const selectedHTML = `
+            ${selectedItem.flag ? `<span class="flag">${selectedItem.flag}</span>` : ''}
+            <span class="name">${selectedItem.name}</span>
+          `;
+          this.trigger.querySelector('.selected-option').innerHTML = selectedHTML;
+          
+          // Update hidden field
+          const hiddenField = document.querySelector('input[name="country"]');
+          if (hiddenField) {
+            hiddenField.value = selectedItem.name;
+          }
+          
+          // Trigger change event
+          if (this.options.onChange) {
+            this.options.onChange(selectedItem);
+          }
+        }
+        
+        this.close();
+      }
+      
+      getValue() {
+        return this.selectedValue;
+      }
+      
+      setValue(value) {
+        // value can be country name or code
+        const selectedItem = this.data.find(item => 
+          item.code === value || item.name === value
+        );
+        if (selectedItem) {
+          this.selectOption(selectedItem.code);
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize country select
+      const countrySelect = new CustomSelect('countrySelect', countriesData, {
+        placeholder: 'Select your country',
+        searchPlaceholder: 'Search countries...',
+        onChange: (country) => {
+          console.log('Selected country:', country.name);
+        }
+      });
+      
+      // Set initial value if country exists
+      const countryField = document.querySelector('input[name="country"]');
+      if (countryField && countryField.value) {
+        countrySelect.setValue(countryField.value);
+      }
+    });
+  </script>
+
+  {% endblock extra_javascript %}
+</body>

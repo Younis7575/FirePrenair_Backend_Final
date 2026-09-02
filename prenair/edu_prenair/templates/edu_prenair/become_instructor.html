@@ -1,0 +1,63 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Become Instructor{% endblock title %}
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+
+<div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex ">
+
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+        <div class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-full lg:py-15 sm:py-12 py-8">
+            <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                <span class="ph ph-squares-four text-xl"></span>
+                <strong class="text-button">Menu</strong>
+            </button>
+        
+            <div class="dashboard_profile scrollbar_custom w-full bg-surface" style="margin: 10px; background: url({% static 'home/images/banner.png' %});">
+                <form action="{% url 'become_instructor' %}" method="post" enctype="multipart/form-data" class="container h-fit">
+                    {% csrf_token %}
+                    <div class="heading flex items-center justify-between">
+                        <h4>Become Instructor</h4>
+                    </div>
+                
+                    <div class="gig-details p-8 mt-7 rounded-lg bg-white shadow-sm">
+                        <h5>Teach today for better tommorrow</h5>
+                        <div class="grid sm:grid-cols-2 gap-5 mt-5">
+                
+                            <!-- name -->
+                            <div class="col-span-full">
+                                <label for="name">Name:</label>
+                                <input type="text" id="name" value="{{request.user.name}}" name="name" class="w-full h-12 px-4 mt-2 border rounded-lg border-line" required placeholder="Enter your name">
+                            </div>
+                
+                            <!-- Description -->
+                            <div class="col-span-full">
+                                <label for="edu_bio">Eduprenair Bio:</label>
+                                <textarea id="edu_bio" name="edu_bio" class="w-full h-24 px-4 mt-2 border rounded-lg border-line" required placeholder="Tell Us Something about yourself..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="category-btn-final" style="padding: 10px 20px;">Apply Now</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+        </div>
+</div>
+
+ 
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+
+<!-- Modal -->
+<div class="modal">
+    <!-- menu_dashboard -->
+    {% include 'work_prenair/partials/menu-modal.html' %}
+
+</div>
+
+{% endblock content %}

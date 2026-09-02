@@ -1,0 +1,345 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Your Funnels{% endblock title %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Funnel Page Styles */
+.main-content {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(255, 111, 97, 0.08) 100%);
+  border-radius: 24px;
+  padding: 48px;
+  margin: 40px 0;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #ff6f61 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+.main-content h2 {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 32px;
+  position: relative;
+  display: inline-block;
+  letter-spacing: -0.02em;
+}
+
+.main-content h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6f61, #1e3a8a);
+  border-radius: 3px;
+}
+
+.starter{
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Funnel List Styles */
+.main-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.main-content ul li {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-content ul li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #1e3a8a, #ff6f61);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.main-content ul li:hover::before {
+  transform: scaleX(1);
+}
+
+.main-content ul li:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18);
+  border-color: rgba(30, 58, 138, 0.15);
+}
+
+/* Funnel Card Content */
+.main-content ul li .funnel-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.main-content ul li .funnel-name {
+  text-decoration: none;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.main-content ul li:hover .funnel-name {
+  color: #ff6f61;
+}
+
+/* Button Group */
+.main-content ul li .button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.main-content ul li .button-group a,
+.main-content ul li .button-group button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 90px;
+}
+
+/* Edit Button */
+.main-content ul li .button-group a.edit-btn {
+  background: #1e3a8a;
+  color: white;
+  border-radius: 0px 15px 15px 15px
+}
+
+.main-content ul li .button-group a.edit-btn:hover {
+  background: #2b4cb4;
+  transform: translateY(-2px);
+}
+
+/* Run Button */
+.main-content ul li .button-group a.run-btn {
+  background: #10b981;
+  color: white;
+  border-radius: 0px 15px 15px 15px
+}
+
+.main-content ul li .button-group a.run-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+/* Delete Button */
+.main-content ul li .button-group a.delete-btn {
+  background: #ef4444;
+  color: white;
+  border-radius: 0px 15px 15px 15px
+}
+
+.main-content ul li .button-group button.delete-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Empty State Styling */
+.main-content ul:empty::after {
+  content: "No funnels created yet. Start by creating your first funnel!";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 1.15rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  border: 2px dashed #d1d5db;
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 32px;
+    margin: 20px 0;
+    border-radius: 16px;
+  }
+
+  .main-content h2 {
+    font-size: 2.25rem;
+    margin-bottom: 24px;
+  }
+
+  .main-content ul {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .main-content ul li .funnel-card {
+    padding: 24px;
+  }
+
+  .main-content ul li .funnel-name {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 24px;
+  }
+
+  .main-content h2 {
+    font-size: 1.9rem;
+  }
+  .main-content ul li .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Loading Animation for Funnel Items */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content ul li {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.main-content ul li:nth-child(1) { animation-delay: 0.1s; }
+.main-content ul li:nth-child(2) { animation-delay: 0.2s; }
+.main-content ul li:nth-child(3) { animation-delay: 0.3s; }
+.main-content ul li:nth-child(4) { animation-delay: 0.4s; }
+.main-content ul li:nth-child(5) { animation-delay: 0.5s; }
+
+/* Accessibility Improvements */,
+.main-content ul li .button-group a:focus,
+.main-content ul li .button-group button:focus {
+  outline: 3px solid #ff6f61;
+  outline-offset: 3px;
+}
+
+/* Print Styles */
+@media print {
+  .main-content {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  .main-content ul li {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .main-content ul li .button-group {
+    display: none;
+  }
+}
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+    <div class="dashboard_earning scrollbar_custom w-full bg-surface"
+      style="background: url({% static 'home/images/banner.png' %}); background-size: cover; background-position: center;">
+      <div class="container h-fit lg:px-15 lg:pb-30 max-lg:px-12 max-sm:px-8">
+        <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+
+        <div class="main-content">
+          <div class="starter">
+          <h2>Your Funnels</h2>
+          <a href="{% url 'create_funnel' %}" class="category-btn-final" >Create Funnel</a>
+          </div>
+          <ul>
+            {% for funnel in funnels %}
+            <li>
+              <div class="funnel-card">
+                <a href="{% url 'edit_funnel' funnel.id %}" class="funnel-name">{{ funnel.name }}</a>
+                <div class="button-group">
+                  {% if funnel.is_published %}
+                  {% if funnel.subdomain %}
+                  <a href="https://{{ funnel.subdomain }}" target="_blank" class="edit-btn" style="background-color: chocolate;">View Live</a>
+                  {% else %}
+                  <a href="https://{{ funnel.custom_domain }}" target="_blank" class="edit-btn" style="background-color: chocolate;">View Live</a>
+                  {% endif %}
+                  {% endif %}
+                  <a href="{% url 'edit_funnel' funnel.id %}" class="edit-btn">Edit</a>
+                  <a href="{% url 'run_funnel' funnel.id %}" class="run-btn">Run Funnel</a>
+                  <a class="delete-btn" href="{% url 'delete_funnel' funnel.id %}">Delete</a>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+{% include 'work_prenair/partials/mb-menu.html' %}
+
+<!-- Modal -->
+<div class="modal">
+  {% include 'work_prenair/partials/menu-modal.html' %}
+</div>
+{% endblock %}
+
+{% block extra_javascript %}
+
+{% endblock extra_javascript %}

@@ -1,0 +1,785 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | My Referrals{% endblock title %}
+
+{% block extra_css %}
+<style>
+  .referral-card {
+    background: linear-gradient(135deg, #ff6f61 0%, #1e3a8a 100%);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(255, 111, 97, 0.3);
+    padding: 32px;
+    margin-bottom: 32px;
+    color: white;
+  }
+  
+  .stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 24px;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #ff6f61 0%, #1e3a8a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .referral-input {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+    width: 100%;
+    font-size: 16px;
+    background-color: white;
+    color: #1f2937;
+  }
+  
+  .referral-input:focus {
+    border-color: #ff6f61;
+    box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+    outline: none;
+  }
+  
+  .referral-input::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+  }
+  
+  .copy-btn {
+    background: linear-gradient(135deg, #ff6f61 0%, #ff6f61 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 0 42px 42px 42px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(253, 228, 5, 0.4);
+  }
+  
+  .user-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .user-card:hover {
+    border-color: #ff6f61;
+    box-shadow: 0 5px 15px rgba(255, 111, 97, 0.1);
+  }
+  
+  .status-badge {
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .status-active {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+  
+  .status-inactive {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .page-header {
+    margin-bottom: 32px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .page-subtitle {
+    color: #6b7280;
+    font-size: 16px;
+  }
+  
+  .referral-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .referral-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  
+  .referral-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .referral-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .form-row .referral-input {
+    flex: 1;
+  }
+  
+  .form-help {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+  }
+  
+  .message-box {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .referral-display {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .referral-display-label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  
+  .referral-link-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .referral-link-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: white;
+    font-family: monospace;
+    font-size: 14px;
+  }
+  
+  .stats-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  
+  .stats-icon.blue {
+    background-color: #dbeafe;
+    color: #2563eb;
+  }
+  
+  .stats-icon.green {
+    background-color: #dcfce7;
+    color: #16a34a;
+  }
+  
+  .stats-icon.purple {
+    background-color: #f3e8ff;
+    color: #9333ea;
+  }
+  
+  .stats-content {
+    flex: 1;
+  }
+  
+  .stats-label {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+  }
+  
+  .stats-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .users-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .users-header {
+    padding: 24px;
+    background: linear-gradient(to right, #f9fafb, white);
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .users-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+  }
+  
+  .users-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+  }
+  
+  .users-content {
+    padding: 24px;
+  }
+  
+  .user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .user-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #60a5fa, #a855f7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .user-info {
+    flex: 1;
+  }
+  
+  .user-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 2px 0;
+  }
+  
+  .user-email {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 2px 0;
+  }
+  
+  .user-date {
+    font-size: 12px;
+    color: #9ca3af;
+    margin: 0;
+  }
+  
+  .empty-state {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 48px;
+    text-align: center;
+  }
+  
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    background-color: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    font-size: 24px;
+    color: #9ca3af;
+  }
+  
+  .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+  }
+  
+  .empty-subtitle {
+    color: #6b7280;
+    margin: 0 0 24px 0;
+  }
+  
+  .dashboard_main {
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  
+  .content_dashboard {
+    max-height: 100%;
+    width: 100%;
+    height: fit-content;
+    overflow-y: auto;
+  }
+  
+  .content_dashboard::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .content_dashboard::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .content_dashboard::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+  
+  .content_dashboard::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+  
+  .container {
+    height: 100%;
+    padding: 32px;
+  }
+  
+  .btn_open_popup {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+  
+  @media (max-width: 1024px) {
+    .dashboard_main {
+      height: auto;
+      overflow: visible;
+    }
+    
+    .btn_open_popup {
+      display: flex;
+    }
+    
+    .container {
+      padding: 24px 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+      flex-direction: column;
+    }
+    
+    .referral-link-row {
+      flex-direction: column;
+    }
+    
+    .user-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .gradient-text {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+{% endblock extra_css %}
+
+{% load static %}
+
+{% block content %}
+
+<body>
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div class="content_dashboard">
+      <div class="container">
+        <button class="btn_open_popup" data-type="menu_dashboard">
+          <span class="ph ph-squares-four" style="font-size: 20px;"></span>
+          <strong>Menu</strong>
+        </button>
+        
+        <!-- Referral Content -->
+        <div class="fade-in">
+          <!-- Page Header -->
+          <div class="page-header">
+            <h1 class="gradient-text">My Referrals</h1>
+            <p class="page-subtitle">Share your referral link and earn rewards when your friends join!</p>
+          </div>
+
+          <!-- Referral Link Section -->
+          <div class="referral-card">
+            <div class="referral-header">
+              <div class="referral-icon">
+                <span class="ph ph-link"></span>
+              </div>
+              <div>
+                <h2 class="referral-title">Your Referral Link</h2>
+                <p class="referral-subtitle">Share this link to earn rewards</p>
+              </div>
+            </div>
+
+            {% if not user.referral_code %}
+            <!-- Set Referral Code Form -->
+            <form method="POST" action="{% url 'my_referrals' %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label">Create Your Referral Code</label>
+                <div class="form-row">
+                  <input type="text" 
+                         name="referral_code" 
+                         class="referral-input" 
+                         placeholder="Enter your unique referral code (e.g., JohnDoe123)"
+                         pattern="[A-Za-z0-9]+"
+                         title="Only letters and numbers allowed"
+                         required>
+                  <button type="submit" class="copy-btn">
+                    Set Code
+                  </button>
+                </div>
+                <p class="form-help">Use only letters and numbers, no spaces or special characters</p>
+              </div>
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="message-box">
+                    <p>{{ message }}</p>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </form>
+            {% else %}
+            <!-- Display Referral Link -->
+            <div class="referral-display">
+              <div class="referral-display-label">Your Referral Link:</div>
+              <div class="referral-link-row">
+                <input type="text" 
+                       value="{{ referral_link }}" 
+                       readonly 
+                       class="referral-link-input"
+                       id="referralLink">
+                <button onclick="copyReferralLink()" 
+                        class="copy-btn"
+                        id="copyBtn">
+                  <span class="ph ph-copy"></span>
+                  Copy
+                </button>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Stats Section -->
+          <div class="stats-grid">
+            <div class="stats-card">
+              <div class="stats-item">
+                <div class="stats-icon blue">
+                  <span class="ph ph-users"></span>
+                </div>
+                <div class="stats-content">
+                  <p class="stats-label">Total Referrals</p>
+                  <p class="stats-value">{{ total_referrals }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-item">
+                <div class="stats-icon green">
+                  <span class="ph ph-check-circle"></span>
+                </div>
+                <div class="stats-content">
+                  <p class="stats-label">Active Users</p>
+                  <p class="stats-value">{{ active_referrals }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-item">
+                <div class="stats-icon purple">
+                  <span class="ph ph-trophy"></span>
+                </div>
+                <div class="stats-content">
+                  <p class="stats-label">Success Rate</p>
+                  <p class="stats-value">{{ success_rate }}%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-card"
+            style="background: white; border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">How Our Referral System Works</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+              <div style="display: flex; gap: 12px;">
+                <div
+                  style="width: 32px; height: 32px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0369a1; flex-shrink: 0;">
+                  <span class="ph ph-share-network" style="font-size: 16px;"></span>
+                </div>
+                <div>
+                  <p style="font-weight: 500; margin: 0 0 4px 0; color: #1f2937;">1. Share Your Link</p>
+                  <p style="margin: 0; font-size: 14px; color: #6b7280;">Share your unique referral link with friends and
+                    colleagues</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <div
+                  style="width: 32px; height: 32px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #166534; flex-shrink: 0;">
+                  <span class="ph ph-user-plus" style="font-size: 16px;"></span>
+                </div>
+                <div>
+                  <p style="font-weight: 500; margin: 0 0 4px 0; color: #1f2937;">2. They Sign Up</p>
+                  <p style="margin: 0; font-size: 14px; color: #6b7280;">Your friend signs up using your referral link</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <div
+                  style="width: 32px; height: 32px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #92400e; flex-shrink: 0;">
+                  <span class="ph ph-briefcase" style="font-size: 16px;"></span>
+                </div>
+                <div>
+                  <p style="font-weight: 500; margin: 0 0 4px 0; color: #1f2937;">3. List a Service</p>
+                  <p style="margin: 0; font-size: 14px; color: #6b7280;">They must list at least one service</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <div
+                  style="width: 32px; height: 32px; background: #ede9fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #7c3aed; flex-shrink: 0;">
+                  <span class="ph ph-currency-dollar" style="font-size: 16px;"></span>
+                </div>
+                <div>
+                  <p style="font-weight: 500; margin: 0 0 4px 0; color: #1f2937;">4. Earn $200</p>
+                  <p style="margin: 0; font-size: 14px; color: #6b7280;">They need to earn at least $200 from their services</p>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+              <p style="margin: 0; font-size: 14px; color: #6b7280;">
+                <strong>Note:</strong> The referral will only be marked as complete when your referred user meets both
+                requirements: listing a service and earning $200.
+              </p>
+            </div>
+          </div>
+          
+          <!-- Referred Users List -->
+          {% if referrals %}
+          <div class="users-section">
+            <div class="users-header">
+              <h3 class="users-title">Your Referred Users</h3>
+              <p class="users-subtitle">Users who joined using your referral link</p>
+            </div>
+            
+            <div class="users-content">
+              {% for referral in referrals %}
+              <div class="user-card">
+                <div class="user-item">
+                  <div class="user-left">
+                    <div class="user-avatar">
+                      <img src="{{ referral.profile_pic.url }}" alt="{{ referral.name }}" />
+                    </div>
+                    <div class="user-info">
+                      <p class="user-name">{{ referral.name }}</p>
+                      <p class="user-email">{{ referral.email }}</p>
+                      <p class="user-date">Joined: {{ referral.created_at|date:"M d, Y" }}</p>
+                    </div>
+                  </div>
+                  <div>
+                    {% if referral.has_listed_and_sold %}
+                      <span class="status-badge status-active">
+                        <span class="ph ph-check-circle"></span>
+                        Active
+                      </span>
+                    {% else %}
+                      <span class="status-badge status-inactive">
+                        <span class="ph ph-clock"></span>
+                        Pending
+                      </span>
+                      <div class="pending-message" style="margin-top: 8px; font-size: 13px; color: #6b7280;">
+                        This user needs to list a service and earn $200 to complete referral
+                      </div>
+                      {% endif %}
+                      </div>
+                      </div>
+                      </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <span class="ph ph-users"></span>
+            </div>
+            <h3 class="empty-title">No Referrals Yet</h3>
+            <p class="empty-subtitle">Start sharing your referral link to see your referred users here!</p>
+            {% if user.referral_code %}
+            <button onclick="copyReferralLink()" class="copy-btn">
+              <span class="ph ph-share"></span>
+              Share Your Link
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+  <!-- Modal -->
+  <div class="modal">
+    {% include 'work_prenair/partials/menu-modal.html' %}
+  </div>
+
+  <script>
+    function copyReferralLink() {
+      const referralInput = document.getElementById('referralLink');
+      const copyBtn = document.getElementById('copyBtn');
+      
+      if (!referralInput) return;
+      
+      referralInput.select();
+      referralInput.setSelectionRange(0, 99999);
+      
+      navigator.clipboard.writeText(referralInput.value).then(function() {
+        // Success feedback
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="ph ph-check"></span>Copied!';
+        copyBtn.classList.add('animate-pulse-slow');
+        
+        setTimeout(function() {
+          copyBtn.innerHTML = originalText;
+          copyBtn.classList.remove('animate-pulse-slow');
+        }, 2000);
+      }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        // Fallback for older browsers
+        try {
+          document.execCommand('copy');
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<span class="ph ph-check"></span>Copied!';
+          
+          setTimeout(function() {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+        } catch (e) {
+          console.error('Copy fallback failed: ', e);
+        }
+      });
+    }
+
+    // Auto-focus on referral code input when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      const referralInput = document.querySelector('input[name="referral_code"]');
+      if (referralInput) {
+        referralInput.focus();
+      }
+    });
+  </script>
+</body>
+{% endblock %}

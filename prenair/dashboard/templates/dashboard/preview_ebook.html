@@ -1,0 +1,749 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Preview eBook{% endblock title %}
+{% load static %}
+{% load course_filters %}
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+<style>
+:root {
+    --primary-color: #1e3a8a;
+    --accent-color: #ff6f61;
+    --primary-light: #3b82f6;
+    --accent-light: #ff8a80;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --surface: #ffffff;
+    --surface-alt: #f7fafc;
+    --surface-dark: #edf2f7;
+    --border-color: #e2e8f0;
+    --success-color: #10b981;
+    --success-light: #34d399;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-heavy: 0 20px 25px rgba(0, 0, 0, 0.1);
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
+}
+
+/* Enhanced Preview Container */
+.preview-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    position: relative;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.preview-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--gradient-primary);
+}
+
+/* Header Section */
+.preview-header {
+    padding: 3rem 3rem 2rem;
+    background: linear-gradient(135deg, var(--surface-alt) 0%, var(--surface) 100%);
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+    position: relative;
+}
+
+.preview-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+.preview-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.preview-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.preview-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.meta-icon {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+}
+
+/* Content Section */
+.preview-content {
+    padding: 3rem;
+}
+
+/* Enhanced Chapter Styling */
+.chapter {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: var(--surface-alt);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.chapter:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-light);
+}
+
+.chapter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-accent);
+    border-radius: 0 2px 2px 0;
+}
+
+.chapter h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chapter h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.chapter p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+}
+
+.chapter ul {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.chapter ul li {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.chapter ul li::marker {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Chapter Image Styling */
+.chapter-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease;
+}
+
+.chapter-image:hover {
+    transform: scale(1.02);
+}
+
+/* Action Buttons Section */
+.actions {
+    padding: 2rem 3rem 3rem;
+    background: var(--surface-dark);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Enhanced Button Styles */
+.btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--success-light) 0%, var(--success-color) 100%);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover::before {
+    left: 0;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Button Icons */
+.btn::before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+}
+
+.btn-success::after {
+    content: '📄';
+    margin-left: 0.5rem;
+}
+
+.btn-outline-secondary::after {
+    content: '➕';
+    margin-left: 0.5rem;
+}
+
+
+/* Print styles */
+@media print {
+    .actions,
+    .preview-header::after,
+    .chapter-image {
+        display: none;
+    }
+    
+    .preview-container {
+        box-shadow: none;
+        border: none;
+    }
+}
+
+/* Add these new styles */
+.image-placeholder {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-alt);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2rem;
+}
+
+.image-placeholder .loader {
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.image-loading-text {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.pulse-animation {
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .preview-container {
+        margin: 1rem;
+        border-radius: 20px;
+    }
+    
+    .preview-header {
+        padding: 2rem 2rem 1.5rem;
+    }
+    
+    .preview-title {
+        font-size: 2rem;
+    }
+    
+    .preview-content {
+        padding: 2rem;
+    }
+    
+    .chapter {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chapter h3 {
+        font-size: 1.3rem;
+    }
+    
+    .chapter-image {
+        max-height: 200px;
+    }
+    
+    .actions {
+        padding: 1.5rem 2rem 2rem;
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .preview-meta {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .preview-header {
+        padding: 1.5rem 1rem 1rem;
+    }
+    
+    .preview-content {
+        padding: 1.5rem;
+    }
+    
+    .chapter {
+        padding: 1rem;
+    }
+    
+    .chapter-image {
+        max-height: 150px;
+    }
+    
+    .actions {
+        padding: 1rem;
+    }
+    
+    .preview-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Loading Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus indicators for accessibility */
+.btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface" style="background: url({% static 'home/images/banner.png' %});">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                
+                <div class="container">
+                    <div class="preview-container">
+                        <!-- Header Section -->
+                        <div class="preview-header">
+                            <h1 class="preview-title">{{ ebook.title }}</h1>
+                            <p class="preview-subtitle">Your eBook is being prepared. Images are generating...</p>
+                            <div class="preview-meta">
+                                <div class="meta-item">
+                                    <span class="meta-icon">📖</span>
+                                    <span>{{ ebook.type|title }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-icon">🎨</span>
+                                    <span>{{ ebook.style }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-icon">📊</span>
+                                    <span>{{ ebook.content.chapters|length }} Chapters</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Section -->
+                        <div class="preview-content">
+                            <!-- Introduction -->
+                            <div class="chapter">
+                                <h3>
+                                    <div class="chapter-icon">🚀</div>
+                                    Introduction
+                                </h3>
+                                <div class="image-placeholder" id="intro-image-placeholder">
+                                    <div class="loader"></div>
+                                    <p class="image-loading-text">Generating introduction image...</p>
+                                </div>
+                                <p>{{ ebook.content.intro }}</p>
+                            </div>
+                            
+                            {% for chapter in ebook.content.chapters %}
+                            <div class="chapter">
+                                <h3>
+                                    <div class="chapter-icon">📖</div>
+                                    {{ chapter.chapter_title }}
+                                </h3>
+                                <div class="image-placeholder" id="chapter-{{ forloop.counter0 }}-image-placeholder">
+                                    <div class="loader"></div>
+                                    <p class="image-loading-text">Generating chapter image...</p>
+                                </div>
+                                <p>{{ chapter.introduction }}</p>
+                                {% for section in chapter.sections %}
+                                <h4>{{ section.section_title }}</h4>
+                                <p>{{ section.content }}</p>
+                                <ul>
+                                    {% for takeaway in section.key_takeaways %}
+                                    <li>{{ takeaway }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+
+                            <!-- Case Studies -->
+                            {% for case_study in ebook.content.case_studies %}
+                            <div class="chapter">
+                                <h3>
+                                    <div class="chapter-icon">📈</div>
+                                    {{ case_study.title }}
+                                </h3>
+                                <div class="image-placeholder" id="casestudy-{{ forloop.counter0 }}-image-placeholder">
+                                    <div class="loader"></div>
+                                    <p class="image-loading-text">Generating case study image...</p>
+                                </div>
+                                <p>{{ case_study.content }}</p>
+                                <ul>
+                                    {% for lesson in case_study.key_lessons %}
+                                    <li>{{ lesson }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Conclusion -->
+                            <div class="chapter">
+                                <h3>
+                                    <div class="chapter-icon">🎯</div>
+                                    Conclusion
+                                </h3>
+                                <div class="image-placeholder" id="conclusion-image-placeholder">
+                                    <div class="loader"></div>
+                                    <p class="image-loading-text">Generating conclusion image...</p>
+                                </div>
+                                <p>{{ ebook.content.conclusion }}</p>
+                            </div>
+
+                            <!-- Resources -->
+                            <div class="chapter">
+                                <h3>
+                                    <div class="chapter-icon">📚</div>
+                                    Resources
+                                </h3>
+                                <div class="image-placeholder" id="resources-image-placeholder">
+                                    <div class="loader"></div>
+                                    <p class="image-loading-text">Generating resources image...</p>
+                                </div>
+                                <ul>
+                                    {% for resource in ebook.content.resources %}
+                                    <li>
+                                        <strong>{{ resource.title }}</strong>: {{ resource.description }}
+                                        {% if resource.link %}
+                                        <br><a href="{{ resource.link }}">{{ resource.link }}</a>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Actions Section -->
+                        <div class="actions">
+                            <form method="post" action="{% url 'generate_pdf' %}" id="downloadForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="title" value="{{ ebook.title }}">
+                                <input type="hidden" name="ebook_type" value="{{ ebook.type }}">
+                                <input type="hidden" name="style" value="{{ ebook.style }}">
+                                <button type="submit" class="btn btn-success btn-disabled" id="downloadBtn" disabled>
+                                    <span class="btn-text">Download PDF</span>
+                                    <span class="pulse-animation">⏳</span>
+                                </button>
+                            </form>
+                            <a href="{% url 'ebook_generation' %}" class="btn btn-outline-secondary">Generate New eBook</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©2025 Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+    <!-- Modal -->
+    <div class="modal">
+        {% include "work_prenair/partials/menu-modal.html" %}
+    </div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statusText = document.querySelector('.preview-subtitle');
+    let imagesGenerated = false;
+    
+    // Function to update images on the page
+    function updateImages(images) {
+        // Update cover image
+        // (Add if you have a cover image)
+        
+        // Update intro image
+        if (images.intro) {
+            const placeholder = document.getElementById('intro-image-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<img src="${images.intro}" alt="Introduction Image" class="chapter-image">`;
+            }
+        }
+        
+        // Update chapter images
+        if (images.chapters) {
+            images.chapters.forEach((img, index) => {
+                const placeholder = document.getElementById(`chapter-${index}-image-placeholder`);
+                if (placeholder) {
+                    placeholder.innerHTML = `<img src="${img}" alt="Chapter ${index+1} Image" class="chapter-image">`;
+                }
+            });
+        }
+        
+        // Update case study images
+        if (images.case_studies) {
+            images.case_studies.forEach((img, index) => {
+                const placeholder = document.getElementById(`casestudy-${index}-image-placeholder`);
+                if (placeholder) {
+                    placeholder.innerHTML = `<img src="${img}" alt="Case Study ${index+1} Image" class="chapter-image">`;
+                }
+            });
+        }
+        
+        // Update conclusion image
+        if (images.conclusion) {
+            const placeholder = document.getElementById('conclusion-image-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<img src="${images.conclusion}" alt="Conclusion Image" class="chapter-image">`;
+            }
+        }
+        
+        // Update resources image
+        if (images.resources) {
+            const placeholder = document.getElementById('resources-image-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<img src="${images.resources}" alt="Resources Image" class="chapter-image">`;
+            }
+        }
+        
+        // Enable download button
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.classList.remove('btn-disabled');
+            downloadBtn.querySelector('.pulse-animation').textContent = '📄';
+        }
+        
+        // Update status text
+        if (statusText) {
+            statusText.textContent = "Your professionally generated eBook is ready!";
+        }
+        
+        imagesGenerated = true;
+    }
+    
+    // Function to check image generation status
+    function checkImageGeneration() {
+        fetch("{% url 'generate_ebook_images' %}", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.images) {
+                updateImages(data.images);
+            } else if (data.error) {
+                console.error('Error generating images:', data.error);
+                // Show error to user
+                if (statusText) {
+                    statusText.textContent = "Error generating images. Please try again.";
+                }
+            } else {
+                // If not complete, check again after delay
+                setTimeout(checkImageGeneration, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Retry after delay
+            setTimeout(checkImageGeneration, 3000);
+        });
+    }
+    
+    // Start checking for image generation status
+    setTimeout(checkImageGeneration, 1000);
+    
+    // Handle PDF download button
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function(e) {
+            if (!imagesGenerated) {
+                e.preventDefault();
+                alert('Please wait until all images are generated before downloading.');
+            }
+        });
+    }
+    
+    // Animation for chapters
+    const chapters = document.querySelectorAll('.chapter');
+    chapters.forEach((chapter, index) => {
+        chapter.style.opacity = '0';
+        chapter.style.transform = 'translateY(20px)';
+        chapter.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        setTimeout(() => {
+            chapter.style.opacity = '1';
+            chapter.style.transform = 'translateY(0)';
+        }, 100);
+    });
+});
+</script>
+{% endblock extra_javascript %}

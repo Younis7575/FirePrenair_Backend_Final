@@ -1,0 +1,206 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - DMCA Policy{% endblock %}
+
+{% block content %}
+
+<style>
+    .policy-content {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-header {
+        margin-bottom: 40px;
+    }
+
+    .policy-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .policy-intro {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .policy-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .section-list {
+        list-style: disc;
+        margin-left: 20px;
+        color: #555;
+    }
+
+    .nested-list {
+        list-style: circle;
+        margin-left: 40px;
+    }
+
+    p{
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/dmca.png' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+
+</style>
+
+<!-- DMCA Policy Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="policy-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">DMCA Policy</h1>
+                            <p class="hero-text">
+                                FirePrenair is committed to respecting intellectual property rights and complying with the Digital Millennium Copyright Act (DMCA). This policy outlines the process for reporting alleged copyright infringements and the actions FirePrenair will take to address such complaints.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- What is the DMCA -->
+                    <div class="policy-section">
+                        <h3 class="section-title">1. What is the DMCA?</h3>
+                        <p>
+                            The DMCA is a U.S. law that protects copyright owners by establishing a process to address online copyright infringement. It allows content creators to report unauthorized use of their intellectual property and provides protections for platforms that comply with these regulations.
+                        </p>
+                    </div>
+
+                    <!-- Filing a DMCA Takedown Request -->
+                    <div class="policy-section">
+                        <h3 class="section-title">2. Filing a DMCA Takedown Request</h3>
+                        <p>If you believe your copyrighted work is being used on FirePrenair without authorization, you may file a DMCA Takedown Notice. To do so, provide the following information:</p>
+                        <ul class="section-list">
+                            <li><strong>Identification of the Copyrighted Work:</strong>
+                                <ul class="nested-list">
+                                    <li>Describe the work you believe has been infringed.</li>
+                                    <li>Include a copy or link to the original material if possible.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Location of Infringing Material:</strong>
+                                <ul class="nested-list">
+                                    <li>Provide the specific URL(s) or detailed description of where the infringing material appears on FirePrenair.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Contact Information:</strong>
+                                <ul class="nested-list">
+                                    <li>Your full name, email address, phone number, and mailing address.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Statement of Good Faith:</strong>
+                                <ul class="nested-list">
+                                    <li>A declaration that you believe, in good faith, that the use of the material is unauthorized by the copyright owner, their agent, or the law.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Ownership Declaration:</strong>
+                                <ul class="nested-list">
+                                    <li>A statement that the information provided is accurate and that you are the copyright owner or authorized to act on their behalf.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Signature:</strong>
+                                <ul class="nested-list">
+                                    <li>A physical or electronic signature of the copyright owner or their authorized representative.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Where to Send Your DMCA Notice -->
+                    <div class="policy-section">
+                        <h3 class="section-title">3. Where to Send Your DMCA Notice</h3>
+                        <p>Submit your DMCA Takedown Notice to the designated agent for FirePrenair:</p>
+                        <ul class="section-list">
+                            <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- FirePrenair’s Response to DMCA Notices -->
+                    <div class="policy-section">
+                        <h3 class="section-title">4. FirePrenair’s Response to DMCA Notices</h3>
+                        <ul class="section-list">
+                            <li><strong>Initial Review:</strong> FirePrenair will review the complaint and temporarily remove or disable access to the alleged infringing content.</li>
+                            <li><strong>Notifying the User:</strong> The user who uploaded the content will be notified of the takedown and provided with the details of the complaint.</li>
+                            <li><strong>Counter-Notification Process:</strong>
+                                <ul class="nested-list">
+                                    <li>Identification of the material that was removed.</li>
+                                    <li>A statement of good faith that the material was mistakenly removed.</li>
+                                    <li>Consent to the jurisdiction of the Federal Court for the user’s location.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Restoration of Content:</strong> If a valid Counter-Notification is received and no legal action is initiated by the original complainant within 10 business days, the content may be restored.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Repeat Infringers Policy -->
+                    <div class="policy-section">
+                        <h3 class="section-title">5. Repeat Infringers Policy</h3>
+                        <p>FirePrenair maintains a strict policy against repeat infringers. Users with multiple verified copyright violations may have their accounts suspended or terminated.</p>
+                    </div>
+
+                    <!-- Misuse of the DMCA Process -->
+                    <div class="policy-section">
+                        <h3 class="section-title">6. Misuse of the DMCA Process</h3>
+                        <p>Filing false or fraudulent DMCA notices is prohibited. Users who misuse the process may face account suspension and legal consequences.</p>
+                    </div>
+
+                    <!-- Safeguarding Copyrighted Content -->
+                    <div class="policy-section">
+                        <h3 class="section-title">7. Safeguarding Copyrighted Content</h3>
+                        <ul class="section-list">
+                            <li><strong>For Creators:</strong> Use watermarks, licensing agreements, or content registration to protect your intellectual property.</li>
+                            <li><strong>For Users:</strong> Before uploading content to FirePrenair, ensure that you have the necessary rights or permissions.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Updates to the DMCA Policy -->
+                    <div class="policy-section">
+                        <h3 class="section-title">8. Updates to the DMCA Policy</h3>
+                        <p>FirePrenair may update this policy as required by changes in law or platform practices. Users will be notified of significant updates via email or platform announcements.</p>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="policy-section">
+                        <h3 class="section-title">9. Contact Information</h3>
+                        <p>For further questions or support regarding the DMCA Policy, contact us:</p>
+                        <ul class="section-list">
+                            <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /DMCA Policy Content -->
+
+{% endblock content %}

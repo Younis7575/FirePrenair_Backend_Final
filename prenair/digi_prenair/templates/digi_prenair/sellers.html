@@ -1,0 +1,119 @@
+{% extends 'digi_prenair/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  .pagination-list .active a {
+    font-weight: bold;
+    color: #007bff; /* Or any color you prefer */
+}
+</style>
+<!-- Your content goes here -->
+<div class="primary-content-area container content-padding">
+  <div class="page-title-section">
+    <h2>Explore <span class="gradient-text">Sellers</span></h2>
+  </div>
+  <div class="filterable-bar">
+    <form id="creators-filter-form" method="get">
+      <div class="filter-options">
+          <!-- Order Selection -->
+          <select name="order" class="select-nice">
+              <option></option>
+              <option value="order-by-name" {% if current_order == "order-by-name" %}selected{% endif %}>Order by Name (A-Z)</option>
+              <option value="order-by-registration-date" {% if current_order == "order-by-registration-date" %}selected{% endif %}>Order by No. of Sales</option>
+          </select>
+
+          <!-- Verified Filter Selection -->
+          <select name="verified" class="select-nice">
+              <option value="all-creators" {% if current_verified == "all-creators" %}selected{% endif %}>All Creators</option>
+              <option value="verified-creators-only" {% if current_verified == "verified-creators-only" %}selected{% endif %}>Verified Creators Only</option>
+          </select>
+      </div>
+      
+      <div class="filter-button">
+          <!-- Filter and Reset Buttons -->
+          <button type="submit" class="btn btn-normal btn-dark">Filter</button>
+          <a href="{% url 'digi_sellers' %}" class="btn btn-normal btn-light">Reset</a>
+      </div>
+  </form>
+</div>
+
+  <div class="primary-content-area container content-padding">
+    <div class="creators-box grid-4-columns">
+        {% for seller in page_obj %}
+        <div class="creator-item">
+            <div class="creator-cover">
+                {% if seller.digi_cover_photo %}
+                <img src="{{ seller.digi_cover_photo.url }}" alt="" />
+                {% else %}
+                <img src="{% static 'digi_prenair/img/content/profile/default-cover.png' %}" alt="" />
+                {% endif %}
+            </div>
+            <div class="creator-wrapper">
+                <div class="creator-info-wrapper">
+                    <div class="creator-info">
+                        <div class="avatar box-64">
+                            <a href="{% url 'digi_profile' seller.slug %}">
+                                <img src="{{ seller.profile_pic.url }}" alt="avatar" />
+                                {% if seller.digi_is_verified %}
+                                <span class="verified">
+                                    <svg class="crumina-icon">
+                                        <use xlink:href="#check-icon"></use>
+                                    </svg>
+                                </span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="title">
+                            <a href="{% url 'digi_profile' seller.slug %}">{{ seller.name }}</a>
+                        </div>
+                        <div class="item-meta">
+                            <span class="gradient-text">@{{ seller.username }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="creator-stats">
+                    <div class="stats-item">
+                        <div class="number">{{ seller.digi_total_items }}</div>
+                        <div class="label">Total Items</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="number">{{ seller.digi_total_sales }}</div>
+                        <div class="label">Total Sales</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="bold">{{ seller.digi_average_rating|default:"N/A" }} / 5.0</div>
+                        <div class="label">Rating</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No sellers available at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
+<div class="pagination-section flex-center">
+  <ul class="pagination-list">
+    {% if page_obj.has_previous %}
+      <li class="page-item page-nav-prev">
+        <a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+      </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <li class="page-item active"><a href="?page={{ num }}">{{ num }}</a></li>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li class="page-item"><a href="?page={{ num }}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item page-nav-next">
+        <a href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</div>
+</div>
+{% endblock %}

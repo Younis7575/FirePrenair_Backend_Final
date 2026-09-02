@@ -1,0 +1,52 @@
+{% extends "work_prenair/base.html" %}
+{% load static %}
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('{% static 'work_prenair/assets/images/banner.png' %}');
+            color: chocolate;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .error-container {
+            text-align: center;
+            background-color: #f8d7da;
+            padding: 20px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+        .error-container h1 {
+            font-size: 2em;
+        }
+        .error-container p {
+            margin: 10px 0;
+        }
+        .error-container a {
+            text-decoration: none;
+            color: #721c24;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 1px solid #721c24;
+            border-radius: 5px;
+            background-color: #f5c6cb;
+            transition: all 0.3s ease;
+        }
+        .error-container a:hover {
+            background-color: #721c24;
+            color: white;
+        }
+    </style>
+
+    <div class="error-container">
+        <h1>Oops! An Error Occurred</h1>
+        <p>{{ error }}</p>
+        <a href="{% url 'buyer_dashboard' %}">Go Back to Dashboard</a>
+    </div>
+
+    {% endblock content %}

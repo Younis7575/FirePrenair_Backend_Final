@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+   /* General Reset */
+body {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Chat Button */
+  .ai-chatbot-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    z-index: 12000;
+  }
+  
+  .ai-chatbot-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .ai-chatbot-icon {
+    font-size: 30px;
+  }
+  
+  /* Chat Modal */
+  .ai-chatbot-modal {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 370px;
+    height: 500px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 12000;
+  }
+  
+  .ai-chatbot-modal.ai-chatbot-hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .ai-chatbot-modal.ai-chatbot-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Chat Header */
+  .ai-chatbot-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #ff6f61;
+    color: white;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .ai-chatbot-avatar {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #ff6f61;
+    font-size: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+  }
+  
+  .ai-chatbot-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  
+  .ai-chatbot-status {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  
+  .ai-chatbot-close-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .ai-chatbot-close-btn:hover {
+    color: #04B2B2;
+  }
+  
+  /* Chat Messages */
+  .ai-chatbot-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: #f6f6f6;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .ai-chatbot-message {
+    margin-bottom: 15px;
+    max-width: 80%;
+  }
+  
+  .ai-chatbot-message.bot {
+    background-color: #ff6f61;
+    color: white;
+    border-radius: 12px 12px 0 12px;
+    padding: 10px;
+    animation: botMessageFadeIn 0.5s ease-in-out;
+  }
+  
+  .ai-chatbot-message.user {
+    background-color: #e2e2e2;
+    color: #333;
+    border-radius: 12px 12px 12px 0;
+    padding: 10px;
+    margin-left: auto;
+    animation: userMessageFadeIn 0.5s ease-in-out;
+  }
+  
+  /* Chat Footer */
+  .ai-chatbot-footer {
+    display: flex;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .ai-chatbot-input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+  }
+  
+  .ai-chatbot-input:focus {
+    border-color: #ff6f61;
+    outline: none;
+  }
+  
+  .ai-chatbot-send-btn {
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .ai-chatbot-send-btn:hover {
+    background-color: #04B2B2;
+  }
+  
+  /* Animations */
+  @keyframes botMessageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes userMessageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+    
+  </style>
+</head>
+
+<body>
+  <div>
+
+  </div>
+  <!-- Chat Button -->
+  <button id="ai-chatbot-btn" class="ai-chatbot-btn">
+    <span class="ai-chatbot-icon"><i class="fa-regular fa-comment"></i></span>
+  </button>
+
+  <!-- Chat Modal -->
+  <div id="ai-chatbot-modal" class="ai-chatbot-modal ai-chatbot-hidden">
+    <div class="ai-chatbot-header">
+      <div class="ai-chatbot-avatar">🤖</div>
+      <div>
+        <h4 class="ai-chatbot-title">AI Chatbot</h4>
+        <p class="ai-chatbot-status">Online</p>
+      </div>
+      <button class="ai-chatbot-close-btn" id="ai-close-chat">×</button>
+    </div>
+    <div id="ai-chatbot-messages" class="ai-chatbot-messages">
+      <!-- Messages will be dynamically added here -->
+    </div>
+    <div class="ai-chatbot-footer">
+      <input id="ai-chatbot-input" type="text" placeholder="Type your message..." class="ai-chatbot-input" />
+      <button id="ai-send-btn" class="ai-chatbot-send-btn"><i class="fa-regular fa-paper-plane"></i></button>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatBtn = document.getElementById('ai-chatbot-btn');
+      const chatModal = document.getElementById('ai-chatbot-modal');
+      const closeChat = document.getElementById('ai-close-chat');
+      const sendBtn = document.getElementById('ai-send-btn');
+      const chatInput = document.getElementById('ai-chatbot-input');
+      const chatMessages = document.getElementById('ai-chatbot-messages');
+  
+      // Toggle Chat Modal
+      chatBtn.addEventListener('click', () => {
+          chatModal.classList.toggle('ai-chatbot-hidden');
+          chatModal.classList.toggle('ai-chatbot-visible');
+      });
+  
+      closeChat.addEventListener('click', () => {
+          chatModal.classList.add('ai-chatbot-hidden');
+          chatModal.classList.remove('ai-chatbot-visible');
+      });
+  
+      // Send Message on Button Click
+      sendBtn.addEventListener('click', () => {
+          sendMessage();
+      });
+  
+      // Send Message on Enter Key Press
+      chatInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+              event.preventDefault(); // Prevent default form submission behavior
+              sendMessage();
+          }
+      });
+  
+      // Send Message Logic
+      function sendMessage() {
+          const userMessage = chatInput.value.trim();
+          if (userMessage) {
+              addMessage('user', userMessage);
+              chatInput.value = '';
+              fetch('eduprenair_chatbot/', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRFToken': getCsrfToken(),
+                  },
+                  body: JSON.stringify({ message: userMessage }),
+              })
+                  .then(response => response.json())
+                  .then(data => addMessage('bot', data.message))
+                  .catch(error => addMessage('bot', 'Sorry, an error occurred.'));
+          }
+      }
+  
+      // Add Message to Chat
+      function addMessage(sender, message) {
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('ai-chatbot-message', sender);
+          messageElement.innerHTML = message;
+          chatMessages.appendChild(messageElement);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+  
+      // Get CSRF Token
+      function getCsrfToken() {
+          const cookies = document.cookie.split(';');
+          for (const cookie of cookies) {
+              const [name, value] = cookie.trim().split('=');
+              if (name === 'csrftoken') {
+                  return value;
+              }
+          }
+          return '';
+      }
+  });
+  
+</script>
+</body>
+
+</html>

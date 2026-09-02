@@ -1,0 +1,1941 @@
+{% load static %}
+{% load socialaccount %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/feather/feather.css' %}">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600;1,700&display=swap');
+
+    /* ── Base popup & overlay ── */
+    .signup-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 92%;
+        max-width: 980px;
+        max-height: 90vh;
+        overflow: hidden;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    /* ── Two-panel layout ── */
+    .signup-layout {
+        display: flex;
+        height: 100%;
+        max-height: 90vh;
+    }
+
+    /* ── Left sidebar ── */
+    .signup-left {
+        width: 37%;
+        min-width: 310px;
+        background: linear-gradient(170deg, #f5a062 0%, #e8735c 42%, #d4587a 100%);
+        border-radius: 18px 100px 100px 18px;
+        padding: 28px 22px 20px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+    }
+
+    /* decorative circles */
+    .signup-left::before {
+        content: '';
+        position: absolute;
+        width: 210px; height: 210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.10);
+        top: -40px; right: -60px;
+        z-index: 0;
+    }
+    .signup-left::after {
+        content: '';
+        position: absolute;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        top: 140px; right: -25px;
+        z-index: 0;
+    }
+    .deco-yellow {
+        position: absolute;
+        bottom: -10px; right: 10px;
+        width: 85px; height: 85px;
+        border-radius: 50%;
+        background: #f4c542;
+        z-index: 0;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo {
+        position: relative;
+        z-index: 2;
+    }
+    .logo-text {
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+        font-family: 'Poppins', sans-serif;
+        letter-spacing: -0.5px;
+    }
+    .logo-text i {
+        color: #fff;
+        font-size: 24px;
+        margin-right: 1px;
+    }
+
+    /* ── Sidebar vertical steps ── */
+    .sidebar-steps {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        gap: 0;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .step-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 40px;
+    }
+
+    .step-circle {
+        width: 40px; height: 40px;
+        min-height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.18);
+        transition: all 0.35s ease;
+        flex-shrink: 0;
+    }
+    .step-item.active .step-circle {
+        background: rgba(255,255,255,0.92);
+        color: #e8735c;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: scale(1.08);
+    }
+    .step-item.completed .step-circle {
+        background: rgba(255,255,255,0.92);
+        color: #27ae60;
+    }
+
+    .step-item.completed .step-info h4 {
+        color: #f4c542;
+    }
+
+    .step-item.completed .step-desc-box {
+        background: rgba(244,197,66,0.30);
+    }
+
+    .step-connector {
+        flex: 1;
+        width: 2.5px;
+        min-height: 12px;
+        background: rgba(255,255,255,0.25);
+        margin: 3px 0;
+        border-radius: 2px;
+        transition: background 0.3s;
+    }
+    .step-item.completed .step-connector {
+        background: rgba(255,255,255,0.55);
+    }
+
+    .step-info {
+        padding-bottom: 10px;
+        flex: 1;
+    }
+    .step-info h4 {
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 5px;
+        letter-spacing: 0.2px;
+    }
+    .step-desc-box {
+        background: rgba(255,240,210,0.22);
+        border-radius: 22px 0px 22px 22px;
+        padding: 8px 12px;
+    }
+    .step-desc-box p {
+        margin: 0;
+        font-size: 11px;
+        color: rgba(255,255,255,0.88);
+        line-height: 1.45;
+    }
+
+    /* ── Sidebar bottom (dots + google) ── */
+    .sidebar-bottom {
+        position: relative;
+        z-index: 2;
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .sidebar-progress-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        align-self: stretch;
+    }
+    .sidebar-progress-dots .dot {
+        width: 22px; height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.30);
+        transition: all 0.35s;
+    }
+    .sidebar-progress-dots .dot.active {
+        background: #fff;
+        width: 32px;
+    }
+    .sidebar-separator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: rgba(255,255,255,0.45);
+        align-self: stretch;
+    }
+    .sidebar-separator hr {
+        flex: 1;
+        border: none;
+        height: 1px;
+        background: #fff;
+    }
+    .sidebar-separator i { font-size: 18px; }
+
+    .google-signup-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        color: #333;
+        border: none;
+        border-radius: 22px 0px 22px 22px;
+        padding: 11px 20px;
+        font-weight: 600;
+        font-size: 14px;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: box-shadow 0.25s, transform 0.25s;
+        justify-content: center;
+        width: fit-content;
+        max-width: 100%;
+    }
+    a.google-signup-btn {
+        text-decoration: none;
+        color: #333;
+        box-sizing: border-box;
+    }
+    .google-signup-btn:hover {
+        box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+        transform: translateY(-1px);
+    }
+    .google-signup-btn svg { flex-shrink: 0; }
+
+    /* ── Right panel ── */
+    .signup-right {
+        flex: 1;
+        background: #fff;
+        border-radius: 0 18px 18px 0;
+        padding: 5px 28px 8px;
+        overflow-y: auto;
+        max-height: 90vh;
+        position: relative;
+    }
+    .signup-right::-webkit-scrollbar { width: 6px; }
+    .signup-right::-webkit-scrollbar-thumb { background: #e8735c; border-radius: 3px; }
+
+    .close-popup {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: linear-gradient(135deg, #e8735c 0%, #f4a261 100%);
+        color: #fff;
+        border: none;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 3px 12px rgba(232,115,92,0.3);
+        line-height: 1;
+    }
+    .close-popup:hover {
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 5px 18px rgba(232,115,92,0.4);
+    }
+
+    .signup-heading {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 700;
+        font-size: 28px;
+        color: #e8735c;
+        margin: 0 0 4px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    .signup-tagline {
+        font-size: 12.5px;
+        color: #666;
+        margin: 0 0 16px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    /* ── Form box (outline container) ── */
+    .form-box {
+        position: relative;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 8px 24px 20px;
+        margin-bottom: 26px;
+        background: #fff;
+        overflow: visible;
+    }
+
+    /* ── Form steps ── */
+    .form-step {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.4s;
+        padding-bottom: 8px;
+    }
+    .form-step.active {
+        display: block;
+        opacity: 1;
+        animation: fpSlideIn 0.4s ease;
+    }
+    /* Avoid transform on .form-step so .form-nav positions against .form-box */
+    @keyframes fpSlideIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* ── Field rows ── */
+    .field-row {
+        display: flex;
+        gap: 16px;
+    }
+    .field-row > .fp-field { flex: 1; min-width: 0; }
+
+    .fp-field {
+        margin-bottom: 7px;
+        position: relative;
+    }
+    .fp-field.full-width { width: 100%; }
+
+    .fp-field label {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+    .fp-field label i {
+        margin-right: 6px;
+        font-size: 13px;
+    }
+
+    .fp-field input[type="text"],
+    .fp-field input[type="email"],
+    .fp-field input[type="password"],
+    .fp-field input[type="tel"],
+    .fp-field select {
+        width: 100%;
+        padding: 7px 14px;
+        border: 1.5px solid #ddd;
+        border-radius: 22px;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.25s, box-shadow 0.25s;
+        outline: none;
+    }
+    .fp-field input:focus,
+    .fp-field select:focus {
+        border-color: #e8735c;
+        box-shadow: 0 0 0 3px rgba(232,115,92,0.10);
+    }
+    .fp-field input.error,
+    .fp-field select.error {
+        border-color: #e74c3c;
+        animation: fpShake 0.4s ease;
+    }
+    @keyframes fpShake {
+        0%,100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+
+    .fp-field .helper-text {
+        font-size: 11px;
+        color: #999;
+        margin-top: 3px;
+        display: block;
+    }
+
+    /* ── Phone input ── */
+    .phone-input-group {
+        display: flex;
+        gap: 10px;
+    }
+    .phone-code-wrapper { flex: 0 0 130px; }
+    .phone-number-wrapper { flex: 1; }
+
+    /* ── Password ── */
+    .password-wrapper {
+        position: relative;
+    }
+    .password-wrapper input { padding-right: 42px; }
+    .pwd-toggle {
+        position: absolute;
+        right: 12px; top: 50%;
+        transform: translateY(-50%);
+        background: none; border: none;
+        color: #888; cursor: pointer;
+        font-size: 15px; padding: 4px;
+        outline: none; line-height: 1;
+    }
+    .pwd-toggle:hover { color: #e8735c; }
+
+    .password-strength-wrapper {
+        display: none;
+        margin-top: 6px;
+    }
+    .password-strength-wrapper.visible { display: block; }
+    .password-strength {
+        height: 4px;
+        background: #eee;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+    .password-strength-text {
+        font-size: 11px;
+        color: #999;
+        margin-top: 3px;
+        text-align: right;
+    }
+    .password-match, .password-mismatch {
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+    }
+    .password-match { color: #27ae60; }
+    .password-mismatch { color: #e74c3c; }
+
+    .pwd-hint {
+        background: #f8f8f8;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 4px 12px;
+        font-size: 11px;
+        color: #777;
+    }
+    .pwd-hint i { color: #e8735c; margin-right: 5px; }
+
+    /* ── Image uploads ── */
+    .image-upload-row {
+        display: flex;
+        gap: 28px;
+        margin: 8px 0 0px;
+        justify-content: space-around;
+    }
+    .image-upload-item { text-align: center; }
+    .image-upload-item label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 6px;
+    }
+    .image-circle {
+        width: 65px; height: 65px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        margin: 0 auto;
+        overflow: hidden;
+        transition: border-color 0.25s;
+        position: relative;
+    }
+    .image-circle:hover { border-color: #e8735c; }
+    .image-circle i {
+        font-size: 22px;
+        color: #aaa;
+        transition: color 0.25s;
+    }
+    .image-circle:hover i { color: #e8735c; }
+    .image-circle img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0; left: 0;
+    }
+
+    /* ── Validation states ── */
+    .error-message {
+        color: #e74c3c;
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+        font-weight: 500;
+    }
+    .success-message {
+        color: #27ae60;
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+        font-weight: 500;
+    }
+    .input-with-validation { position: relative; }
+    .input-with-validation input { padding-right: 40px; }
+    .validation-status {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+        font-size: 15px;
+    }
+    .validation-status.checking { display: block; color: #999; }
+    .validation-status.available { display: block; color: #27ae60; }
+    .validation-status.unavailable { display: block; color: #e74c3c; }
+
+    /* ── Custom select ── */
+    .custom-select-wrapper { position: relative; width: 100%; }
+    .custom-select-trigger {
+        width: 100%;
+        padding: 3px 14px;
+        border: 1.5px solid #ddd;
+        border-radius: 22px;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: border-color 0.25s;
+    }
+    .custom-select-trigger:hover,
+    .custom-select-trigger.active {
+        border-color: #e8735c;
+    }
+    .custom-select-trigger .selected-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        overflow: hidden;
+    }
+    .custom-select-trigger .flag { font-size: 18px; }
+    .custom-select-trigger .arrow {
+        transition: transform 0.3s;
+        color: #888;
+        font-size: 12px;
+    }
+    .custom-select-trigger.active .arrow { transform: rotate(180deg); }
+
+    .custom-select-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0; right: 0;
+        background: #fff;
+        border: 1.5px solid #ddd;
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+        z-index: 1000;
+        max-height: 280px;
+        overflow: hidden;
+        display: none;
+        animation: fpDropIn 0.25s ease;
+    }
+    .custom-select-dropdown.active { display: block; }
+    @keyframes fpDropIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .custom-select-search {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 5;
+    }
+    .custom-select-search input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1.5px solid #eee;
+        border-radius: 10px;
+        font-size: 13px;
+        outline: none;
+        font-family: inherit;
+    }
+    .custom-select-search input:focus { border-color: #e8735c; }
+    .custom-select-options {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+    .custom-select-options::-webkit-scrollbar { width: 6px; }
+    .custom-select-options::-webkit-scrollbar-thumb { background: #e8735c; border-radius: 3px; }
+    .custom-select-option {
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background 0.15s;
+        border-bottom: 1px solid #f8f8f8;
+        font-size: 13px;
+    }
+    .custom-select-option:hover {
+        background: rgba(232,115,92,0.06);
+    }
+    .custom-select-option.selected {
+        background: rgba(232,115,92,0.10);
+        font-weight: 600;
+        color: #e8735c;
+    }
+    .custom-select-option .flag { font-size: 18px; width: 24px; text-align: center; }
+    .custom-select-option .name { flex: 1; }
+    .custom-select-option .dial-code { font-size: 12px; color: #999; }
+    .no-results {
+        padding: 16px;
+        text-align: center;
+        color: #aaa;
+        font-size: 13px;
+    }
+
+    /* ── Terms section ── */
+    .terms-section { margin: 8px 0 4px; }
+    .terms-card {
+        background: #fff;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .terms-card:hover {
+        border-color: #e8735c;
+        box-shadow: 0 3px 12px rgba(232,115,92,0.08);
+    }
+    .terms-checkbox {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        gap: 12px;
+    }
+    .terms-checkbox input[type="checkbox"] {
+        margin-top: 2px;
+        width: 18px; height: 18px;
+        accent-color: #e8735c;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .terms-checkbox-content span {
+        color: #333;
+        font-weight: 600;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .terms-checkbox-content p {
+        color: #666;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.55;
+    }
+    .terms-checkbox-content a {
+        color: #e8735c;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .terms-checkbox-content a:hover { text-decoration: underline; }
+
+    .terms-info-box {
+        background: #fff8f6;
+        border: 1px solid #fde0db;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
+    .terms-info-box h6 {
+        color: #e8735c;
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 6px;
+    }
+    .terms-info-box h6 i { margin-right: 6px; }
+    .terms-info-box p {
+        color: #777;
+        font-size: 12px;
+        margin: 0;
+        line-height: 1.55;
+    }
+
+    /* ── Verification step ── */
+    .verify-section { text-align: center; padding: 20px 0; }
+    .verify-section .verify-icon {
+        font-size: 52px;
+        color: #e8735c;
+        margin-bottom: 16px;
+    }
+    .verify-section p { color: #666; font-size: 13px; line-height: 1.55; margin-bottom: 18px; }
+    .verify-section strong { color: #e8735c; }
+    .verify-code-input {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto 8px;
+        padding: 12px 16px;
+        border: 2px solid #ddd;
+        border-radius: 14px;
+        font-size: 22px;
+        text-align: center;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        font-family: inherit;
+        color: #333;
+        outline: none;
+        transition: border-color 0.25s;
+        display: block;
+    }
+    .verify-code-input:focus { border-color: #e8735c; }
+    .verify-resend {
+        font-size: 12px;
+        color: #999;
+        margin-top: 10px;
+    }
+    .verify-resend a {
+        color: #e8735c;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* ── Buttons (straddle bottom border of .form-box) ── */
+    .form-nav {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 50%);
+        z-index: 4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        width: calc(100% - 48px);
+        max-width: 420px;
+        pointer-events: none;
+    }
+    .form-nav button {
+        pointer-events: auto;
+    }
+    .btn-fp-next, .btn-fp-submit {
+        background: #ff6f61;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 11px 36px;
+        font-weight: 600;
+        font-size: 14px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .btn-fp-next:hover, .btn-fp-submit:hover {
+        box-shadow: 0 4px 16px rgba(232,115,92,0.35);
+        transform: translateY(-1px);
+    }
+    .btn-fp-next:disabled, .btn-fp-submit:disabled {
+        background: #ccc;
+        color: #888;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+    .btn-fp-prev {
+        background: #1e3a8a;
+        color: #fff;
+        border: none;
+        border-radius: 0px 22px 22px 22px;
+        padding: 11px 30px;
+        font-weight: 600;
+        font-size: 14px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .btn-fp-prev:hover {
+        box-shadow: 0 4px 14px rgba(30,58,138,0.30);
+        transform: translateY(-1px);
+    }
+
+    /* ── Step heading inside each form step ── */
+    .step-form-heading {
+        font-size: 15px;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    .step-form-desc {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 14px;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    #step1Form .form-nav {
+        justify-content: center;
+    }
+
+    #step1Form .form-nav > div {
+        display: none;
+    }
+
+    #step4Form .form-nav {
+        justify-content: center;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 991px) {
+        .signup-left { display: none; }
+        .signup-right { border-radius: 18px; }
+        .signup-popup { max-width: 600px; }
+    }
+    @media (max-width: 576px) {
+        .signup-popup { width: 98%; border-radius: 14px; }
+        .signup-right { padding: 18px 16px 16px; border-radius: 14px; }
+        .form-box { padding: 16px 14px 48px; margin-bottom: 28px; border-radius: 16px; }
+        .field-row { flex-direction: column; gap: 0; }
+        .field-row > .fp-field { flex: none; }
+        .signup-heading { font-size: 22px; }
+        .form-nav {
+            flex-direction: column-reverse;
+            gap: 10px;
+            width: calc(100% - 28px);
+            max-width: none;
+        }
+        .btn-fp-next, .btn-fp-submit, .btn-fp-prev { width: 100%; text-align: center; }
+        .image-upload-row { gap: 16px; }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="popup-overlay" id="popupOverlay"></div>
+
+<div class="signup-popup" id="signupPopup">
+    <div class="signup-layout">
+
+        <!-- ═══ Left Sidebar ═══ -->
+        <div class="signup-left">
+            <div class="deco-yellow"></div>
+
+            <div class="sidebar-logo">
+                <img src="{% static 'images/navbar/fireprenair_logo_no_bg.png' %}" alt="logo" style="max-width: 35%; ">
+            </div>
+
+            <div class="sidebar-steps" id="sidebarSteps">
+                <!-- Step 1 -->
+                <div class="step-item active" data-step="1">
+                    <div class="step-marker">
+                        <div class="step-circle"><i class="fas fa-user"></i></div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step-info">
+                        <h4>Personal Details</h4>
+                        <div class="step-desc-box">
+                            <p>Enter your basic information to begin your Fireprenair setup.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="step-item" data-step="2">
+                    <div class="step-marker">
+                        <div class="step-circle"><i class="fas fa-cog"></i></div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step-info">
+                        <h4>Account Details</h4>
+                        <div class="step-desc-box">
+                            <p>Create your account credentials and personalize your access.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="step-item" data-step="3">
+                    <div class="step-marker">
+                        <div class="step-circle"><i class="fas fa-file-contract"></i></div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step-info">
+                        <h4>Terms &amp; Policies</h4>
+                        <div class="step-desc-box">
+                            <p>Review and accept the terms to continue securely.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Step 4 -->
+                <div class="step-item" data-step="4">
+                    <div class="step-marker">
+                        <div class="step-circle"><i class="fas fa-handshake"></i></div>
+                    </div>
+                    <div class="step-info">
+                        <h4>Verification</h4>
+                        <div class="step-desc-box">
+                            <p>Verify your account and unlock your Fireprenair dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-progress-dots" id="progressDots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <div class="sidebar-separator">
+                    <hr><i class="fas fa-handshake"></i><hr>
+                </div>
+                <a class="google-signup-btn" href="{% provider_login_url 'google' %}" rel="noopener noreferrer">
+                    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    <span>Sign up with Google</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ═══ Right Panel ═══ -->
+        <div class="signup-right">
+            <button class="close-popup" id="closePopup">&times;</button>
+
+            <h1 class="signup-heading" id="mainHeading">Let's Get You Started</h1>
+            <p class="signup-tagline" id="mainTagline">Join Fireprenair and unlock the tools to create, launch, and scale your business.</p>
+
+            <div class="form-box">
+
+                <!-- ─── Step 1: Personal Details ─── -->
+                <div class="form-step active" id="step1Form">
+                    <form id="registerForm" method="post" action="{% url 'register' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="full_name" id="hiddenFullName">
+                        <input type="hidden" name="email" id="hiddenEmail">
+                        <input type="hidden" name="username" id="hiddenUsername">
+                        <input type="hidden" name="country" id="hiddenCountry">
+                        <input type="hidden" name="language" id="hiddenLanguage">
+                        <input type="hidden" name="timezone" id="hiddenTimezone">
+                        <input type="hidden" name="phone" id="hiddenPhone">
+                        <input type="hidden" name="age_confirmed" id="hiddenAgeConfirmed" value="true">
+                        <input type="hidden" name="password" id="hiddenPassword">
+                        <input type="hidden" name="profile_photo" id="hiddenProfilePhoto">
+                        <input type="hidden" name="background_photo" id="hiddenBgPhoto">
+                        <input type="hidden" name="customer_type" id="hiddenCustomerType">
+                        <input type="hidden" name="identity_type" id="hiddenIdentityType">
+                        <input type="hidden" name="identity_number" id="hiddenIdentityNumber">
+                        <input type="hidden" name="agree_terms" id="hiddenAgreeTerms">
+                        <input type="hidden" name="agree_privacy" id="hiddenAgreePrivacy">
+                        <input type="hidden" name="referral_code" value="{{ request.GET.referral_code }}">
+
+                        <div class="field-row">
+                            <div class="fp-field">
+                                <label><i class="fas fa-user" style="color:#a0714f"></i> Full Name*</label>
+                                <input type="text" id="fullName" placeholder="John Doe">
+                                <div class="error-message" id="fullNameError"></div>
+                            </div>
+                            <div class="fp-field">
+                                <label><i class="fas fa-envelope" style="color:#e8735c"></i> Email Address*</label>
+                                <div class="input-with-validation">
+                                    <input type="email" id="email" placeholder="john@example.com">
+                                    <span class="validation-status" id="emailStatus"></span>
+                                </div>
+                                <div class="error-message" id="emailError"></div>
+                                <div class="success-message" id="emailSuccess"></div>
+                            </div>
+                        </div>
+
+                        <div class="field-row">
+                            <div class="fp-field">
+                                <label><i class="fas fa-at" style="color:#e8735c"></i> Username*</label>
+                                <div class="input-with-validation">
+                                    <input type="text" id="username" placeholder="johndoe123">
+                                    <span class="validation-status" id="usernameStatus"></span>
+                                </div>
+                                <div class="error-message" id="usernameError"></div>
+                                <div class="success-message" id="usernameSuccess"></div>
+                            </div>
+                            <div class="fp-field">
+                                <label><i class="fas fa-language" style="color:#e8735c"></i> Preferred Language*</label>
+                                <div id="languageSelect"></div>
+                                <div class="error-message" id="languageError"></div>
+                            </div>
+                        </div>
+
+                        <div class="fp-field full-width">
+                            <label><i class="fas fa-phone" style="color:#e8735c"></i> Phone Number (Optional)</label>
+                            <div class="phone-input-group">
+                                <div class="phone-code-wrapper">
+                                    <div id="phoneCodeSelect"></div>
+                                </div>
+                                <div class="phone-number-wrapper">
+                                    <input type="tel" id="phone" placeholder="Enter phone number">
+                                </div>
+                            </div>
+                            <small class="helper-text">Format: +1.234.567.8901</small>
+                            <div class="error-message" id="phoneError"></div>
+                        </div>
+
+                        <div class="field-row">
+                            <div class="fp-field">
+                                <label><i class="fas fa-lock" style="color:#e8735c"></i> Password*</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="password" placeholder="Create password">
+                                    <button type="button" class="pwd-toggle" id="togglePassword"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <div class="password-strength-wrapper" id="passwordStrengthWrapper">
+                                    <div class="password-strength">
+                                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                                    </div>
+                                    <div class="password-strength-text" id="passwordStrengthText">Password strength: None</div>
+                                </div>
+                                <div class="error-message" id="passwordError"></div>
+                            </div>
+                            <div class="fp-field">
+                                <label><i class="fas fa-lock" style="color:#e8735c"></i> Confirm Password*</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="confirmPassword" placeholder="Re-enter password">
+                                    <button type="button" class="pwd-toggle" id="toggleConfirmPassword"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <div class="password-match" id="passwordMatch">&#10003; Passwords match</div>
+                                <div class="password-mismatch" id="passwordMismatch">&#10007; Passwords do not match</div>
+                                <div class="error-message" id="confirmPasswordError"></div>
+                            </div>
+                        </div>
+
+                        <div class="pwd-hint">
+                            <i class="fas fa-shield-alt"></i>
+                            Min 8 chars, upper, lower, number, special character
+                        </div>
+
+                        <div class="image-upload-row">
+                            <div class="image-upload-item">
+                                <label>Profile image*</label>
+                                <div class="image-circle" id="profilePhotoPreview">
+                                    <i class="fas fa-camera" id="profileCamIcon"></i>
+                                    <img id="profilePreviewImg" src="" alt="" style="display:none">
+                                </div>
+                                <input type="file" id="profilePhoto" accept="image/png, image/jpeg" style="display:none">
+                                <div class="error-message" id="photoError" style="text-align:center"></div>
+                            </div>
+                            <div class="image-upload-item">
+                                <label>Background image*</label>
+                                <div class="image-circle" id="bgPhotoPreview">
+                                    <i class="fas fa-camera" id="bgCamIcon"></i>
+                                    <img id="bgPreviewImg" src="" alt="" style="display:none">
+                                </div>
+                                <input type="file" id="bgPhoto" accept="image/png, image/jpeg" style="display:none">
+                                <div class="error-message" id="bgPhotoError" style="text-align:center"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-nav">
+                            <div></div>
+                            <button type="button" class="btn-fp-next" id="nextStep1">Next</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ─── Step 2: Account Details ─── -->
+                <div class="form-step" id="step2Form">
+                    <p class="step-form-heading">Account Details</p>
+                    <p class="step-form-desc">Tell us a bit more about how you'll use Fireprenair.</p>
+
+                    <div class="field-row">
+                        <div class="fp-field">
+                            <label><i class="fas fa-globe" style="color:#e8735c"></i> Country/Region *</label>
+                            <div id="countrySelect"></div>
+                            <div class="error-message" id="countryError"></div>
+                        </div>
+                        <div class="fp-field">
+                            <label><i class="fas fa-user-tag" style="color:#e8735c"></i> Customer Type (Optional)</label>
+                            <select id="customerType">
+                                <option value="">Select type</option>
+                                <option value="individual">Individual</option>
+                                <option value="company">Company</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="fp-field">
+                            <label><i class="fas fa-id-card" style="color:#e8735c"></i> Identity Type (Optional)</label>
+                            <select id="identityType">
+                                <option value="">Select identity type</option>
+                                <option value="passport">Passport</option>
+                                <option value="national_id">National ID</option>
+                                <option value="drivers_license">Driver's License</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="fp-field">
+                            <label><i class="fas fa-hashtag" style="color:#e8735c"></i> Identity Number (Optional)</label>
+                            <input type="text" id="identityNumber" placeholder="Enter ID number">
+                        </div>
+                    </div>
+
+                    <div class="form-nav">
+                        <button type="button" class="btn-fp-prev" id="prevStep2">Back</button>
+                        <button type="button" class="btn-fp-next" id="nextStep2">Next</button>
+                    </div>
+                </div>
+
+                <!-- ─── Step 3: Terms & Policies ─── -->
+                <div class="form-step" id="step3Form">
+                    <p class="step-form-heading">Terms &amp; Conditions</p>
+                    <p class="step-form-desc">Please review and accept our terms to complete registration.</p>
+
+                    <div class="terms-section">
+                        <div class="terms-card">
+                            <label class="terms-checkbox">
+                                <input type="checkbox" id="agreeTerms">
+                                <div class="terms-checkbox-content">
+                                    <span>Terms of Use *</span>
+                                    <p>I have read and agree to abide by the <a href="{% url 'terms_of_use' %}" target="_blank">Terms of Use</a> governing the use of Fireprenair services.</p>
+                                </div>
+                            </label>
+                            <div class="error-message" id="termsError"></div>
+                        </div>
+                        <div class="terms-card">
+                            <label class="terms-checkbox">
+                                <input type="checkbox" id="agreePrivacy">
+                                <div class="terms-checkbox-content">
+                                    <span>Privacy Policy *</span>
+                                    <p>I have read and understand the <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a> regarding how my personal information is collected and used.</p>
+                                </div>
+                            </label>
+                            <div class="error-message" id="privacyError"></div>
+                        </div>
+                    </div>
+
+                    <div class="terms-info-box">
+                        <h6><i class="fas fa-info-circle"></i> Important Information</h6>
+                        <p>By creating an account, you agree to receive important notifications and updates about your account via email. You can manage your communication preferences in your account settings.</p>
+                    </div>
+
+                    <div class="form-nav">
+                        <button type="button" class="btn-fp-prev" id="prevStep3">Back</button>
+                        <button type="button" class="btn-fp-submit" id="submitForm">Complete Registration</button>
+                    </div>
+                </div>
+
+                <!-- ─── Step 4: Email Verification ─── -->
+                <div class="form-step" id="step4Form">
+                    <div class="verify-section">
+                        <div class="verify-icon"><i class="fas fa-envelope-open-text"></i></div>
+                        <p class="step-form-heading" style="font-size:18px;margin-bottom:6px">Verify Your Email</p>
+                        <p>We sent a 6-digit code to <strong id="verifyEmailDisplay"></strong>. Enter it below to activate your account.</p>
+                        <input type="text" class="verify-code-input" id="verificationCode" placeholder="ABC123" maxlength="6" autocomplete="one-time-code">
+                        <div class="error-message" id="verifyError" style="text-align:center"></div>
+                        <p class="verify-resend">Didn't receive the code? <a id="resendCodeBtn">Resend</a></p>
+                    </div>
+                    <div class="form-nav">
+                        <button type="button" class="btn-fp-submit" id="verifyCodeBtn">Verify &amp; Create Account</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_javascript %}
+<script>
+let countrySelect, languageSelect, phoneCodeSelect;
+
+const countriesData = [
+    { code: "AF", name: "Afghanistan", dialCode: "+93", flag: "\u{1F1E6}\u{1F1EB}" },
+    { code: "AL", name: "Albania", dialCode: "+355", flag: "\u{1F1E6}\u{1F1F1}" },
+    { code: "DZ", name: "Algeria", dialCode: "+213", flag: "\u{1F1E9}\u{1F1FF}" },
+    { code: "AR", name: "Argentina", dialCode: "+54", flag: "\u{1F1E6}\u{1F1F7}" },
+    { code: "AU", name: "Australia", dialCode: "+61", flag: "\u{1F1E6}\u{1F1FA}" },
+    { code: "AT", name: "Austria", dialCode: "+43", flag: "\u{1F1E6}\u{1F1F9}" },
+    { code: "BD", name: "Bangladesh", dialCode: "+880", flag: "\u{1F1E7}\u{1F1E9}" },
+    { code: "BE", name: "Belgium", dialCode: "+32", flag: "\u{1F1E7}\u{1F1EA}" },
+    { code: "BR", name: "Brazil", dialCode: "+55", flag: "\u{1F1E7}\u{1F1F7}" },
+    { code: "CA", name: "Canada", dialCode: "+1", flag: "\u{1F1E8}\u{1F1E6}" },
+    { code: "CN", name: "China", dialCode: "+86", flag: "\u{1F1E8}\u{1F1F3}" },
+    { code: "CO", name: "Colombia", dialCode: "+57", flag: "\u{1F1E8}\u{1F1F4}" },
+    { code: "HR", name: "Croatia", dialCode: "+385", flag: "\u{1F1ED}\u{1F1F7}" },
+    { code: "CZ", name: "Czech Republic", dialCode: "+420", flag: "\u{1F1E8}\u{1F1FF}" },
+    { code: "DK", name: "Denmark", dialCode: "+45", flag: "\u{1F1E9}\u{1F1F0}" },
+    { code: "EG", name: "Egypt", dialCode: "+20", flag: "\u{1F1EA}\u{1F1EC}" },
+    { code: "FI", name: "Finland", dialCode: "+358", flag: "\u{1F1EB}\u{1F1EE}" },
+    { code: "FR", name: "France", dialCode: "+33", flag: "\u{1F1EB}\u{1F1F7}" },
+    { code: "DE", name: "Germany", dialCode: "+49", flag: "\u{1F1E9}\u{1F1EA}" },
+    { code: "GR", name: "Greece", dialCode: "+30", flag: "\u{1F1EC}\u{1F1F7}" },
+    { code: "HK", name: "Hong Kong", dialCode: "+852", flag: "\u{1F1ED}\u{1F1F0}" },
+    { code: "HU", name: "Hungary", dialCode: "+36", flag: "\u{1F1ED}\u{1F1FA}" },
+    { code: "IN", name: "India", dialCode: "+91", flag: "\u{1F1EE}\u{1F1F3}" },
+    { code: "ID", name: "Indonesia", dialCode: "+62", flag: "\u{1F1EE}\u{1F1E9}" },
+    { code: "IE", name: "Ireland", dialCode: "+353", flag: "\u{1F1EE}\u{1F1EA}" },
+    { code: "IL", name: "Israel", dialCode: "+972", flag: "\u{1F1EE}\u{1F1F1}" },
+    { code: "IT", name: "Italy", dialCode: "+39", flag: "\u{1F1EE}\u{1F1F9}" },
+    { code: "JP", name: "Japan", dialCode: "+81", flag: "\u{1F1EF}\u{1F1F5}" },
+    { code: "KE", name: "Kenya", dialCode: "+254", flag: "\u{1F1F0}\u{1F1EA}" },
+    { code: "KR", name: "South Korea", dialCode: "+82", flag: "\u{1F1F0}\u{1F1F7}" },
+    { code: "MY", name: "Malaysia", dialCode: "+60", flag: "\u{1F1F2}\u{1F1FE}" },
+    { code: "MX", name: "Mexico", dialCode: "+52", flag: "\u{1F1F2}\u{1F1FD}" },
+    { code: "NL", name: "Netherlands", dialCode: "+31", flag: "\u{1F1F3}\u{1F1F1}" },
+    { code: "NZ", name: "New Zealand", dialCode: "+64", flag: "\u{1F1F3}\u{1F1FF}" },
+    { code: "NG", name: "Nigeria", dialCode: "+234", flag: "\u{1F1F3}\u{1F1EC}" },
+    { code: "NO", name: "Norway", dialCode: "+47", flag: "\u{1F1F3}\u{1F1F4}" },
+    { code: "PK", name: "Pakistan", dialCode: "+92", flag: "\u{1F1F5}\u{1F1F0}" },
+    { code: "PE", name: "Peru", dialCode: "+51", flag: "\u{1F1F5}\u{1F1EA}" },
+    { code: "PH", name: "Philippines", dialCode: "+63", flag: "\u{1F1F5}\u{1F1ED}" },
+    { code: "PL", name: "Poland", dialCode: "+48", flag: "\u{1F1F5}\u{1F1F1}" },
+    { code: "PT", name: "Portugal", dialCode: "+351", flag: "\u{1F1F5}\u{1F1F9}" },
+    { code: "RO", name: "Romania", dialCode: "+40", flag: "\u{1F1F7}\u{1F1F4}" },
+    { code: "RU", name: "Russia", dialCode: "+7", flag: "\u{1F1F7}\u{1F1FA}" },
+    { code: "SA", name: "Saudi Arabia", dialCode: "+966", flag: "\u{1F1F8}\u{1F1E6}" },
+    { code: "SG", name: "Singapore", dialCode: "+65", flag: "\u{1F1F8}\u{1F1EC}" },
+    { code: "ZA", name: "South Africa", dialCode: "+27", flag: "\u{1F1FF}\u{1F1E6}" },
+    { code: "ES", name: "Spain", dialCode: "+34", flag: "\u{1F1EA}\u{1F1F8}" },
+    { code: "SE", name: "Sweden", dialCode: "+46", flag: "\u{1F1F8}\u{1F1EA}" },
+    { code: "CH", name: "Switzerland", dialCode: "+41", flag: "\u{1F1E8}\u{1F1ED}" },
+    { code: "TW", name: "Taiwan", dialCode: "+886", flag: "\u{1F1F9}\u{1F1FC}" },
+    { code: "TH", name: "Thailand", dialCode: "+66", flag: "\u{1F1F9}\u{1F1ED}" },
+    { code: "TR", name: "Turkey", dialCode: "+90", flag: "\u{1F1F9}\u{1F1F7}" },
+    { code: "UA", name: "Ukraine", dialCode: "+380", flag: "\u{1F1FA}\u{1F1E6}" },
+    { code: "AE", name: "United Arab Emirates", dialCode: "+971", flag: "\u{1F1E6}\u{1F1EA}" },
+    { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "\u{1F1EC}\u{1F1E7}" },
+    { code: "US", name: "United States", dialCode: "+1", flag: "\u{1F1FA}\u{1F1F8}" },
+    { code: "VN", name: "Vietnam", dialCode: "+84", flag: "\u{1F1FB}\u{1F1F3}" },
+];
+
+const languagesData = [
+    { code: "en", name: "English", flag: "\u{1F1EC}\u{1F1E7}" },
+    { code: "es", name: "Spanish", flag: "\u{1F1EA}\u{1F1F8}" },
+    { code: "fr", name: "French", flag: "\u{1F1EB}\u{1F1F7}" },
+    { code: "de", name: "German", flag: "\u{1F1E9}\u{1F1EA}" },
+    { code: "zh", name: "Chinese", flag: "\u{1F1E8}\u{1F1F3}" },
+    { code: "ja", name: "Japanese", flag: "\u{1F1EF}\u{1F1F5}" },
+    { code: "ru", name: "Russian", flag: "\u{1F1F7}\u{1F1FA}" },
+    { code: "ar", name: "Arabic", flag: "\u{1F1F8}\u{1F1E6}" },
+    { code: "pt", name: "Portuguese", flag: "\u{1F1F5}\u{1F1F9}" },
+    { code: "hi", name: "Hindi", flag: "\u{1F1EE}\u{1F1F3}" },
+    { code: "it", name: "Italian", flag: "\u{1F1EE}\u{1F1F9}" },
+    { code: "ko", name: "Korean", flag: "\u{1F1F0}\u{1F1F7}" },
+    { code: "tr", name: "Turkish", flag: "\u{1F1F9}\u{1F1F7}" },
+    { code: "nl", name: "Dutch", flag: "\u{1F1F3}\u{1F1F1}" },
+    { code: "pl", name: "Polish", flag: "\u{1F1F5}\u{1F1F1}" },
+];
+
+class CustomSelect {
+    constructor(elementId, data, options = {}) {
+        this.elementId = elementId;
+        this.data = data;
+        this.options = options;
+        this.selectedValue = null;
+        this.isOpen = false;
+        this.filteredData = [...data];
+        this.init();
+    }
+    init() {
+        const container = document.getElementById(this.elementId);
+        if (!container) return;
+        container.innerHTML = `
+            <div class="custom-select-wrapper">
+                <div class="custom-select-trigger">
+                    <div class="selected-option">
+                        <span class="placeholder1">${this.options.placeholder || 'Select an option'}</span>
+                    </div>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </div>
+                <div class="custom-select-dropdown">
+                    <div class="custom-select-search">
+                        <input type="text" placeholder="${this.options.searchPlaceholder || 'Search...'}" autocomplete="off">
+                    </div>
+                    <div class="custom-select-options"></div>
+                </div>
+            </div>`;
+        this.trigger = container.querySelector('.custom-select-trigger');
+        this.dropdown = container.querySelector('.custom-select-dropdown');
+        this.searchInput = container.querySelector('.custom-select-search input');
+        this.optionsContainer = container.querySelector('.custom-select-options');
+        this.renderOptions();
+        this.attachEvents();
+    }
+    renderOptions() {
+        if (!this.filteredData.length) {
+            this.optionsContainer.innerHTML = '<div class="no-results">No results found</div>';
+            return;
+        }
+        this.optionsContainer.innerHTML = this.filteredData.map(item => `
+            <div class="custom-select-option" data-value="${item.code}">
+                ${item.flag ? `<span class="flag">${item.flag}</span>` : ''}
+                <span class="name">${item.name}</span>
+                ${item.dialCode ? `<span class="dial-code">${item.dialCode}</span>` : ''}
+            </div>`).join('');
+        this.optionsContainer.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.addEventListener('click', () => this.selectOption(opt.dataset.value));
+        });
+    }
+    attachEvents() {
+        this.trigger.addEventListener('click', e => { e.stopPropagation(); this.toggle(); });
+        this.searchInput.addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            this.filteredData = this.data.filter(i =>
+                i.name.toLowerCase().includes(q) ||
+                (i.dialCode && i.dialCode.includes(q)) ||
+                i.code.toLowerCase().includes(q)
+            );
+            this.renderOptions();
+        });
+        document.addEventListener('click', e => {
+            if (!this.trigger.contains(e.target) && !this.dropdown.contains(e.target)) this.close();
+        });
+        this.searchInput.addEventListener('click', e => e.stopPropagation());
+    }
+    toggle() { this.isOpen ? this.close() : this.open(); }
+    open() {
+        this.dropdown.classList.add('active');
+        this.trigger.classList.add('active');
+        this.isOpen = true;
+        this.searchInput.focus();
+    }
+    close() {
+        this.dropdown.classList.remove('active');
+        this.trigger.classList.remove('active');
+        this.isOpen = false;
+        this.searchInput.value = '';
+        this.filteredData = [...this.data];
+        this.renderOptions();
+    }
+    selectOption(value) {
+        this.selectedValue = value;
+        const item = this.data.find(i => i.code === value);
+        if (item) {
+            this.trigger.querySelector('.selected-option').innerHTML = `
+                ${item.flag ? `<span class="flag">${item.flag}</span>` : ''}
+                <span class="name">${item.name}</span>
+                ${item.dialCode ? `<span class="dial-code">${item.dialCode}</span>` : ''}`;
+            if (this.options.onChange) this.options.onChange(item);
+        }
+        this.close();
+    }
+    getValue() { return this.selectedValue; }
+    setValue(value) { this.selectOption(value); }
+}
+
+/* ── AJAX helpers ── */
+function getCookie(name) {
+    let v = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.substring(0, name.length + 1) === (name + '='))
+                v = decodeURIComponent(c.substring(name.length + 1));
+        });
+    }
+    return v;
+}
+
+let usernameTimeout, emailTimeout;
+
+async function checkUsernameAvailability(username) {
+    const statusIcon = document.getElementById('usernameStatus');
+    const errorMsg = document.getElementById('usernameError');
+    const successMsg = document.getElementById('usernameSuccess');
+    const input = document.getElementById('username');
+    if (!username || username.length < 3) {
+        statusIcon.className = 'validation-status';
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        input.classList.remove('error');
+        return;
+    }
+    statusIcon.className = 'validation-status checking';
+    statusIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    try {
+        const res = await fetch('/my_accounts/check-username/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (data.available) {
+            statusIcon.className = 'validation-status available';
+            statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            successMsg.textContent = data.message;
+            successMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            input.classList.remove('error');
+        } else {
+            statusIcon.className = 'validation-status unavailable';
+            statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            errorMsg.textContent = data.message;
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            input.classList.add('error');
+        }
+    } catch (e) {
+        statusIcon.className = 'validation-status';
+    }
+}
+
+async function checkEmailAvailability(email) {
+    const statusIcon = document.getElementById('emailStatus');
+    const errorMsg = document.getElementById('emailError');
+    const successMsg = document.getElementById('emailSuccess');
+    const input = document.getElementById('email');
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !re.test(email)) {
+        statusIcon.className = 'validation-status';
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        input.classList.remove('error');
+        return;
+    }
+    statusIcon.className = 'validation-status checking';
+    statusIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    try {
+        const res = await fetch('/my_accounts/check-email/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.available) {
+            statusIcon.className = 'validation-status available';
+            statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            successMsg.textContent = data.message;
+            successMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            input.classList.remove('error');
+        } else {
+            statusIcon.className = 'validation-status unavailable';
+            statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            errorMsg.textContent = data.message;
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            input.classList.add('error');
+        }
+    } catch (e) {
+        statusIcon.className = 'validation-status';
+    }
+}
+
+/* ── Main initialization ── */
+document.addEventListener('DOMContentLoaded', function () {
+    const popupOverlay = document.getElementById('popupOverlay');
+    const signupPopup = document.getElementById('signupPopup');
+    const closePopup = document.getElementById('closePopup');
+
+    const stepItems = document.querySelectorAll('#sidebarSteps .step-item');
+    const stepForms = document.querySelectorAll('.form-step');
+    const progressDots = document.querySelectorAll('#progressDots .dot');
+
+    const fullName = document.getElementById('fullName');
+    const email = document.getElementById('email');
+    const username = document.getElementById('username');
+    const phone = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+    const passwordStrengthText = document.getElementById('passwordStrengthText');
+    const passwordStrengthWrapper = document.getElementById('passwordStrengthWrapper');
+    const passwordMatch = document.getElementById('passwordMatch');
+    const passwordMismatch = document.getElementById('passwordMismatch');
+
+    const profilePhoto = document.getElementById('profilePhoto');
+    const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+    const profilePreviewImg = document.getElementById('profilePreviewImg');
+    const profileCamIcon = document.getElementById('profileCamIcon');
+    const bgPhoto = document.getElementById('bgPhoto');
+    const bgPhotoPreview = document.getElementById('bgPhotoPreview');
+    const bgPreviewImg = document.getElementById('bgPreviewImg');
+    const bgCamIcon = document.getElementById('bgCamIcon');
+
+    const customerType = document.getElementById('customerType');
+    const identityType = document.getElementById('identityType');
+    const identityNumber = document.getElementById('identityNumber');
+    const agreeTerms = document.getElementById('agreeTerms');
+    const agreePrivacy = document.getElementById('agreePrivacy');
+
+    const mainHeading = document.getElementById('mainHeading');
+    const mainTagline = document.getElementById('mainTagline');
+
+    const hiddenFields = {
+        fullName: document.getElementById('hiddenFullName'),
+        email: document.getElementById('hiddenEmail'),
+        username: document.getElementById('hiddenUsername'),
+        country: document.getElementById('hiddenCountry'),
+        language: document.getElementById('hiddenLanguage'),
+        timezone: document.getElementById('hiddenTimezone'),
+        phone: document.getElementById('hiddenPhone'),
+        password: document.getElementById('hiddenPassword'),
+        profilePhoto: document.getElementById('hiddenProfilePhoto'),
+        bgPhoto: document.getElementById('hiddenBgPhoto'),
+        customerType: document.getElementById('hiddenCustomerType'),
+        identityType: document.getElementById('hiddenIdentityType'),
+        identityNumber: document.getElementById('hiddenIdentityNumber'),
+        agreeTerms: document.getElementById('hiddenAgreeTerms'),
+        agreePrivacy: document.getElementById('hiddenAgreePrivacy')
+    };
+
+    let currentStep = 1;
+    const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    hiddenFields.timezone.value = detectedTimezone;
+
+    const headings = {
+        1: ["Let's Get You Started", "Join Fireprenair and unlock the tools to create, launch, and scale your business."],
+        2: ["Almost There!", "Tell us a bit more about yourself to personalize your experience."],
+        3: ["Review & Accept", "Please review and accept our terms to complete your registration."],
+        4: ["Verify Your Email", "Enter the 6-digit code we sent to your email to finish up."]
+    };
+
+    /* ── Popup open/close ── */
+    document.querySelectorAll('.signup-btn-home, .signup-btn-home1').forEach(btn => {
+        btn?.addEventListener('click', () => {
+            popupOverlay.style.display = 'block';
+            signupPopup.style.display = 'block';
+            resetForm();
+        });
+    });
+    closePopup.addEventListener('click', closeSignup);
+    popupOverlay.addEventListener('click', closeSignup);
+    function closeSignup() {
+        popupOverlay.style.display = 'none';
+        signupPopup.style.display = 'none';
+    }
+
+    const hasErrors = "{{ values.has_errors|default:'' }}";
+    if (hasErrors === "True") {
+        popupOverlay.style.display = 'block';
+        signupPopup.style.display = 'block';
+    }
+    const showRegisterPopup = {{ show_register_popup|yesno:"true,false" }};
+    if (showRegisterPopup) {
+        popupOverlay.style.display = 'block';
+        signupPopup.style.display = 'block';
+        const url = new URL(window.location.href);
+        url.searchParams.delete('register');
+        window.history.replaceState({}, document.title, url.toString());
+    }
+
+    /* ── Step progress ── */
+    function updateProgress() {
+        stepItems.forEach((el, i) => {
+            el.classList.remove('active', 'completed');
+            if (i + 1 === currentStep) el.classList.add('active');
+            else if (i + 1 < currentStep) el.classList.add('completed');
+        });
+
+        stepItems.forEach(el => {
+            const circle = el.querySelector('.step-circle');
+            if (el.classList.contains('completed')) {
+                circle.innerHTML = '<i class="fas fa-check"></i>';
+            } else {
+                const icons = { '1': 'fa-user', '2': 'fa-cog', '3': 'fa-file-contract', '4': 'fa-handshake' };
+                circle.innerHTML = `<i class="fas ${icons[el.dataset.step]}"></i>`;
+            }
+        });
+
+        progressDots.forEach((d, i) => d.classList.toggle('active', i + 1 === currentStep));
+
+        stepForms.forEach((f, i) => {
+            f.classList.remove('active');
+            if (i + 1 === currentStep) f.classList.add('active');
+        });
+
+        const h = headings[currentStep];
+        if (h) {
+            mainHeading.textContent = h[0];
+            mainTagline.textContent = h[1];
+        }
+    }
+
+    /* ── Validation helpers ── */
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+        document.querySelectorAll('.fp-field input, .fp-field select').forEach(el => el.classList.remove('error'));
+    }
+
+    function validateStep1() {
+        let ok = true;
+        clearErrors();
+        if (!fullName.value.trim()) { showError('fullNameError', 'Full name is required'); fullName.classList.add('error'); ok = false; }
+        else if (fullName.value.trim().length < 2) { showError('fullNameError', 'Min 2 characters'); fullName.classList.add('error'); ok = false; }
+
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.value.trim()) { showError('emailError', 'Email is required'); email.classList.add('error'); ok = false; }
+        else if (!emailRe.test(email.value)) { showError('emailError', 'Enter a valid email'); email.classList.add('error'); ok = false; }
+
+        if (!username.value.trim()) { showError('usernameError', 'Username is required'); username.classList.add('error'); ok = false; }
+        else if (username.value.trim().length < 3) { showError('usernameError', 'Min 3 characters'); username.classList.add('error'); ok = false; }
+        else if (!/^[a-zA-Z0-9_]+$/.test(username.value.trim())) { showError('usernameError', 'Letters, numbers & underscores only'); username.classList.add('error'); ok = false; }
+
+        if (!languageSelect.getValue()) { showError('languageError', 'Select a language'); ok = false; }
+
+        if (phone.value.trim()) {
+            if (!/^[\d\s\-\(\)]+$/.test(phone.value)) { showError('phoneError', 'Invalid phone number'); phone.classList.add('error'); ok = false; }
+        }
+
+        if (!passwordInput.value) { showError('passwordError', 'Password is required'); passwordInput.classList.add('error'); ok = false; }
+        else if (checkPasswordStrength(passwordInput.value) < 3) { showError('passwordError', 'Password too weak'); passwordInput.classList.add('error'); ok = false; }
+        else { hiddenFields.password.value = passwordInput.value; }
+
+        if (!confirmPassword.value) { showError('confirmPasswordError', 'Confirm your password'); confirmPassword.classList.add('error'); ok = false; }
+        else if (passwordInput.value !== confirmPassword.value) { showError('confirmPasswordError', 'Passwords do not match'); confirmPassword.classList.add('error'); ok = false; }
+
+        return ok;
+    }
+
+    function validateStep2() {
+        let ok = true;
+        document.getElementById('countryError').style.display = 'none';
+        if (!countrySelect.getValue()) { showError('countryError', 'Select your country'); ok = false; }
+        return ok;
+    }
+
+    function checkPasswordStrength(pw) {
+        let s = 0;
+        if (pw.length >= 8) s++;
+        if (pw.length >= 12) s++;
+        if (/[A-Z]/.test(pw)) s++;
+        if (/[a-z]/.test(pw)) s++;
+        if (/[0-9]/.test(pw)) s++;
+        if (/[^A-Za-z0-9]/.test(pw)) s++;
+        const pct = (s / 6) * 100;
+        passwordStrengthBar.style.width = pct + '%';
+        let txt = 'Very Weak', col = '#e74c3c';
+        if (s >= 5) { txt = 'Very Strong'; col = '#27ae60'; }
+        else if (s >= 4) { txt = 'Strong'; col = '#20c997'; }
+        else if (s >= 3) { txt = 'Good'; col = '#f1c40f'; }
+        else if (s >= 2) { txt = 'Weak'; col = '#e67e22'; }
+        passwordStrengthBar.style.backgroundColor = col;
+        passwordStrengthText.textContent = 'Password strength: ' + txt;
+        passwordStrengthText.style.color = col;
+        return s;
+    }
+
+    /* ── Password toggles ── */
+    togglePassword.addEventListener('click', function () {
+        const t = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = t;
+        this.querySelector('i').className = t === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+    toggleConfirmPassword.addEventListener('click', function () {
+        const t = confirmPassword.type === 'password' ? 'text' : 'password';
+        confirmPassword.type = t;
+        this.querySelector('i').className = t === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+
+    passwordInput.addEventListener('input', function () {
+        passwordStrengthWrapper.classList.toggle('visible', this.value.length > 0);
+        checkPasswordStrength(this.value);
+        hiddenFields.password.value = this.value;
+        if (confirmPassword.value) {
+            const match = this.value === confirmPassword.value;
+            passwordMatch.style.display = match ? 'block' : 'none';
+            passwordMismatch.style.display = match ? 'none' : 'block';
+            confirmPassword.classList.toggle('error', !match);
+        }
+    });
+    confirmPassword.addEventListener('input', function () {
+        const match = passwordInput.value === this.value;
+        passwordMatch.style.display = match ? 'block' : 'none';
+        passwordMismatch.style.display = match ? 'none' : 'block';
+        this.classList.toggle('error', !match);
+    });
+
+    /* ── Image uploads ── */
+    function setupImageUpload(previewEl, imgEl, iconEl, fileInput, hiddenField, errorId) {
+        previewEl.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { showError(errorId, 'Max 2MB'); return; }
+            const valid = ['image/jpeg', 'image/png'];
+            if (!valid.includes(file.type)) { showError(errorId, 'JPG/PNG only'); return; }
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                imgEl.src = ev.target.result;
+                imgEl.style.display = 'block';
+                iconEl.style.display = 'none';
+                hiddenField.value = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    setupImageUpload(profilePhotoPreview, profilePreviewImg, profileCamIcon, profilePhoto, hiddenFields.profilePhoto, 'photoError');
+    setupImageUpload(bgPhotoPreview, bgPreviewImg, bgCamIcon, bgPhoto, hiddenFields.bgPhoto, 'bgPhotoError');
+
+    /* ── Username auto-suggestion ── */
+    fullName.addEventListener('blur', function () {
+        if (username.value.trim()) return;
+        const parts = this.value.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) {
+            username.value = parts[0] + '_' + parts[parts.length - 1];
+        } else if (parts.length === 1) {
+            username.value = parts[0] + Math.floor(Math.random() * 999);
+        }
+        if (username.value) {
+            clearTimeout(usernameTimeout);
+            usernameTimeout = setTimeout(() => checkUsernameAvailability(username.value.trim()), 200);
+        }
+    });
+
+    /* ── Step navigation ── */
+    document.getElementById('nextStep1').addEventListener('click', () => {
+        if (!validateStep1()) return;
+        hiddenFields.fullName.value = fullName.value.trim();
+        hiddenFields.email.value = email.value.trim();
+        hiddenFields.username.value = username.value.trim();
+        hiddenFields.language.value = languageSelect.getValue();
+        hiddenFields.timezone.value = detectedTimezone;
+        const phoneCodeValue = phoneCodeSelect.getValue();
+        const phoneNumber = phone.value.trim();
+        if (phoneNumber && phoneCodeValue) {
+            const c = countriesData.find(c => c.code === phoneCodeValue);
+            hiddenFields.phone.value = c ? c.dialCode + phoneNumber : phoneNumber;
+        } else {
+            hiddenFields.phone.value = '';
+        }
+        currentStep = 2;
+        updateProgress();
+    });
+
+    document.getElementById('nextStep2').addEventListener('click', () => {
+        if (!validateStep2()) return;
+        const sc = countriesData.find(c => c.code === countrySelect.getValue());
+        hiddenFields.country.value = sc ? sc.name : '';
+        hiddenFields.customerType.value = customerType.value || '';
+        hiddenFields.identityType.value = identityType.value || '';
+        hiddenFields.identityNumber.value = identityNumber.value.trim();
+        currentStep = 3;
+        updateProgress();
+    });
+
+    document.getElementById('prevStep2').addEventListener('click', () => { currentStep = 1; updateProgress(); });
+    document.getElementById('prevStep3').addEventListener('click', () => { currentStep = 2; updateProgress(); });
+
+    /* ── Submit → send verification email ── */
+    let pendingVerifyEmail = null;
+    const registerUrl = "{% url 'register' %}";
+    const verifyEmailUrl = "{% url 'verify_email' %}";
+    const submitForm = document.getElementById('submitForm');
+
+    submitForm.addEventListener('click', async () => {
+        let ok = true;
+        document.getElementById('termsError').style.display = 'none';
+        document.getElementById('privacyError').style.display = 'none';
+        if (!agreeTerms.checked) { showError('termsError', 'You must agree to the Terms of Use'); ok = false; }
+        if (!agreePrivacy.checked) { showError('privacyError', 'You must agree to the Privacy Policy'); ok = false; }
+        if (!ok) return;
+
+        hiddenFields.agreeTerms.value = 'true';
+        hiddenFields.agreePrivacy.value = 'true';
+        hiddenFields.timezone.value = detectedTimezone;
+
+        const form = document.getElementById('registerForm');
+        const formData = new FormData(form);
+        submitForm.disabled = true;
+        submitForm.textContent = 'Sending...';
+
+        try {
+            const res = await fetch(registerUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+                credentials: 'same-origin'
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success && data.email) {
+                pendingVerifyEmail = data.email;
+                document.getElementById('verifyEmailDisplay').textContent = data.email;
+                document.getElementById('verificationCode').value = '';
+                document.getElementById('verifyError').style.display = 'none';
+                currentStep = 4;
+                updateProgress();
+            } else if (data.errors) {
+                const map = { full_name: 'fullNameError', email: 'emailError', username: 'usernameError', password: 'passwordError', country: 'countryError', language: 'languageError', timezone: 'termsError', phone: 'phoneError', terms: 'termsError', privacy: 'privacyError' };
+                Object.keys(data.errors).forEach(k => {
+                    const id = map[k] || k + 'Error';
+                    const el = document.getElementById(id);
+                    if (el) { el.textContent = data.errors[k]; el.style.display = 'block'; }
+                });
+            }
+        } catch (e) {
+            showError('termsError', 'Something went wrong. Please try again.');
+        }
+        submitForm.disabled = false;
+        submitForm.textContent = 'Complete Registration';
+    });
+
+    /* ── Verify code ── */
+    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    const verificationCodeInput = document.getElementById('verificationCode');
+
+    verifyCodeBtn.addEventListener('click', async () => {
+        const code = verificationCodeInput.value.trim();
+        const errEl = document.getElementById('verifyError');
+        errEl.style.display = 'none';
+        if (!code || code.length !== 6) { errEl.textContent = 'Enter the 6-digit code from your email.'; errEl.style.display = 'block'; return; }
+        if (!pendingVerifyEmail) { errEl.textContent = 'Session expired. Please register again.'; errEl.style.display = 'block'; return; }
+        verifyCodeBtn.disabled = true;
+        verifyCodeBtn.textContent = 'Verifying...';
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        fd.append('email', pendingVerifyEmail);
+        fd.append('verification_code', code);
+        try {
+            const res = await fetch(verifyEmailUrl, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.success && data.redirect_url) { window.location.href = data.redirect_url; return; }
+            errEl.textContent = data.error || 'Verification failed. Please try again.';
+            errEl.style.display = 'block';
+        } catch (e) {
+            errEl.textContent = 'Something went wrong. Please try again.';
+            errEl.style.display = 'block';
+        }
+        verifyCodeBtn.disabled = false;
+        verifyCodeBtn.textContent = 'Verify & Create Account';
+    });
+
+    /* ── Resend code (re-submit registration) ── */
+    document.getElementById('resendCodeBtn').addEventListener('click', async () => {
+        if (!pendingVerifyEmail) return;
+        const form = document.getElementById('registerForm');
+        const formData = new FormData(form);
+        try {
+            await fetch(registerUrl, {
+                method: 'POST', body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+                credentials: 'same-origin'
+            });
+            const errEl = document.getElementById('verifyError');
+            errEl.textContent = 'A new code has been sent to your email.';
+            errEl.style.color = '#27ae60';
+            errEl.style.display = 'block';
+            setTimeout(() => { errEl.style.color = ''; errEl.style.display = 'none'; }, 4000);
+        } catch (e) { /* silent */ }
+    });
+
+    /* ── Reset ── */
+    function resetForm() {
+        currentStep = 1;
+        updateProgress();
+        document.getElementById('registerForm').reset();
+        hiddenFields.timezone.value = detectedTimezone;
+        [profilePreviewImg, bgPreviewImg].forEach(img => { img.src = ''; img.style.display = 'none'; });
+        profileCamIcon.style.display = '';
+        bgCamIcon.style.display = '';
+        passwordStrengthWrapper.classList.remove('visible');
+        passwordStrengthBar.style.width = '0%';
+        passwordStrengthText.textContent = 'Password strength: None';
+        passwordStrengthText.style.color = '#999';
+        passwordMatch.style.display = 'none';
+        passwordMismatch.style.display = 'none';
+        Object.keys(hiddenFields).forEach(k => { if (k !== 'timezone') hiddenFields[k].value = ''; });
+        hiddenFields.timezone.value = detectedTimezone;
+        clearErrors();
+    }
+
+    updateProgress();
+
+    /* ── Custom selects init ── */
+    countrySelect = new CustomSelect('countrySelect', countriesData, {
+        placeholder: 'Select your country',
+        searchPlaceholder: 'Search countries...',
+        onChange: c => { if (phoneCodeSelect) phoneCodeSelect.setValue(c.code); }
+    });
+    languageSelect = new CustomSelect('languageSelect', languagesData, {
+        placeholder: 'Select language',
+        searchPlaceholder: 'Search languages...'
+    });
+    phoneCodeSelect = new CustomSelect('phoneCodeSelect', countriesData, {
+        placeholder: '+1',
+        searchPlaceholder: 'Search codes...'
+    });
+
+    /* ── AJAX field validation ── */
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    if (usernameInput) usernameInput.addEventListener('input', function () {
+        clearTimeout(usernameTimeout);
+        usernameTimeout = setTimeout(() => checkUsernameAvailability(this.value.trim()), 500);
+    });
+    if (emailInput) emailInput.addEventListener('input', function () {
+        clearTimeout(emailTimeout);
+        emailTimeout = setTimeout(() => checkEmailAvailability(this.value.trim()), 500);
+    });
+});
+</script>
+{% endblock extra_javascript %}

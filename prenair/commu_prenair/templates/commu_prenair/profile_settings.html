@@ -1,0 +1,95 @@
+{% extends "commu_prenair/partials/base.html" %}
+
+{% load static %}
+{% block title %} Fireprenair - Commuprenair | Settings {% endblock title %}
+{% block content %}
+
+
+{% include 'commu_prenair/partials/header.html' %}
+
+
+<!-- Main Content start -->
+<main class="main-content" style="padding-top: 10px;">
+    <div class="container">
+        <div class="row">
+            {% include 'commu_prenair/partials/home_left_side.html' %}
+            <div class="col-xl-9 col-lg-8 cus-mar setting-row">
+                <div class="head-area mb-6 text-start">
+                    <h5>Settings</h5>
+                </div>
+            <form action="{% url 'profile_settings' %}" method="post" enctype="multipart/form-data" class="text-center d-grid gap-4">
+                    {% csrf_token %}
+                <div class="single-box p-sm-5 p-3">
+                    <div class="row gap-6">
+                        <div class="col-xxl-2 col-md-3 col-sm-5 col-6 pe-0">
+                            <div class="upload-single">
+                                <div class="head-area mb-2 text-start">
+                                    <h6>Profile Image</h6>
+                                </div>
+                                <div class="profile-picture text-start">
+                                    <img class="preview-image w-100" src="{{ request.user.profile_pic.url }}" alt="Preview Image">
+                                </div>
+                                <div class="file-upload">
+                                    <label class="file text-start mt-2">
+                                        <input type="file" name="profile_pic">
+                                        <span class="category-btn-final">Change Profile</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="single-box text-start p-sm-5 p-3">
+                    <div class="head-area mb-6">
+                        <h6>General Information </h6>
+                    </div>
+                    <form action="#" class="text-center d-grid gap-4">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="name">Name</label>
+                                    <div class="input-area second">
+                                        <input type="text" name="name" value="{{ request.user.name }}" placeholder="Type name" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="single-input text-start">
+                                    <label for="bio">Bio</label>
+                                    <div class="input-area second">
+                                        <input type="text" name="bio" value="{{ request.user.commu_bio }}" placeholder="Bio" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 mt-4">
+                                <div class="btn-area text-end">
+                                    <button type="submit" class="category-btn-final">Saved Change</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/slick.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/jquery.nice-select.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plyr.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/apexcharts.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/wow.min.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/plugins/plugin.js' %}"></script>
+<script src="{% static 'commu_prenair/assets/js/main.js' %}"></script>
+    
+{% endblock javascript %}

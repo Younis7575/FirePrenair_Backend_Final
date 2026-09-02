@@ -1,0 +1,724 @@
+{% extends "digi_prenair/base.html" %} 
+{% load static %} 
+{% block content %}
+<style>
+  
+.search-preview-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 1rem;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 400px;
+    overflow-y: auto;
+    overscroll-behavior: contain; 
+    width: calc(100% - 8px);
+    right: 0;
+}
+
+.search-preview-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-preview-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 0 1rem 1rem 0;
+}
+
+.search-preview-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}
+
+.search-preview-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.search-preview-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: #1f2937;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    scroll-margin-top: 10px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+}
+
+.preview-item:hover {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 1rem;
+}
+
+.preview-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+.preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-content {
+    flex-grow: 1;
+}
+
+.preview-title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.preview-description {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.preview-pricing {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+}
+
+.discounted-price {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.original-price {
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+/* Loading animation */
+@keyframes loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.search-preview-dropdown.loading .preview-loader {
+    display: block;
+    width: 24px;
+    height: 24px;
+    margin: 2rem auto;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: loading 1s linear infinite;
+}
+
+.scroll-fade {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+    pointer-events: none;
+}
+
+</style>
+<div class="primary-content-area bottom-padding-70">
+  <div class="section-padding fullwidth-banner">
+    <div class="banner-overlay" style="background-image: url({%static 'digi_prenair/img/content/home-banner.png'%});"></div>
+    <div class="search-form-with-text section-small">
+      <div class="text-content">
+        <div class="subtitle">WELCOME TO DIGIPRENAIR</div>
+        <div class="title">
+          Browse the Best<br />
+          Digital Products!
+        </div>
+      </div>
+      <div class="search-block">
+        <form method="get" action="{% url 'digi_explore' %}" class="main-search">
+          <input
+              class="main-search-params"
+              type="hidden"
+              name="params"
+              value="all"
+          />
+          <button class="search-params">
+              <span class="button-text search-param-title">All Categories</span>
+              <svg class="crumina-icon">
+                  <use xlink:href="#arrow-down-icon"></use>
+              </svg>
+          </button>
+          <ul class="search-dropdown">
+              <li data-param="all">All Categories</li>
+              <li data-param="ui-templates">UI templates</li>
+              <li data-param="coded-templates">Coded templates</li>
+              <li data-param="social-graphics">Social Graphics</li>
+          </ul>
+          <input
+              type="text"
+              class="search-input search-input-digi"
+              name="q"
+              placeholder="Enter your search here..."
+          />
+          <div class="search-preview-dropdown" id="searchPreview">
+            <div class="preview-loader"></div>
+            <div class="preview-results" id="previewResults"></div>
+        </div>
+          <button class="search-button" type="submit">
+              <svg class="crumina-icon">
+                  <use xlink:href="#search-icon"></use>
+              </svg>
+          </button>
+      </form>
+      </div>
+    </div>
+  </div>
+  <!-- fullwidth banner -->
+  <!-- featured items carousel -->
+  <div class="container section-padding overflow-hidden">
+    <div class="section-title-wrapper">
+      <div class="section-title">
+        <span class="gradient-text">Featured</span> Items
+      </div>
+      <div class="title-navigation">
+        <div class="featured-carousel-icon swiper-button-prev">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-left2-icon"></use>
+          </svg>
+        </div>
+        <div class="featured-carousel-icon swiper-button-next">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-right2-icon"></use>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="featured-carousel">
+      <div class="swiper-wrapper">
+        {% for item in featured_items %}
+        <div class="swiper-slide">
+          <div class="featured-item v5" data-slug="{{ item.slug }}">
+            <div class="featured-item-wrapper">
+              <div class="featured-item-content">
+                {% comment %} <div class="fav-counter">
+                  <svg class="crumina-icon">
+                    <use xlink:href="#heart-icon"></use>
+                  </svg>
+                  <span class="count">{{ item.likes }}</span>
+                </div> {% endcomment %}
+                <div class="featured-item-image">
+                  <a href="{% url 'digi_product' slug=item.slug %}" class="product-link">
+                    <!-- Use slug here -->
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" />
+                  </a>
+                </div>
+                <div class="featured-item-info">
+                  <div
+                    class="item-category {{item.category.color}}"
+                  >
+                    {{ item.category.name }}
+                  </div>
+                  <div class="title">
+                    <a href="{% url 'digi_product' slug=item.slug %}" class="product-link">{{ item.title }}</a>
+                    <!-- Use slug here -->
+                  </div>
+                  <div class="item-meta">
+                    <span class="avatar box-26">
+                      <a href="{% url 'digi_profile' item.seller.slug %}">
+                        <!-- Use seller's slug here -->
+                        <img
+                          src="{{ item.seller.profile_pic.url }}"
+                          alt="{{ item.seller.username }}"
+                        />
+                      </a>
+                      {% if item.seller.digi_is_verified %}
+                      <span class="verified"
+                        ><svg class="crumina-icon">
+                          <use xlink:href="#check-icon"></use></svg></span>
+                      {% endif %}
+                    </span>
+                    @{{ item.seller.username }}
+                  </div>
+                </div>
+              </div>
+              <div class="featured-item-post-content">
+                <div class="item-rating">
+                  {% for i in "12345" %} {% if i|add:"0" <= item.rating %}
+                  <span class="filled">
+                    <svg class="crumina-icon">
+                      <use xlink:href="#star2-icon"></use>
+                    </svg>
+                  </span>
+                  {% else %}
+                  <span>
+                    <svg class="crumina-icon">
+                      <use xlink:href="#star2-icon"></use>
+                    </svg>
+                  </span>
+                  {% endif %} {% endfor %}
+                </div>
+                <div class="item-price">
+                  {% if item.discounted_price > 0 %}
+                    <!-- Line-through the original price if there's a discount -->
+                    <span class="original-price">${{ item.price|floatformat:2 }}</span>
+                    <span class="discounted-price">${{ item.discounted_price|floatformat:2 }}</span>
+                  {% else %}
+                    <!-- Display the original price if no discount -->
+                    <span class="normal-price">${{ item.price|floatformat:2 }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- featured items carousel -->
+  <!--  items categories carousel -->
+  <div class="container section-padding">
+    <div class="section-title-wrapper">
+      <div class="section-title">
+        Browse <span class="gradient-text">Categories</span>
+      </div>
+      <div class="title-navigation">
+        <div class="items-categories-icon swiper-button-prev">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-left2-icon"></use>
+          </svg>
+        </div>
+        <div class="items-categories-icon swiper-button-next">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-right2-icon"></use>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="items-categories-carousel overflow-hidden">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <a href="{% url 'digi_explore' %}?category={{ categories.3.id }}">
+            <div class="category-card turquoise-gradient-diagonal">
+              <div
+                class="category-wrapper"
+                style="background-image: url({% static 'digi_prenair/img/content/categories/screens-1.png' %});">
+                <div class="category-content">
+                  <div class="category-title">{{ categories.3.name }}</div>
+                  <div class="category-meta">{{ categories.3.item_count }} Items</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="swiper-slide">
+          <a href="{% url 'digi_explore' %}?category={{ categories.1.id }}">
+            <div class="category-card purple-gradient-diagonal">
+              <div
+                class="category-wrapper"
+                style="background-image: url({% static 'digi_prenair/img/content/categories/screens-2.png' %});">
+                <div class="category-content">
+                  <div class="category-title">{{ categories.1.name }}</div>
+                  <div class="category-meta">{{ categories.1.item_count }} Items</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="swiper-slide">
+          <a href="{% url 'digi_explore' %}?category={{ categories.0.id }}">
+            <div class="category-card orange-gradient-diagonal">
+              <div
+                class="category-wrapper" style=" background-image: url({% static 'digi_prenair/img/content/categories/screens-2.png' %});">
+                <div class="category-content">
+                  <div class="category-title">{{ categories.0.name }}</div>
+                  <div class="category-meta">{{ categories.0.item_count }} Items</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="swiper-slide">
+          <a href="{% url 'digi_explore' %}?category={{ categories.2.id }}">
+            <div class="category-card green-gradient">
+              <div class="category-wrapper" style="background-image: url({% static 'digi_prenair/img/content/categories/screens-1.png' %});">
+                <div class="category-content">
+                  <div class="category-title">{{ categories.2.name }}</div>
+                  <div class="category-meta">{{ categories.2.item_count }} Items</div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--  items categories carousel -->
+  <!-- featured items grid -->
+  <div class="container section-padding">
+    <div class="section-title-wrapper">
+      <div class="section-title">
+        <span class="gradient-text">Newest</span> Items
+      </div>
+      <div class="all-items-link">
+        <a href="{% url "digi_explore" %}">Explore all Artworks</a>
+      </div>
+    </div>
+
+    <div class="featured-box">
+      <div class="featured-box-wrapper grid-4-columns">
+        {% for item in newest_items %}
+        <div class="featured-item v5" data-slug="{{ item.slug }}">
+          <div class="featured-item-wrapper">
+            <div class="featured-item-content">
+              {% comment %} <div class="fav-counter">
+                <svg class="crumina-icon">
+                  <use xlink:href="#heart-icon"></use>
+                </svg>
+                <span class="count">{{ item.likes }}</span>
+              </div> {% endcomment %}
+              <div class="featured-item-image">
+                <a href="{% url 'digi_product' slug=item.slug %}" class="product-link">
+                  {% if item.image %}
+                  <img src="{{ item.image.url }}" alt="{{ item.title }}" />
+                  {% endif %}
+                </a>
+              </div>
+              <div class="featured-item-info">
+                <div
+                  class="item-category {% if item.category.name == 'UI templates' %}ui-templates{% endif %} {% if item.category.name == 'Video tutorials' %}video-tutorials{% endif %} {% if item.category.name == 'Coded templates' %}coded-templates{% endif %} {% if item.category.name == 'Social graphics' %}social-graphics{% endif %}"
+                >
+                  {{ item.category.name }}
+                </div>
+                <div class="title">
+                  <a href="{% url 'digi_product' slug=item.slug %}" class="product-link">{{ item.title }}</a>
+                </div>
+                <div class="item-meta">
+                  <span class="avatar box-26">
+                    <a href="{% url 'digi_profile' slug=item.seller.slug %}">
+                      <img
+                        src="{{ item.seller.profile_pic.url }}"
+                        alt="{{ item.seller.username }}"
+                      />
+                    </a>
+                    {% if item.seller.digi_is_verified %}
+                    <span class="verified"
+                      ><svg class="crumina-icon">
+                        <use xlink:href="#check-icon"></use></svg></span>
+                    {% endif %}
+                  </span>
+                  @{{ item.seller.username }}
+                </div>
+              </div>
+            </div>
+            <div class="featured-item-post-content">
+              <div class="item-rating">
+                {% for i in "12345" %} {% if i|add:"0" <= item.rating %}
+                <span class="filled">
+                  <svg class="crumina-icon">
+                    <use xlink:href="#star2-icon"></use>
+                  </svg>
+                </span>
+                {% else %}
+                <span>
+                  <svg class="crumina-icon">
+                    <use xlink:href="#star2-icon"></use>
+                  </svg>
+                </span>
+                {% endif %} {% endfor %}
+              </div>
+              <div class="item-price">
+                {% if item.discounted_price > 0 %}
+                  <!-- Line-through the original price if there's a discount -->
+                  <span class="original-price">${{ item.price|floatformat:2 }}</span>
+                  <span class="discounted-price">${{ item.discounted_price|floatformat:2 }}</span>
+                {% else %}
+                  <!-- Display the original price if no discount -->
+                  <span class="normal-price">${{ item.price|floatformat:2 }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- featured items grid -->
+  <!-- featured sellers carousel -->
+  <div class="container section-padding">
+    <div class="section-title-wrapper">
+      <div class="section-title">
+        Featured <span class="gradient-text">Sellers</span>
+      </div>
+      <div class="title-navigation">
+        <div class="featured-sellers-icon swiper-button-prev">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-left2-icon"></use>
+          </svg>
+        </div>
+        <div class="featured-sellers-icon swiper-button-next">
+          <svg class="crumina-icon">
+            <use xlink:href="#arrow-right2-icon"></use>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="featured-sellers-carousel overflow-hidden">
+      <div class="swiper-wrapper">
+        {% for seller in featured_sellers %}
+        <div class="swiper-slide">
+          <div class="seller-card">
+            <div class="about-seller">
+              <div class="seller-info">
+                <div class="avatar box-64">
+                  <a href="{% url 'digi_profile' slug=seller.slug %}">
+                    <img
+                      src="{{ seller.profile_pic.url }}"
+                      alt="{{ seller.username }}"
+                    />
+                  </a>
+                  {% if seller.digi_is_verified %}
+                  <span class="verified">
+                    <svg class="crumina-icon">
+                      <use xlink:href="#check-icon"></use>
+                    </svg>
+                  </span>
+                  {% endif %}
+                </div>
+                <div class="seller-meta">
+                  <div class="title">{{ seller.username }}</div>
+                  <div class="meta">@{{ seller.username }}</div>
+                </div>
+              </div>
+              <div class="seller-stats">
+                <div class="seller-score">
+                  <div class="number title">{{ seller.products.count }}</div>
+                  <div class="label">Total Items</div>
+                </div>
+                <div class="seller-score">
+                  <div class="number title">{{ seller.digi_total_sales }}</div>
+                  <div class="label">Total Sales</div>
+                </div>
+                <div class="seller-score">
+                  <div class="number title">
+                    {{ seller.digi_average_rating }} / 5
+                  </div>
+                  <div class="label">Avg. Rating</div>
+                </div>
+              </div>
+            </div>
+            <div class="seller-products">
+              <div class="products-previews">
+                {% for product in seller.products.all|slice:":4" %}
+                <div class="preview-box">
+                  <a href="{% url 'digi_product' slug=product.slug %}" class="product-link">
+                    <img
+                      src="{{ product.image.url }}"
+                      alt="{{ product.title }}"
+                    />
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="more-link">
+                <a href="{% url 'digi_profile' slug=seller.slug %}">
+                  <svg class="crumina-icon">
+                    <use xlink:href="#dots-icon"></use>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <!-- featured sellers carousel -->
+  <!-- become seller block -->
+  <div class="section-small section-padding">
+    <div class="become-seller-block">
+      <img src="{% static "digi_prenair/img/content/become-seller.png" %}"
+      alt="">
+      <div class="text-content">
+        <div class="subtitle">JOIN OUR COMMUNITY!</div>
+        <div class="title">
+          Click
+          <span class="gradient-text"
+            ><a href="{% url "digi_become_seller" %}">Here</a></span
+          >
+          to <br />
+          Become a Seller!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'digi_prenair/partials/product_modal.html' %}
+
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("DOm Loaded in preview")
+    const searchInput = document.querySelector('.search-input-digi');
+    const previewDropdown = document.getElementById('searchPreview');
+    const previewResults = document.getElementById('previewResults');
+    let debounceTimer;
+
+    const debounce = (func, delay) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(func, delay);
+    };
+
+    const fetchResults = async (query) => {
+        console.log("Fetching results for:", query);
+        if (query.length < 2) {
+            previewDropdown.classList.remove('active');
+            return;
+        }
+
+        previewDropdown.classList.add('loading');
+        try {
+            const response = await fetch(`{% url 'product_search_api' %}?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            displayResults(data.results);
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+        }
+        previewDropdown.classList.remove('loading');
+    };
+
+    const displayResults = (results) => {
+    previewResults.innerHTML = '';
+    if (results.length === 0) {
+        previewResults.innerHTML = '<div class="no-results">No matching products found</div>';
+        previewDropdown.classList.add('active');
+        return;
+    }
+
+    // Limit to 8 results for better UX
+    const displayResults = results.slice(0, 8);
+    
+    displayResults.forEach(product => {
+        const productElement = document.createElement('a');
+        productElement.href = product.url;
+        productElement.className = 'preview-item product-link';
+        productElement.setAttribute('data-slug', product.slug);
+        productElement.innerHTML = `
+            <div class="preview-image">
+                <img src="${product.image}" alt="${product.title}">
+            </div>
+            <div class="preview-content">
+                <h4 class="preview-title">${product.title}</h4>
+                <p class="preview-description">${product.description}</p>
+                <div class="preview-pricing">
+                    ${product.discounted_price > 0 ? 
+                        `<span class="original-price">$${product.price}</span>
+                         <span class="discounted-price">$${product.discounted_price}</span>` :
+                        `<span class="normal-price">$${product.price}</span>`
+                    }
+                </div>
+            </div>
+        `;
+        previewResults.appendChild(productElement);
+    });
+    
+    // Add a subtle fade effect at the bottom when scrolled
+    if (results.length > 4) {
+        const fadeElement = document.createElement('div');
+        fadeElement.className = 'scroll-fade';
+        previewDropdown.appendChild(fadeElement);
+    }
+    
+    previewDropdown.classList.add('active');
+  };
+
+    searchInput.addEventListener('input', (e) => {
+        console.log("Input event triggered");
+        debounce(() => fetchResults(e.target.value.trim()), 300);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target)) {
+            previewDropdown.classList.remove('active');
+        }
+    });
+});
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchDropdown = document.querySelector(".search-dropdown");
+    const searchParamButton = document.querySelector(".search-params");
+    const searchParamTitle = document.querySelector(".search-param-title");
+    const hiddenParamInput = document.querySelector(".main-search-params");
+
+    // Toggle dropdown menu
+    searchParamButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        searchDropdown.classList.toggle("open");
+    });
+
+    // Handle selection
+    searchDropdown.addEventListener("click", function (e) {
+        if (e.target && e.target.tagName === "LI") {
+            const selectedCategory = e.target.getAttribute("data-param");
+            const selectedCategoryText = e.target.innerText;
+
+            // Update button text and hidden input value
+            searchParamTitle.innerText = selectedCategoryText;
+            hiddenParamInput.value = selectedCategory;
+
+            // Close the dropdown
+            searchDropdown.classList.remove("open");
+        }
+    });
+
+    // Close dropdown if clicked outside
+    document.addEventListener("click", function (e) {
+        if (!searchParamButton.contains(e.target) && !searchDropdown.contains(e.target)) {
+            searchDropdown.classList.remove("open");
+        }
+    });
+});
+
+
+  </script>
+
+{% endblock %}
+
+

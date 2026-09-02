@@ -1,0 +1,10 @@
+{% extends "profiles/emails_subscription/subscription_base.html" %}
+{% block content %}
+    <h2>Your {{ plan_name }} Subscription Canceled</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Your {{ plan_name }} subscription has been canceled. We're sorry to see you go!</p>
+    <p>If this was a mistake or you'd like to reactivate, you can do so from your account.</p>
+    <div class="button-container">
+        <a href="{% url 'billings' %}" class="button">Reactivate Subscription</a>
+    </div>
+{% endblock %}

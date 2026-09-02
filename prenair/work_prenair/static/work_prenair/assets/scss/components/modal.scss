@@ -1,0 +1,150 @@
+/* modal */
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    visibility: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    width: 100vw;
+    height: 100vh;
+    background: rgba($color: #000000, $alpha: 0.6);
+    opacity: 0;
+    transition: all ease 0.4s;
+
+    &:has(>.open) {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    &:has(>.sidebar.open),
+    &:has(>.menu_dashboard.open) {
+
+        .sidebar,
+        .menu_dashboard {
+            transform: translateX(0);
+        }
+    }
+
+    &:hover {
+        cursor: not-allowed;
+    }
+
+    &_item {
+        display: none;
+        cursor: default;
+
+        &.open {
+            display: block;
+        }
+    }
+}
+
+/* modal_apply */
+.modal_apply {
+    .delivery {
+        .minus_btn {
+            &.disabled {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+        }
+
+        input {
+            max-width: 34px;
+            text-align: center;
+            field-sizing: content;
+        }
+    }
+}
+
+/* sidebar */
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: default;
+    transform: translateX(-100%);
+    transition: all ease 0.3s;
+
+    &.-relative {
+        position: relative;
+        transform: unset;
+    }
+
+    &_inner,
+    .block_filter {
+        overflow-x: hidden;
+        max-height: calc(100vh - 68px);
+
+        &::-webkit-scrollbar {
+            width: 8px;
+            background-color: #dddddd;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: #afafaf;
+            border-radius: 8px;
+        }
+
+        &.full-height {
+            max-height: 100%;
+        }
+
+        &.-relative,
+        &.overflow-unset {
+            overflow: unset;
+        }
+    }
+
+    .block_btn {
+        box-shadow: 0px 5px 18px 5px rgba(64, 72, 87, 0.15);
+    }
+}
+
+/* menu_dashboard */
+.menu_dashboard {
+    &.-relative {
+        position: relative;
+        top: unset;
+        left: unset;
+        right: unset;
+        bottom: unset;
+        transform: translate(0);
+    }
+
+    &.-modal {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        transition: all ease 0.3s;
+    }
+
+    .list_link {
+        .link {
+            &.active {
+                background-color: var(--background);
+
+                span {
+                    color: var(--primary);
+                }
+            }
+        }
+    }
+}
+
+/* modal_chat */
+.modal_chat {
+    .chat_content {
+        max-height: 500px;
+
+        @media (max-height: 800px) {
+            max-height: calc(90vh - 10rem);
+        }
+    }
+}

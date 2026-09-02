@@ -1,0 +1,172 @@
+{% extends "home/partials/base.html" %}
+{% load static %}
+
+{% block title %}FirePrenair - Cookies Policy{% endblock %}
+
+{% block content %}
+
+<style>
+    .policy-content {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.policy-header {
+    margin-bottom: 40px;
+}
+
+.policy-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.policy-intro {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.policy-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.section-list {
+    list-style: disc;
+    margin-left: 20px;
+    color: #555;
+}
+
+.nested-list {
+    list-style: circle;
+    margin-left: 40px;
+}
+
+p{
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.hero-section {
+        position: relative;
+        height: 400px;
+        background: url('{% static 'home/images/footer/cookies.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+</style>
+
+<!-- Cookies Policy Content -->
+<div class="page-content" style="background: url({% static 'home/images/banner.png' %});">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="policy-content">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Cookies Policy</h1>
+                            <p class="hero-text">
+                                FirePrenair uses cookies and similar tracking technologies to enhance user experience, improve platform performance, and provide personalized services. This Cookies Policy explains what cookies are, how we use them, and how users can manage their preferences.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- What Are Cookies -->
+                    <div class="policy-section">
+                        <h3 class="section-title">1. What Are Cookies?</h3>
+                        <p>Cookies are small text files stored on your device (computer, tablet, or smartphone) when you visit a website. These files help websites remember user actions and preferences, enabling seamless navigation and functionality.</p>
+                    </div>
+
+                    <!-- Types of Cookies We Use -->
+                    <div class="policy-section">
+                        <h3 class="section-title">2. Types of Cookies We Use</h3>
+                        <ul class="section-list">
+                            <li><strong>Essential Cookies:</strong> These cookies are necessary for the platform to function properly. Without them, key features such as login, account management, and secure transactions may not work.</li>
+                            <li><strong>Performance Cookies:</strong> These cookies collect information about how users interact with FirePrenair, helping us improve the platform’s performance. For example, they track pages visited, time spent, and errors encountered.</li>
+                            <li><strong>Functionality Cookies:</strong> These cookies remember user preferences (e.g., language, currency, or layout) to provide a customized experience.</li>
+                            <li><strong>Advertising and Marketing Cookies:</strong> These cookies are used to deliver personalized ads and measure the effectiveness of marketing campaigns. They may track your activity across different websites and apps.</li>
+                            <li><strong>Analytics Cookies:</strong> Used to analyze user behavior and trends on the platform, often through tools like Google Analytics, to optimize features and content.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Why We Use Cookies -->
+                    <div class="policy-section">
+                        <h3 class="section-title">3. Why We Use Cookies</h3>
+                        <ul class="section-list">
+                            <li>Improve platform usability and performance.</li>
+                            <li>Provide personalized recommendations for services, courses, and digital products.</li>
+                            <li>Enable secure login and transaction processes.</li>
+                            <li>Analyze platform traffic and user behavior to enhance features.</li>
+                            <li>Show relevant advertisements and promotions to users.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Third-Party Cookies -->
+                    <div class="policy-section">
+                        <h3 class="section-title">4. Third-Party Cookies</h3>
+                        <p>Some cookies on FirePrenair may be set by third-party providers, such as:</p>
+                        <ul class="section-list">
+                            <li><strong>Payment Processors:</strong> Cookies from services like Payoneer or Stripe for secure transactions.</li>
+                            <li><strong>Analytics Providers:</strong> Cookies from tools like Google Analytics for data insights.</li>
+                            <li><strong>Advertising Platforms:</strong> Cookies from partners like Google Ads or Facebook to deliver tailored marketing campaigns.</li>
+                        </ul>
+                        <p>FirePrenair does not control these third-party cookies and recommends reviewing their policies for more information.</p>
+                    </div>
+
+                    <!-- Managing Cookie Preferences -->
+                    <div class="policy-section">
+                        <h3 class="section-title">5. Managing Cookie Preferences</h3>
+                        <ul class="section-list">
+                            <li><strong>Cookie Settings on FirePrenair:</strong> Users can manage cookie preferences via the “Cookie Settings” link at the bottom of our website. This allows you to accept or decline specific types of cookies.</li>
+                            <li><strong>Browser Settings:</strong> Most web browsers allow you to block or delete cookies through their settings. Keep in mind that disabling cookies may affect platform functionality.</li>
+                            <li><strong>Do Not Track (DNT):</strong> FirePrenair supports DNT signals where applicable, ensuring compliance with user privacy preferences.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Data Protection and Security -->
+                    <div class="policy-section">
+                        <h3 class="section-title">6. Data Protection and Security</h3>
+                        <ul class="section-list">
+                            <li>FirePrenair ensures that cookies do not store sensitive personal information like passwords or payment details.</li>
+                            <li>Data collected through cookies is encrypted and used solely for improving the platform’s functionality and user experience.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Updates to the Cookies Policy -->
+                    <div class="policy-section">
+                        <h3 class="section-title">7. Updates to the Cookies Policy</h3>
+                        <p>FirePrenair may update this policy from time to time to reflect changes in technology, regulations, or platform practices. Users will be notified of significant updates via email or a notice on the platform.</p>
+                    </div>
+
+                    <!-- Contact Us -->
+                    <div class="policy-section">
+                        <h3 class="section-title">8. Contact Us</h3>
+                        <p>If you have questions about this Cookies Policy or how FirePrenair uses cookies, please contact us:</p>
+                        <ul class="section-list">
+                            <li>Email: <a href="mailto:support@fireprenair.com">support@fireprenair.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Cookies Policy Content -->
+
+{% endblock content %}

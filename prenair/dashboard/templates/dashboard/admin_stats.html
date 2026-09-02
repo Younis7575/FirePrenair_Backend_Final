@@ -1,0 +1,174 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Fireprenair | Admin Stats{% endblock title %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'work_prenair/assets/css/apexcharts.css' %}" />
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="lg:overflow-hidden">
+
+    {% include "dashboard/partials/header.html" %}
+
+    <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+        {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+        <div class="dashboard_earning scrollbar_custom w-full bg-surface">
+            <div class="container h-fit lg:pt-15 lg:pb-30 max-lg:py-12 max-sm:py-8">
+                <button class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden" data-type="menu_dashboard">
+                    <span class="ph ph-squares-four ph-duotone text-xl"></span>
+                    <strong class="text-button">Menu</strong>
+                </button>
+                <h4 class="heading4 max-lg:mt-3">General Statistics</h4>
+                
+                <!-- General Statistics -->
+                <ul class="list_counter grid xl:grid-cols-4 grid-cols-2 xl:gap-6 gap-4 mt-7.5">
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-users ph-duotone text-blue-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Users</span>
+                            <strong class="heading4 block">{{ total_users }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-currency-dollar ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Withdraw Requests Completed</span>
+                            <strong class="heading4 block">{{ total_withdraw_requests }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-currency-dollar ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Withdraw Requests Pending</span>
+                            <strong class="heading4 block">{{ total_withdraw_requests_pending }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-currency-dollar ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Amount Withdrawn</span>
+                            <strong class="heading4 block">{{ total_amount_withdrawn }}</strong>
+                        </div>
+                    </li>
+                </ul>
+        
+                <!-- Digiprenair -->
+                <h5 class="heading5 mt-10">Digiprenair</h5>
+                <ul class="list_counter grid xl:grid-cols-4 grid-cols-2 xl:gap-6 gap-4 mt-7.5">
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-storefront ph-duotone text-purple-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Sellers</span>
+                            <strong class="heading4 block">{{ total_digi_sellers }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-coda-logo ph-duotone text-yellow-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Products</span>
+                            <strong class="heading4 block">{{ total_products }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-basket ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Sellings</span>
+                            <strong class="heading4 block">{{ total_orders }}</strong>
+                        </div>
+                    </li>
+                </ul>
+        
+                <!-- Eduprenair -->
+                <h5 class="heading5 mt-10">Eduprenair</h5>
+                <ul class="list_counter grid xl:grid-cols-4 grid-cols-2 xl:gap-6 gap-4 mt-7.5">
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-chalkboard-teacher ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Instructors</span>
+                            <strong class="heading4 block">{{ total_instructors }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-books ph-duotone text-blue-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Courses</span>
+                            <strong class="heading4 block">{{ total_courses }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-graduation-cap ph-duotone text-purple-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Enrollments</span>
+                            <strong class="heading4 block">{{ total_enrollments }}</strong>
+                        </div>
+                    </li>
+                </ul>
+        
+                <!-- Commuprenair -->
+                <h5 class="heading5 mt-10">Commuprenair</h5>
+                <ul class="list_counter grid xl:grid-cols-4 grid-cols-2 xl:gap-6 gap-4 mt-7.5">
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-chat-dots ph-duotone text-pink-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Posts</span>
+                            <strong class="heading4 block">{{ total_posts }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-users-three ph-duotone text-blue-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Groups</span>
+                            <strong class="heading4 block">{{ total_groups }}</strong>
+                        </div>
+                    </li>
+                </ul>
+        
+                <!-- Workprenair -->
+                <h5 class="heading5 mt-10">Workprenair</h5>
+                <ul class="list_counter grid xl:grid-cols-4 grid-cols-2 xl:gap-6 gap-4 mt-7.5">
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-briefcase ph-duotone text-gray-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Sellers</span>
+                            <strong class="heading4 block">{{ total_work_sellers }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-files ph-duotone text-yellow-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Gigs</span>
+                            <strong class="heading4 block">{{ total_gigs }}</strong>
+                        </div>
+                    </li>
+                    <li class="item flex items-center gap-4 p-4 rounded-lg shadow-sm bg-white">
+                        <span class="ph ph-handshake ph-duotone text-green-600 text-3xl"></span>
+                        <div>
+                            <span class="text-gray-600">Total Work Orders</span>
+                            <strong class="heading4 block">{{ total_work_orders }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        
+            <div class="lg:fixed bottom-0 left-0 z-[1] lg:pl-[280px] flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md">
+                <span class="copyright caption1 text-secondary">©{% now "Y" %} Fireprenair. All Rights Reserved</span>
+            </div>
+        </div>        
+    </div>
+
+    {% include 'work_prenair/partials/mb-menu.html' %}
+
+{% endblock content %}
+
+
+
+
+
+{% block extra_javascript %}
+
+<script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+
+{% endblock extra_javascript %}

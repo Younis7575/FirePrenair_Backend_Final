@@ -1,0 +1,2331 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireprenair | {{user_website.name}} Editor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/misc/fireprenair_logo.png' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: rgb(219, 218, 218);
+            color: black;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img{
+            width: 150px;
+        }
+
+        .website-input {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            width: 200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .website-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #ff6f61;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: #da6c62;
+            transform: translateY(-1px);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        }
+
+        .save-btn:hover {
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        /* Main Editor Container */
+        .editor-container {
+            display: flex;
+            height: calc(100vh - 64px);
+            background: white;
+        }
+
+        /* Left Sidebar */
+        .left-sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .sidebar-tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .sidebar-tab:hover:not(.active) {
+            background: #f3f4f6;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* Block Categories */
+        .block-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .block-item {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .block-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .block-item:active {
+            cursor: grabbing;
+        }
+
+        .block-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Main Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        /* Canvas Toolbar */
+        .canvas-toolbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .device-selector {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .device-btn {
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .device-btn.active {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #667eea;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .zoom-btn {
+            padding: 6px 10px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .zoom-btn:hover {
+            background: white;
+        }
+
+        .zoom-display {
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Canvas */
+        #gjs {
+            flex: 1;
+            border: none;
+            background: #f8fafc;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 300px;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+        }
+
+        .properties-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .properties-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Template Library */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .template-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .template-preview {
+            height: 120px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #9ca3af;
+        }
+
+        .template-info {
+            padding: 12px;
+        }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .template-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        /* Assets Panel */
+        .asset-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .asset-upload:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .asset-item {
+            aspect-ratio: 1;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .asset-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .left-sidebar {
+                width: 250px;
+            }
+            .right-sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            .left-sidebar, .right-sidebar {
+                width: 100%;
+                height: 200px;
+            }
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: all 0.4s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #22c55e;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .notification.warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border-radius: 8px;
+            padding: 8px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1002;
+            min-width: 180px;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .context-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 4px 0;
+        }
+
+            .modal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            z-index: 9999;
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            min-width: 450px;
+            max-width: 90vw;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transform: scale(0.7) translateY(100px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .close {
+            position: absolute;
+            right: 6px;
+            top: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(30, 58, 138, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            color: #1e3a8a;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .close:hover {
+            background: rgba(30, 58, 138, 0.2);
+            transform: scale(1.1);
+        }
+
+        .modal-header {
+            margin-bottom: 32px;
+        }
+
+        .modal h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal p {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .input-container {
+            position: relative;
+            margin: 24px 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #ff6f61;
+            box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.1);
+        }
+
+        .subdomain-input {
+            width: 100%;
+            padding: 20px 24px;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .subdomain-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .domain-suffix {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(30, 58, 138, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .publish-btn {
+            background: linear-gradient(135deg, #ff6f61, #ff8a80);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(255, 111, 97, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .publish-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .publish-btn:hover::before {
+            left: 100%;
+        }
+
+        .publish-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255, 111, 97, 0.4);
+        }
+
+        .publish-btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 500;
+            min-height: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .message a {
+            color: #16a34a;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .message a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            margin: 24px 0;
+            gap: 16px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 16px;
+            background: rgba(30, 58, 138, 0.05);
+            border-radius: 12px;
+            flex: 1;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #ff6f61;
+        }
+
+        .feature-text {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .tabs {
+    display: flex;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #64748b;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab.active {
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #ff6f61;
+    border-radius: 3px 3px 0 0;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+.tab-content-domain {
+    display: none;
+}
+
+.tab-content-domain.active {
+    display: block;
+}
+
+
+.save-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.save-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    z-index: 1001;
+}
+
+.save-popup h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.4em;
+}
+
+.save-popup p {
+    margin: 0 0 25px 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.popup-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-save {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #218838;
+}
+
+.btn-discard {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-discard:hover {
+    background-color: #c82333;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.product-item {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.product-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-item .placeholder-image {
+    width: 100%;
+    height: 100px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.product-info {
+    padding: 8px;
+    text-align: center;
+}
+
+.product-title {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-price {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1e3a8a;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+        @media (max-width: 640px) {
+            .modal-content {
+                min-width: 320px;
+                padding: 32px 24px;
+            }
+            
+            .features {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="logo">
+                <a href="/dashboard"><img src="{% static 'home/images/fireprenair_logo_no_bg.png' %}" alt=""></a>
+            </div>
+            <!-- <input type="text" class="website-input" id="website-name" placeholder="Enter website name..."> -->
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn" onclick="showSavePopup()">
+                <i class="fas fa-arrow-left"></i>
+                Go To Dashboard
+            </button>
+            <button class="nav-btn" onclick="previewWebsite()">
+                <i class="fas fa-eye"></i>
+                Preview
+            </button>
+            <button class="nav-btn" onclick="exportWebsite()">
+                <i class="fas fa-download"></i>
+                Export
+            </button>
+            <button class="nav-btn" onclick="publishWebsite()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Publish
+            </button>
+            <button class="nav-btn save-btn" id="save-btn" onclick="saveWebsite()">
+                <i class="fas fa-save"></i>
+                Save
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Editor Container -->
+    <div class="editor-container">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="sidebar-tabs">
+                <!-- <div class="sidebar-tab active" onclick="switchTab('blocks')">
+                    <i class="fas fa-th-large"></i>
+                    Blocks
+                </div> -->
+                <!-- <div class="sidebar-tab" onclick="switchTab('templates')">
+                    <i class="fas fa-layer-group"></i>
+                    Templates
+                </div> -->
+                <div class="sidebar-tab" onclick="switchTabSide('assets')">
+                    <i class="fas fa-images"></i>
+                    Assets
+                </div>
+                <div class="sidebar-tab" onclick="switchTabSide('products')">
+                    <i class="fas fa-box"></i>
+                    Products
+                </div>
+
+            </div>
+            <div class="sidebar-content" id="sidebar-content">
+                <!-- Blocks Tab Content -->
+                <!-- <div id="blocks-tab">
+                    <div class="block-category">
+                        <div class="category-title">
+                            <i class="fas fa-cube"></i>
+                            Basic Elements
+                        </div>
+                        <div class="block-grid">
+                            <div class="block-item" draggable="true" data-block="text">
+                                <i class="fas fa-font block-icon"></i>
+                                Text
+                            </div>
+                            <div class="block-item" draggable="true" data-block="heading">
+                                <i class="fas fa-heading block-icon"></i>
+                                Heading
+                            </div>
+                            <div class="block-item" draggable="true" data-block="image">
+                                <i class="fas fa-image block-icon"></i>
+                                Image
+                            </div>
+                            <div class="block-item" draggable="true" data-block="button">
+                                <i class="fas fa-mouse-pointer block-icon"></i>
+                                Button
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="block-category">
+                        <div class="category-title">
+                            <i class="fas fa-th"></i>
+                            Layout
+                        </div>
+                        <div class="block-grid">
+                            <div class="block-item" draggable="true" data-block="container">
+                                <i class="fas fa-square block-icon"></i>
+                                Container
+                            </div>
+                            <div class="block-item" draggable="true" data-block="row">
+                                <i class="fas fa-columns block-icon"></i>
+                                Row
+                            </div>
+                            <div class="block-item" draggable="true" data-block="column">
+                                <i class="fas fa-grip-lines-vertical block-icon"></i>
+                                Column
+                            </div>
+                            <div class="block-item" draggable="true" data-block="divider">
+                                <i class="fas fa-minus block-icon"></i>
+                                Divider
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="block-category">
+                        <div class="category-title">
+                            <i class="fas fa-puzzle-piece"></i>
+                            Components
+                        </div>
+                        <div class="block-grid">
+                            <div class="block-item" draggable="true" data-block="navbar">
+                                <i class="fas fa-bars block-icon"></i>
+                                Navbar
+                            </div>
+                            <div class="block-item" draggable="true" data-block="hero">
+                                <i class="fas fa-star block-icon"></i>
+                                Hero
+                            </div>
+                            <div class="block-item" draggable="true" data-block="card">
+                                <i class="fas fa-id-card block-icon"></i>
+                                Card
+                            </div>
+                            <div class="block-item" draggable="true" data-block="footer">
+                                <i class="fas fa-shoe-prints block-icon"></i>
+                                Footer
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="block-category">
+                        <div class="category-title">
+                            <i class="fas fa-edit"></i>
+                            Forms
+                        </div>
+                        <div class="block-grid">
+                            <div class="block-item" draggable="true" data-block="input">
+                                <i class="fas fa-keyboard block-icon"></i>
+                                Input
+                            </div>
+                            <div class="block-item" draggable="true" data-block="textarea">
+                                <i class="fas fa-align-left block-icon"></i>
+                                Textarea
+                            </div>
+                            <div class="block-item" draggable="true" data-block="select">
+                                <i class="fas fa-list block-icon"></i>
+                                Select
+                            </div>
+                            <div class="block-item" draggable="true" data-block="checkbox">
+                                <i class="fas fa-check-square block-icon"></i>
+                                Checkbox
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Assets Tab Content -->
+                <div id="assets-tab">
+                    <div class="asset-upload" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <div style="font-weight: 600; margin-bottom: 5px;">Upload Assets</div>
+                        <div style="font-size: 12px; color: #6b7280;">Drag files here or click to browse</div>
+                        <input type="file" id="file-input" multiple accept="image/*,video/*" style="display: none;">
+                    </div>
+                    <div class="asset-grid" id="asset-grid">
+                        <!-- Assets will be populated here -->
+                    </div>
+                </div>
+                <div id="products-tab" style="display: none;">
+    <div class="product-grid" id="product-grid">
+        {% for product in products %}
+        <div class="product-item" 
+             data-id="{{ product.id }}"
+             data-type="{{ product_type }}"
+             data-title="{{ product.title }}"
+             {% if product.image %}data-image="{{ product.image.url }}"{% endif %}
+             data-price="{{ product.price }}"
+             onclick="insertProduct(this)">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.title }}" style="width: 100%; height: 100px; object-fit: contain;">
+            {% else %}
+            <div class="placeholder-image" style="width: 100%; height: 100px; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-image" style="font-size: 24px; color: #9ca3af;"></i>
+            </div>
+            {% endif %}
+            <div class="product-info" style="padding: 8px; text-align: center;">
+                <div class="product-title" style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.title }}</div>
+                <div class="product-price" style="font-size: 14px; font-weight: bold; color: #1e3a8a;">${{ product.price }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <p style="text-align: center; padding: 20px; color: #6b7280;">No products available.</p>
+        {% endfor %}
+    </div>
+</div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-area">
+            <div class="canvas-toolbar">
+                <div class="toolbar-left">
+                    <div class="device-selector">
+                        <button class="device-btn active" onclick="setDevice('desktop')">
+                            <i class="fas fa-desktop"></i>
+                        </button>
+                        <button class="device-btn" onclick="setDevice('tablet')">
+                            <i class="fas fa-tablet-alt"></i>
+                        </button>
+                        <button class="device-btn" onclick="setDevice('mobile')">
+                            <i class="fas fa-mobile-alt"></i>
+                        </button>
+                    </div>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <div class="zoom-display" id="zoom-display">100%</div>
+                        <button class="zoom-btn" onclick="zoomIn()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="nav-btn" onclick="toggleFullscreen()">
+                        <i class="fas fa-expand"></i>
+                        Fullscreen
+                    </button>
+                </div>
+            </div>
+            <div id="gjs"></div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="properties-header">
+                <div class="properties-title">
+                    <i class="fas fa-cog"></i>
+                    Properties
+                </div>
+            </div>
+            <div class="properties-content" id="properties-content">
+                <div style="text-align: center; color: #6b7280; padding: 40px 20px;">
+                    <i class="fas fa-mouse-pointer" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                    Select an element to edit its properties
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" onclick="contextAction('copy')">
+            <i class="fas fa-copy"></i>
+            Copy
+        </div>
+        <div class="context-menu-item" onclick="contextAction('paste')">
+            <i class="fas fa-paste"></i>
+            Paste
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="contextAction('duplicate')">
+            <i class="fas fa-clone"></i>
+            Duplicate
+        </div>
+        <div class="context-menu-item" onclick="contextAction('delete')">
+            <i class="fas fa-trash"></i>
+            Delete
+        </div>
+    </div>
+
+
+    <div id="publishModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="togglePublishModal()">×</button>
+            <div class="tabs">
+                <button class="tab active" data-tab="subdomain">Fireprenair Subdomain</button>
+                <button class="tab" data-tab="custom-domain">Custom Domain</button>
+            </div>
+    
+            <!-- Subdomain Tab -->
+            <div id="subdomain" class="tab-content-domain active">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        {% if user_website.subdomain %}
+                        <input type="text" id="subdomain-input" class="subdomain-input" value="{{ user_website.subdomain }}">
+                        {% else %}
+                        <input type="text" id="subdomain-input" class="subdomain-input" placeholder="yoeur-awesome-site">
+                        {% endif %}
+                        <span class="domain-suffix">.fireprenair.com</span>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="custom-domain" class="tab-content-domain">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        {% if user_website.custom_domain %} 
+                        <input type="text" id="custom-domain-input" class="subdomain-input" value="{{ user_website.custom_domain }}">
+                        {% else %}
+                        <input type="text" id="custom-domain-input" class="subdomain-input" placeholder="example.com">
+                        {% endif %}
+                    </div>
+                </div>
+    
+                <div class="dns-info"
+                    style="display: none; margin-top: 20px; background: rgba(30, 58, 138, 0.05); border-radius: 12px; padding: 16px;">
+                    <h3 style="margin-top: 0; color: #1e3a8a;">DNS Configuration Required</h3>
+                    <p>Add this A record to your domain's DNS settings:</p>
+                    <div class="dns-record"
+                        style="background: white; padding: 12px; border-radius: 8px; font-family: monospace;">
+                        Type: <span id="record-type">A</span> |
+                        Host: <span id="record-host">@</span> |
+                        Value: <span id="record-value">3.21.28.122</span>
+                    </div>
+                    <p style="font-size: 14px; margin-top: 10px; color: #64748b;">
+                        <i class="fas fa-info-circle"></i> Changes may take up to 24 hours to propagate
+                    </p>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h2>Launch Your Website</h2>
+                <p>Choose your perfect subdomain and go live instantly</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text">Instant Deploy</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">SSL Secured</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-text">Global CDN</div>
+            </div>
+        </div>
+        
+        <!-- <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="subdomain-input" class="subdomain-input" placeholder="your-awesome-site">
+                <span class="domain-suffix">.fireprenair.com</span>
+            </div>
+        </div> -->
+        
+        <button class="publish-btn" onclick="submitPublish()">
+            <span id="btn-text">Publish Now</span>
+        </button>
+        
+        <div id="publish-message" class="message"></div>
+    </div>
+</div>
+
+<div id="savePopupOverlay" class="save-popup-overlay">
+    <div class="save-popup">
+        <h3><i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i> Save Your Work?</h3>
+        <p>You have unsaved changes. Would you like to save your website before going to the dashboard?</p>
+        <div class="popup-buttons">
+            <button class="popup-btn btn-save" onclick="saveAndRedirect()">
+                <i class="fas fa-save"></i> Save & Go
+            </button>
+            <button class="popup-btn btn-discard" onclick="discardAndRedirect()">
+                <i class="fas fa-trash"></i> Discard Changes
+            </button>
+            <button class="popup-btn btn-cancel" onclick="hidePopup()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage"></script>
+    <script>
+        // Global variables
+        let editor;
+        let currentZoom = 100;
+        let currentDevice = 'desktop';
+        let selectedElement = null;
+        const websiteID = "{{ user_website.id }}"; // Django template variable for website ID
+        const csrfToken = "{{ csrf_token }}"; // Django CSRF token
+
+        // Initialize the editor
+        function initEditor() {
+            editor = grapesjs.init({
+                container: '#gjs',
+                plugins: [
+                    'gjs-blocks-basic',
+                    'gjs-preset-webpage'
+                ],
+                pluginsOpts: {
+                    'gjs-blocks-basic': { flexGrid: true },
+                    'gjs-preset-webpage': {
+                        modalImportTitle: 'Import Template',
+                        modalImportLabel: '<div style="margin-bottom: 10px; font-size: 13px;">Paste here your HTML/CSS and click Import</div>',
+                        modalImportContent: function(editor) {
+                            return editor.getHtml() + '<style>' + editor.getCss() + '</style>';
+                        }
+                    }
+                },
+                storageManager: false,
+                deviceManager: {
+                    devices: [
+                        {
+                            name: 'Desktop',
+                            width: '',
+                        },
+                        {
+                            name: 'Tablet',
+                            width: '768px',
+                            widthMedia: '992px',
+                        },
+                        {
+                            name: 'Mobile',
+                            width: '320px',
+                            widthMedia: '768px',
+                        }
+                    ]
+                },
+                canvas: {
+                    styles: [
+                        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+                    ]
+                }
+            });
+
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load template dynamically
+            loadDynamicTemplate();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Element selection
+            editor.on('component:selected', (component) => {
+                selectedElement = component;
+                updatePropertiesPanel(component);
+            });
+
+            editor.on('component:deselected', () => {
+                selectedElement = null;
+                clearPropertiesPanel();
+            });
+
+            // Auto-save functionality
+            let saveTimeout;
+            editor.on('component:update', () => {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(autoSave, 2000);
+            });
+
+            // Context menu
+            document.addEventListener('contextmenu', handleContextMenu);
+            document.addEventListener('click', hideContextMenu);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+
+        // Load template dynamically from Django backend
+        function loadDynamicTemplate() {
+            fetch(`/dashboard/get_user_website/${websiteID}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.html) {
+                    editor.setComponents(data.html);
+                    showNotification('Template loaded successfully!', 'success');
+                } else {
+                    showNotification('Failed to load template!', 'error');
+                    loadDefaultTemplate(); // Fallback to default template
+                }
+            })
+            .catch(error => {
+                console.error('Error loading template:', error);
+                showNotification('Error loading template!', 'error');
+                loadDefaultTemplate();
+            });
+        }
+
+        // Load default template (fallback)
+        function loadDefaultTemplate() {
+            const defaultHTML = `
+                <div class="container">
+                    <header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 0; text-align: center;">
+                        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Welcome to Your Website</h1>
+                        <p style="font-size: 1.2rem; opacity: 0.9;">Create something amazing with our professional web builder</p>
+                        <button style="background: #fff; color: #667eea; padding: 12px 30px; border: none; border-radius: 25px; font-weight: bold; margin-top: 20px; cursor: pointer;">Get Started</button>
+                    </header>
+                    
+                    <section style="padding: 80px 0;">
+                        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+                            <div style="text-align: center; margin-bottom: 60px;">
+                                <h2 style="font-size: 2.5rem; margin-bottom: 1rem; color: #374151;">Features</h2>
+                                <p style="font-size: 1.1rem; color: #6b7280;">Everything you need to build professional websites</p>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                                <div style="text-align: center; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 3rem; color: #667eea; margin-bottom: 20px;">🎨</div>
+                                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #374151;">Drag & Drop</h3>
+                                    <p style="color: #6b7280;">Intuitive drag-and-drop interface for easy website building</p>
+                                </div>
+                                <div style="text-align: center; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 3rem; color: #667eea; margin-bottom: 20px;">📱</div>
+                                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #374151;">Responsive</h3>
+                                    <p style="color: #6b7280;">Your website will look perfect on all devices</p>
+                                </div>
+                                <div style="text-align: center; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 3rem; color: #667eea; margin-bottom: 20px;">⚡</div>
+                                    <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #374151;">Fast</h3>
+                                    <p style="color: #6b7280;">Optimized for speed and performance</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <footer style="background: #374151; color: white; padding: 40px 0; margin-top: 80px;">
+                        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; text-align: center;">
+                            <p>© 2025 Your Website. All rights reserved.</p>
+                        </div>
+                    </footer>
+                </div>
+            `;
+            editor.setComponents(defaultHTML);
+        }
+
+        // Tab switching
+        function switchTabSide(tabName) {
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('[id$="-tab"]').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabName + '-tab').style.display = 'block';
+        }
+
+        function insertProduct(productItem) {
+            const id = productItem.dataset.id;
+            const type = productItem.dataset.type;
+            const title = productItem.dataset.title;
+            const image = productItem.dataset.image;
+            const price = productItem.dataset.price;
+                
+            // Create product card HTML
+            let productCard = `
+                <div class="product-card" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 300px; margin: 20px auto;">
+                    <div style="height: 150px; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+            `;
+                    
+            if (image) {
+                productCard += `<img src="${image}" alt="${title}" style="max-width: 100%; max-height: 100%;">`;
+            } else {
+                productCard += `<div style="text-align: center; color: #9ca3af;"><i class="fas fa-image" style="font-size: 48px;"></i></div>`;
+            }
+            
+            productCard += `
+                    </div>
+                    <div style="padding: 15px;">
+                        <h3 style="margin: 0 0 8px; font-size: 16px; color: #374151;">${title}</h3>
+                        <div style="font-weight: bold; color: #1e3a8a;">$${price}</div>
+                        <button style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 12px; cursor: pointer;">View Details</button>
+                    </div>
+                </div>
+            `;
+            
+            // Insert into editor
+            const selected = editor.getSelected();
+            if (selected) {
+                selected.append(productCard);
+            } else {
+                editor.getWrapper().append(productCard);
+            }
+            
+            showNotification('Product added to page!', 'success');
+        }
+
+        // Device switching
+        function setDevice(device) {
+            currentDevice = device;
+            document.querySelectorAll('.device-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            const deviceMap = {
+                'desktop': 'Desktop',
+                'tablet': 'Tablet',
+                'mobile': 'Mobile'
+            };
+            editor.setDevice(deviceMap[device]);
+        }
+
+        // Zoom controls
+        function zoomIn() {
+            if (currentZoom < 200) {
+                currentZoom += 25;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > 25) {
+                currentZoom -= 25;
+                updateZoom();
+            }
+        }
+
+        function updateZoom() {
+            const canvas = editor.Canvas.getFrameEl();
+            if (canvas) {
+                canvas.style.transform = `scale(${currentZoom / 100})`;
+                canvas.style.transformOrigin = 'top left';
+            }
+            document.getElementById('zoom-display').textContent = currentZoom + '%';
+        }
+
+        // Properties panel
+        function updatePropertiesPanel(component) {
+            const propertiesContent = document.getElementById('properties-content');
+            const componentName = component.get('tagName') || 'Element';
+            const componentId = component.getId();
+            const componentClasses = component.getClasses().join(' ');
+
+            propertiesContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #374151; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-cube"></i>
+                        ${componentName}
+                    </h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 5px;">ID</label>
+                        <input type="text" value="${componentId}" onchange="updateComponentId('${componentId}', this.value)" 
+                               style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 5px;">CSS Classes</label>
+                        <input type="text" value="${componentClasses}" onchange="updateComponentClasses('${componentId}', this.value)"
+                               style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                    <h4 style="color: #374151; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-paint-brush"></i>
+                        Styling
+                    </h4>
+                    <div id="style-properties"></div>
+                </div>
+            `;
+
+            addStyleProperties(component);
+        }
+
+        function addStyleProperties(component) {
+            const styleContainer = document.getElementById('style-properties');
+            const styles = component.getStyle();
+            const commonStyles = [
+                { name: 'Background Color', property: 'background-color', type: 'color' },
+                { name: 'Text Color', property: 'color', type: 'color' },
+                { name: 'Font Size', property: 'font-size', type: 'text' },
+                { name: 'Padding', property: 'padding', type: 'text' },
+                { name: 'Margin', property: 'margin', type: 'text' },
+                { name: 'Border Radius', property: 'border-radius', type: 'text' }
+            ];
+
+            let styleHTML = '';
+            commonStyles.forEach(style => {
+                const currentValue = styles[style.property] || '';
+                styleHTML += `
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 5px;">${style.name}</label>
+                        <input type="${style.type}" value="${currentValue}" 
+                               onchange="updateComponentStyle('${style.property}', this.value)"
+                               style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                    </div>
+                `;
+            });
+
+            styleContainer.innerHTML = styleHTML;
+        }
+
+        function clearPropertiesPanel() {
+            const propertiesContent = document.getElementById('properties-content');
+            propertiesContent.innerHTML = `
+                <div style="text-align: center; color: #6b7280; padding: 40px 20px;">
+                    <i class="fas fa-mouse-pointer" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                    Select an element to edit its properties
+                </div>
+            `;
+        }
+
+        // Component property updates
+        function updateComponentId(oldId, newId) {
+            if (selectedElement && newId.trim() !== '') {
+                selectedElement.setId(newId);
+            }
+        }
+
+        function updateComponentClasses(componentId, classes) {
+            if (selectedElement) {
+                const classArray = classes.split(' ').filter(cls => cls.trim() !== '');
+                selectedElement.setClass(classArray);
+            }
+        }
+
+        function updateComponentStyle(property, value) {
+            if (selectedElement) {
+                selectedElement.setStyle({ [property]: value });
+            }
+        }
+
+        // Template loading (client-side fallback)
+        function loadTemplate(templateName) {
+            const templates = {
+                business: `
+                    <div class="business-template">
+                        <nav style="background: #1f2937; color: white; padding: 1rem 0;">
+                            <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+                                <div style="font-size: 1.5rem; font-weight: bold;">BusinessPro</div>
+                                <div style="display: flex; gap: 2rem;">
+                                    <a href="#" style="color: white; text-decoration: none;">Home</a>
+                                    <a href="#" style="color: white; text-decoration: none;">Services</a>
+                                    <a href="#" style="color: white; text-decoration: none;">About</a>
+                                    <a href="#" style="color: white; text-decoration: none;">Contact</a>
+                                </div>
+                            </div>
+                        </nav>
+                        <section style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: white; padding: 100px 0;">
+                            <div style="max-width: 1200px; margin: 0 auto; text-align: center; padding: 0 20px;">
+                                <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Professional Business Solutions</h1>
+                                <p style="font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.9;">We help businesses grow with innovative strategies and cutting-edge technology</p>
+                                <button style="background: #3b82f6; color: white; padding: 15px 40px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Get Started Today</button>
+                            </div>
+                        </section>
+                    </div>
+                `,
+                portfolio: `
+                    <div class="portfolio-template">
+                        <header style="background: #111827; color: white; padding: 80px 0;">
+                            <div style="max-width: 800px; margin: 0 auto; text-align: center; padding: 0 20px;">
+                                <h1 style="font-size: 3rem; margin-bottom: 1rem;">Creative Portfolio</h1>
+                                <p style="font-size: 1.2rem; opacity: 0.8;">Designer • Developer • Creative Thinker</p>
+                            </div>
+                        </header>
+                        <section style="padding: 80px 0;">
+                            <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+                                <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px; color: #374151;">My Work</h2>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                                    <div style="background: #f9fafb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                        <div style="height: 200px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #9ca3af;">Project 1</div>
+                                        <div style="padding: 20px;">
+                                            <h3 style="margin-bottom: 10px; color: #374151;">Project Title</h3>
+                                            <p style="color: #6b7280;">Brief project description</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                `,
+                landing: `
+                    <div class="landing-template">
+                        <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 120px 0; text-align: center;">
+                            <div style="max-width: 800px; margin: 0 auto; padding: 0 20px;">
+                                <h1 style="font-size: 4rem; margin-bottom: 1.5rem; font-weight: 800;">Launch Your Success</h1>
+                                <p style="font-size: 1.4rem; margin-bottom: 2.5rem; opacity: 0.9;">Join thousands of satisfied customers who have transformed their business with our solution</p>
+                                <button style="background: #fff; color: #667eea; padding: 18px 50px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.2);">Start Free Trial</button>
+                            </div>
+                        </section>
+                        <section style="padding: 100px 0; background: #f8fafc;">
+                            <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; text-align: center;">
+                                <h2 style="font-size: 2.5rem; margin-bottom: 60px; color: #374151;">Why Choose Us?</h2>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 3rem; margin-bottom: 20px;">🚀</div>
+                                        <h3 style="margin-bottom: 15px; color: #374151;">Fast Setup</h3>
+                                        <p style="color: #6b7280;">Get started in minutes, not hours</p>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 3rem; margin-bottom: 20px;">💎</div>
+                                        <h3 style="margin-bottom: 15px; color: #374151;">Premium Quality</h3>
+                                        <p style="color: #6b7280;">Enterprise-grade solution</p>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 3rem; margin-bottom: 20px;">🎯</div>
+                                        <h3 style="margin-bottom: 15px; color: #374151;">Results Driven</h3>
+                                        <p style="color: #6b7280;">Proven to increase conversions</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                `,
+                blog: `
+                    <div class="blog-template">
+                        <header style="background: #fff; border-bottom: 1px solid #e5e7eb; padding: 20px 0;">
+                            <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #374151;">MyBlog</div>
+                                <nav style="display: flex; gap: 2rem;">
+                                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">Home</a>
+                                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">Categories</a>
+                                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">About</a>
+                                </nav>
+                            </div>
+                        </header>
+                        <main style="max-width: 800px; margin: 0 auto; padding: 60px 20px;">
+                            <article style="margin-bottom: 60px; padding-bottom: 40px; border-bottom: 1px solid #e5e7eb;">
+                                <h1 style="font-size: 2.5rem; margin-bottom: 20px; color: #374151;">Welcome to My Blog</h1>
+                                <div style="color: #6b7280; margin-bottom: 30px; font-size: 0.9rem;">Published on March 15, 2025</div>
+                                <p style="line-height: 1.7; color: #4b5563; font-size: 1.1rem;">This is where I share my thoughts, experiences, and insights about various topics. Stay tuned for regular updates and engaging content.</p>
+                            </article>
+                        </main>
+                    </div>
+                `
+            };
+
+            if (templates[templateName]) {
+                editor.setComponents(templates[templateName]);
+                showNotification('Template loaded successfully!', 'success');
+            }
+        }
+
+        // Asset management
+        document.getElementById('file-input').addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            const assetGrid = document.getElementById('asset-grid');
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const assetItem = document.createElement('div');
+                        assetItem.className = 'asset-item';
+                        assetItem.style.backgroundImage = `url(${e.target.result})`;
+                        assetItem.style.backgroundSize = 'cover';
+                        assetItem.style.backgroundPosition = 'center';
+                        assetItem.onclick = () => insertImage(e.target.result);
+                        assetGrid.appendChild(assetItem);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            showNotification('Assets uploaded successfully!', 'success');
+        }
+
+        function insertImage(src) {
+            const selected = editor.getSelected();
+            if (selected) {
+                if (selected.get('tagName') === 'img') {
+                    selected.set('src', src);
+                } else {
+                    selected.append(`<img src="${src}" alt="Image" style="max-width: 100%; height: auto;">`);
+                }
+            } else {
+                editor.getWrapper().append(`<img src="${src}" alt="Image" style="max-width: 100%; height: auto; display: block; margin: 20px auto;">`);
+            }
+        }
+
+        // Context menu
+        function handleContextMenu(event) {
+            event.preventDefault();
+            const contextMenu = document.getElementById('context-menu');
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function contextAction(action) {
+            if (!selectedElement) return;
+
+            switch (action) {
+                case 'copy':
+                    editor.runCommand('copy');
+                    break;
+                case 'paste':
+                    editor.runCommand('paste');
+                    break;
+                case 'duplicate':
+                    editor.runCommand('duplicate');
+                    break;
+                case 'delete':
+                    selectedElement.remove();
+                    break;
+            }
+            hideContextMenu();
+        }
+
+        // Keyboard shortcuts
+        function handleKeyboardShortcuts(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 's':
+                        event.preventDefault();
+                        saveWebsite();
+                        break;
+                    case 'z':
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            editor.runCommand('redo');
+                        } else {
+                            editor.runCommand('undo');
+                        }
+                        break;
+                    case 'c':
+                        if (selectedElement) {
+                            event.preventDefault();
+                            editor.runCommand('copy');
+                        }
+                        break;
+                    case 'v':
+                        if (selectedElement) {
+                            event.preventDefault();
+                            editor.runCommand('paste');
+                        }
+                        break;
+                }
+            }
+            
+            if (event.key === 'Delete' && selectedElement) {
+                selectedElement.remove();
+            }
+        }
+
+        // Utility functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                        type === 'error' ? 'fa-exclamation-circle' : 
+                        'fa-info-circle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 400);
+            }, 3000);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Save website to backend
+        function saveWebsite() {
+            const html = editor.getHtml();
+            const css = editor.getCss();
+
+            const fullHtml = `
+                <html>
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `;
+
+            fetch('/dashboard/save_website/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    website_id: websiteID,
+                    html: fullHtml
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Website saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save website!', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving website:', error);
+                showNotification('Error saving website!', 'error');
+            });
+        }
+
+        function autoSave() {
+            const html = editor.getHtml();
+            const css = editor.getCss();
+
+            const fullHtml = `
+                <html>
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `;
+
+
+            
+            fetch('/dashboard/save_website/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    website_id: websiteID,
+                    html: fullHtml
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const indicator = document.createElement('div');
+                    indicator.style.cssText = `
+                        position: fixed; top: 20px; right: 20px; 
+                        background: rgba(34, 197, 94, 0.9); color: white; 
+                        padding: 8px 16px; border-radius: 20px; 
+                        font-size: 12px; z-index: 1001;
+                        opacity: 0; transition: opacity 0.3s ease;
+                    `;
+                    indicator.textContent = 'Auto-saved';
+                    document.body.appendChild(indicator);
+                    
+                    setTimeout(() => indicator.style.opacity = '1', 100);
+                    setTimeout(() => {
+                        indicator.style.opacity = '0';
+                        setTimeout(() => document.body.removeChild(indicator), 300);
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error auto-saving:', error);
+            });
+        }
+
+        function previewWebsite() {
+            const html = editor.getHtml();
+            const css = editor.getCss();
+            const fullHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Preview</title>
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+                    <style>${css}</style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `;
+            
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(fullHTML);
+            previewWindow.document.close();
+        }
+
+        function exportWebsite() {
+            const html = editor.getHtml();
+            const css = editor.getCss();
+            const name =  '{{ user_website.name }}'
+            
+            const fullHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${name}</title>
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+                    <style>
+                        ${css}
+                        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Website exported successfully!', 'success');
+        }
+
+function togglePublishModal() {
+    const modal = document.getElementById("publishModal");
+    modal.classList.toggle("show");
+    
+    if (modal.classList.contains("show")) {
+        document.body.style.overflow = "hidden";
+        // Reset to subdomain tab
+        switchTab('subdomain');
+        document.getElementById("subdomain-input").focus();
+    } else {
+        document.body.style.overflow = "auto";
+        // Reset form
+        document.getElementById("subdomain-input").value = "";
+        document.getElementById("custom-domain-input").value = "";
+        document.getElementById("publish-message").innerHTML = "";
+        document.getElementById("publish-message").className = "message";
+        document.querySelector(".dns-info").style.display = "none";
+    }
+}
+
+function switchTab(tabName) {
+    // Update tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+    });
+    
+    // Update content
+    document.querySelectorAll('.tab-content-domain').forEach(content => {
+        content.classList.toggle('active', content.id === `${tabName}`);
+    });
+    
+    // Clear messages
+    document.getElementById("publish-message").innerHTML = "";
+    document.getElementById("publish-message").className = "message";
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        switchTab(this.dataset.tab);
+    });
+});
+
+
+document.getElementById("publishModal").addEventListener("click", function(e) {
+    if (e.target === this) {
+        togglePublishModal();
+    }
+});
+
+document.getElementById("subdomain-input").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        submitPublish();
+    }
+});
+
+
+function publishWebsite() {
+    togglePublishModal();
+}
+
+function submitPublish() {
+    const activeTab = document.querySelector('.tab.active').dataset.tab;
+    const message = document.getElementById("publish-message");
+    const btnText = document.getElementById("btn-text");
+    const publishBtn = document.querySelector(".publish-btn");
+    
+    let data = {};
+    
+    if (activeTab === "subdomain") {
+        const subdomain = document.getElementById("subdomain-input").value.trim();
+        if (!subdomain) {
+            message.innerHTML = "⚠️ Please enter a subdomain name";
+            message.className = "message error";
+            return;
+        }
+        data = {
+            publish_type: "subdomain",
+            subdomain: subdomain
+        };
+    } 
+    else if (activeTab === "custom-domain") {
+        const domain = document.getElementById("custom-domain-input").value.trim();
+        if (!domain) {
+            message.innerHTML = "⚠️ Please enter a domain name";
+            message.className = "message error";
+            return;
+        }
+        data = {
+            publish_type: "custom_domain",
+            custom_domain: domain
+        };
+    }
+
+    publishBtn.disabled = true;
+    btnText.innerHTML = '<span class="loading"></span>Publishing...';
+
+    fetch(`/dashboard/website/{{ user_website.id }}/publish/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": '{{ csrf_token }}'
+        },
+        body: new URLSearchParams(data).toString()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (activeTab === "subdomain") {
+                const url = `https://${data.url}`;
+                message.innerHTML = `🎉 Success! Your site is live at <a href="${url}" target="_blank">${url}</a>`;
+                message.className = "message success";
+            } else {
+                // Show DNS instructions
+                document.querySelector(".dns-info").style.display = "block";
+                document.getElementById("record-type").textContent = data.dns_info.record_type;
+                document.getElementById("record-host").textContent = data.dns_info.host;
+                document.getElementById("record-value").textContent = data.dns_info.value;
+                
+                message.innerHTML = `✅ Domain saved! Configure DNS settings to complete setup.`;
+                message.className = "message success";
+            }
+            
+            publishBtn.disabled = false;
+            btnText.innerHTML = 'Published ✓';
+        } else {
+            message.innerHTML = `⚠️ ${data.error}`;
+            message.className = "message error";
+            btnText.innerHTML = 'Publish Now';
+            publishBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        publishBtn.disabled = false;
+        message.innerHTML = '⚠️ Something went wrong. Please try again.';
+        message.className = "message error";
+        btnText.innerHTML = 'Publish Now';
+    });
+}
+
+let hasUnsavedChanges = false;
+
+function markAsChanged() {
+    hasUnsavedChanges = true;
+}
+
+// Function to mark content as saved
+function markAsSaved() {
+    hasUnsavedChanges = false;
+}
+
+// Show the save popup
+function showSavePopup() {
+    document.getElementById('savePopupOverlay').style.display = 'block';
+}
+
+// Hide the popup
+function hidePopup() {
+    document.getElementById('savePopupOverlay').style.display = 'none';
+}
+
+// Save and then redirect
+function saveAndRedirect() {
+    const html = editor.getHtml();
+    const css = editor.getCss();
+
+    const fullHtml = `
+        <html>
+        <head>
+            <style>${css}</style>
+        </head>
+        <body>${html}</body>
+        </html>
+    `;
+
+    fetch('/dashboard/save_website/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            website_id: websiteID,
+            html: fullHtml
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showNotification('Website saved successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = "{% url 'dashboard_home' %}";
+            }, 1000);
+        } else {
+            showNotification('Failed to save website!', 'error');
+        }
+        hidePopup();
+    })
+    .catch(error => {
+        console.error('Error saving website:', error);
+        showNotification('Error saving website!', 'error');
+        hidePopup();
+    });
+}
+
+// Discard changes and redirect
+function discardAndRedirect() {
+    markAsSaved(); // Mark as saved to avoid showing popup again
+    window.location.href = "{% url 'dashboard_home' %}";
+}
+
+        // Initialize the editor when the page loads
+        document.addEventListener('DOMContentLoaded', initEditor);
+</script>
+</body>
+</html>

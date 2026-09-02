@@ -1,0 +1,1077 @@
+{% extends "dashboard/dashboard_base.html" %} {% block title %}Dashboard |
+Eduprenair{% endblock title %} {% load static %} 
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{% static 'work_prenair/assets/css/apexcharts.css' %}"
+/>
+
+<style>
+.modal-open {
+  overflow: hidden;
+}
+
+.analysis-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.analysis-modal.fade-out {
+  opacity: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(16, 24, 52, 0.85);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideIn 0.4s ease-out forwards;
+}
+
+/* Close Button */
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.close-modal:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #ff6f61;
+  transform: rotate(90deg);
+}
+
+/* Loading Section */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  height: 400px;
+}
+
+.loading-section h3 {
+  margin: 20px 0 10px;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.loading-section p {
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.spinner-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.spinner {
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(30, 58, 138, 0.1);
+  border-top: 4px solid #ff6f61;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+.spinner:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border: 4px solid rgba(255, 111, 97, 0.1);
+  border-bottom: 4px solid #1e3a8a;
+  border-radius: 50%;
+  animation: spin 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite reverse;
+}
+
+.progress-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.progress-dots span {
+  width: 10px;
+  height: 10px;
+  background-color: #e2e8f0;
+  border-radius: 50%;
+  display: block;
+  animation: dotPulse 1.4s infinite ease-in-out;
+}
+
+.progress-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.progress-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Results Section */
+.analysis-results {
+  display: none;
+  padding: 0;
+  height: 100%;
+}
+
+.results-header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2d4eaa 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 16px 16px 0 0;
+  text-align: center;
+  position: relative;
+}
+
+.results-header h3 {
+  margin: 10px 0 5px;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.results-header p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+.header-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 15px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.insights-container {
+  padding: 30px;
+}
+
+/* Individual Insight Sections */
+.risk-metric, .strengths, .improvements {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(30px);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.risk-metric.visible, .strengths.visible, .improvements.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: white;
+  font-size: 18px;
+}
+
+.icon-container.risk {
+  background: linear-gradient(135deg, #ff6f61 0%, #ff5547 100%);
+}
+
+.icon-container.strength {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+}
+
+.icon-container.improvement {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2d4eaa 100%);
+}
+
+.icon-container.error {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.insight-header h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 18px;
+}
+
+/* Risk Meter */
+.risk-level {
+  margin: 15px 0;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.risk-level.high-risk {
+  color: #e11d48;
+}
+
+.risk-level.low-risk {
+  color: #10b981;
+}
+
+.risk-meter {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  margin: 15px 0 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.risk-progress {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.risk-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 5px;
+}
+
+/* Insights Lists */
+.insights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.insights-list li {
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateX(10px);
+  animation: fadeInRight 0.5s forwards;
+  animation-delay: calc(0.1s * var(--i, 0));
+}
+
+.insights-list li:last-child {
+  margin-bottom: 0;
+}
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.check-icon, .action-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.check-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.action-icon {
+  background: rgba(30, 58, 138, 0.1);
+  color: #1e3a8a;
+}
+
+.insight-item p {
+  margin: 0;
+  line-height: 1.5;
+  color: #334155;
+}
+
+
+/* Error Message */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-message h4 {
+  margin: 15px 0 10px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.error-message p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  padding: 10px 25px;
+  background: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #ff5547;
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { 
+    transform: scale(1);
+    background-color: #e2e8f0;
+  }
+  50% { 
+    transform: scale(1.3);
+    background-color: #ff6f61;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    max-height: 85vh;
+  }
+  
+  .results-header {
+    padding: 25px 15px;
+  }
+  
+  .insights-container {
+    padding: 20px 15px;
+  }
+  
+  .risk-metric, .strengths, .improvements {
+    padding: 20px;
+  }
+}
+</style>
+
+{% endblock extra_css %} 
+{% block content %}
+<body class="lg:overflow-hidden">
+  {% include "dashboard/partials/header.html" %}
+
+  <div class="dashboard_main overflow-hidden lg:w-screen lg:h-screen flex">
+    {% include 'dashboard/partials/dashboard_sidebar.html' %}
+
+    <div
+      class="content_dashboard scrollbar_custom max-h-full w-full h-fit bg-surface"
+    >
+      <div class="container h-full lg:px-15 sm:py-12 px-8">
+        <button
+          class="btn_open_popup btn_menu_dashboard flex items-center gap-2 lg:hidden"
+          data-type="menu_dashboard"
+        >
+          <span class="ph ph-squares-four text-xl"></span>
+          <strong class="text-button">Menu</strong>
+        </button>
+        <h4 class="heading4 max-lg:mt-3">Dashboard</h4>
+        <ul
+          class="list_counter grid 2xl:grid-cols-4 grid-cols-2 sm:gap-7.5 gap-5 mt-7.5 w-full"
+        >
+          <li
+            class="counter_item applied_job flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Students</span>
+              <h4 class="number heading4 mt-1">{{ edu_instructor_total_students }}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-briefcase sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item services_offered flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Earnings</span>
+              <h4 class="number heading4 mt-1">${{edu_total_earnings}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph ph-money sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item views_profile flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Total Courses</span>
+              <h4 class="number heading4 mt-1">{{edu_instrcutor_courses.count}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-eye sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+          <li
+            class="counter_item total_reviews flex items-center justify-between sm:gap-4 gap-3 sm:p-6 p-5 rounded-lg bg-white"
+          >
+            <div class="counter_content">
+              <span class="text-secondary">Reviews Recieved</span>
+              <h4 class="number heading4 mt-1">{{edu_total_reviews}}</h4>
+            </div>
+            <div
+              class="counter_icon flex flex-shrink-0 items-center justify-center sm:w-[72px] w-12 sm:h-[72px] h-12 rounded-full bg-gradient"
+            >
+              <span
+                class="ph-fill ph-thumbs-up sm:text-3xl text-2xl text-white"
+              ></span>
+            </div>
+          </li>
+        </ul>
+        <div class="chart_overview flex max-xl:flex-col gap-7.5 mt-7.5">
+          <div class="w-full h-full rounded-lg bg-white shadow-lg p-4">
+            <div class="flex flex-wrap justify-between gap-6 p-6">
+              <h5 class="heading5 text-gray-800 font-semibold">Course Enrollment Count</h5>
+            </div>
+            <div class="chart md:px-6 pb-6">
+              <canvas id="course-enrollment-chart"></canvas>
+            </div>
+          </div>
+          <div
+            class="notification overflow-hidden flex-shrink-0 flex-grow xl:w-[300px] h-full rounded-lg bg-white py-6"
+          >
+            <h5 class="heading5 px-6">Notifications</h5>
+            <ul class="list_notification scrollbar_custom max-h-[420px] flex flex-col gap-2.5 px-6 mt-5">
+              {% for notification in notifications %}
+              <li class="item flex gap-2">
+                <span
+                  class="icon flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-surface text-secondary"
+                >
+                  <span class="ph-fill ph-bell text-lg"></span>
+                </span>
+                <div class="content flex flex-col gap-2">
+                  <p class="title text-secondary">
+                    {{ notification.message|truncatechars:50 }}
+                  </p>
+                  <span class="date caption1 text-secondary">{{ notification.created_at|date:"F j, Y, g:i a" }}</span>
+                </div>
+              </li>
+              {% empty %}
+              <li class="item">
+                <p class="text-center text-secondary">No notifications available.</p>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+          <h5 class="heading5">Listed Courses</h5>
+          <div class="list overflow-x-auto w-full p-5 rounded-xl">
+            <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+              <thead class="border-b border-line">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Course Title
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Enrollments
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                  Duration
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Created At
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in listed_courses %}
+                <tr class="item duration-300 hover:bg-background">
+                  <th scope="row" class="p-5 text-center">
+                    <div class="info flex items-center gap-3">
+                      <a
+                        href="{% url 'course_detail' course.slug %}"
+                        class="avatar flex-shrink-0 w-20 h-15  overflow-hidden"
+                      >
+                        <img
+                          src="{{ course.thumbnail.url }}"
+                          alt="{{ course.title }}"
+                          class="w-full h-full object-cover"
+                        />
+                      </a>
+                      <a href="{% url 'course_detail' course.slug %}" class="block">
+                        <strong
+                          class="candidates_name -style-1 heading6 duration-300 hover:text-primary"
+                          >{{ course.title }}</strong
+                        >
+                      </a>
+                    </div>
+                  </th>
+                  <td class="p-5 heading6">{{ course.enrollment_count}}</td>
+                  <td class="p-5 heading6">${{ course.price }}</td>
+                  <td class="p-5 heading6">{{ course.duration }}</td>
+                  <td class="p-5 whitespace-nowrap">
+                    {{ course.created_at|date:"d-m-Y" }}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="p-5 text-center">No courses found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="recent_applicants p-6 mt-7.5 rounded-lg bg-white">
+          <h5 class="heading5">Enrolled Courses</h5>
+          <div class="list overflow-x-auto w-full p-5 rounded-xl">
+            <table class="w-full max-[1400px]:w-[1200px] max-md:w-[1000px]">
+              <thead class="border-b border-line">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Course Title
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Progress
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                  Duration
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap"
+                  >
+                    Enrolled At
+                  </th>
+                  <th scope="col" class="px-5 py-4 text-left text-sm font-bold uppercase text-secondary whitespace-nowrap">
+                    Analyze Progress
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in enrolled_courses %}
+                <tr class="item duration-300 hover:bg-background">
+                  <th scope="row" class="p-5 text-center">
+                    <div class="info flex items-center gap-3">
+                      <a
+                        href="{% url 'course_detail' course.course.slug %}" target="_blank"
+                        class="avatar flex-shrink-0 w-20 h-15  overflow-hidden"
+                      >
+                        <img src="{{ course.course.thumbnail.url }}" alt="{{ course.course.title }}" class="w-full h-full object-cover"/>
+                      </a>
+                      <a href="{% url 'course_detail' course.course.slug %}" class="block">
+                        <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{ course.course.title }}</strong>
+                      </a>
+                    </div>
+                  </th>
+                  <td class="p-5 heading6">{{ course.progress}}%</td>
+                  <td class="p-5 heading6">${{ course.course.price }}</td>
+                  <td class="p-5 heading6">{{ course.course.duration }} Hours</td>
+                  <td class="p-5 whitespace-nowrap">{{ course.enrolled_date|date:"d-m-Y" }}</td>
+                  <td class="p-5 whitespace-nowrap">
+                    <button 
+                      class="analyze-progress-btn text-white px-4 py-2 rounded-lg category-btn-final"
+                      data-course-slug="{{ course.course.slug }}" data-user-id="{{ request.user.id }}">
+                      Analyze Progress
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="p-5 text-center">No courses found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% include "dashboard/partials/footer_cta.html" %}
+      </div>
+      <div
+        class="flex items-center justify-center w-full h-15 bg-white duration-300 shadow-md"
+      >
+        <span class="copyright caption1 text-secondary"
+          >©{% now "Y" %} Fireprenair. All Rights Reserved</span
+        >
+      </div>
+    </div>
+  </div>
+
+  {% include 'work_prenair/partials/mb-menu.html' %}
+
+  <!-- Modal -->
+  <div class="modal">
+    <!-- menu_dashboard -->
+    {% include "work_prenair/partials/menu-modal.html" %}
+  </div>
+
+  <div class="analysis-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <button class="close-modal" aria-label="Close modal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      
+      <div class="loading-section">
+        <div class="spinner-container">
+          <div class="spinner"></div>
+        </div>
+        <h3>Analyzing Student Data</h3>
+        <p>Our AI is generating personalized insights...</p>
+        <div class="progress-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      
+      <div class="analysis-results">
+        <div class="results-header">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#1e3a8a" stroke-width="2"/>
+              <path d="M15 9L9 15M9 9L15 15" stroke="#ff6f61" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Student Learning Insights</h3>
+          <p>Personalized analysis based on learning patterns</p>
+        </div>
+        
+        <div class="insights-container">
+          <div class="risk-metric"></div>
+          <div class="strengths"></div>
+          <div class="improvements"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endblock content %} {% block extra_javascript %}
+
+  <script src="{% static 'work_prenair/assets/js/apexcharts.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get data from the template context
+      const courseTitles = {{ course_titles|safe }};
+      const enrollmentCounts = {{ enrollment_counts|safe }};
+    
+      // Get the canvas context before creating the gradient
+      const ctx = document.getElementById("course-enrollment-chart").getContext("2d");
+    
+      // Create the gradient outside of the dataset
+      const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+      gradient.addColorStop(0, "rgba(0, 172, 193, 0.8)");
+      gradient.addColorStop(1, "rgba(0, 172, 193, 0.3)");
+    
+      // Create the Chart.js Horizontal Bar Chart
+      const courseEnrollmentChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: courseTitles, // Course titles as labels
+          datasets: [
+            {
+              label: "Enrollments",
+              data: enrollmentCounts, // Enrollment counts
+              backgroundColor: gradient, // Use gradient directly here
+              borderColor: "#00ACC3",  // Matching border with gradient
+              borderWidth: 2,
+              hoverBackgroundColor: "#00B8D4",  // Hover effect color
+              hoverBorderColor: "#0288D1",
+              hoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y', // Horizontal bar chart
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)', // Subtle grid lines
+                borderDash: [5, 5], // Dashed grid lines for a cleaner look
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+            y: {
+              grid: {
+                display: false, // Hides vertical grid lines
+              },
+              ticks: {
+                font: {
+                  size: 14,
+                  family: "'Roboto', sans-serif",
+                  weight: '500',
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              displayColors: false,
+              callbacks: {
+                label: function (context) {
+                  return `${context.label}: ${context.raw} students`;
+                },
+              },
+            },
+            legend: {
+              display: false, // Hide legend if only one dataset
+            },
+          },
+          animation: {
+            duration: 1000,  // Smooth animation
+            easing: 'easeInOutQuad',
+          },
+        },
+      });
+    });
+
+    // -------------------------------- Analyze Progress Modal --------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.querySelector('.analysis-modal');
+  const analyzeButtons = document.querySelectorAll('.analyze-progress-btn');
+  const closeModal = document.querySelector('.close-modal');
+
+  function animateProgress(element, targetValue) {
+    let width = 0;
+    const duration = 1500;
+    const interval = 10;
+    const increment = (targetValue * interval) / duration;
+    
+    const animation = setInterval(() => {
+      width += increment;
+      if (width >= targetValue) {
+        width = targetValue;
+        clearInterval(animation);
+      }
+      element.style.width = `${width}%`;
+      
+      if (targetValue > 70) {
+        element.style.background = `linear-gradient(90deg, #ff6f61 0%, #ff3b28 100%)`;
+      } else if (targetValue > 40) {
+        element.style.background = `linear-gradient(90deg, #ffc107 0%, #ff9800 100%)`;
+      } else {
+        element.style.background = `linear-gradient(90deg, #4caf50 0%, #2e7d32 100%)`;
+      }
+    }, interval);
+  }
+
+  function animateElement(element, delay) {
+    setTimeout(() => {
+      element.classList.add('visible');
+    }, delay);
+  }
+
+  analyzeButtons.forEach(button => {
+    button.addEventListener('click', async function () {
+      const courseSlug = this.dataset.courseSlug;
+      const userId = this.dataset.userId;
+
+      modal.style.display = 'flex';
+      document.body.classList.add('modal-open');
+
+      try {
+        const response = await fetch('/dashboard/eduprenair/analyze_student_progress/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            course_slug: courseSlug,
+            user_id: userId
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.querySelector('.loading-section').style.display = 'none';
+          const results = document.querySelector('.analysis-results');
+          results.style.display = 'block';
+
+          const riskMetric = results.querySelector('.risk-metric');
+          riskMetric.innerHTML = `
+            <div class="insight-header">
+              <div class="icon-container risk">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h4>Dropout Risk Assessment</h4>
+            </div>
+            <p class="risk-level ${data.analysis.risk_percentage > 50 ? 'high-risk' : 'low-risk'}">
+              ${data.analysis.risk_prediction}
+            </p>
+            <div class="risk-meter">
+              <div class="risk-progress" id="risk-progress-bar"></div>
+              <div class="risk-labels">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+              </div>
+            </div>
+          `;
+
+          const strengthsSection = results.querySelector('.strengths');
+          strengthsSection.innerHTML = `
+            <div class="insight-header">
+              <div class="icon-container strength">
+                <i class="fas fa-award"></i>
+              </div>
+              <h4>Learning Strengths</h4>
+            </div>
+            <ul class="insights-list">
+              ${data.analysis.strengths.map(s => `
+                <li>
+                  <div class="insight-item">
+                    <div class="check-icon">✓</div>
+                    <p>${s}</p>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+          `;
+
+          const improvementsSection = results.querySelector('.improvements');
+          improvementsSection.innerHTML = `
+            <div class="insight-header">
+              <div class="icon-container improvement">
+                <i class="fas fa-bullseye"></i>
+              </div>
+              <h4>Growth Opportunities</h4>
+            </div>
+            <ul class="insights-list">
+              ${data.analysis.improvements.map(i => `
+                <li>
+                  <div class="insight-item">
+                    <div class="action-icon">→</div>
+                    <p>${i}</p>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+          `;
+
+          setTimeout(() => {
+            animateProgress(document.getElementById('risk-progress-bar'), data.analysis.risk_percentage);
+            
+            animateElement(riskMetric, 300);
+            animateElement(strengthsSection, 600);
+            animateElement(improvementsSection, 900);
+          }, 300);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        
+        document.querySelector('.loading-section').style.display = 'none';
+        const results = document.querySelector('.analysis-results');
+        results.style.display = 'block';
+        results.innerHTML = `
+          <div class="error-message">
+            <div class="icon-container error">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h4>Oops! Something went wrong</h4>
+            <p>We couldn't process your request. Please try again later.</p>
+            <button class="retry-btn">Try Again</button>
+          </div>
+        `;
+        
+        document.querySelector('.retry-btn').addEventListener('click', () => {
+          modal.style.display = 'none';
+          document.body.classList.remove('modal-open');
+          setTimeout(() => {
+            this.click();
+          }, 500);
+        });
+      }
+    });
+  });
+
+  function closeModalFunction() {
+    modal.classList.add('fade-out');
+    setTimeout(() => {
+      modal.style.display = 'none';
+      modal.classList.remove('fade-out');
+      document.querySelector('.loading-section').style.display = 'flex';
+      document.querySelector('.analysis-results').style.display = 'none';
+      document.body.classList.remove('modal-open');
+      
+      const animatedElements = document.querySelectorAll('.risk-metric, .strengths, .improvements');
+      animatedElements.forEach(el => el.classList.remove('visible'));
+    }, 300);
+  }
+
+  closeModal.addEventListener('click', closeModalFunction);
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModalFunction();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeModalFunction();
+    }
+  });
+});
+  </script>
+
+  {% endblock extra_javascript %}
+</body>

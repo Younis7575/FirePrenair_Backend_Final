@@ -1,0 +1,237 @@
+{% extends 'edu_prenair/edu_base.html' %}
+{% load static %}
+{% block title %}Fireprenair | Features{% endblock title %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/feather/feather.css' %}">
+
+<link rel="stylesheet" href="{% static 'edu_prenair/assets/plugins/swiper/css/swiper.min.css' %}">
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
+{% endblock extra_css %}
+
+{% block content %}
+<body class="home-two">
+    {% include 'home/partials/new_header.html' %}
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+   <!-- Eduprenair Section -->
+		<section class="about-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 wow fadeInLeft order-lg-1 order-xs-2 order-sm-2">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Create, Innovate, and Sell with Digiprenair</p>
+							<h2 class="mb-0" style="color: #ff6f61;">Empowering Digital Creators Worldwide</h2>
+						</div>
+						<div class="header-two-title">
+							<p class="about-text">
+								Digiprenair is your ultimate platform for showcasing, marketing, and selling your digital creations. From templates and themes to stock media and plugins, we connect creators with a global audience. Leverage powerful tools, analytics, and secure payment systems to transform your creativity into a sustainable income stream.
+							</p>
+							<div class="about-button more-details">
+								<a href="{% url 'digi_home' %}" class="category-btn-final" style="color: white; width: fit-content;">Learn more</a>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-lg-6 order-lg-2 order-xs-1 order-sm-1">
+						<div class="stylist-gallery">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-one d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-gallery-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">30</span>K</h4>
+												<p class="mb-0">Digital Products</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-two d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-user-star-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">10</span>K</h4>
+												<p class="mb-0">Creators Worldwide</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-three d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-global-line" style="font-size: 3rem; color: #ff6f61;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #ff6f61;"><span class="counterUp">50</span>+</h4>
+												<p class="mb-0">Countries Reached</p>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="about-image count-four d-flex align-items-center justify-content-center flex-fill project-details">
+										<div class="about-count">
+											<div class="course-icon">
+												<i class="ri-secure-payment-line" style="font-size: 3rem; color: #1e3a8a;"></i>
+											</div>
+											<div class="count-content-three course-count ms-0">
+												<h4 style="color: #1e3a8a;"><span class="counterUp">100</span>%</h4>
+												<p class="mb-0">Secure Transactions</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</section>
+		<!-- /About us -->
+
+        <section class="growup-section">
+			<div class="home-two-shapes">
+				<img src="{% static 'home/images/home-right-bottom.png' %}" alt="Img">
+			</div>
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-xl-6 col-lg-6 col-md-5 col-12">
+						<div class="growup-images-two">
+							<div class="growup-skills-img">
+								<img style="border-radius: 8px;" class="" src="{% static 'home/images/digi_1.png' %}" alt="image-banner" title="image-banner">
+							</div>
+						</div>
+					</div>
+		
+					<div class="col-xl-6 col-lg-6 col-md-7 col-12 wow fadeInLeft">
+						<div class="header-two-title">
+							<p class="tagline" style="color: #1e3a8a;">Expand Your Creativity</p>
+							<h2 class="" style="color: #ff6f61;">Create, Share, and Succeed with Digiprenair</h2>
+							<div class="header-two-text">
+								<p class="mb-0">Digiprenair is your platform for unleashing creativity and sharing innovative digital products. Whether you're a designer, developer, or creator, we provide the tools and marketplace to showcase your work to a global audience. Empower your ideas, connect with buyers worldwide, and turn your passion into a thriving business. Join our creative ecosystem and redefine success on your terms.</p>
+							</div>
+						</div>
+						
+						<div class="about-button more-details">
+							<a href="{% url 'home' %}?register=true" class="category-btn-final"  style="color: white; width: fit-content;">Join Today</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+
+
+        <!-- digiprenair -->
+		<section class="master-skills-sec">
+			<div class="container">
+				<div class="header-two-title text-center">
+					<p class="tagline" style="color: #1e3a8a;">Explore the Possibilities</p>
+					<h2 style="color: #ff6f61;">Transform Your Ideas into Digital Success</h2>
+					<div class="header-two-text">
+						<p class="mb-0">At Digiprenair, we empower creators to design, develop, and distribute exceptional digital products. Whether you're launching your first template or expanding your digital portfolio, our platform ensures you achieve tangible results. Join the growing community of creators shaping the future of digital innovation.</p>
+					</div>
+				</div>
+				<!-- Platform Info -->
+				<div class="course-info-two">
+					<div class="row align-items-center">
+			
+						<!-- Resources Content -->
+						<div class="col-lg-6 col-md-12 order-lg-0 order-md-0 order-0">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Award-Winning Digital Tools</h2>
+								<p>Digiprenair's innovative tools are crafted to guide you from concept to creation. Whether you're a beginner or an experienced designer, our resources provide unmatched support tailored to your needs. Create confidently in today’s competitive digital marketplace.</p>
+							</div>
+						</div>
+						<!-- /Resources Content -->
+			
+						<!-- Resources Image -->
+						<div class="col-lg-6 col-md-12 order-lg-1 order-md-1 order-1">
+							<div class="join-mentor-img">
+								<div class="winning-two-one">
+									<img style="border-radius: 8px;" src="{% static 'home/images/digi_2.png' %}" alt="Award-Winning Tools" class="img-fluid">
+								</div>
+								<div class="joing-icon-award">
+									<i class="ri-award-line" style="font-size: 3rem; color: #ff6f61;"></i>
+								</div>
+							</div>
+						</div>
+						<!-- /Resources Image -->
+			
+						<!-- Innovation Content -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-2 order-md-3 order-3">
+							<div class="join-mentor-img">
+								<div class="winning-two-two">
+									<img style="border-radius: 8px;" src="{% static 'home/images/digi_3.png' %}" alt="Digital Innovation" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-lightbulb-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Innovation Content -->
+			
+						<!-- Innovation Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-3 order-md-2 order-2">
+							<div class="join-title-middle">
+								<h2 style="color: #ff6f61;">Tools for Digital Innovators</h2>
+								<p>Our platform equips creators with everything needed to turn ideas into successful products. With interactive tools, dynamic support, and global exposure, Digiprenair ensures your innovations reach the right audience.</p>
+							</div>
+						</div>
+						<!-- /Innovation Image -->
+			
+						<!-- Certification Content -->
+						<div class="col-xl-6 col-lg-7 col-md-12 order-lg-4 order-md-4 order-4">
+							<div class="join-title-one">
+								<h2 style="color: #ff6f61;">Recognition for Your Work</h2>
+								<p>Showcase your expertise with certifications and product endorsements that build credibility and trust. Digiprenair supports creators in gaining the recognition they deserve for their exceptional contributions.</p>
+							</div>
+						</div>
+						<!-- /Certification Content -->
+			
+						<!-- Certification Image -->
+						<div class="col-xl-6 col-lg-5 col-md-12 order-lg-5 order-md-5 order-5">
+							<div class="join-mentor-img mb-0">
+								<div class="winning-two-three">
+									<img style="border-radius: 8px;" src="{% static 'home/images/digi_4.png' %}" alt="Creator Certifications" class="img-fluid">
+								</div>
+							</div>
+							<div class="joing-icon-award">
+								<i class="ri-certificate-line" style="font-size: 3rem; color: #ff6f61;"></i>
+							</div>
+						</div>
+						<!-- /Certification Image -->
+			
+					</div>
+				</div>
+				<!-- /Platform Info -->
+			</div>
+			
+		</section>
+		
+    
+		{% include 'home/partials/footer.html' %}
+   
+</div>
+<!-- /Main Wrapper -->
+</body>
+{% endblock content %}
+
+{% block extra_javascript %} 
+
+<script src="{% static 'edu_prenair/assets/plugins/swiper/js/swiper.min.js' %}"></script>
+
+{% endblock extra_javascript %}

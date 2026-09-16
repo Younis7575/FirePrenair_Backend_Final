@@ -7,10 +7,28 @@ import base64
 from django.core.files.base import ContentFile
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    room_group_name = None
+
     async def connect(self):
         self.user = self.scope["user"]
         self.chat_slug = self.scope['url_route']['kwargs']['slug']
-        self.chat = await database_sync_to_async(PrivateChat.objects.get)(slug=self.chat_slug)
+
+        # An anonymous socket used to be accepted and then blow up in
+        # set_user_online, which calls save() on AnonymousUser.
+        if not self.user.is_authenticated:
+            await self.close(code=4401)
+            return
+
+        try:
+            self.chat = await database_sync_to_async(PrivateChat.objects.get)(
+                slug=self.chat_slug
+            )
+        except PrivateChat.DoesNotExist:
+            # A bad slug raised inside connect(), which surfaces as the
+            # same silent drop rather than a refusal the client can read.
+            await self.close(code=4404)
+            return
+
         self.room_group_name = f'chat_{self.chat_slug}'
         
         await self.channel_layer.group_add(
@@ -31,6 +49,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        # connect() may have refused before the group was joined.
+        if not self.room_group_name:
+            return
         await self.set_user_offline(self.user)
         await self.channel_layer.group_send(
             self.room_group_name,

@@ -44,8 +44,17 @@ Connect from the EC2 console (**Instances → fireprenair → Connect → EC2 In
 Connect → Connect**), then run one command:
 
 ```bash
-cd /home/ubuntu/Fireprenair && git pull && bash deploy/setup-server.sh
+cd /home/ubuntu/Fireprenair && \
+  curl -fsSL https://raw.githubusercontent.com/Younis7575/FirePrenair_Backend_Final/main/deploy/setup-server.sh -o /tmp/ss.sh && \
+  bash /tmp/ss.sh
 ```
+
+Fetched over curl rather than `git pull` on purpose. The checkout on the server
+came from a different repository (`ZainAli121/Fireprenair`) and shares no
+history with this one, so `git pull` fails with *"Need to specify how to
+reconcile divergent branches"* and always will. `deploy/deploy.sh` does not use
+`pull` either — it uses `fetch` + `reset --hard origin/main`, which works
+across unrelated histories.
 
 It finds the service, path and virtualenv itself, grants CI the narrow sudo
 right to restart that one service, installs `postgresql-client`, and prints

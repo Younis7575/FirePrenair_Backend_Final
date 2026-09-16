@@ -134,4 +134,6 @@ jobs:
 
             echo
             echo "==> Nothing left to apply?"
-            python manage.py showmigrations --plan | grep -c '^\[ \]' | sed 's/^/pending: /'
+            # grep exits 1 when the count is zero, which is the outcome we want,
+            # so do not let it fail the job.
+            python manage.py showmigrations --plan | grep -c '^\[ \]' | sed 's/^/pending: /' || true

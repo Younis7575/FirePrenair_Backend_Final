@@ -52,5 +52,17 @@ jobs:
             sudo tail -15 /var/log/nginx/error.log
 
             echo
-            echo "===== 6. disk ====="
+            echo "===== 6. where do uploaded media files actually live? ====="
+            echo "-- MEDIA_ROOT Django thinks it uses --"
+            cd "$DJANGO_DIR" && ../venv/bin/python -c "import django;django.setup();from django.conf import settings;print('MEDIA_ROOT:',settings.MEDIA_ROOT);print('MEDIA_URL :',settings.MEDIA_URL)" 2>&1 | tail -3
+            echo "-- candidate upload directories on disk --"
+            for d in "$DJANGO_DIR/static/images" "$DJANGO_DIR/media" "$APP_DIR/media" "$DJANGO_DIR/images"; do
+              [ -d "$d" ] && echo "$d : $(find "$d" -type f | wc -l) files"
+            done
+            echo "-- hunting two files the site asks for and cannot find --"
+            sudo find /home -name 'WhatsApp_Image_2025-07-05*' -o -name 'Group_1_2.png' 2>/dev/null | head -5
+            echo "(khali = woh files server par kahin nahi hain)"
+
+            echo
+            echo "===== 7. disk ====="
             df -h /

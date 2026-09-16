@@ -15,8 +15,14 @@ confirm there is nothing left to do.
 
 Run from the Django directory with DJANGO_SETTINGS_MODULE set.
 """
+import os
 import pathlib
 import sys
+
+# Run by absolute path, so Python puts THIS file's directory on sys.path, not
+# the Django project's. Django needs to import the settings module, which
+# lives beside manage.py in the working directory.
+sys.path.insert(0, os.getcwd())
 
 import django
 

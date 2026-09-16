@@ -1,0 +1,56 @@
+name: Diagnose server
+
+# Read-only look at the live box. Run it from the Actions tab when something
+# is wrong and you need facts rather than guesses. It changes nothing.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: diagnose-production
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    name: Diagnose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Look at the server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          command_timeout: 5m
+          script: |
+            APP_DIR="${{ vars.APP_DIR }}"
+            DJANGO_DIR="${{ vars.DJANGO_DIR }}"
+
+            echo "===== 1. effective nginx config for /static/ ====="
+            sudo nginx -T 2>/dev/null | grep -n -B8 -A6 'location /static' || echo "(no /static/ location found)"
+
+            echo
+            echo "===== 2. which server blocks claim fireprenair.com ====="
+            sudo nginx -T 2>/dev/null | grep -n 'server_name\|# configuration file' | grep -i -B1 'fireprenair\|server_name'
+
+            echo
+            echo "===== 3. does the file exist, and can nginx read it? ====="
+            F="$DJANGO_DIR/staticfiles/commu_prenair/assets/css/style.css"
+            ls -l "$F" 2>&1
+            sudo -u www-data test -r "$F" && echo "www-data CAN read it" || echo "www-data CANNOT read it"
+            namei -l "$F" 2>&1 | tail -12
+
+            echo
+            echo "===== 4. what nginx actually answers ====="
+            for p in /static/commu_prenair/assets/css/style.css /static/images/navbar/icons.png; do
+              printf '%s -> ' "$p"
+              curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: fireprenair.com' "http://127.0.0.1$p"
+            done
+
+            echo
+            echo "===== 5. latest nginx errors ====="
+            sudo tail -15 /var/log/nginx/error.log
+
+            echo
+            echo "===== 6. disk ====="
+            df -h /

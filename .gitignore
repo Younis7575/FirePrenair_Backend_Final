@@ -8,3 +8,7 @@ venv/
 myvir
 .vscode
 sub_data.csv
+# Firebase service-account key. Loaded by path at runtime
+# (settings.py: BASE_DIR / 'fcm_service_account.json'), so it belongs on
+# the server next to .env -- never in the repository.
+fcm_service_account.json

@@ -5,14 +5,13 @@
 #   bash deploy/repoint-remote.sh
 #
 # It does NOT touch a single line of deployed code — no pull, no reset, no
-# restart. It only changes where git fetches from, and sets up the read-only
-# SSH key GitHub requires for a private repository (HTTPS passwords stopped
-# working in 2021).
+# restart. It only changes where git fetches from. The repository is public, so
+# no credentials or deploy key are needed.
 #
 # Safe to re-run.
 set -uo pipefail
 
-REPO_SSH="git@github.com:Younis7575/FirePrenair_Backend_Final.git"
+REPO_URL="https://github.com/Younis7575/FirePrenair_Backend_Final.git"
 CHECKOUT="${1:-/home/ubuntu/Fireprenair}"
 KEY=~/.ssh/fireprenair_deploy
 
@@ -31,34 +30,23 @@ echo "  uncommitted files: $DIRTY"
     but the first deploy does 'git reset --hard' and WILL discard them.
     Save them first:  git -C $CHECKOUT diff > ~/server-local-changes.patch"
 
-banner "1/3  Deploy key"
-if [ -f "$KEY" ]; then
-  ok "already exists at $KEY"
-else
-  ssh-keygen -t ed25519 -N '' -C "fireprenair-deploy@$(hostname)" -f "$KEY" >/dev/null
-  ok "generated $KEY"
-fi
-# Make git use this key for github.com without touching any global ssh config.
-git config core.sshCommand "ssh -i $KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
-ok "this checkout will use that key for github.com"
-
-banner "2/3  Remote"
-git remote set-url origin "$REPO_SSH"
+banner "1/2  Remote"
+git remote set-url origin "$REPO_URL"
 ok "origin -> $(git remote get-url origin)"
 
-banner "3/3  Add the public key to GitHub, then verify"
-cat <<EOF
+banner "2/2  Verify"
+if git fetch origin --quiet 2>/dev/null; then
+  ok "fetch works — no credentials needed (public repo)"
+  echo "  origin/main is at: $(git log -1 --format='%h %s' origin/main)"
+  echo "  this checkout is : $(git log -1 --format='%h %s' HEAD)"
+  echo
+  echo "  Your running code has NOT changed. It changes on the first deploy,"
+  echo "  which does 'git reset --hard origin/main'."
+else
+  warn "fetch failed — check the repo is public and the box has internet"
+fi
 
-  Copy the line between the markers and add it at:
-    https://github.com/Younis7575/FirePrenair_Backend_Final/settings/keys/new
-    Title: fireprenair-ec2        Allow write access: LEAVE UNCHECKED
+cat <<'EOF'
 
-────────────────────────────────────────────────────────────────────────
-$(cat "$KEY.pub")
-────────────────────────────────────────────────────────────────────────
-
-  Then run:   git -C $CHECKOUT fetch origin && echo FETCH-OK
-
-  A successful fetch downloads history only. Your running code does not
-  change until a deploy runs.
+  Next: bash deploy/setup-server.sh
 EOF

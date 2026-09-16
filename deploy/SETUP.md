@@ -117,9 +117,29 @@ moving target.
 free rather than filling the disk and taking the site down; if it starts
 refusing, grow the EBS volume.
 
-**A credential is committed.** `prenair/fcm_service_account.json` is a Firebase
-service-account key tracked in git. The repo is private, so it is not public —
-but it is in the history, and anyone with repo access has it.
+**A Firebase key was published.** `prenair/fcm_service_account.json` — a live
+service-account key for project `fireprenair-53919` — was tracked in git when
+the repository was made public. It is now untracked and gitignored, but it
+remains in the history at commit `d2ee7db`, and public GitHub is scanned
+continuously by credential harvesters.
+
+Removing the file does not undo the exposure. **The key has to be revoked and
+replaced** in the Google Cloud console:
+<https://console.cloud.google.com/iam-admin/serviceaccounts?project=fireprenair-53919>
+→ `firebase-adminsdk-fbsvc@…` → Keys → delete key `30341c80…` → Add key → new
+JSON.
+
+Then put the new file on the server, where the code expects it:
+`/home/ubuntu/Fireprenair/prenair/fcm_service_account.json`. It is loaded by
+path (`settings.py`: `BASE_DIR / "fcm_service_account.json"`), so it lives
+beside `.env` and never goes back into the repo.
+
+Note the ordering: because the file was tracked and now is not, the first
+`git reset --hard` of a deploy will **delete it from the server**. Place the
+replacement before or straight after that first deploy, or FCM stays down.
+
+`.env` was never committed, so the database password, `DJANGO_SECRET_KEY` and
+the OpenAI/Stripe keys were not exposed.
 
 **requirements.txt did not describe the app.** Three packages the code imports
 at module level were missing from it — `psycopg2` (the Postgres driver),

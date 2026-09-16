@@ -31,9 +31,9 @@ Same page, **Variables** tab. Fill these in with the real paths on the box
 
 | Variable | Example |
 |---|---|
-| `APP_DIR` | `/home/ubuntu/Fireprenair-main` (the git checkout) |
-| `DJANGO_DIR` | `/home/ubuntu/Fireprenair-main/prenair` |
-| `VENV_DIR` | `/home/ubuntu/Fireprenair-main/prenair/venv` |
+| `APP_DIR` | `/home/ubuntu/Fireprenair` (the git checkout) |
+| `DJANGO_DIR` | `/home/ubuntu/Fireprenair/prenair` |
+| `VENV_DIR` | `/home/ubuntu/Fireprenair/prenair/venv` |
 | `SERVICE_NAME` | `fireprenair` (the systemd unit running daphne) |
 | `DJANGO_SETTINGS_MODULE` | `prenair.production_settings` |
 | `HEALTH_URL` | `http://127.0.0.1/` |
@@ -44,7 +44,7 @@ Connect from the EC2 console (**Instances → fireprenair → Connect → EC2 In
 Connect → Connect**), then run one command:
 
 ```bash
-cd /home/ubuntu/Fireprenair-main && git pull && bash deploy/setup-server.sh
+cd /home/ubuntu/Fireprenair && git pull && bash deploy/setup-server.sh
 ```
 
 It finds the service, path and virtualenv itself, grants CI the narrow sudo
@@ -65,7 +65,7 @@ sudo chmod 440 /etc/sudoers.d/fireprenair-deploy
 sudo apt-get install -y postgresql-client
 
 # Point the checkout at the repo if it is not already.
-cd /home/ubuntu/Fireprenair-main && git remote -v
+cd /home/ubuntu/Fireprenair && git remote -v
 ```
 </details>
 
@@ -93,7 +93,7 @@ the live box. Remove it once you trust the pipeline.
 
 Roll back by hand at any time:
 ```bash
-cd /home/ubuntu/Fireprenair-main && git reset --hard <previous-sha> && sudo systemctl restart fireprenair
+cd /home/ubuntu/Fireprenair && git reset --hard <previous-sha> && sudo systemctl restart fireprenair
 ```
 
 ## Known risks

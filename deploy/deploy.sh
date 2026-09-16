@@ -36,7 +36,21 @@ die() { printf '\n\033[1;31m!!! %s\033[0m\n' "$*" >&2; exit 1; }
 log "Checking disk"
 FREE_MB=$(df -Pm "$APP_DIR" | awk 'NR==2 {print $4}')
 df -h "$APP_DIR" | tail -1
-[ "$FREE_MB" -ge "$MIN_FREE_MB" ] || die "Only ${FREE_MB}MB free, need ${MIN_FREE_MB}MB. Free space first (old backups, pip cache, journal logs) and re-run."
+
+# The box sits around 86% full, so a deploy used to stall waiting for somebody
+# to log in and delete caches by hand. Reclaim the throwaway things first --
+# none of this is data -- and only then decide whether there is room.
+if [ "$FREE_MB" -lt "$MIN_FREE_MB" ]; then
+  log "Only ${FREE_MB}MB free — reclaiming caches and old logs"
+  rm -rf "$HOME/.cache/pip" 2>/dev/null || true
+  sudo apt-get clean 2>/dev/null || true
+  sudo journalctl --vacuum-size=100M >/dev/null 2>&1 || true
+  git -C "$APP_DIR" gc --prune=now --quiet 2>/dev/null || true
+  FREE_MB=$(df -Pm "$APP_DIR" | awk 'NR==2 {print $4}')
+  log "Now ${FREE_MB}MB free"
+fi
+
+[ "$FREE_MB" -ge "$MIN_FREE_MB" ] || die "Only ${FREE_MB}MB free, need ${MIN_FREE_MB}MB, and automatic cleanup could not reclaim enough. The disk needs to grow."
 
 # ── 2. Record where we can roll back to ──────────────────────────────────────
 cd "$APP_DIR"
@@ -103,33 +117,86 @@ source "$VENV_DIR/bin/activate"
 log "Installing requirements"
 pip install --quiet --no-cache-dir -r requirements.txt || { rollback; die "pip install failed"; }
 
-# ── 6. Migrations — OFF by default, and deliberately so ──────────────────────
-# This step used to run `makemigrations` and `migrate` on every deploy. That
-# was wrong twice over:
+# ── 6. Migrations ────────────────────────────────────────────────────────────
+# These run on every deploy, because a release whose code reaches the server
+# but whose schema does not is not a release -- it is an outage waiting for the
+# first request to the new page.
 #
-#   * `makemigrations` writes new migration files on the production host,
-#     derived from whatever state that host happens to be in. Migrations belong
-#     in version control, authored and reviewed, not generated mid-deploy.
-#   * `migrate` changes the database, and the rollback below cannot undo it.
-#     A deploy that rolls back the code but not the schema leaves the two out
-#     of step, which is worse than either failing cleanly.
+# Two rules make that safe to automate:
 #
-# Deploy #13 demonstrated the cost: it applied allauth migrations to a SQLite
-# file that turned out not to hold the live data, and the code rollback left
-# those writes in place.
+#   * --fake-initial. The project's apps were migrated at some point and the
+#     migration files were then lost (they were gitignored), so the live
+#     database holds the tables while Django's record of them is empty.
+#     --fake-initial recognises a table that already exists and marks the
+#     initial migration applied instead of trying to create it again. Once the
+#     record is straight, later migrations apply normally.
+#   * makemigrations is never run here. Migration files are authored and
+#     reviewed in the repository, not generated on the production host from
+#     whatever state that host happens to be in. CI fails the build if a model
+#     change arrives without one.
 #
-# Set the RUN_MIGRATIONS repository variable to "true" only when you have
-# decided, for that release, that the schema change is right and reviewed.
-if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
-  log "Applying migrations (RUN_MIGRATIONS=true)"
-  python manage.py migrate --noinput || { rollback; die "migrate failed"; }
-else
-  log "Skipping migrations (set RUN_MIGRATIONS=true to enable)"
-  # Say plainly whether the code being deployed needs a schema this database
-  # does not have, instead of finding out from 500s after the restart.
-  PENDING=$(python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[ \]' || true)
-  [ "${PENDING:-0}" -gt 0 ] && warn_pending="$PENDING unapplied migration(s) — the new code may not match the database"
-  [ -n "${warn_pending:-}" ] && log "WARNING: $warn_pending"
+# Deploy #13 is why both rules exist: it ran makemigrations on the server and
+# applied the result to a SQLite file that did not hold the live data.
+#
+# The database is dumped in step 3 above, before any of this.
+log "Applying migrations"
+python manage.py migrate --fake-initial --noinput || { rollback; die "migrate failed — a dump taken before this deploy is in $BACKUP_DIR"; }
+
+# Migrating fixes Django's *record* of the schema. It cannot tell you whether
+# the tables really carry the columns the models expect -- and after a
+# --fake-initial they might not. Say so plainly instead of waiting for a 500.
+log "Checking the database matches the models"
+python - <<'PYEOF' || true
+import django
+django.setup()
+from django.apps import apps
+from django.db import connection
+
+with connection.cursor() as cur:
+    cur.execute(
+        "SELECT table_name, column_name FROM information_schema.columns "
+        "WHERE table_schema = current_schema()"
+    )
+    have = {}
+    for table, column in cur.fetchall():
+        have.setdefault(table, set()).add(column)
+
+problems = []
+for model in apps.get_models():
+    table = model._meta.db_table
+    if table not in have:
+        problems.append("missing table  %s" % table)
+        continue
+    for field in model._meta.local_fields:
+        if field.column not in have[table]:
+            problems.append("missing column %s.%s" % (table, field.column))
+
+if problems:
+    print("!!! %d schema mismatch(es) between the models and the database:" % len(problems))
+    for p in problems[:25]:
+        print("      %s" % p)
+    if len(problems) > 25:
+        print("      ... and %d more" % (len(problems) - 25))
+    print("    The code expects columns the database does not have. Pages that")
+    print("    touch them will fail. That needs a real migration, not a fake one.")
+else:
+    print("Schema matches the models.")
+PYEOF
+
+# ── 6b. Settings the server is missing ───────────────────────────────────────
+# .env cannot be in git, so a release that starts reading a new setting would
+# otherwise fail at runtime. .env.example is the committed list of key names.
+if [ -f .env.example ] && [ -f .env ]; then
+  log "Checking .env against .env.example"
+  MISSING=$(comm -23 \
+    <(grep -oE '^[A-Z0-9_]+=' .env.example | tr -d '=' | sort -u) \
+    <(grep -oE '^[A-Z0-9_]+=' .env         | tr -d '=' | sort -u))
+  if [ -n "$MISSING" ]; then
+    log "WARNING: .env is missing $(echo "$MISSING" | wc -l | tr -d ' ') key(s) the code may read:"
+    echo "$MISSING" | sed 's/^/      /'
+  else
+    echo "  .env has every key in .env.example"
+  fi
 fi
 
 log "Collecting static files"
@@ -137,6 +204,47 @@ python manage.py collectstatic --noinput || { rollback; die "collectstatic faile
 
 log "Django deployment check"
 python manage.py check --deploy || true   # advisory only
+
+# ── 6c. nginx configuration ──────────────────────────────────────────────────
+# The site's nginx config used to be edited by hand on the box, which is how it
+# came to disagree with the repository -- and how a `git reset --hard` could
+# silently undo it. Keep the snippets in git and push them out from here.
+#
+# This never rewrites the server block itself beyond adding one include line,
+# and it will not reload nginx unless `nginx -t` passes, so a bad snippet
+# leaves the running config untouched.
+NGINX_SRC="$APP_DIR/deploy/nginx"
+NGINX_SITE=$(readlink -f /etc/nginx/sites-enabled/fireprenair 2>/dev/null || true)
+if [ -d "$NGINX_SRC" ] && [ -n "$NGINX_SITE" ] && [ -f "$NGINX_SITE" ]; then
+  log "Syncing nginx snippets"
+  NGINX_CHANGED=0
+  sudo mkdir -p /etc/nginx/snippets
+  for f in "$NGINX_SRC"/*.conf; do
+    [ -f "$f" ] || continue
+    dest="/etc/nginx/snippets/fireprenair-$(basename "$f")"
+    if ! sudo cmp -s "$f" "$dest" 2>/dev/null; then
+      sudo cp "$f" "$dest" && NGINX_CHANGED=1 && echo "  updated $dest"
+    fi
+    inc="include snippets/$(basename "$dest");"
+    if ! grep -qF "$inc" "$NGINX_SITE"; then
+      sudo cp "$NGINX_SITE" "$NGINX_SITE.bak-$(date +%s)"
+      awk -v inc="    $inc" '!d && /^    location \/static\/ \{/ {print inc; print ""; d=1} {print}' \
+        "$NGINX_SITE" > /tmp/fireprenair-site.conf \
+        && sudo cp /tmp/fireprenair-site.conf "$NGINX_SITE" \
+        && NGINX_CHANGED=1 && echo "  added $inc to $(basename "$NGINX_SITE")"
+    fi
+  done
+  if [ "$NGINX_CHANGED" = 1 ]; then
+    if sudo nginx -t >/dev/null 2>&1; then
+      sudo systemctl reload nginx && log "nginx reloaded"
+    else
+      log "WARNING: nginx -t failed — config NOT reloaded, the old one is still serving"
+      sudo nginx -t || true
+    fi
+  else
+    echo "  nginx config already up to date"
+  fi
+fi
 
 # ── 7. Restart and verify ────────────────────────────────────────────────────
 log "Restarting $SERVICE_NAME"

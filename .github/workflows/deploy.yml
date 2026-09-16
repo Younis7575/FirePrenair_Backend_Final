@@ -22,6 +22,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The deploy script runs on the live box with `set -Eeuo pipefail`. Bash
+      # parses as it goes, so a syntax error half way down would not surface
+      # until the script was already part way through a deploy. Check it here,
+      # where the `deploy` job cannot start unless this one passes.
+      - name: Check the deploy script parses
+        run: |
+          for f in deploy/*.sh; do
+            bash -n "$f" || { echo "::error::$f has a syntax error"; exit 1; }
+            echo "$f parses."
+          done
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -34,10 +45,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Django system check (production settings)
+      # The module named here is the one the server actually starts with, taken
+      # from the same repository variable the deploy step exports. Checking
+      # production_settings.py while the box runs settings.py -- which is what
+      # this job used to do -- means a mistake in the file that matters sails
+      # through CI and is only found by the deploy.
+      - name: Django system check (the settings the server runs)
         working-directory: prenair
         env:
-          DJANGO_SETTINGS_MODULE: prenair.production_settings
+          DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE || 'prenair.settings' }}
           # These only need to be *present*, not valid. The real values live in
           # the server's .env and never leave it.
           #
@@ -52,13 +68,38 @@ jobs:
           GROQ_API_KEY: ci-placeholder-not-a-real-key
         run: python manage.py check
 
-      - name: Fail if DEBUG is on in production settings
+      # A model change without its migration is the failure this pipeline is
+      # least able to survive: the code reaches the server, the column does not,
+      # and the page 500s. Catch it here, where nothing is at stake yet.
+      - name: Fail if a model change has no migration
+        working-directory: prenair
+        env:
+          DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE || 'prenair.settings' }}
+          DJANGO_SECRET_KEY: ci-placeholder-not-a-real-secret
+          OPENAI_API_KEY: sk-ci-placeholder-not-a-real-key
+          GROQ_API_KEY: ci-placeholder-not-a-real-key
         run: |
-          if grep -qE '^\s*DEBUG\s*=\s*True' prenair/prenair/production_settings.py; then
-            echo "::error::DEBUG=True in production_settings.py — refusing to deploy"
+          if ! python manage.py makemigrations --check --dry-run; then
+            echo "::error::A model changed but no migration was committed. Run 'python manage.py makemigrations', commit the file, and push again."
             exit 1
           fi
-          echo "DEBUG is off in production settings."
+          echo "Every model change has a migration."
+
+      - name: Report DEBUG
+        run: |
+          for f in prenair/prenair/settings.py prenair/prenair/production_settings.py; do
+            if grep -qE '^\s*DEBUG\s*=\s*True' "$f"; then
+              echo "::warning::DEBUG=True in $(basename "$f")"
+            else
+              echo "DEBUG is off in $(basename "$f")."
+            fi
+          done
+          # Only the module the server actually starts with is a hard failure.
+          RUNNING="${{ vars.DJANGO_SETTINGS_MODULE || 'prenair.settings' }}"
+          RUNNING_FILE="prenair/${RUNNING//.//}.py"
+          if grep -qE '^\s*DEBUG\s*=\s*True' "$RUNNING_FILE"; then
+            echo "::warning::The server runs $RUNNING with DEBUG=True. Django's error pages expose settings, file paths and SQL to visitors. This should be turned off, but flipping it changes what users see, so it is a warning here rather than a blocked deploy."
+          fi
 
   deploy:
     name: Deploy

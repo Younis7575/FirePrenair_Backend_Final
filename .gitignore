@@ -1,7 +1,9 @@
 venv/
 *db.sqlite3
 *__pycache__/
-*migrations/
+# Migrations ARE tracked. They describe the database, they are reviewed like
+# code, and the server must receive them the same way it receives everything
+# else. Ignoring them is why the live database and the code drifted apart.
 *node_modules/
 .env
 *myvir

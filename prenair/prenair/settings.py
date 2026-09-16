@@ -322,8 +322,15 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://192.168.0.105:8000',
     'http://10.0.2.2:8000',
-    'http://18.188.41.235',
+    'https://fireprenair.com',
+    'https://www.fireprenair.com',
+    'https://*.fireprenair.com',
 ]
+
+# nginx and Cloudflare terminate TLS, so Django sees a plain HTTP request and
+# would otherwise compare an https:// Origin header against http://. Trust the
+# header the proxy sets. proxy_params passes X-Forwarded-Proto.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set True for production (HTTPS)
 

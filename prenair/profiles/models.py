@@ -16,6 +16,19 @@ from django.apps import apps
 import zoneinfo
 
 
+def available_timezone_choices():
+    """Every timezone this machine knows about, in a stable order.
+
+    Passed to the field as a callable rather than a list on purpose. A list
+    would be written into the migration, and since available_timezones()
+    returns a set whose contents differ between machines and whose order
+    differs between runs, `makemigrations --check` would demand a fresh
+    migration almost every time it ran. Django stores a reference to this
+    function instead, so the migration stays put.
+    """
+    return [(tz, tz) for tz in sorted(zoneinfo.available_timezones())]
+
+
 # Create your models here.
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -159,7 +172,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     portfolio_link = models.URLField(max_length=200, blank=True, null=True)
 
     language = models.CharField(max_length=10, choices=[('en', 'English'),('es', 'Spanish'),('fr', 'French'),('it', 'Italian'),('zh-hans', 'Simplified Chinese'),('ko', 'Korean'),('nl', 'Dutch'),], default='en')
-    timezone = models.CharField(max_length=32, choices=[(tz, tz) for tz in zoneinfo.available_timezones()], default='UTC')
+    timezone = models.CharField(max_length=32, choices=available_timezone_choices, default='UTC')
 
     referred_by = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="referrals")
     has_listed_and_sold = models.BooleanField(default=False)

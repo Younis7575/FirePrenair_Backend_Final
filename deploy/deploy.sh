@@ -103,22 +103,35 @@ source "$VENV_DIR/bin/activate"
 log "Installing requirements"
 pip install --quiet --no-cache-dir -r requirements.txt || { rollback; die "pip install failed"; }
 
-# ── 6. Migrations ────────────────────────────────────────────────────────────
-# NOTE: migrations are excluded by .gitignore ('*migrations/'), so they are not
-# shipped with the code and have to be generated here. That is how this project
-# already works, but it means each environment invents its own history — see
-# deploy/SETUP.md, "Known risks". The database is Postgres and already holds a
-# migration history, so makemigrations only ever writes files that are new.
-log "Applying migrations"
-python manage.py makemigrations --noinput || { rollback; die "makemigrations failed"; }
-python manage.py migrate --noinput || { rollback; die "migrate failed"; }
+# ── 6. Migrations — OFF by default, and deliberately so ──────────────────────
+# This step used to run `makemigrations` and `migrate` on every deploy. That
+# was wrong twice over:
+#
+#   * `makemigrations` writes new migration files on the production host,
+#     derived from whatever state that host happens to be in. Migrations belong
+#     in version control, authored and reviewed, not generated mid-deploy.
+#   * `migrate` changes the database, and the rollback below cannot undo it.
+#     A deploy that rolls back the code but not the schema leaves the two out
+#     of step, which is worse than either failing cleanly.
+#
+# Deploy #13 demonstrated the cost: it applied allauth migrations to a SQLite
+# file that turned out not to hold the live data, and the code rollback left
+# those writes in place.
+#
+# Set the RUN_MIGRATIONS repository variable to "true" only when you have
+# decided, for that release, that the schema change is right and reviewed.
+if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
+  log "Applying migrations (RUN_MIGRATIONS=true)"
+  python manage.py migrate --noinput || { rollback; die "migrate failed"; }
+else
+  log "Skipping migrations (set RUN_MIGRATIONS=true to enable)"
+  # Say plainly whether the code being deployed needs a schema this database
+  # does not have, instead of finding out from 500s after the restart.
+  PENDING=$(python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[ \]' || true)
+  [ "${PENDING:-0}" -gt 0 ] && warn_pending="$PENDING unapplied migration(s) — the new code may not match the database"
+  [ -n "${warn_pending:-}" ] && log "WARNING: $warn_pending"
+fi
 
-# No --clear: static files live in S3 (django-storages), and --clear calls
-# clear_dir("") -> storage.exists("") -> S3 head_object with an empty Key,
-# which S3 rejects outright:
-#   ParamValidationError: Invalid length for parameter Key, value: 0
-# It is also the wrong thing to want here — it would try to wipe the bucket
-# prefix before re-uploading. collectstatic overwrites changed files anyway.
 log "Collecting static files"
 python manage.py collectstatic --noinput || { rollback; die "collectstatic failed"; }
 

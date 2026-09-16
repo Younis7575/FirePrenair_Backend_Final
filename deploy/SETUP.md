@@ -96,7 +96,8 @@ the live box. Remove it once you trust the pipeline.
    - `git reset --hard origin/main`;
    - `pip install -r requirements.txt`;
    - `makemigrations` + `migrate`;
-   - `collectstatic --clear`;
+   - `collectstatic` (no `--clear` — static files are in S3, where `--clear`
+     asks for an empty S3 key and fails);
    - restarts the service, then curls it up to 10 times;
    - **rolls back to the previous commit and restarts** if any step fails.
 

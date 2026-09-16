@@ -113,8 +113,14 @@ log "Applying migrations"
 python manage.py makemigrations --noinput || { rollback; die "makemigrations failed"; }
 python manage.py migrate --noinput || { rollback; die "migrate failed"; }
 
+# No --clear: static files live in S3 (django-storages), and --clear calls
+# clear_dir("") -> storage.exists("") -> S3 head_object with an empty Key,
+# which S3 rejects outright:
+#   ParamValidationError: Invalid length for parameter Key, value: 0
+# It is also the wrong thing to want here — it would try to wipe the bucket
+# prefix before re-uploading. collectstatic overwrites changed files anyway.
 log "Collecting static files"
-python manage.py collectstatic --noinput --clear || { rollback; die "collectstatic failed"; }
+python manage.py collectstatic --noinput || { rollback; die "collectstatic failed"; }
 
 log "Django deployment check"
 python manage.py check --deploy || true   # advisory only

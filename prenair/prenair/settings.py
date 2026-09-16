@@ -229,7 +229,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 MEDIA_ROOT = BASE_DIR / "static/images"
-MEDIA_URL = "/images/"
+# Under /api/ on purpose: Cloudflare challenges every visitor outside the UAE,
+# and an existing rule exempts any URI containing "/api". A browser solves the
+# challenge; the mobile app's HTTP client cannot, so media served from /images/
+# came back 403 to the app. nginx serves both paths (deploy/nginx/media.conf).
+MEDIA_URL = "/api/images/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

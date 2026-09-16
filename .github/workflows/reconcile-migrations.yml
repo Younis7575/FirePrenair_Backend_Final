@@ -59,7 +59,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           command_timeout: 15m
-          script_stop: true
+          # Not script_stop: it injects a shell check after every line, which
+          # breaks anything multi-line. The script sets -Eeuo pipefail itself.
           script: |
             set -Eeuo pipefail
             APP_DIR="${{ vars.APP_DIR }}"
@@ -115,27 +116,7 @@ jobs:
             # database at all.
             echo
             echo "==> Recording the committed migrations as applied"
-            python - <<'PYEOF'
-            import pathlib
-            import django
-            django.setup()
-            from django.db.migrations.recorder import MigrationRecorder
-            from django.db import connection
-
-            recorder = MigrationRecorder(connection)
-            recorder.ensure_schema()
-            applied = {(app, name) for app, name in recorder.applied_migrations()}
-
-            recorded = 0
-            for path in sorted(pathlib.Path(".").glob("*/migrations/[0-9]*.py")):
-                app, name = path.parts[0], path.stem
-                if (app, name) in applied:
-                    continue
-                recorder.record_applied(app, name)
-                print("      recorded %s.%s" % (app, name))
-                recorded += 1
-            print("%d migration(s) recorded" % recorded)
-            PYEOF
+            python "$APP_DIR/deploy/record_migrations.py"
 
             echo
             echo "==> migrate (should have nothing left to do)"
@@ -149,39 +130,7 @@ jobs:
             # ── 5. Did the schema survive untouched, and does it fit? ────────
             echo
             echo "==> Checking the database still matches the models"
-            python - <<'PYEOF'
-            import django
-            django.setup()
-            from django.apps import apps
-            from django.db import connection
-
-            with connection.cursor() as cur:
-                cur.execute(
-                    "SELECT table_name, column_name FROM information_schema.columns "
-                    "WHERE table_schema = current_schema()"
-                )
-                have = {}
-                for table, column in cur.fetchall():
-                    have.setdefault(table, set()).add(column)
-
-            problems = []
-            for model in apps.get_models():
-                table = model._meta.db_table
-                if table not in have:
-                    problems.append("missing table  %s" % table)
-                    continue
-                for field in model._meta.local_fields:
-                    if field.column not in have[table]:
-                        problems.append("missing column %s.%s" % (table, field.column))
-
-            print("tables in database: %d" % len(have))
-            if problems:
-                print("!!! %d mismatch(es):" % len(problems))
-                for p in problems[:40]:
-                    print("      %s" % p)
-                raise SystemExit(1)
-            print("Schema matches the models.")
-            PYEOF
+            python "$APP_DIR/deploy/check_schema.py"
 
             echo
             echo "==> Nothing left to apply?"

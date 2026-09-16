@@ -146,42 +146,10 @@ python manage.py migrate --fake-initial --noinput || { rollback; die "migrate fa
 # the tables really carry the columns the models expect -- and after a
 # --fake-initial they might not. Say so plainly instead of waiting for a 500.
 log "Checking the database matches the models"
-python - <<'PYEOF' || true
-import django
-django.setup()
-from django.apps import apps
-from django.db import connection
-
-with connection.cursor() as cur:
-    cur.execute(
-        "SELECT table_name, column_name FROM information_schema.columns "
-        "WHERE table_schema = current_schema()"
-    )
-    have = {}
-    for table, column in cur.fetchall():
-        have.setdefault(table, set()).add(column)
-
-problems = []
-for model in apps.get_models():
-    table = model._meta.db_table
-    if table not in have:
-        problems.append("missing table  %s" % table)
-        continue
-    for field in model._meta.local_fields:
-        if field.column not in have[table]:
-            problems.append("missing column %s.%s" % (table, field.column))
-
-if problems:
-    print("!!! %d schema mismatch(es) between the models and the database:" % len(problems))
-    for p in problems[:25]:
-        print("      %s" % p)
-    if len(problems) > 25:
-        print("      ... and %d more" % (len(problems) - 25))
-    print("    The code expects columns the database does not have. Pages that")
-    print("    touch them will fail. That needs a real migration, not a fake one.")
-else:
-    print("Schema matches the models.")
-PYEOF
+# Reported, not fatal: the site may well be serving every page that does not
+# touch the missing column, and failing the deploy would not put the column
+# back. The line to act on is in this log.
+python "$APP_DIR/deploy/check_schema.py" || true
 
 # ── 6b. Settings the server is missing ───────────────────────────────────────
 # .env cannot be in git, so a release that starts reading a new setting would

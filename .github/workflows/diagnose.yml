@@ -25,28 +25,20 @@ jobs:
           script: |
             DJANGO_DIR="${{ vars.DJANGO_DIR }}"
             cd "$DJANGO_DIR"
+            export $(grep -E '^DB_' .env | tr -d ' "' | xargs)
 
-            echo "===== A. migration files ON THE SERVER (per app) ====="
-            for d in */migrations; do
-              [ -d "$d" ] || continue
-              n=$(ls "$d"/*.py 2>/dev/null | grep -v __init__ | wc -l)
-              echo "$n  $d"
-            done
-
-            echo
-            echo "===== B. every server migration filename (sha1 so we can compare) ====="
-            find . -path '*/migrations/*.py' ! -name '__init__.py' -printf '%p\n' \
-              | sort | while read -r f; do printf '%s  %s\n' "$(sha1sum "$f" | cut -c1-8)" "$f"; done
+            echo "===== what django_migrations records for the project's apps ====="
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F'  ' -c \
+              "SELECT app, name, applied FROM django_migrations
+               WHERE app IN ('profiles','commu_prenair','work_prenair','digi_prenair',
+                             'edu_prenair','dashboard','home')
+               ORDER BY app, id"
 
             echo
-            echo "===== C. what the database says is applied ====="
-            ../venv/bin/python manage.py showmigrations --plan 2>&1 | tail -40
+            echo "===== totals per app ====="
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F'  ' -c \
+              "SELECT app, count(*) FROM django_migrations GROUP BY app ORDER BY app"
 
             echo
-            echo "===== D. count applied vs unapplied ====="
-            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[X\]' | sed 's/^/applied  : /'
-            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[ \]' | sed 's/^/pending  : /'
-
-            echo
-            echo "===== E. which ones are pending ====="
-            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep '^\[ \]'
+            echo "===== migration files now on the server ====="
+            find . -path '*/migrations/*.py' ! -name '__init__.py' | sort

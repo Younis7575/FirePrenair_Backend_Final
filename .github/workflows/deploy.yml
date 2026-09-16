@@ -8,6 +8,8 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
+      # Editing the read-only diagnose workflow is not a release.
+      - '.github/workflows/diagnose.yml'
   workflow_dispatch:
 
 concurrency:

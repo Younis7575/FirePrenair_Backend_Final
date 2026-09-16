@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Image unavailable">
+  <rect width="400" height="300" fill="#f1f2f4"/>
+  <g transform="translate(200 138)" fill="none" stroke="#c2c7ce" stroke-width="6"
+     stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-52" y="-40" width="104" height="80" rx="8"/>
+    <circle cx="-22" cy="-14" r="10"/>
+    <path d="M-52 24 L-16 -8 L8 14 L24 2 L52 26"/>
+  </g>
+  <text x="200" y="224" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="17" fill="#9aa1ab">Image unavailable</text>
+</svg>

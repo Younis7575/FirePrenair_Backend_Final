@@ -106,6 +106,34 @@ Roll back by hand at any time:
 cd /home/ubuntu/Fireprenair && git reset --hard <previous-sha> && sudo systemctl restart fireprenair
 ```
 
+## The one that matters most
+
+**Production runs the development settings.** The daphne unit sets no
+`DJANGO_SETTINGS_MODULE`, so `asgi.py` falls back to `prenair.settings`. That
+means the live site is running on:
+
+* `DEBUG = True` — every unhandled error returns a full traceback, local
+  variables and settings to whoever triggered it;
+* **SQLite**, not PostgreSQL;
+* `ALLOWED_HOSTS = ['*']`.
+
+`production_settings.py` — DEBUG off, Postgres, real ALLOWED_HOSTS, secure
+cookies — is not being used by anything.
+
+This surfaced when a deploy ran `migrate` against `production_settings`
+(Postgres, which holds only Django's own tables) while the app read SQLite, and
+the new code then died on `no such table: dashboard_trafficlog`.
+
+Two ways forward:
+
+1. **Match reality now.** Set the `DJANGO_SETTINGS_MODULE` repository variable
+   to `prenair.settings` so migrations run against the database the app
+   actually uses. Deploys work; the site stays on SQLite with DEBUG on.
+2. **Move to the production settings properly.** Migrate the SQLite data into
+   Postgres, add `Environment=DJANGO_SETTINGS_MODULE=prenair.production_settings`
+   to the daphne unit, restart. This is a real piece of work and wants its own
+   maintenance window — but until it happens, DEBUG is on in production.
+
 ## Known risks
 
 **Migrations are not in version control.** `.gitignore` contains `*migrations/`,

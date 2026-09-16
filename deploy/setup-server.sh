@@ -48,9 +48,29 @@ if [ -z "$VENV_DIR" ] && [ -n "$EXECSTART" ]; then
 fi
 [ -n "$VENV_DIR" ] && ok "virtualenv: $VENV_DIR" || bad "could not find the virtualenv"
 
+# Read what the service actually uses. Do NOT fall back to a plausible-looking
+# value: this script previously defaulted to prenair.production_settings, which
+# hid the fact that the unit sets nothing and asgi.py therefore falls back to
+# prenair.settings -- the development settings, on SQLite, with DEBUG=True.
+# Migrations then ran against the wrong database entirely.
 SETTINGS=$(systemctl show -p Environment --value "$SERVICE" 2>/dev/null | tr ' ' '\n' | grep '^DJANGO_SETTINGS_MODULE=' | cut -d= -f2)
-[ -z "$SETTINGS" ] && SETTINGS="prenair.production_settings"
-ok "settings: $SETTINGS"
+if [ -n "$SETTINGS" ]; then
+  ok "settings: $SETTINGS (from the systemd unit)"
+else
+  SETTINGS=$(grep -oE "setdefault\(['\"]DJANGO_SETTINGS_MODULE['\"], *['\"][^'\"]+" "$DJANGO_DIR/prenair/asgi.py" 2>/dev/null | sed "s/.*['\"]//")
+  SETTINGS="${SETTINGS:-prenair.settings}"
+  warn "the unit sets no DJANGO_SETTINGS_MODULE — asgi.py falls back to: $SETTINGS"
+fi
+
+# Which database is that settings module actually pointing at? Getting this
+# wrong means migrating one database while the app reads another.
+DB_ENGINE=$(cd "$DJANGO_DIR" && DJANGO_SETTINGS_MODULE="$SETTINGS" "$VENV_DIR/bin/python" -c \
+  "import django;django.setup();from django.conf import settings;print(settings.DATABASES['default']['ENGINE'].rsplit('.',1)[-1])" 2>/dev/null | tail -1)
+[ -n "$DB_ENGINE" ] && ok "database: $DB_ENGINE" || warn "could not determine the database backend"
+if [ "$DB_ENGINE" = "sqlite3" ]; then
+  warn "the live app is on SQLite. production_settings.py (Postgres, DEBUG=False)
+    is not what is running -- see deploy/SETUP.md, \"Known risks\"."
+fi
 
 banner "2/4  Granting CI permission to restart $SERVICE (and nothing else)"
 DEPLOY_USER="${SUDO_USER:-$(id -un)}"

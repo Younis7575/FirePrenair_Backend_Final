@@ -105,6 +105,21 @@ refusing, grow the EBS volume.
 service-account key tracked in git. The repo is private, so it is not public —
 but it is in the history, and anyone with repo access has it.
 
+**requirements.txt did not describe the app.** Three packages the code imports
+at module level were missing from it — `psycopg2` (the Postgres driver),
+`docraptor` and `elevenlabs`. The server has all three installed by hand, so
+nothing was visibly wrong until CI built an environment from the file alone and
+the app would not import. All three are now pinned. Rebuilding the virtualenv
+from `requirements.txt` was, until this commit, something that would have
+broken the site.
+
+**The app cannot start without an OpenAI key.** `home/views.py` runs
+`client = OpenAI()` at module level, and four other modules do the same with
+`settings.OPENAI_API_KEY`. A missing key therefore does not disable one AI
+feature — it raises during URLconf import and stops the site from starting.
+Building those clients lazily, inside the views that use them, would turn a
+total outage into one broken feature. CI passes placeholders to get past it.
+
 **The Postgres driver was never pinned.** `production_settings.py` uses
 `django.db.backends.postgresql`, but `psycopg2` was missing from
 `requirements.txt` — the server has one installed by hand. Rebuilding the

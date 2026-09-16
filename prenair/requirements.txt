@@ -92,3 +92,10 @@ zope.interface==7.1.1
 # rebuilding the virtualenv from this file alone would leave Django unable
 # to reach the database.
 psycopg2-binary==2.9.9
+# Imported at module level but never pinned, same as psycopg2 was:
+#   dashboard/views.py     -> import docraptor
+#   edu_prenair/views.py   -> from elevenlabs import ElevenLabs
+# The server has both installed by hand, so this only showed up once CI
+# built an environment from this file alone.
+docraptor==3.1.0
+elevenlabs==2.65.0

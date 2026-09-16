@@ -48,8 +48,24 @@ log "Current commit $PREVIOUS_SHA"
 # file production_settings.py reads. They are never passed in from CI.
 BACKUP_DIR="$HOME/fireprenair-backups"
 mkdir -p "$BACKUP_DIR"
+# Read the DB_* values out of .env WITHOUT executing it. Sourcing it with '.'
+# assumes the file is valid shell, and a Django .env generally is not: a line
+# like `DJANGO_SECRET_KEY = "..."` makes the shell try to run
+# DJANGO_SECRET_KEY as a command, which is exactly how this failed first time.
 if [ -f "$DJANGO_DIR/.env" ]; then
-  set -a; . "$DJANGO_DIR/.env"; set +a
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in \#*|'') continue ;; esac
+    key=$(printf '%s' "${line%%=*}" | tr -d '[:space:]')
+    case "$key" in
+      DB_NAME|DB_USER|DB_PASSWORD|DB_HOST|DB_PORT) ;;
+      *) continue ;;
+    esac
+    val=${line#*=}
+    # strip surrounding whitespace, then a matching pair of quotes
+    val=$(printf '%s' "$val" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+                                   -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'\$/\1/")
+    export "$key=$val"
+  done < "$DJANGO_DIR/.env"
 fi
 if command -v pg_dump >/dev/null 2>&1 && [ -n "${DB_NAME:-}" ]; then
   STAMP=$(date +%Y%m%d-%H%M%S)

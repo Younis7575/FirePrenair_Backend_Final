@@ -38,9 +38,18 @@ jobs:
         working-directory: prenair
         env:
           DJANGO_SETTINGS_MODULE: prenair.production_settings
-          # Only needs to be *a* key for the check to import settings; the real
-          # one lives in the server's .env and never leaves it.
+          # These only need to be *present*, not valid. The real values live in
+          # the server's .env and never leave it.
+          #
+          # They are required because several modules build their API clients at
+          # import time -- home/views.py does `client = OpenAI()` at module
+          # level, so importing the URLconf raises OpenAIError when the key is
+          # absent. Worth fixing properly one day (build the clients lazily, in
+          # the view that uses them): as it stands, a missing key does not
+          # degrade one AI feature, it stops the whole site from starting.
           DJANGO_SECRET_KEY: ci-placeholder-not-a-real-secret
+          OPENAI_API_KEY: sk-ci-placeholder-not-a-real-key
+          GROQ_API_KEY: ci-placeholder-not-a-real-key
         run: python manage.py check
 
       - name: Fail if DEBUG is on in production settings

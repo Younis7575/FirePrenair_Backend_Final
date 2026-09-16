@@ -1,0 +1,156 @@
+name: Reconcile migration history
+
+# A ONE-OFF repair, not part of any release. Run it by hand, once.
+#
+# The problem it fixes:
+#   The project's migration files were gitignored for the whole life of the
+#   project. The database therefore records 158 migrations for the seven local
+#   apps -- a real history, built between December 2024 and September 2026 --
+#   while the files that produced it exist nowhere: not in the repository, not
+#   in the backup zip, not on the server. Three of the names now committed
+#   collide with names in that record, so `migrate` refuses with
+#   InconsistentMigrationHistory and every deploy rolls back.
+#
+# What it does:
+#   Deletes the seven apps' rows from django_migrations and re-records them
+#   from the committed files with `migrate --fake-initial`. This is the normal
+#   way to restart a migration history whose files are gone.
+#
+# What it does not do:
+#   It runs no schema DDL. django_migrations is Django's bookkeeping table:
+#   which migrations it believes have run. No user, gig, order, post or file
+#   is read or written. The tables and columns are left exactly as they are,
+#   and the step afterwards checks that they still match the models.
+#
+# It takes a full pg_dump first, and refuses to start unless you type the
+# confirmation word.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "reconcile" to confirm this rewrites django_migrations'
+        required: true
+        default: ''
+
+concurrency:
+  # Must never overlap a deploy.
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Reconcile
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check the confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "reconcile" ]; then
+            echo "::error::Type 'reconcile' in the confirmation box to run this."
+            exit 1
+          fi
+
+      - name: Reconcile on the server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          command_timeout: 15m
+          script_stop: true
+          script: |
+            set -Eeuo pipefail
+            APP_DIR="${{ vars.APP_DIR }}"
+            DJANGO_DIR="${{ vars.DJANGO_DIR }}"
+            VENV_DIR="${{ vars.VENV_DIR }}"
+            export DJANGO_SETTINGS_MODULE="${{ vars.DJANGO_SETTINGS_MODULE }}"
+
+            cd "$APP_DIR"
+            git fetch --prune origin
+            git reset --hard origin/main
+
+            cd "$DJANGO_DIR"
+            source "$VENV_DIR/bin/activate"
+
+            # ── 1. Back up first, always ─────────────────────────────────────
+            export $(grep -E '^DB_' .env | tr -d ' "' | xargs)
+            BACKUP="$HOME/fireprenair-backups/pre-reconcile-$(date +%Y%m%d-%H%M%S).sql.gz"
+            echo "==> Dumping $DB_NAME to $BACKUP"
+            PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "${DB_PORT:-5432}" \
+                -U "$DB_USER" -d "$DB_NAME" | gzip > "$BACKUP"
+            ls -lh "$BACKUP"
+
+            # ── 2. The apps to reset, taken from the files themselves ────────
+            APPS=$(find . -mindepth 2 -maxdepth 2 -type d -name migrations \
+                   | sed 's|^\./||; s|/migrations$||' | sort | tr '\n' ' ')
+            echo "==> Apps with committed migrations: $APPS"
+
+            QUOTED=$(printf "'%s'," $APPS | sed 's/,$//')
+
+            echo
+            echo "==> django_migrations rows BEFORE"
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F'  ' \
+              -c "SELECT app, count(*) FROM django_migrations WHERE app IN ($QUOTED) GROUP BY app ORDER BY app"
+
+            # ── 3. Clear the record for those apps only ──────────────────────
+            # Third-party apps (auth, admin, allauth, socialaccount...) are not
+            # touched: their files still exist and their history is intact.
+            echo
+            echo "==> Deleting their rows"
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" \
+              -c "DELETE FROM django_migrations WHERE app IN ($QUOTED)"
+
+            # ── 4. Re-record from the committed files ────────────────────────
+            # --fake-initial sees the tables already exist and marks the initial
+            # migrations applied instead of trying to create them.
+            echo
+            echo "==> Re-recording with migrate --fake-initial"
+            python manage.py migrate --fake-initial --noinput
+
+            echo
+            echo "==> django_migrations rows AFTER"
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F'  ' \
+              -c "SELECT app, count(*) FROM django_migrations WHERE app IN ($QUOTED) GROUP BY app ORDER BY app"
+
+            # ── 5. Did the schema survive untouched, and does it fit? ────────
+            echo
+            echo "==> Checking the database still matches the models"
+            python - <<'PYEOF'
+            import django
+            django.setup()
+            from django.apps import apps
+            from django.db import connection
+
+            with connection.cursor() as cur:
+                cur.execute(
+                    "SELECT table_name, column_name FROM information_schema.columns "
+                    "WHERE table_schema = current_schema()"
+                )
+                have = {}
+                for table, column in cur.fetchall():
+                    have.setdefault(table, set()).add(column)
+
+            problems = []
+            for model in apps.get_models():
+                table = model._meta.db_table
+                if table not in have:
+                    problems.append("missing table  %s" % table)
+                    continue
+                for field in model._meta.local_fields:
+                    if field.column not in have[table]:
+                        problems.append("missing column %s.%s" % (table, field.column))
+
+            print("tables in database: %d" % len(have))
+            if problems:
+                print("!!! %d mismatch(es):" % len(problems))
+                for p in problems[:40]:
+                    print("      %s" % p)
+                raise SystemExit(1)
+            print("Schema matches the models.")
+            PYEOF
+
+            echo
+            echo "==> Nothing left to apply?"
+            python manage.py showmigrations --plan | grep -c '^\[ \]' | sed 's/^/pending: /'

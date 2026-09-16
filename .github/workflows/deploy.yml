@@ -10,6 +10,7 @@ on:
       - 'docs/**'
       # Editing the read-only diagnose workflow is not a release.
       - '.github/workflows/diagnose.yml'
+      - '.github/workflows/reconcile-migrations.yml'
   workflow_dispatch:
 
 concurrency:

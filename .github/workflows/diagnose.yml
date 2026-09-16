@@ -64,5 +64,19 @@ jobs:
             echo "(khali = woh files server par kahin nahi hain)"
 
             echo
-            echo "===== 7. disk ====="
+            echo "===== 7. can the lost uploads be recovered from git? ====="
+            cd "$APP_DIR"
+            echo "-- is the pre-deploy commit still in the object store? --"
+            git cat-file -e e3c290f3^{commit} 2>&1 && echo "e3c290f3 EXISTS" || echo "e3c290f3 GONE"
+            echo "-- reflog (what HEAD pointed at before) --"
+            git reflog --date=iso 2>&1 | head -12
+            echo "-- other remotes/branches still known --"
+            git remote -v; git branch -a 2>&1 | head
+            echo "-- how many media files did the pre-deploy commit track? --"
+            git ls-tree -r --name-only e3c290f3 -- prenair/static/images 2>/dev/null | wc -l
+            echo "-- does it contain the two missing files? --"
+            git ls-tree -r --name-only e3c290f3 2>/dev/null | grep -i 'WhatsApp_Image_2025-07-05\|Group_1_2.png' | head
+
+            echo
+            echo "===== 8. disk ====="
             df -h /

@@ -23,94 +23,30 @@ jobs:
           port: 22
           command_timeout: 5m
           script: |
-            APP_DIR="${{ vars.APP_DIR }}"
             DJANGO_DIR="${{ vars.DJANGO_DIR }}"
-
-            echo "===== 1. effective nginx config for /static/ ====="
-            sudo nginx -T 2>/dev/null | grep -n -B8 -A6 'location /static' || echo "(no /static/ location found)"
-
-            echo
-            echo "===== 2. which server blocks claim fireprenair.com ====="
-            sudo nginx -T 2>/dev/null | grep -n 'server_name\|# configuration file' | grep -i -B1 'fireprenair\|server_name'
-
-            echo
-            echo "===== 3. does the file exist, and can nginx read it? ====="
-            F="$DJANGO_DIR/staticfiles/commu_prenair/assets/css/style.css"
-            ls -l "$F" 2>&1
-            sudo -u www-data test -r "$F" && echo "www-data CAN read it" || echo "www-data CANNOT read it"
-            namei -l "$F" 2>&1 | tail -12
-
-            echo
-            echo "===== 4. what nginx actually answers ====="
-            for p in /static/commu_prenair/assets/css/style.css /static/images/navbar/icons.png; do
-              printf '%s -> ' "$p"
-              curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: fireprenair.com' "http://127.0.0.1$p"
-            done
-
-            echo
-            echo "===== 5. latest nginx errors ====="
-            sudo tail -15 /var/log/nginx/error.log
-
-            echo
-            echo "===== 6. where do uploaded media files actually live? ====="
-            echo "-- MEDIA_ROOT Django thinks it uses --"
-            cd "$DJANGO_DIR" && ../venv/bin/python -c "import django;django.setup();from django.conf import settings;print('MEDIA_ROOT:',settings.MEDIA_ROOT);print('MEDIA_URL :',settings.MEDIA_URL)" 2>&1 | tail -3
-            echo "-- candidate upload directories on disk --"
-            for d in "$DJANGO_DIR/static/images" "$DJANGO_DIR/media" "$APP_DIR/media" "$DJANGO_DIR/images"; do
-              [ -d "$d" ] && echo "$d : $(find "$d" -type f | wc -l) files"
-            done
-            echo "-- hunting two files the site asks for and cannot find --"
-            sudo find /home -name 'WhatsApp_Image_2025-07-05*' -o -name 'Group_1_2.png' 2>/dev/null | head -5
-            echo "(khali = woh files server par kahin nahi hain)"
-
-            echo
-            echo "===== 7. can the lost uploads be recovered from git? ====="
-            cd "$APP_DIR"
-            echo "-- is the pre-deploy commit still in the object store? --"
-            git cat-file -e e3c290f3^{commit} 2>&1 && echo "e3c290f3 EXISTS" || echo "e3c290f3 GONE"
-            echo "-- reflog (what HEAD pointed at before) --"
-            git reflog --date=iso 2>&1 | head -12
-            echo "-- other remotes/branches still known --"
-            git remote -v; git branch -a 2>&1 | head
-            echo "-- how many media files did the pre-deploy commit track? --"
-            git ls-tree -r --name-only e3c290f3 -- prenair/static/images 2>/dev/null | wc -l
-            echo "-- does it contain the two missing files? --"
-            git ls-tree -r --name-only e3c290f3 2>/dev/null | grep -i 'WhatsApp_Image_2025-07-05\|Group_1_2.png' | head
-
-            echo
-            echo "===== 8. how many images does the database reference that are missing? ====="
             cd "$DJANGO_DIR"
-            DJANGO_SETTINGS_MODULE=prenair.settings ../venv/bin/python - <<'PYEOF'
-            import django, os
-            django.setup()
-            from django.apps import apps
-            from django.db import models
-            from django.conf import settings
-            total = missing = 0
-            per_model = {}
-            for m in apps.get_models():
-                fields = [f for f in m._meta.get_fields()
-                          if isinstance(f, (models.FileField, models.ImageField))]
-                if not fields:
-                    continue
-                names = [f.name for f in fields]
-                for row in m.objects.all().only(*names).iterator():
-                    for n in names:
-                        v = getattr(row, n, None)
-                        if not v:
-                            continue
-                        total += 1
-                        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, str(v))):
-                            missing += 1
-                            k = f"{m._meta.label}.{n}"
-                            per_model[k] = per_model.get(k, 0) + 1
-            print(f"MEDIA_ROOT      : {settings.MEDIA_ROOT}")
-            print(f"file references : {total}")
-            print(f"missing on disk : {missing}")
-            for k, v in sorted(per_model.items(), key=lambda kv: -kv[1]):
-                print(f"   {v:5d}  {k}")
-            PYEOF
+
+            echo "===== A. migration files ON THE SERVER (per app) ====="
+            for d in */migrations; do
+              [ -d "$d" ] || continue
+              n=$(ls "$d"/*.py 2>/dev/null | grep -v __init__ | wc -l)
+              echo "$n  $d"
+            done
 
             echo
-            echo "===== 9. disk ====="
-            df -h /
+            echo "===== B. every server migration filename (sha1 so we can compare) ====="
+            find . -path '*/migrations/*.py' ! -name '__init__.py' -printf '%p\n' \
+              | sort | while read -r f; do printf '%s  %s\n' "$(sha1sum "$f" | cut -c1-8)" "$f"; done
+
+            echo
+            echo "===== C. what the database says is applied ====="
+            ../venv/bin/python manage.py showmigrations --plan 2>&1 | tail -40
+
+            echo
+            echo "===== D. count applied vs unapplied ====="
+            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[X\]' | sed 's/^/applied  : /'
+            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep -c '^\[ \]' | sed 's/^/pending  : /'
+
+            echo
+            echo "===== E. which ones are pending ====="
+            ../venv/bin/python manage.py showmigrations --plan 2>/dev/null | grep '^\[ \]'

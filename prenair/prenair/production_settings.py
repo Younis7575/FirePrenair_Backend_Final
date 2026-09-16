@@ -26,7 +26,18 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["3.135.224.67", "fireprenair.com", "www.fireprenair.com", "localhost", "127.0.0.1", '18.188.41.235', ".fireprenair.com"]
+# The instance has no Elastic IP, so its public address changes whenever it is
+# stopped and started -- 3.135.224.67 and 18.188.41.235 are previous addresses
+# that were left behind here. 3.21.28.122 is the address as of 2026-09-16.
+# Allocating an Elastic IP would stop this list needing edits.
+ALLOWED_HOSTS = [
+    "fireprenair.com",
+    "www.fireprenair.com",
+    ".fireprenair.com",
+    "3.21.28.122",
+    "localhost",
+    "127.0.0.1",
+]
 
 SITE_ID = 1
 

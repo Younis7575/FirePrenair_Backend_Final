@@ -87,3 +87,8 @@ urllib3==2.2.3
 webencodings==0.5.1
 yarl==1.18.3
 zope.interface==7.1.1
+# production_settings.py uses django.db.backends.postgresql, but no Postgres
+# driver was ever pinned here -- the server has one installed by hand, so
+# rebuilding the virtualenv from this file alone would leave Django unable
+# to reach the database.
+psycopg2-binary==2.9.9

@@ -39,6 +39,21 @@ Same page, **Variables** tab. Fill these in with the real paths on the box
 | `HEALTH_URL` | `http://127.0.0.1/` |
 
 ### 3. On the server, once
+
+Connect from the EC2 console (**Instances → fireprenair → Connect → EC2 Instance
+Connect → Connect**), then run one command:
+
+```bash
+cd /home/ubuntu/Fireprenair-main && git pull && bash deploy/setup-server.sh
+```
+
+It finds the service, path and virtualenv itself, grants CI the narrow sudo
+right to restart that one service, installs `postgresql-client`, and prints
+every value to paste into GitHub. Safe to re-run. If it cannot identify the
+service, re-run as `SERVICE_OVERRIDE=<name> bash deploy/setup-server.sh`.
+
+<details><summary>Or do it by hand</summary>
+
 ```bash
 # The deploy restarts a service, so the deploy user needs exactly that right —
 # and nothing more.
@@ -52,6 +67,7 @@ sudo apt-get install -y postgresql-client
 # Point the checkout at the repo if it is not already.
 cd /home/ubuntu/Fireprenair-main && git remote -v
 ```
+</details>
 
 ### 4. Protect the first run
 Create a `production` environment (`Settings → Environments`) with yourself as a

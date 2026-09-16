@@ -78,5 +78,39 @@ jobs:
             git ls-tree -r --name-only e3c290f3 2>/dev/null | grep -i 'WhatsApp_Image_2025-07-05\|Group_1_2.png' | head
 
             echo
-            echo "===== 8. disk ====="
+            echo "===== 8. how many images does the database reference that are missing? ====="
+            cd "$DJANGO_DIR"
+            DJANGO_SETTINGS_MODULE=prenair.settings ../venv/bin/python - <<'PYEOF'
+            import django, os
+            django.setup()
+            from django.apps import apps
+            from django.db import models
+            from django.conf import settings
+            total = missing = 0
+            per_model = {}
+            for m in apps.get_models():
+                fields = [f for f in m._meta.get_fields()
+                          if isinstance(f, (models.FileField, models.ImageField))]
+                if not fields:
+                    continue
+                names = [f.name for f in fields]
+                for row in m.objects.all().only(*names).iterator():
+                    for n in names:
+                        v = getattr(row, n, None)
+                        if not v:
+                            continue
+                        total += 1
+                        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, str(v))):
+                            missing += 1
+                            k = f"{m._meta.label}.{n}"
+                            per_model[k] = per_model.get(k, 0) + 1
+            print(f"MEDIA_ROOT      : {settings.MEDIA_ROOT}")
+            print(f"file references : {total}")
+            print(f"missing on disk : {missing}")
+            for k, v in sorted(per_model.items(), key=lambda kv: -kv[1]):
+                print(f"   {v:5d}  {k}")
+            PYEOF
+
+            echo
+            echo "===== 9. disk ====="
             df -h /

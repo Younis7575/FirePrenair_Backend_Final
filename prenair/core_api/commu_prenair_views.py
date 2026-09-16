@@ -10,7 +10,7 @@ from profiles.models import Notification
 
 # ai 
 import json
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.safestring import mark_safe
 import markdown
@@ -218,7 +218,21 @@ class MakePostView(APIView):
 @authenticated_user_required_commu_api
 def make_group_post_api(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    
+
+    # Posting is for members. `group_detail_api` already refuses to show a
+    # private group to a non-member, but this endpoint let anyone signed in
+    # post into any group — including a private one they had never joined,
+    # which made the whole membership-request flow pointless.
+    is_member = (
+        group.admin_id == request.user.id
+        or group.members.filter(id=request.user.id).exists()
+    )
+    if not is_member:
+        return Response(
+            {'error': 'You must join this group to post in it.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     content = request.data.get('content')
     image = request.FILES.get('image')
     video = request.FILES.get('video')
@@ -320,11 +334,14 @@ def add_reply_api(request, comment_id):
             content=content
         )
         
+        # `author.profile.profile_pic` never resolved — CustomUser has no
+        # `profile` relation, profile_pic sits on the user — so the avatar came
+        # back null every time, and `username` was sent where the templates
+        # show `name`. Returning the serialised reply keeps this identical to
+        # what the post detail hands back for a comment.
         return Response({
             "success": True,
-            "author_name": reply.author.username,
-            "author_profile_pic": reply.author.profile.profile_pic.url if hasattr(reply.author, 'profile') and reply.author.profile.profile_pic else None,
-            "content": reply.content,
+            "reply": ReplyCommentSerializer(reply).data,
         }, status=status.HTTP_201_CREATED)
     
     except Comment.DoesNotExist:
@@ -399,25 +416,58 @@ def get_likes_api(request, slug):
 
     return Response({'liked_users': liked_users}, status=status.HTTP_200_OK)
 
+def _get_user_by_slug(slug):
+    """Resolve a user from a URL segment that may be a slug or a username.
+
+    The commu endpoints all matched `slug=slug` exactly. A user whose username
+    differs from their slug only in case -- `Test4` against `test4`, which is
+    what slugify produces -- therefore 404'd on their own profile, because the
+    clients hold the username and send that.
+    """
+    user = User.objects.filter(slug=slug).first()
+    if user is None:
+        user = User.objects.filter(slug__iexact=slug).first()
+    if user is None:
+        user = User.objects.filter(username__iexact=slug).first()
+    if user is None:
+        raise Http404(f'No user matching "{slug}".')
+    return user
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile_api(request, slug):
-    user = get_object_or_404(User, slug=slug)
+    user = _get_user_by_slug(slug)
     posts = Post.objects.filter(author=user, is_group_post=False).order_by('-created_at')
     
     user_data = UserSerializer(user).data
     posts_data = PostSerializer(posts, many=True).data
-    
+
+    # The website's profile header shows "<n> Followers" above a stack of the
+    # first three connection avatars (see partials/profile_topbar.html). Only
+    # the connections *list* endpoint carried this, so the app had to make a
+    # second request just to draw the header.
+    # A method, not a property — the template calls it implicitly, Python does not.
+    connections = user.user_connections()
     return Response({
         'user': user_data,
-        'posts': posts_data
+        'posts': posts_data,
+        'followers_count': connections.count(),
+        'followers': [
+            {
+                'username': person.username,
+                'slug': person.slug,
+                'name': person.name,
+                'profile_pic': person.profile_pic.url if person.profile_pic else None,
+            }
+            for person in connections[:3]
+        ],
     })
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile_about_api(request, slug):
-    user = get_object_or_404(User, slug=slug)
+    user = _get_user_by_slug(slug)
     user_data = UserSerializer(user).data
     
     return Response({'user': user_data})
@@ -426,7 +476,7 @@ def profile_about_api(request, slug):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile_groups_api(request, slug):
-    user = get_object_or_404(User, slug=slug)
+    user = _get_user_by_slug(slug)
     groups = Group.objects.filter(members=user)
     
     user_data = UserSerializer(user).data
@@ -454,11 +504,23 @@ def group_detail_api(request, slug):
     posts_data = PostSerializer(posts, many=True).data
     friends_data = UserSerializer(friends_in_group, many=True).data
     
+    # The app has to decide which header actions to draw — Leave vs Join vs
+    # "Requested", and whether to offer Manage Group — and none of that was
+    # derivable from the payload before.
+    is_admin = group.admin_id == request.user.id
+
     return Response({
         'group': group_data,
         'posts': posts_data,
         'friends_count': friends_count,
-        'friends_in_group': friends_data
+        'friends_in_group': friends_data,
+        'is_admin': is_admin,
+        'is_member': group.is_member(request.user),
+        'is_pending': group.is_pending(request.user),
+        'member_count': group.members.count(),
+        # Only the admin can act on these, so only the admin is told.
+        'pending_requests_count':
+            group.group_membership_requests.count() if is_admin else 0,
     })
     
     
@@ -466,6 +528,16 @@ def group_detail_api(request, slug):
 @permission_classes([IsAuthenticated])
 def manage_group_api(request, slug):
     group = get_object_or_404(Group, slug=slug)
+
+    # Membership requests are the group admin's to decide. Without this any
+    # signed-in user could read another group's pending requests and approve
+    # or decline them — `decline_all` from a non-admin was accepted.
+    if group.admin_id != request.user.id:
+        return Response(
+            {'error': 'Only the group admin can manage this group.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     member_requests = GroupMemberShipRequests.objects.filter(group=group)
     
     query = request.GET.get('query')
@@ -521,35 +593,61 @@ def get_group_categories_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createe_group_api(request):
-    name=request.data.get('name')
-    desc=request.data.get('desc')
-    is_private=request.data.get('is_private')
-    profile_img=request.data.get('profile_img')
-    cover_img=request.data.get('cover_img')
-    category_l_1=request.data.get('category_l_1')
-    category_l_2=request.data.get('category_l_2')
-    category_l_3=request.data.get('category_l_3')
-    data=request.data
-    if not all([data.get('name'), data.get('desc'), data.get('profile_img'), data.get('cover_img')]):
-        return Response({'error': 'All fields are required.(name, desc, profile_img, cover_img)'}, status=400)
+    name = request.data.get('name')
+    desc = request.data.get('desc')
+    is_private = request.data.get('is_private', 'False')
+    # DRF puts uploaded files in request.FILES, not request.data
+    profile_img = request.FILES.get('profile_img') or request.data.get('profile_img')
+    cover_img = request.FILES.get('cover_img') or request.data.get('cover_img')
+    category_l_1 = request.data.get('category_l_1')
+    category_l_2 = request.data.get('category_l_2')
+    category_l_3 = request.data.get('category_l_3')
+
+    print(f'Create Group: name={name}, desc={desc}, private={is_private}, l1={category_l_1}, l2={category_l_2}, l3={category_l_3}')
+    print(f'  profile_img={profile_img}, cover_img={cover_img}')
+
+    if not name or not desc:
+        return Response({'error': 'Name and description are required.'}, status=400)
+    if not category_l_1:
+        return Response({'error': 'Category L1 is required.'}, status=400)
+
     try:
+        # Validate categories exist
+        cat_l1 = Groupcategory.objects.get(id=category_l_1)
+        cat_l2 = Groupcategory.objects.get(id=category_l_2) if category_l_2 else cat_l1
+        cat_l3 = Groupcategory.objects.get(id=category_l_3) if category_l_3 else cat_l2
+    except Groupcategory.DoesNotExist:
+        return Response({'error': 'Invalid category ID.'}, status=400)
+
+    try:
+        # Handle is_private properly - DRF sends form data as strings
+        if isinstance(is_private, str):
+            is_private_bool = is_private.lower() in ('true', '1', 'yes')
+        else:
+            is_private_bool = bool(is_private)
+
+        print(f'  Creating group: name={name}, private={is_private_bool}, img={profile_img}, cover={cover_img}')
+
         group = Group.objects.create(
             name=name,
             desc=desc,
             admin=request.user,
-            is_private=is_private,
+            is_private=is_private_bool,
             profile_img=profile_img,
             bg_img=cover_img,
             slug=slugify(name) + "-" + str(uuid.uuid4())[:6],
-            category_l_1=Groupcategory.objects.get(id=category_l_1),
-            category_l_2=Groupcategory.objects.get(id=category_l_2),
-            category_l_3=Groupcategory.objects.get(id=category_l_3)
+            category_l_1=cat_l1,
+            category_l_2=cat_l2,
+            category_l_3=cat_l3,
         )
-        print('instance created')
         group.members.add(request.user)
         group.save()
+        print(f'  Group created successfully: {group.slug}')
         return Response({'message': 'Group created successfully.', 'group': GroupSerializer(group).data})
     except Exception as e:
+        print(f'  ERROR creating group: {e}')
+        import traceback
+        traceback.print_exc()
         return Response({'error': str(e)}, status=400)
 
 
@@ -597,7 +695,7 @@ def leave_group_api(request, slug):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile_connections_api(request, slug):
-    user = get_object_or_404(User, slug=slug)
+    user = _get_user_by_slug(slug)
     query = request.GET.get('q', '')
     
     connections_sent = User.objects.filter(connections_sent__to_user=user)
@@ -622,7 +720,7 @@ def connection_requests_api(request):
 @permission_classes([IsAuthenticated])
 def send_friend_request_api(request, slug):
     try:
-        to_user = get_object_or_404(User, slug=slug)
+        to_user = _get_user_by_slug(slug)
         
         if FriendRequest.objects.filter(from_user=request.user, to_user=to_user).exists():
             return Response({'message': 'Friend request already sent.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -640,7 +738,7 @@ def send_friend_request_api(request, slug):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def withdraw_friend_request_api(request, slug):
-    to_user = get_object_or_404(User, slug=slug)
+    to_user = _get_user_by_slug(slug)
     friend_request = FriendRequest.objects.filter(from_user=request.user, to_user=to_user).first()
     
     if not friend_request:
@@ -652,7 +750,7 @@ def withdraw_friend_request_api(request, slug):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def handle_friend_request_api(request, slug, action):
-    tto_user = get_object_or_404(User, slug=slug)
+    tto_user = _get_user_by_slug(slug)
     friend_request = FriendRequest.objects.filter(from_user=tto_user, to_user=request.user).first()
     
     if not friend_request:
@@ -672,7 +770,7 @@ def handle_friend_request_api(request, slug, action):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_connection_api(request, slug):
-    other_user = get_object_or_404(User, slug=slug)
+    other_user = _get_user_by_slug(slug)
     
     Connection.objects.filter(from_user=request.user, to_user=other_user).delete()
     Connection.objects.filter(from_user=other_user, to_user=request.user).delete()
@@ -721,11 +819,30 @@ def profile_settings_api(request):
 @permission_classes([IsAuthenticated])
 def user_messages_api(request):
     try:
-        print('inside the api') 
+        # When ?user_slug= is present, find/create a private chat with that user
+        # instead of listing all chats. This handles the case where Flutter opens
+        # a chat from a profile with no existing chat slug.
+        user_slug = request.GET.get('user_slug')
+        if user_slug:
+            other_user = _get_user_by_slug(user_slug)
+            chat = PrivateChat.objects.filter(
+                (Q(user1=request.user, commu_prenair_chat=True) & Q(user2=other_user, commu_prenair_chat=True)) |
+                (Q(user1=other_user, commu_prenair_chat=True) & Q(user2=request.user, commu_prenair_chat=True))
+            ).first()
+            if not chat:
+                unique_uuid = uuid.uuid4()
+                chat_slug = slugify(f"{request.user.username}-{other_user.username}-{unique_uuid}")
+                chat = PrivateChat.objects.create(user1=request.user, user2=other_user, slug=chat_slug)
+                Notification.objects.create(
+                    user=other_user,
+                    message=f'{request.user.username} has started a chat with you on Commuprenair',
+                    app_name='commuprenair'
+                )
+            return Response({"chat_slug": chat.slug}, status=status.HTTP_201_CREATED)
+
         user_chats = request.user.get_all_chats()
         
         chats_with_last_message = []
-        print(' before loop inside the api') 
         for user_chat in user_chats:
             last_message = user_chat.chat_messages.order_by('-timestamp').first()
             unread_count = user_chat.chat_messages.filter(is_read=False, receiver=request.user).count()
@@ -736,11 +853,10 @@ def user_messages_api(request):
                 "unread_count": unread_count
             }
             chats_with_last_message.append(chat_data)
-        print('after loop inside the api') 
 
         return Response(chats_with_last_message, status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -755,7 +871,7 @@ def private_chat_api(request, slug):
             if not other_user_slug:
                 return Response({"error": "User slug is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-            other_user = get_object_or_404(User, slug=other_user_slug)
+            other_user = _get_user_by_slug(other_user_slug)
             
             chat = PrivateChat.objects.filter(
                 (Q(user1=request.user, commu_prenair_chat=True) & Q(user2=other_user, commu_prenair_chat=True)) |

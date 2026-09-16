@@ -16,6 +16,27 @@ def admin_not_allowed(view_func):
     return _wrapped_view
 
 
+def admin_not_allowed_api(view_func):
+    """API counterpart of [admin_not_allowed].
+
+    The web version answers with a 302 to the home page. On an API endpoint
+    that hands a mobile client an HTML redirect it cannot act on, so this
+    returns a JSON 403 instead.
+    """
+    from rest_framework import status as drf_status
+    from rest_framework.response import Response
+
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not hasattr(request.user, 'role') or request.user.role == 'admin':
+            return Response(
+                {'error': 'Admin accounts cannot use the seller dashboard.'},
+                status=drf_status.HTTP_403_FORBIDDEN,
+            )
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
 
 def get_top_sellers(count=10, min_sales=0):
     top_sellers = CustomUser.objects.filter(

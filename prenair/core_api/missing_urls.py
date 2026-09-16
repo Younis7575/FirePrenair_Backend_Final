@@ -5,6 +5,9 @@ These are appended to core_api/urls.py
 from django.urls import path
 from .missing_apis import *
 from .missing_apis_v2 import *
+from .missing_apis_v3 import *
+from .home_views import home_subscribe_api
+from .edu_prenair_views import get_notifications_api
 
 urlpatterns = [
     # ==================== COMMUPRENAIR EVENTS ====================
@@ -92,4 +95,24 @@ urlpatterns = [
 
     # ==================== CHAT THREAD ====================
     path('home/delete_thread/', delete_chat_thread_api, name='delete_chat_thread_api'),
+
+    # ==================== HOME SUBSCRIBE ====================
+    path('home/subscribe/', home_subscribe_api, name='home_subscribe_api'),
+
+    # ==================== EDU NOTIFICATIONS ====================
+    path('eduprenair/notifications/', get_notifications_api, name='edu_notifications_api'),
+
+    # ==================== FUNNEL SEND TAG EMAIL ====================
+    path('dashboard/funnels/send-tag-email/', send_tag_email_api_v2, name='send_tag_email_api_v2'),
+
+    # ==================== PROFILE RECOVERY & CHECK ====================
+    path('my_accounts/forgot-password/', forgot_password_api_v2, name='forgot_password_api_v2'),
+    path('my_accounts/forgot-username/', forgot_username_api_v2, name='forgot_username_api_v2'),
+    path('my_accounts/password-reset-confirm/', password_reset_confirm_api_v2, name='password_reset_confirm_api_v2'),
+    path('my_accounts/check-username/', check_username_availability_api, name='check_username_availability_api'),
+    path('my_accounts/check-email/', check_email_availability_api, name='check_email_availability_api'),
+
+    # ==================== ADMIN SALES ====================
+    path('dashboard/admin/sales/digiprenair/', digi_sales_api, name='admin_digi_sales_api'),
+    path('dashboard/admin/sales/workprenair/', work_sales_api, name='admin_work_sales_api'),
 ]

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fireprenair.server</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>source /Users/apple/Desktop/Fireprenair-main/prenair/venv/bin/activate && cd /Users/apple/Desktop/Fireprenair-main/prenair && python manage.py runserver 0.0.0.0:8000</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/apple/Desktop/Fireprenair-main/prenair</string>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/tmp/fireprenair_server.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/fireprenair_server.log</string>
+</dict>
+</plist>

@@ -382,7 +382,7 @@ def digi_product_api(request, slug):
         if user_review_exists:
             return Response({'error': 'You have already reviewed this product.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ReviewSerializer(data=request.data)
+        serializer = DigiReviewSerializer(data=request.data)
         if serializer.is_valid():
             review = serializer.save(product=product, user=request.user)
 
@@ -830,10 +830,38 @@ def digi_purchases_api(request):
 
 
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def digi_become_seller_api(request):
+    """Apply to sell on DigiPrenair, mirroring `digi_prenair.views`.
+
+    The website answers a GET by either bouncing an existing seller to their
+    dashboard or rendering the application form pre-filled from the account.
+    Only POST existed here, so a client had no way to ask "am I a seller?" and
+    had to guess — which is why the app's "Become a Seller" link went straight
+    to the upload screen for everyone.
+    """
     user = request.user
+
+    if request.method == "GET":
+        return Response(
+            {
+                "is_seller": user.is_digi_seller,
+                "is_verified": user.digi_is_verified,
+                # The form's Name field is pre-filled on the website; the rest
+                # are sent back so a re-application is not typed from scratch.
+                "prefill": {
+                    "name": user.name or "",
+                    "phone": user.phone_no or "",
+                    "country": user.country or "",
+                    "skills": user.digi_speciality or "",
+                    "portfolio": user.digi_portfolio or "",
+                    "bio": user.digi_description or "",
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+
     if user.is_digi_seller:
         return Response(
             {"detail": "You are already a Seller."},

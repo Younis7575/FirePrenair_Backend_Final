@@ -1,3 +1,5 @@
+import re
+from importlib import import_module
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -87,44 +89,173 @@ class LogoutUserAPIView(APIView):
             'message': 'You have successfully logged out.'
         }, status=status.HTTP_200_OK)
 
+def _as_bool(value, default=False):
+    """Registration flags arrive as JSON booleans from the app and as the
+    strings 'true'/'on' from the web form. Accept either."""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ('true', '1', 'yes', 'on', 'agree')
+
+
+def _registration_session(request):
+    """Returns (session_store, registration_data).
+
+    The web flow carries the session in a cookie. Mobile clients can't rely on
+    a cookie jar, so they replay the `session_id` handed back by /register/
+    (in the body, or the X-Session-Id header) and we open that store directly.
+    """
+    data = request.session.get('registration_data')
+    if data:
+        return request.session, data
+
+    key = (
+        request.data.get('session_id')
+        or request.headers.get('X-Session-Id')
+        or ''
+    )
+    key = str(key).strip()
+    if key:
+        engine = import_module(settings.SESSION_ENGINE)
+        store = engine.SessionStore(session_key=key)
+        data = store.get('registration_data')
+        if data:
+            return store, data
+
+    return request.session, None
+
+
+def _auth_payload(user):
+    """The same user + tokens shape LoginUserAPIView returns, so a client can
+    treat a completed verification exactly like a fresh login."""
+    refresh = RefreshToken.for_user(user)
+    return {
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'name': user.name,
+            'username': user.username,
+            'role': user.role,
+            'slug': user.slug,
+            'profile_pic': user.profile_pic.url if user.profile_pic else None,
+            'is_edu_instructor': user.is_edu_instructor,
+            'is_work_freelancer': user.is_work_freelancer,
+            'is_digi_seller': user.is_digi_seller,
+            'is_corporate_client': user.is_corporate_client,
+            'is_staff': user.is_staff,
+            'country': user.country,
+            'language': user.language,
+            'timezone': user.timezone,
+        },
+        'tokens': {
+            'accessToken': str(refresh.access_token),
+            'refreshToken': str(refresh),
+        },
+    }
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserAPIView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         data = request.data
-        full_name = data.get('full_name')
-        email = data.get('email')
-        username = data.get('username')
-        password = data.get('password')
-        country = data.get('country', '')
-        language = data.get('language', 'en')
-        user_timezone = data.get('timezone', 'UTC')
-        phone = data.get('phone', '')
-        customer_type = data.get('customer_type', '')
-        identity_type = data.get('identity_type', '')
-        identity_number = data.get('identity_number', '')
-        referral_code = data.get('referral_code', '')
-        terms_accepted = data.get('agree')
+        full_name = (data.get('full_name') or '').strip()
+        email = (data.get('email') or '').strip()
+        username = (data.get('username') or '').strip()
+        password = data.get('password') or ''
+        country = (data.get('country') or '').strip()
+        language = (data.get('language') or 'en').strip()
+        user_timezone = (data.get('timezone') or 'UTC').strip()
+        phone = (data.get('phone') or '').strip()
+        age_confirmed = _as_bool(data.get('age_confirmed'), default=True)
+        customer_type = (data.get('customer_type') or '').strip()
+        identity_type = (data.get('identity_type') or '').strip()
+        identity_number = (data.get('identity_number') or '').strip()
+        referral_code = (data.get('referral_code') or '').strip()
+        terms_accepted = _as_bool(data.get('agree_terms')) or data.get('agree') == 'agree'
+        privacy_accepted = _as_bool(data.get('agree_privacy'))
         errors = {}
+
+        # Full Name validation
         if not full_name:
             errors['full_name'] = 'Full Name is required.'
+        elif len(full_name) < 2:
+            errors['full_name'] = 'Full name must be at least 2 characters.'
+
+        # Email validation
         if not email:
             errors['email'] = 'Email is required.'
-        elif CustomUser.objects.filter(email=email).exists():
+        elif not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+            errors['email'] = 'Please enter a valid email address.'
+        elif CustomUser.objects.filter(email__iexact=email).exists():
             errors['email'] = 'An account with this email already exists.'
+
+        # Username validation
         if not username:
             errors['username'] = 'Username is required.'
-        elif CustomUser.objects.filter(username=username).exists():
+        elif len(username) < 3:
+            errors['username'] = 'Username must be at least 3 characters.'
+        elif not re.match(r'^[a-zA-Z0-9_]+$', username):
+            errors['username'] = 'Username can only contain letters, numbers, and underscores.'
+        elif CustomUser.objects.filter(username__iexact=username).exists():
             errors['username'] = 'This username is already taken.'
+
+        # Password validation (strong)
         if not password:
             errors['password'] = 'Password is required.'
+        else:
+            if len(password) < 8:
+                errors['password'] = 'Password must be at least 8 characters long.'
+            elif not re.search(r'[A-Z]', password):
+                errors['password'] = 'Password must contain at least one uppercase letter.'
+            elif not re.search(r'[a-z]', password):
+                errors['password'] = 'Password must contain at least one lowercase letter.'
+            elif not re.search(r'[0-9]', password):
+                errors['password'] = 'Password must contain at least one number.'
+            elif not re.search(r'[^A-Za-z0-9]', password):
+                errors['password'] = 'Password must contain at least one special character.'
+
+        # Country required
+        if not country:
+            errors['country'] = 'Country/Region is required.'
+
+        # Language required
+        if not language:
+            errors['language'] = 'Preferred language is required.'
+
+        # Timezone required
+        if not user_timezone:
+            errors['timezone'] = 'Timezone is required.'
+
+        # Phone E.164 format (optional but must be valid if provided)
+        if phone and not re.match(r'^\+\d{1,14}$', phone):
+            errors['phone'] = 'Please enter a valid phone number in E.164 format (e.g., +1234567890).'
+
+        # Optional KYC fields must still match the values the model accepts,
+        # otherwise create_user() stores something no form can render back.
+        valid_customer_types = dict(CustomUser.CUSTOMER_TYPE)
+        if customer_type and customer_type not in valid_customer_types:
+            errors['customer_type'] = 'Please choose a valid customer type.'
+
+        valid_identity_types = dict(CustomUser.IDENTITY_TYPE_CHOICES)
+        if identity_type and identity_type not in valid_identity_types:
+            errors['identity_type'] = 'Please choose a valid identity type.'
+        if identity_type and not identity_number:
+            errors['identity_number'] = 'Identity number is required for the selected identity type.'
+
+        # Terms & Privacy
         if not terms_accepted:
-            errors['terms'] = 'You must accept the Terms of Service and Privacy Policy.'
+            errors['terms'] = 'You must agree to the Terms of Use.'
+        if not privacy_accepted:
+            errors['privacy'] = 'You must agree to the Privacy Policy.'
+
         if errors:
             return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
-        if not errors:
-            verification_code = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-            
+
+        verification_code = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
+
         request.session['registration_data'] = {
             'full_name': full_name,
             'email': email,
@@ -134,13 +265,16 @@ class RegisterUserAPIView(APIView):
             'language': language,
             'timezone': user_timezone,
             'phone': phone,
+            'age_confirmed': age_confirmed,
             'customer_type': customer_type,
             'identity_type': identity_type,
             'identity_number': identity_number,
             'referral_code': referral_code,
+            'terms_accepted': terms_accepted,
+            'privacy_accepted': privacy_accepted,
             'verification_code': verification_code,
         }
-        request.session.set_expiry(3600)  
+        request.session.set_expiry(3600)
 
         email_content = f"""
         <html>
@@ -175,26 +309,46 @@ class RegisterUserAPIView(APIView):
         </body>
         </html>
         """
-        send_email(email, '🔒 Verify Your Email - FirePrenair', email_content)
-        request.session.save()
-        print(request.session.session_key)  # This will print the session ID
+        try:
+            send_email(email, '🔒 Verify Your Email - FirePrenair', email_content)
+        except Exception as exc:
+            # The code lives in the session either way — a mail outage
+            # shouldn't wipe out a registration the user just completed.
+            print(f'Registration: could not send verification email to {email}: {exc}')
 
-        return Response({
+        request.session.save()
+
+        # Always on the server console, so a dev can complete the flow when
+        # mail delivery is unavailable.
+        print(f'[REGISTER] verification code for {email}: {verification_code}')
+
+        payload = {
             'message': 'A verification code has been sent to your email.',
             'redirect_url': f"{reverse('home')}?verify=true&email={email}",
-            'session_id': request.session.session_key,  # Include session key
-            'session': request.session
-        }, status=status.HTTP_200_OK)
+            'email': email,
+            'session_id': request.session.session_key,
+            'expires_in': 3600,
+        }
+        # Only echoed back while DEBUG is on — never in production, where it
+        # would hand the code to anyone who can call this endpoint.
+        if settings.DEBUG:
+            payload['debug_verification_code'] = verification_code
+
+        return Response(payload, status=status.HTTP_200_OK)
+
     def get(self, request):
         return Response({'message': 'Send a POST request to register.'}, status=status.HTTP_200_OK)
-    
-from rest_framework.permissions import AllowAny    
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailAPIView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        code = request.data.get('verification_code')
-        registration_data = request.session.get('registration_data')
+        code = (request.data.get('verification_code') or '').strip().upper()
+        email = (request.data.get('email') or '').strip()
+        session_store, registration_data = _registration_session(request)
+
         if not code:
             return Response(
                 {'error': 'verification_code is required.'},
@@ -205,40 +359,93 @@ class VerifyEmailAPIView(APIView):
                 {'error': 'Verification code has expired or email mismatch. Please register again.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if registration_data['verification_code'] != code:
+        if email and registration_data.get('email', '').lower() != email.lower():
             return Response(
-                {'error': 'Invalid verification code.'},
+                {'error': 'Verification code has expired or email mismatch. Please register again.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if registration_data.get('verification_code') != code:
+            return Response(
+                {'error': 'Invalid verification code. Please try again.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # The window between /register/ and /verify-email/ is long enough for
+        # someone else to claim the same email or username.
+        if CustomUser.objects.filter(email__iexact=registration_data['email']).exists():
+            return Response(
+                {'error': 'An account with this email already exists. Please sign in instead.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if CustomUser.objects.filter(username__iexact=registration_data['username']).exists():
+            return Response(
+                {'error': 'This username is already taken. Please register again with a different username.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         referrer = None
         if registration_data.get('referral_code'):
-            referrer = CustomUser.objects.filter(referral_code=registration_data['referral_code']).first()
+            referrer = CustomUser.objects.filter(
+                referral_code=registration_data['referral_code']
+            ).first()
 
-        user = CustomUser.objects.create_user(
-            name=registration_data['full_name'],
-            email=registration_data['email'],
-            username=registration_data['username'],
-            password=registration_data['password'],
-            country=registration_data.get('country', ''),
-            language=registration_data.get('language', 'en'),
-            timezone=registration_data.get('timezone', 'UTC'),
-            phone_no=registration_data.get('phone', ''),
-            customer_type=registration_data.get('customer_type') or None,
-            identity_type=registration_data.get('identity_type') or None,
-            identity_number=registration_data.get('identity_number') or None,
-            referred_by=referrer,
-            profile_pic='profile_pics/avatar.jpg',
-        )
-        user.save()
+        try:
+            user = CustomUser.objects.create_user(
+                name=registration_data['full_name'],
+                email=registration_data['email'],
+                username=registration_data['username'],
+                password=registration_data['password'],
+                country=registration_data.get('country', ''),
+                language=registration_data.get('language', 'en'),
+                timezone=registration_data.get('timezone', 'UTC'),
+                phone_no=registration_data.get('phone', ''),
+                customer_type=registration_data.get('customer_type') or None,
+                identity_type=registration_data.get('identity_type') or None,
+                identity_number=registration_data.get('identity_number') or None,
+                referred_by=referrer,
+                profile_pic='profile_pics/avatar.jpg',
+            )
+            user.save()
+        except Exception as exc:
+            print(f'Verification: could not create account: {exc}')
+            return Response(
+                {'error': f'An error occurred while creating your account: {exc}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        del request.session['registration_data']
-        return Response(
-            {
-                'message': 'Your email has been verified, and your account is now active!',
-                'redirect_url': reverse('dashboard_home')
-            },
-            status=status.HTTP_200_OK
-        )
+
+        # Consume the code so it can't be replayed.
+        try:
+            del session_store['registration_data']
+            session_store.save()
+        except KeyError:
+            pass
+
+        welcome_email_content = """
+        <html>
+        <body>
+            <div style="text-align: center; padding: 40px; font-family: Arial, sans-serif;">
+                <h1 style="color: #ff6f61;">Welcome to FirePrenair! 🎉</h1>
+                <p>Your account has been successfully verified and activated.</p>
+                <p>Start your entrepreneurial journey with us today!</p>
+            </div>
+        </body>
+        </html>
+        """
+        try:
+            send_email(user.email, '🎉 Welcome to FirePrenair!', welcome_email_content)
+        except Exception as exc:
+            print(f'Verification: could not send welcome email to {user.email}: {exc}')
+
+        payload = {
+            'message': 'Your email has been verified, and your account is now active!',
+            'redirect_url': reverse('dashboard_home'),
+        }
+        # Hand back tokens so the client lands on the dashboard signed in,
+        # exactly like the web flow does.
+        payload.update(_auth_payload(user))
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 

@@ -13,7 +13,32 @@ class UserSerializer(serializers.ModelSerializer):
             "commu_bio","edu_bio","is_edu_instructor","featured_instructor","digi_is_verified","digi_average_rating",
             "digi_is_featured","digi_speciality","digi_cover_photo","digi_portfolio","digi_description","work_bio",
             "is_work_freelancer","work_expertise","is_work_profile_approved","portfolio_link",
+            # The profile header draws a green/grey presence dot from this
+            # (partials/profile_topbar.html); it was never serialised, so the
+            # app had no way to render it.
+            "is_online",
         ]
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    """Admin-facing user listing.
+
+    The admin screens search on email and phone and show account state, so
+    unlike [UserSerializer] this exposes those fields. Referenced by the admin
+    user and online-user endpoints, which previously raised NameError because
+    no such serializer existed.
+    """
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id", "username", "name", "email", "phone_no", "slug", "role",
+            "profile_pic", "country", "city", "language", "timezone",
+            "customer_type", "company_name", "is_online", "is_active",
+            "is_staff", "created_at", "last_login",
+            "is_edu_instructor", "is_work_freelancer", "is_digi_seller",
+            "is_corporate_client",
+        ]
+
 
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,8 +80,29 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         return value
 
 
+class ReplyCommentSerializer(serializers.ModelSerializer):
+    """A reply under a comment.
+
+    Same shape as a comment so the client can render either with one widget:
+    the web templates read `reply.author.name`, `.slug`, `.profile_pic` and
+    `reply.content`, which is exactly what UserDataSerializer provides.
+    """
+
+    author = UserDataSerializer(read_only=True)
+
+    class Meta:
+        model = ReplyComment
+        fields = ['id', 'comment', 'author', 'content', 'created_at',
+                  'updated_at']
+
+
 class CommentSerializer(serializers.ModelSerializer):
-    author=UserDataSerializer(read_only=True)
+    author = UserDataSerializer(read_only=True)
+    # `fields = '__all__'` covers concrete columns only, so the `replies`
+    # reverse relation was never serialised — replies could be posted but
+    # never came back, which made them invisible in the app.
+    replies = ReplyCommentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Comment
         fields = '__all__'
@@ -74,8 +120,10 @@ class GroupCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class GroupSerializer(serializers.ModelSerializer):
-    admin=UserDataSerializer(read_only=True)
-    members=UserDataSerializer(read_only=True)
+    admin = UserDataSerializer(read_only=True)
+    # `members` is a many-to-many; without many=True the serializer is handed
+    # the related manager and blows up looking for `username` on it.
+    members = UserDataSerializer(many=True, read_only=True)
     class Meta:
         model = Group
         fields = '__all__'
@@ -671,3 +719,57 @@ class EditUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['name', 'work_bio', 'profile_pic']
+
+
+from home.models import PlanFeature, PricingPlan
+from digi_prenair.models import Review as DigiReviewModel
+
+
+class DigiReviewSerializer(serializers.ModelSerializer):
+    """Reviews on a DigiPrenair product.
+
+    `ReviewSerializer` is declared twice in this module and both bind to
+    work_prenair's Review, which has `gig`/`order` instead of `product` — so
+    the digi views were validating and rendering against the wrong table.
+    """
+
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = DigiReviewModel
+        fields = ['id', 'product', 'user', 'title', 'body', 'rating',
+                  'created_at', 'updated_at']
+        read_only_fields = ['id', 'product', 'user', 'created_at', 'updated_at']
+
+
+
+class PlanFeatureSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='feature.name', read_only=True)
+    key = serializers.CharField(source='feature.key', read_only=True)
+    description = serializers.CharField(
+        source='feature.description', read_only=True
+    )
+
+    class Meta:
+        model = PlanFeature
+        fields = ['id', 'name', 'key', 'description', 'value']
+
+
+class PricingPlanSerializer(serializers.ModelSerializer):
+    """Subscription plans for the pricing screen.
+
+    Needed by the pricing endpoint, which raised NameError because this
+    serializer was referenced but never written.
+    """
+
+    features = PlanFeatureSerializer(
+        source='plan_features', many=True, read_only=True
+    )
+
+    class Meta:
+        model = PricingPlan
+        fields = [
+            'id', 'title', 'description', 'price_monthly', 'price_annual',
+            'access_to_dept', 'ai_tools_limit', 'product_limit',
+            'service_limit', 'support_limit', 'features',
+        ]

@@ -76,6 +76,8 @@ social-auth-core==4.5.4
 sqlparse==0.5.1
 starkbank-ecdsa==2.2.0
 stripe==11.2.0
+fcm-django==2.2.1
+firebase-admin==6.5.0
 tqdm==4.66.6
 Twisted==24.11.0rc1
 txaio==23.1.1

@@ -3,6 +3,43 @@ from .models import *
 from commu_prenair.models import Message, PrivateChat
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+# Nine views in this module call send_mail and none of them imported it.
+# Every one raised NameError *after* saving its changes, so the database was
+# mutated and the client still got a 500 — submit_requirements_api left orders
+# active while telling the app the request had failed.
+from django.core.mail import send_mail as _django_send_mail
+# Same story as send_mail: used by the delivery and revision views and never
+# imported. Both templates it is asked for -- emails/order_delivery_client.html
+# and emails/revision_request_seller.html -- do not exist in this project
+# either, so once the import was added the views swapped NameError for
+# TemplateDoesNotExist. Delivering work and requesting a revision could never
+# have succeeded. A missing notification template must not sink the request
+# that already saved the delivery.
+from django.template.loader import render_to_string as _django_render_to_string
+
+
+def render_to_string(*args, **kwargs):
+    """render_to_string that degrades to an empty body instead of raising."""
+    try:
+        return _django_render_to_string(*args, **kwargs)
+    except Exception as exc:  # missing template, bad context…
+        print(f"render_to_string failed (continuing): {exc}")
+        return ""
+
+
+def send_mail(*args, **kwargs):
+    """send_mail that cannot fail the request it is called from.
+
+    Every call site here fires *after* the order has already been saved, so
+    letting an SMTP error escape rolls nothing back — it just reports failure
+    for work the server actually did, and leaves the client's view stale.
+    The module's own `send_email` helper already swallows errors this way.
+    """
+    try:
+        return _django_send_mail(*args, **kwargs)
+    except Exception as exc:  # SMTP down, refused sender, bad credentials…
+        print(f"send_mail failed (continuing): {exc}")
+        return 0
 from django.views.decorators.csrf import csrf_exempt
 import stripe
 from django.http import JsonResponse
@@ -212,28 +249,57 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+# How many gigs the home screen shows per top-level category, and overall.
+HOME_GIGS_PER_CATEGORY = 8
+HOME_GIGS_LIMIT = 40
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def work_home_api(request):
-    web_dev_gigs = Gig.objects.filter(category_level_1__name='Programming & Tech')[:8]
-    design_gigs = Gig.objects.filter(category_level_1__name='Graphics & Design')[:8]
-    ai_gigs = Gig.objects.filter(category_level_1__name='AI')[:8]
-    writing_gigs = Gig.objects.filter(category_level_1__name='Writing')[:8]
-    marketing_gigs = Gig.objects.filter(category_level_1__name='Digital Marketing')[:8]
+    """Gigs and featured categories for the WorkPrenair home screen.
 
-    # Combine all the gigs into one list
-    all_gigs = list(chain(web_dev_gigs, design_gigs, ai_gigs, writing_gigs, marketing_gigs))
+    Gigs are grouped by whatever top-level categories actually exist rather
+    than a hardcoded list of five names: previously a gig filed under any
+    other category — including featured ones — never reached the home screen
+    at all, and renaming a category silently emptied its row.
+    """
+    gigs = (
+        Gig.objects.select_related(
+            'user', 'category_level_1', 'category_level_2', 'category_level_3'
+        )
+        .prefetch_related('tags')
+        .order_by('-featured', '-top_rated', '-created_at')
+    )
 
-    # Fetch and serialize top-level featured categories
-    top_categories = Category.objects.filter(is_featured=True, parent=None)
+    # Spread the selection across categories so one busy category can't fill
+    # the whole screen, then top up with the newest gigs if there's room.
+    per_category = {}
+    picked, picked_ids = [], set()
+    for gig in gigs[: HOME_GIGS_LIMIT * 4]:
+        key = gig.category_level_1_id
+        if per_category.get(key, 0) >= HOME_GIGS_PER_CATEGORY:
+            continue
+        per_category[key] = per_category.get(key, 0) + 1
+        picked.append(gig)
+        picked_ids.add(gig.pk)
+        if len(picked) >= HOME_GIGS_LIMIT:
+            break
 
-    data = {
-        'all_gigs': GigSerializer(all_gigs, many=True).data,
-        # 'top_categories': WorkCategorySerializer(top_categories, many=True).data,
-        'top_categories': CategoryWithSubcategoriesSerializer(top_categories, many=True).data,
-    }
+    if len(picked) < HOME_GIGS_LIMIT:
+        for gig in gigs.exclude(pk__in=picked_ids)[: HOME_GIGS_LIMIT - len(picked)]:
+            picked.append(gig)
 
-    return Response(data)
+    top_categories = Category.objects.filter(
+        is_featured=True, parent=None
+    ).prefetch_related('subcategories')
+
+    return Response({
+        'all_gigs': GigSerializer(picked, many=True).data,
+        'top_categories': CategoryWithSubcategoriesSerializer(
+            top_categories, many=True
+        ).data,
+    })
 
 
 # ------------------- DASHBOARD -------------------
@@ -285,10 +351,20 @@ def sellor_dashboard_api(request):
         'delivered_orders': OrderSerializer(delivered_orders, many=True).data,
         'completed_orders': OrderSerializer(completed_orders, many=True).data,
         'active_orders_count': active_orders.count(),
+        'delivered_orders_count': delivered_orders.count(),
         'completed_orders_count': completed_orders.count(),
         'notifications': NotificationSerializer(notifications, many=True).data,
         'formatted_monthly_orders_data': formatted_monthly_orders_data,
         'yearly_orders_data': yearly_orders_data,
+        # The dashboard's four counters, as sellor_dashboard.html draws them.
+        # `active_gigs_count` and `total_work_earnings` were missing, so the
+        # app had no figure for the "Total Work Earnings" tile at all.
+        'active_gigs_count': user_gigs.count(),
+        'total_work_earnings': float(user.work_total_earnings or 0),
+        # Which profile the account is on, so the client can offer the same
+        # "Switch to Buyer" the website puts in its user menu.
+        'is_work_freelancer': user.is_work_freelancer,
+        'is_work_profile_approved': user.is_work_profile_approved,
     }
 
     return Response(response_data)
@@ -919,20 +995,86 @@ def order_detail_api(request, order_slug):
     if request.user != order.user and request.user != order.gig.user:
         return Response({'error': 'You are not authorized to view this order.'}, status=status.HTTP_403_FORBIDDEN)
 
-    # Prepare the response data
+    def _user(u):
+        return {
+            'id': u.id,
+            'username': u.username,
+            'name': u.name,
+            'slug': u.slug,
+            'email': u.email,
+            'profile_pic': u.profile_pic.url if u.profile_pic else None,
+        }
+
+    # order_detail.html renders far more than this endpoint used to return:
+    # the requirements, the deliveries and their revision requests, the
+    # reviews, and the flags that decide which of Submit Requirements /
+    # Submit Work / Request Revision / Complete / Leave A Review is offered.
+    # Without them a client could show the page but none of its actions.
+    deliveries = []
+    for delivery in order.deliveries():
+        deliveries.append({
+            'slug': delivery.slug,
+            'message': delivery.message,
+            'file': delivery.file.url if delivery.file else None,
+            'created_at': delivery.created_at,
+            'developer': _user(delivery.developer),
+            'revisions': [
+                {
+                    'slug': revision.slug,
+                    'message': revision.message,
+                    'is_resolved': revision.is_resolved,
+                    'created_at': revision.created_at,
+                    'client': _user(revision.client),
+                }
+                for revision in delivery.revisions()
+            ],
+        })
+
+    # `order_review()`, `client_reviews()` and `seller_review()` all return
+    # querysets despite two of them reading as singular, so every one of them
+    # is serialised as a list.
+    def _review(review):
+        return {
+            'rating': review.rating,
+            'review': review.review,
+            'is_client_review': review.is_client_review,
+            'created_at': review.created_at,
+            'user': _user(review.user),
+        }
+
+    is_buyer = request.user == order.user
+
     order_data = {
+        # submit_requirements_api is keyed on the numeric id, not the slug.
+        'id': order.id,
         'order_slug': order.slug,
         'gig_title': order.gig.title,
+        'gig_slug': order.gig.slug,
+        'gig_image': order.gig.image.url if getattr(order.gig, 'image', None) else None,
+        'gig_description': order.gig.description,
         'order_status': order.status,
         'order_date': order.created_at,
-        'user': {
-            'username': order.user.username,
-            'email': order.user.email,
-        },
-        'gig_user': {
-            'username': order.gig.user.username,
-            'email': order.gig.user.email,
-        },
+        'package_type': order.package_type,
+        'price': float(order.price or 0),
+        'requirements': order.requirements,
+        'delivery_date': order.delivery_date,
+        'delivery_days': order.delivery_days,
+        'completed_on': order.completed_on,
+        'is_paid': order.is_paid,
+        'is_delivered': order.is_delivered,
+        'is_completed': order.is_completed,
+        'has_client_reviewed': order.has_client_reviewed,
+        'has_seller_reviewed': order.has_seller_reviewed,
+        # Which side of the order the caller is on, so the client does not have
+        # to compare usernames to decide what to show.
+        'is_buyer': is_buyer,
+        'is_seller': request.user == order.gig.user,
+        'deliveries': deliveries,
+        'order_review': [_review(r) for r in order.order_review()],
+        'client_reviews': [_review(r) for r in order.client_reviews()],
+        'seller_review': [_review(r) for r in order.seller_review()],
+        'user': _user(order.user),
+        'gig_user': _user(order.gig.user),
         'rating_range': list(range(1, 6)),  # Rating range from 1 to 5
     }
 
@@ -2528,13 +2670,41 @@ def get_work_subcategories_api(request, category_id):
     except Exception as e:
         return Response({'errorr': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 def become_seller_api(request):
-    """
-    API endpoint for users to become sellers by providing necessary details.
+    """Apply to sell on WorkPrenair, mirroring `work_prenair.views.become_seller`.
+
+    A GET answers "where should Become Seller take me?". The website decides
+    that server-side: an approved seller is bounced to their dashboard, anyone
+    else gets the application form pre-filled from their account. Only POST
+    existed here, so a client had to guess — which is why the app's button went
+    to the dashboard for everyone, approved or not.
+
+    Note the two separate flags. `is_work_profile_approved` says the user *may*
+    sell; `is_work_freelancer` says they are *currently* acting as a seller.
+    Switching between buyer and seller only flips the second, and that is what
+    `toggle_profile_api` does.
     """
     if not request.user.is_authenticated:
         return Response({"error": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'GET':
+        user = request.user
+        return Response(
+            {
+                "is_approved": user.is_work_profile_approved,
+                "is_freelancer": user.is_work_freelancer,
+                "prefill": {
+                    "name": user.name or "",
+                    "phone": user.phone_no or "",
+                    "country": user.country or "",
+                    "about": user.work_bio or "",
+                    "portfolio": user.portfolio_link or "",
+                    "expertise": user.work_expertise or "",
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
 
     # Check if the user is already a seller
     if request.user.is_work_profile_approved:

@@ -172,7 +172,18 @@ def make_post(request):
 @authenticated_user_required_commu
 def make_group_post(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    
+
+    # Posting is for members. `group_detail` already hides a private group
+    # from non-members, but this view let anyone signed in post into any
+    # group — including a private one they had never joined.
+    is_member = (
+        group.admin_id == request.user.id
+        or group.members.filter(id=request.user.id).exists()
+    )
+    if not is_member:
+        messages.error(request, "You must join this group to post in it.")
+        return redirect('group_detail', slug=slug)
+
     if request.method == 'POST':
         content = request.POST.get('content')
         image = request.FILES.get('image')
@@ -598,6 +609,14 @@ def group_detail(request, slug):
 @authenticated_user_required_commu
 def manage_group(request, slug):
     group = get_object_or_404(Group, slug=slug)
+
+    # Membership requests are the group admin's to decide. Without this any
+    # signed-in user could open another group's manage page and approve or
+    # decline its pending requests, `decline_all` included.
+    if group.admin_id != request.user.id:
+        messages.error(request, "Only the group admin can manage this group.")
+        return redirect('group_detail', slug=slug)
+
     member_requests = GroupMemberShipRequests.objects.filter(group=group)
 
     query = request.GET.get('query')

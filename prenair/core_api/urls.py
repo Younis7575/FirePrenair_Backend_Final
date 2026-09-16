@@ -11,6 +11,7 @@ from .edu_prenair_views import *
 from .work_prenair_views import *
 from .dashboard_views import *
 from .missing_urls import urlpatterns as missing_urlpatterns
+from .fcm_views import register_fcm_token, unregister_fcm_token, test_push_notification
 
 urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -113,6 +114,11 @@ urlpatterns = [
     path('my_accounts/billing-portal/', StripeBillingPortalAPIView.as_view(), name='billing_portal_api'),
 
     path('my_accounts/change-language/', UpdateLanguageAPIView.as_view(), name='change_language_api'),
+
+    # ── FCM Push Notifications ────────────────────────────────────────
+    path('my_accounts/fcm-register/', register_fcm_token, name='fcm_register_api'),
+    path('my_accounts/fcm-unregister/', unregister_fcm_token, name='fcm_unregister_api'),
+    path('my_accounts/test-push/', test_push_notification, name='test_push_api'),
 
 
 
@@ -262,8 +268,12 @@ urlpatterns = [
     path('workprenair/seller-dashboard/', sellor_dashboard_api, name='sellor_dashboard_api'),
     path('workprenair/my_orders/', user_orders_api, name='user_orders_api'),
 
-    path('workprenair/profile/<str:username>/', user_profile_api, name='work_user_profile_api'),
+    # The literal route has to come first: `<str:username>` matches "edit",
+    # so declared the other way round every request to profile/edit/ was
+    # answered by user_profile_api with username="edit" and edit_profile_api
+    # was unreachable.
     path('workprenair/profile/edit/', edit_profile_api, name='edit_work_profile_api'),
+    path('workprenair/profile/<str:username>/', user_profile_api, name='work_user_profile_api'),
 
     path('workprenair/messages/', user_chats_api, name='user_chats_api'),
     path('workprenair/message/<str:chatSlug>/', user_chat_api, name='user_chat_api'),
@@ -282,7 +292,11 @@ urlpatterns = [
     path('workprenair/services/', gigs_api, name='gigs_api'),
     path('workprenair/gigs/', user_gigs_api, name='user_gigs_api'),
     path('workprenair/gig/create/', create_gig_api, name='create_gig_api'),
-    path('workprenair/gig/<str:slug>', gig_detail_api, name='gig_detail_api'),
+    # The only route in the project that was missing its trailing slash, so
+    # `workprenair/gig/<slug>/` — the form ApiEndpoints.workGigDetail builds,
+    # and the one every sibling route uses — 404'd. Callers that still omit the
+    # slash are redirected onto this by APPEND_SLASH.
+    path('workprenair/gig/<str:slug>/', gig_detail_api, name='gig_detail_api'),
     path('workprenair/gig/<str:slug>/edit/', edit_gig_api, name='edit_gig_api'),
     path('workprenair/gig/<str:slug>/delete/', delete_gig_api, name='delete_gig_api'),
     path('workprenair/gig/optimize/<str:slug>/', optimize_gig_api, name='optimize_gig_api'),

@@ -31,6 +31,9 @@ ASGI_APPLICATION = 'prenair.asgi.application'
 
 ALLOWED_HOSTS = ['*']
 
+# Base URL for generating absolute image URLs in API responses
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
+
 
 SITE_ID = 1
 
@@ -50,6 +53,7 @@ INSTALLED_APPS = [
 
 EXTERNAL_APPS = [
     "channels",
+    "fcm_django",
     "dashboard",
     "profiles",
     "digi_prenair",
@@ -310,7 +314,13 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #### configurations for Rest Apis
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access CSRF cookies
 CSRF_COOKIE_SAMESITE = 'Lax'  # Or 'None' if cross-site requests
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://18.188.41.235/']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://192.168.0.105:8000',
+    'http://10.0.2.2:8000',
+    'http://18.188.41.235',
+]
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set True for production (HTTPS)
 
@@ -351,3 +361,22 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+
+
+# ── FCM (Firebase Cloud Messaging) ───────────────────────────────────────
+FCM_DJANGO_SETTINGS = {
+    "DEFAULT_AUTO_HANDLE_TIMEOUT": 30,
+    "DEFAULT_AUTO_RETRY_ATTEMPTS": 3,
+}
+
+# FCM uses a service account JSON file for server-side push.
+# For local dev we skip it; the push helper is a no-op until the
+# file is placed at fcm_service_account.json in the project root.
+import json as _json
+_fcm_cred = BASE_DIR / "fcm_service_account.json"
+if _fcm_cred.exists():
+    import firebase_admin
+    from firebase_admin import credentials
+    _cred = credentials.Certificate(str(_fcm_cred))
+    firebase_admin.initialize_app(_cred)
+

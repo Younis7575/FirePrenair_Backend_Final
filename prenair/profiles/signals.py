@@ -90,6 +90,19 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @receiver(post_save, sender=PricingPlan)
 def sync_pricing_plan_with_stripe(sender, instance, created, **kwargs):
+    # Without Stripe credentials every call below raises, which made saving a
+    # PricingPlan impossible at all on a local/dev setup — the admin, fixtures
+    # and the seed command all failed before the row could be written. Skip
+    # the sync instead; the plan is still stored, only checkout is unavailable.
+    if not stripe.api_key:
+        print(
+            'Stripe not configured (STRIPE_SECRET_KEY is empty) — saved '
+            f'pricing plan "{instance.title}" without syncing prices.'
+        )
+        instance._original_price_monthly = instance.price_monthly
+        instance._original_price_annual = instance.price_annual
+        return
+
     needs_save = False
     product = None
 
@@ -132,7 +145,7 @@ def sync_pricing_plan_with_stripe(sender, instance, created, **kwargs):
         post_save.disconnect(sync_pricing_plan_with_stripe, sender=PricingPlan)
         instance.save()
         post_save.connect(sync_pricing_plan_with_stripe, sender=PricingPlan)
-        
+
     instance._original_price_monthly = instance.price_monthly
     instance._original_price_annual = instance.price_annual
 

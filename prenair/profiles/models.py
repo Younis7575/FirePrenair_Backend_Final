@@ -68,6 +68,22 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     slug = models.SlugField(max_length=150, unique=True, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     profile_pic = models.ImageField(upload_to="profile_pics/", blank=True, null=True)
+
+    @property
+    def profile_pic_url(self):
+        """Return full URL for profile_pic, handling relative and absolute paths."""
+        if not self.profile_pic:
+            return ''
+        pic = str(self.profile_pic)
+        if pic.startswith('http'):
+            return pic
+        # Relative path — prepend the server origin
+        from django.conf import settings
+        base = getattr(settings, 'SITE_URL', '')
+        if not base:
+            # Fallback: use request site or just return relative path
+            base = ''
+        return f'{base}/{pic.lstrip("/")}'
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="user")
     gender = models.CharField(max_length=10, choices=GENDER, blank=True, null=True)
 
@@ -342,8 +358,45 @@ class Notification(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     app_name = models.CharField(max_length=100,blank=True, null=True, choices=[('digiprenair', 'Digiprenair'), ('eduprenair', 'Eduprenair'), ('commuprenair', 'Commuprenair'), ('workprenair', 'Workprenair')])
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            # Fire-and-forget FCM push notification
+            try:
+                from core_api.fcm_views import send_push_notification
+                send_push_notification(
+                    user=self.user,
+                    title=f"FirePrenair - {self.get_app_name_display() or 'Update'}",
+                    body=self.message,
+                    data={'notification_id': str(self.id), 'app_name': self.app_name or ''},
+                    app_name=self.app_name,
+                )
+            except Exception:
+                pass  # Never block the request
+
     def __str__(self):
         return f"Notification for {self.user.name} - {self.message[:20]}"
     
     class Meta:
         ordering = ['-created_at']
+
+
+class FCMDeviceToken(models.Model):
+    """Stores Firebase Cloud Messaging device tokens for push notifications."""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="fcm_tokens")
+    token = models.CharField(max_length=500, unique=True)
+    platform = models.CharField(max_length=20, choices=[
+        ('android', 'Android'),
+        ('ios', 'iOS'),
+        ('web', 'Web'),
+    ], default='android')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.platform} ({self.token[:20]}...)"
+
+    class Meta:
+        ordering = ['-updated_at']

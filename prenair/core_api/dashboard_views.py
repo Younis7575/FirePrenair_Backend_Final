@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth.decorators import login_required
 from dashboard.models import WithdrawalRequest
 from profiles.models import Notification
-from dashboard.decorators import admin_not_allowed
+from dashboard.decorators import admin_not_allowed_api
 
 from commu_prenair.models import *
 from django.views.decorators.csrf import csrf_exempt
@@ -56,7 +56,7 @@ from django.db.models.functions import ExtractMonth
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def dashboard_home_api(request):
     user = request.user
     completion_percentage = user.profile_completion_percentage()
@@ -131,31 +131,39 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
-from dashboard.decorators import admin_not_allowed
+from dashboard.decorators import admin_not_allowed_api
 from digi_prenair.models import *
 from commu_prenair.models import *
 from dashboard.models import *
 from edu_prenair.models import *
 from work_prenair.models import *
+# `digi_prenair`, `work_prenair` and `edu_prenair` all define Review and
+# Order, and the last wildcard import wins — alias the digiprenair ones so
+# the digi views can't silently query the wrong table.
+from digi_prenair.models import (
+    Review as DigiReview,
+    Order as DigiOrder,
+    OrderItem as DigiOrderItem,
+)
 from .serializers import ProductSerializer, NotificationSerializer
 import calendar
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def dashboard_digiprenair_api(request):
     user = request.user
-    digi_total_reviews = Review.objects.filter(product__seller=user).count()
+    digi_total_reviews = DigiReview.objects.filter(product__seller=user).count()
     digi_total_items = user.digi_total_items
     total_earnings = user.digi_total_earnings
     total_sales = user.digi_total_sales
-    recent_sales = OrderItem.objects.filter(product__seller=user).order_by(
+    recent_sales = DigiOrderItem.objects.filter(product__seller=user).order_by(
         "-order__created_at"
     )[:10]
 
     # Total sales per month
     monthly_sales = (
-        OrderItem.objects.filter(product__seller=user)
+        DigiOrderItem.objects.filter(product__seller=user)
         .annotate(month=ExtractMonth("order__created_at"))
         .values("month")
         .annotate(total_sales=Sum("product__price"))
@@ -175,7 +183,7 @@ def dashboard_digiprenair_api(request):
         "labels": [calendar.month_name[i] for i in range(1, 13)],  # Jan to Dec
     }
 
-    orders = Order.objects.filter(user=user, is_paid=True)
+    orders = DigiOrder.objects.filter(user=user, is_paid=True)
     
     # notifications
     # Fetch unread notifications for the user
@@ -196,7 +204,12 @@ def dashboard_digiprenair_api(request):
         "user": {
             "id": user.id,
             "username": user.username,
-            # Add other user fields as needed
+            "name": user.name,
+            # The dashboard is only reachable by sellers on the website; the
+            # app needs the flag itself to decide whether to send someone here
+            # or to the application form.
+            "is_digi_seller": user.is_digi_seller,
+            "digi_is_verified": user.digi_is_verified,
         },
         "digi_total_items": digi_total_items,
         "digi_total_reviews": digi_total_reviews,
@@ -205,7 +218,7 @@ def dashboard_digiprenair_api(request):
         "recent_sales": [
             {
                 "id": sale.id,
-                "product_name": sale.product.name,
+                "product_name": sale.product.title,
                 "price": float(sale.product.price),
                 "order_date": sale.order.created_at,
                 # Add other fields as needed
@@ -214,7 +227,7 @@ def dashboard_digiprenair_api(request):
         "orders": [
             {
                 "id": order.id,
-                "total": float(order.total),
+                "total": float(order.total_amount or 0),
                 "created_at": order.created_at,
                 # Add other fields as needed
             } for order in orders
@@ -236,7 +249,7 @@ def dashboard_digiprenair_api(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def get_child_categories_digi_api(request):
     parent_id = request.query_params.get("parent_id")
     if parent_id:
@@ -250,7 +263,7 @@ def get_child_categories_digi_api(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def upload_item_digiprenair_api(request):
     user = request.user
 
@@ -279,7 +292,7 @@ def upload_item_digiprenair_api(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def manage_item_digiprenair_api(request):
     user = request.user
 
@@ -296,7 +309,7 @@ def manage_item_digiprenair_api(request):
 
 @api_view(['GET', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def edit_item_digiprenair_api(request, slug):
     user = request.user
 
@@ -346,7 +359,7 @@ def edit_item_digiprenair_api(request, slug):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def delete_notification_api(request, notification_id):
     # Get the notification or return 404 if not found
     notification = get_object_or_404(
@@ -375,7 +388,7 @@ import time
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def image_generation_api(request):
     user = request.user
     
@@ -472,7 +485,7 @@ def image_generation_api(request):
 # EduPrenair API Views
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def dashboard_eduprenair_api(request):
     user = request.user
 
@@ -486,8 +499,8 @@ def dashboard_eduprenair_api(request):
 
     edu_total_earnings = user.edu_total_earnings
     edu_total_reviews = CourseRating.objects.filter(course__instructor=user).count()
-    edu_instrcutor_courses = user.edu_instrcutor_courses
-    edu_instructor_total_students = user.edu_instructor_total_students
+    edu_instrcutor_courses = user.edu_instrcutor_courses().count()
+    edu_instructor_total_students = user.edu_instructor_total_students()
 
     # Prepare data for the Course Enrollment Chart
     course_titles = [course.title for course in listed_courses]
@@ -564,7 +577,7 @@ def dashboard_eduprenair_api(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def manage_courses_eduprenair_api(request):
     user = request.user
 
@@ -597,7 +610,7 @@ def manage_courses_eduprenair_api(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def get_child_categories_api(request):
     parent_id = request.query_params.get("parent_id")
     if parent_id:
@@ -611,7 +624,7 @@ def get_child_categories_api(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def course_create_eduprenair_api(request):
     user = request.user
     
@@ -653,7 +666,7 @@ def course_create_eduprenair_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def submit_for_approval_api(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug, instructor=request.user)
     
@@ -673,7 +686,7 @@ def submit_for_approval_api(request, course_slug):
 
 @api_view(['GET', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def course_edit_eduprenair_api(request, course_slug):
     user = request.user
     
@@ -724,7 +737,7 @@ def course_edit_eduprenair_api(request, course_slug):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def delete_course_api(request, slug):
     user = request.user
 
@@ -748,7 +761,7 @@ def delete_course_api(request, slug):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-@admin_not_allowed
+@admin_not_allowed_api
 def add_module_course_eduprenair_api(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug, instructor=request.user)
     
@@ -924,7 +937,7 @@ def digi_reviews_api(request):
     rating = request.query_params.get('rating')
     sort = request.query_params.get('sort', 'newest')
 
-    reviews = Review.objects.filter(product__seller=user)
+    reviews = DigiReview.objects.filter(product__seller=user)
     if product_id and product_id != 'all':
         reviews = reviews.filter(product_id=product_id)
     
@@ -948,7 +961,7 @@ def digi_reviews_api(request):
     five_star_count = reviews.filter(rating=5).count()
     reviewed_products_count = products.count()
 
-    reviews_serializer = ReviewSerializer(reviews, many=True)
+    reviews_serializer = DigiReviewSerializer(reviews, many=True)
     products_serializer = ProductSerializer(products, many=True)
     
     return Response({
@@ -1191,7 +1204,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Sum, Count, Avg
-from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
+from django.db.models.functions import Trunc, TruncDate, TruncWeek, TruncMonth
 from django.utils.text import slugify
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -1409,7 +1422,7 @@ def admin_traffic_logs_api(request):
 
     # Aggregate data
     traffic_data = qs.annotate(
-        date=functions.Trunc('timestamp', period)
+        date=Trunc('timestamp', period)
     ).values('date', 'country').annotate(
         visits=Count('id')
     ).order_by('-date')
@@ -1717,63 +1730,60 @@ def payment_history_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_billings_api(request):
+    """The signed-in user's subscriptions plus every plan on offer.
+
+    `PricingPlan` has no `price` or `features` attribute — the fields are
+    `price_monthly` / `price_annual`, and features hang off the `plan_features`
+    relation. The previous version read `plan.price` behind a `hasattr` guard,
+    so every price and feature list came back as null instead of erroring.
+    """
     user = request.user
-    
-    user_plans = UserPlan.objects.filter(user=user)
-    user_plan_data = []
-    
-    for plan in user_plans:
-        user_plan_data.append({
-            "id": plan.id,
-            "plan_name": plan.plan.title if hasattr(plan, 'plan') else None,
-            "start_date": plan.start_date if hasattr(plan, 'start_date') else None,
-            "end_date": plan.end_date if hasattr(plan, 'end_date') else None,
-            "is_active": plan.is_active if hasattr(plan, 'is_active') else None,
-            "price": plan.price if hasattr(plan, 'price') else None
-        })
-    
-    plans = PricingPlan.objects.all()
-    plan_data = []
-    
-    for plan in plans:
-        plan_data.append({
+
+    user_plan_data = [
+        {
+            "id": user_plan.id,
+            "plan_id": user_plan.plan_id,
+            "plan_name": user_plan.plan.title if user_plan.plan else None,
+            "type": user_plan.type,
+            "status": user_plan.status,
+            "start_date": user_plan.start_date,
+            "end_date": user_plan.end_date,
+            "is_active": user_plan.is_active,
+            "price": float(
+                user_plan.plan.price_annual
+                if user_plan.type == "annual"
+                else user_plan.plan.price_monthly
+            ) if user_plan.plan else None,
+        }
+        for user_plan in UserPlan.objects.filter(user=user).select_related("plan")
+    ]
+
+    plans = PricingPlan.objects.all().order_by("price_monthly").prefetch_related(
+        "plan_features__feature"
+    )
+    plan_data = PricingPlanSerializer(plans, many=True).data
+
+    # Keyed shortcuts the billing screen uses to lay out the columns.
+    by_title = {plan.title: plan for plan in plans}
+    available = {}
+    for key, title in (
+        ("basic_plan", "FreeTier"),
+        ("startprenair_plan", "StartPrenair"),
+        ("bizprenair_plan", "BizPrenair"),
+        ("entreprenair_plan", "EntrePrenair"),
+    ):
+        plan = by_title.get(title)
+        available[key] = {
             "id": plan.id,
             "title": plan.title,
-            "price": plan.price if hasattr(plan, 'price') else None,
-            "description": plan.description if hasattr(plan, 'description') else None,
-            "features": plan.features if hasattr(plan, 'features') else None
-        })
-    
-    basic_plan = get_object_or_404(PricingPlan, title='FreeTier')
-    startprenair_plan = get_object_or_404(PricingPlan, title='StartPrenair')
-    bizprenair_plan = get_object_or_404(PricingPlan, title='BizPrenair')
-    entreprenair_plan = get_object_or_404(PricingPlan, title='EntrePrenair')
-    
+            "price_monthly": float(plan.price_monthly),
+            "price_annual": float(plan.price_annual),
+        } if plan else None
+
     return Response({
         "user_plans": user_plan_data,
         "all_plans": plan_data,
-        "available_plans": {
-            "basic_plan": {
-                "id": basic_plan.id,
-                "title": basic_plan.title,
-                "price": basic_plan.price if hasattr(basic_plan, 'price') else None
-            },
-            "startprenair_plan": {
-                "id": startprenair_plan.id,
-                "title": startprenair_plan.title,
-                "price": startprenair_plan.price if hasattr(startprenair_plan, 'price') else None
-            },
-            "bizprenair_plan": {
-                "id": bizprenair_plan.id,
-                "title": bizprenair_plan.title,
-                "price": bizprenair_plan.price if hasattr(bizprenair_plan, 'price') else None
-            },
-            "entreprenair_plan": {
-                "id": entreprenair_plan.id,
-                "title": entreprenair_plan.title,
-                "price": entreprenair_plan.price if hasattr(entreprenair_plan, 'price') else None
-            }
-        }
+        "available_plans": available,
     })
 
 

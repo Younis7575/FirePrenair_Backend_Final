@@ -573,7 +573,16 @@ def delete_todo_api(request, pk):
 from rest_framework.pagination import PageNumberPagination
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def gigs_api(request):
+    """Browse and search services.
+
+    Public, because `work_prenair.views.gigs` is: the website lets anyone
+    browse services and only asks for a login when they order. Without an
+    explicit permission class this fell back to DEFAULT_PERMISSION_CLASSES
+    (IsAuthenticated) and answered 401, so the app's search returned nothing
+    to a visitor who had not signed in.
+    """
     try:
         keyword = request.GET.get('keyword', '').strip()
         category_id = request.GET.get('category', '').strip()

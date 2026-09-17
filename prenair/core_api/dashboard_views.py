@@ -482,6 +482,102 @@ def image_generation_api(request):
         )
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@admin_not_allowed_api
+def logo_generation_api(request):
+    """Generate a logo, mirroring `dashboard.views.logo_gen`.
+
+    The website has had this since the dashboard was built; the API never
+    did, so the app's logo screen was a mock that returned a placeholder
+    image. Same Leonardo model and polling as image_generation_api -- the
+    only difference is that the prompt is assembled from the brief rather
+    than typed.
+    """
+    required = ['companyName', 'industry', 'colorScheme', 'style']
+    missing = [f for f in required if not request.data.get(f)]
+    if missing:
+        return Response(
+            {"error": f"Missing required fields: {', '.join(missing)}"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    data = request.data
+    prompt = (
+        f"Professional logo design for {data['companyName']} in the "
+        f"{data['industry']} industry. Style: {data['style']}, "
+        f"Color scheme: {data['colorScheme']}. Modern, minimalist, "
+        f"vector-style design suitable for business use."
+    )
+    if data.get('tagline'):
+        prompt += f" Include tagline: '{data['tagline']}'."
+    if data.get('additional_notes'):
+        prompt += f" Additional requirements: {data['additional_notes']}."
+
+    image_url, error, code = _leonardo_image(prompt)
+    if error:
+        return Response({"error": error}, status=code)
+    return Response({"image_url": image_url, "prompt": prompt},
+                    status=status.HTTP_200_OK)
+
+
+def _leonardo_image(prompt):
+    """Create a Leonardo generation and wait for the first image.
+
+    Returns (url, error, status_code). Shared by the logo endpoint and kept
+    separate so the polling loop is written once.
+    """
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": f"Bearer {settings.LEONARDO_API_KEY}",
+    }
+    payload = {
+        "alchemy": True,
+        "height": 768,
+        "modelId": "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+        "num_images": 1,
+        "presetStyle": "DYNAMIC",
+        "prompt": prompt,
+        "width": 1024,
+        "negative_prompt": "low quality, amateurish, text, watermark, blurry",
+    }
+
+    try:
+        created = requests.post(
+            "https://cloud.leonardo.ai/api/rest/v1/generations",
+            json=payload, headers=headers, timeout=30,
+        )
+        created.raise_for_status()
+        generation_id = created.json()["sdGenerationJob"]["generationId"]
+    except requests.exceptions.RequestException as exc:
+        return None, f"API connection failed: {exc}", status.HTTP_502_BAD_GATEWAY
+    except (KeyError, ValueError):
+        return None, "Invalid API response format", status.HTTP_502_BAD_GATEWAY
+
+    poll_url = f"https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+    for _ in range(12):
+        try:
+            polled = requests.get(poll_url, headers=headers, timeout=10)
+            polled.raise_for_status()
+            generation = polled.json()["generations_by_pk"]
+        except (requests.exceptions.RequestException, KeyError, ValueError):
+            time.sleep(5)
+            continue
+
+        state = generation.get("status", "PENDING")
+        if state == "COMPLETE":
+            images = generation.get("generated_images") or []
+            if images and images[0].get('url'):
+                return images[0]['url'], None, status.HTTP_200_OK
+            return None, "Generation finished with no image", status.HTTP_502_BAD_GATEWAY
+        if state in ("FAILED", "CANCELLED"):
+            return None, f"Generation failed: {state}", status.HTTP_502_BAD_GATEWAY
+        time.sleep(5)
+
+    return None, "Image generation timed out", status.HTTP_504_GATEWAY_TIMEOUT
+
+
 # EduPrenair API Views
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

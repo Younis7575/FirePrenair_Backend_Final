@@ -354,6 +354,7 @@ urlpatterns = [
     path("dashboard/digiprenair/edit_item_digiprenair/<slug:slug>/", edit_item_digiprenair_api, name="edit_item_digiprenair_api"),
     path('dashboard/image_generation/', image_generation_api, name='image_generation_api'),
     path('dashboard/logo_generation/', logo_generation_api, name='logo_generation_api'),
+    path('dashboard/ebook_generation/', generate_ebook_api, name='generate_ebook_api'),
 
     # Eduprenair
     path('dashboard/get-child-categories/', get_child_categories_api, name='get_child_categories_api'),

@@ -485,6 +485,46 @@ def image_generation_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @admin_not_allowed_api
+def generate_ebook_api(request):
+    """Write an eBook, mirroring `dashboard.views.generate_ebook`.
+
+    The website stashes the text in the session and redirects to a preview
+    page. An API client has neither, so the content comes back in the
+    response and the caller decides what to do with it.
+    """
+    from dashboard.views import generate_ai_ebook_content
+
+    title = (request.data.get('title') or '').strip()
+    if not title:
+        return Response(
+            {"error": "Please provide a title for the eBook."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    ebook_type = request.data.get('ebook_type') or 'ebook'
+    style = request.data.get('style') or 'Motivational'
+    comments = request.data.get('additional_comments') or ''
+
+    try:
+        content = generate_ai_ebook_content(title, style, comments)
+    except Exception as exc:
+        return Response({"error": str(exc)},
+                        status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response(
+        {
+            "title": title,
+            "type": ebook_type,
+            "style": style,
+            "content": content,
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@admin_not_allowed_api
 def logo_generation_api(request):
     """Generate a logo, mirroring `dashboard.views.logo_gen`.
 

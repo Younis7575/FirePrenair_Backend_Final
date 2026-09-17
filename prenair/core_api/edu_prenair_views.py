@@ -1910,10 +1910,29 @@ def paypal_course_success_api(request, course_slug):
 #     return JsonResponse({"level_2_categories": data})
 
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def become_instructor_api(request):
+    """Apply to teach on EduPrenair.
+
+    A GET answers "where should Become Instructor take me?". Only POST
+    existed, so the app could not tell an instructor from anyone else and
+    its button opened the dashboard for everybody -- the same gap that was
+    fixed for WorkPrenair's become_seller_api, answered the same way.
+    """
     user = request.user
+
+    if request.method == "GET":
+        return Response(
+            {
+                "is_instructor": user.is_edu_instructor,
+                "prefill": {
+                    "name": user.name or "",
+                    "edu_bio": user.edu_bio or "",
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
 
     if user.is_edu_instructor:
         return Response(

@@ -565,6 +565,54 @@ def add_to_cart_api(request, slug):
 
 
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_cart_item_api(request, item_id):
+    """Set a cart line's quantity.
+
+    The app has had a quantity stepper in the cart all along, calling
+    PATCH digiprenair/update_cart_item/<id>/ -- an endpoint that did not exist,
+    so every change 404'd. The website only ever adds one at a time and has no
+    equivalent, which is why the gap went unnoticed.
+
+    Scoped to the caller's own cart: item_id alone would otherwise let anyone
+    edit anyone's basket.
+    """
+    cart_item = CartItem.objects.filter(
+        id=item_id, cart__user=request.user
+    ).first()
+    if cart_item is None:
+        return Response(
+            {'error': 'That item is not in your cart.'},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        quantity = int(request.data.get('quantity'))
+    except (TypeError, ValueError):
+        return Response(
+            {'error': 'quantity must be a whole number.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if quantity < 1:
+        # Treat 0 as 'remove', which is what the stepper means by it.
+        cart_item.delete()
+        return Response(
+            {'message': 'Item removed from your cart.', 'cart_item': None},
+            status=status.HTTP_200_OK,
+        )
+
+    cart_item.quantity = quantity
+    cart_item.save()
+
+    return Response({
+        'message': 'Cart updated.',
+        'cart_item': CartItemSerializer(cart_item).data,
+    }, status=status.HTTP_200_OK)
+
+
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_from_cart_api(request, slug):

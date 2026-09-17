@@ -142,6 +142,7 @@ urlpatterns = [
     # Cart
     path("digiprenair/shoping_cart_api/", digi_shoping_cart_api, name="digi_shoping_cart_api"),
     path("digiprenair/add_to_cart_api/<slug:slug>/", add_to_cart_api, name="add_to_cart_api"),
+    path("digiprenair/update_cart_item/<int:item_id>/", update_cart_item_api, name="update_cart_item_api"),
     path("digiprenair/remove_from_cart_api/<slug:slug>/", remove_from_cart_api, name="remove_from_cart_api"),
 
     # Notifications

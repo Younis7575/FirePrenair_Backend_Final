@@ -555,8 +555,13 @@ def my_courses_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def submit_for_approval_api(request, slug):
-    course = get_object_or_404(Course, slug=slug, instructor=request.user)
+def submit_for_approval_api(request, slug=None, course_slug=None):
+    # The dashboard route passes the value as `course_slug`
+    # (dashboard/eduprenair/course_submit/<slug:course_slug>/) while the edu
+    # route passes `slug`. Accepting both stops a TypeError 500 on submit.
+    course = get_object_or_404(
+        Course, slug=(slug or course_slug), instructor=request.user
+    )
 
     if course.submit_for_approval:
         return Response({"message": "This course has already been submitted for approval."}, status=status.HTTP_400_BAD_REQUEST)
@@ -596,7 +601,7 @@ def add_module_api(request, course_slug):
         modules = Module.objects.filter(course=course)
         modules_data = [
             {
-                "id": module.id,
+                "id": module.pk,  # Course uses slug as PK; Module has real id — keep .pk for safety
                 "title": module.title,
                 "description": module.description,
                 "order": module.order,
@@ -607,7 +612,7 @@ def add_module_api(request, course_slug):
         
         return Response({
             "course": {
-                "id": course.id,
+                "id": course.pk,  # Course PK is its slug; `.id` raised AttributeError.
                 "title": course.title,
                 "slug": course.slug,
             },
@@ -694,13 +699,13 @@ def course_detail_api(request, slug):
     modules_data = []
     for module in course.modules.all():
         module_data = {
-            "id": module.id,
+            "id": module.pk,
             "title": module.title,
             "description": module.description,
             "order": module.order,
             "lessons": [
                 {
-                    "id": lesson.id,
+                    "id": lesson.pk,
                     "title": lesson.title,
                     "slug": lesson.slug,
                     "order": lesson.order,
@@ -712,7 +717,7 @@ def course_detail_api(request, slug):
 
     context = {
         "course": {
-            "id": course.id,
+            "id": course.pk,  # Course PK is its slug; `.id` raised AttributeError (500 on detail).
             "title": course.title,
             "slug": course.slug,
             "description": course.description,
@@ -916,7 +921,16 @@ def generate_quiz_api(request, course_slug):
         })
         
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Groq auth/quota problems surfaced as raw 500s. An invalid or
+        # missing GROQ_API key is an environment issue, so report it as 503
+        # with a clear message instead of leaking provider errors.
+        msg = str(e)
+        if 'invalid_api_key' in msg or 'Invalid API Key' in msg:
+            return Response(
+                {'error': 'AI service is not configured (invalid API key). Contact the administrator.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return Response({'error': msg}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET', 'POST'])

@@ -87,7 +87,7 @@ knowledge_base = {
 
 @method_decorator(csrf_exempt, name='dispatch')  # Exempt CSRF for this view
 class CommuprenairChatbotView(APIView):
-    def post(request):
+    def post(self, request):  # `self` was missing -> TypeError 500 on every chatbot call
         user_message = request.data.get('message', '').lower()
         
         # Predefined responses for quick replies
@@ -103,20 +103,30 @@ class CommuprenairChatbotView(APIView):
                 return Response({"message": response})
 
         # Interact with Groq API for other responses
-        client = Groq(api_key=settings.GROQ_API_KEY)
-        groq_response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": json.dumps({
-                    "knowledge_base": knowledge_base,
-                    "instruction": "Please generate short, clear, and professional responses. "
-                                   "Limit unnecessary details, ensure the tone is formal, and provide concise answers. "
-                                   "Avoid elaboration and keep responses to the point. "
-                                   "Give answer according to question."
-                })},
-                {"role": "user", "content": user_message},
-            ],
-            model="llama3-8b-8192",
-        )
+        try:
+            client = Groq(api_key=settings.GROQ_API_KEY)
+            groq_response = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": json.dumps({
+                        "knowledge_base": knowledge_base,
+                        "instruction": "Please generate short, clear, and professional responses. "
+                                       "Limit unnecessary details, ensure the tone is formal, and provide concise answers. "
+                                       "Avoid elaboration and keep responses to the point. "
+                                       "Give answer according to question."
+                    })},
+                    {"role": "user", "content": user_message},
+                ],
+                model="llama3-8b-8192",
+            )
+        except Exception as e:
+            # An invalid/expired GROQ key must not 500 the chat widget; tell
+            # the user the assistant is temporarily unavailable.
+            if 'invalid_api_key' in str(e) or 'Invalid API Key' in str(e):
+                return Response(
+                    {"message": "The assistant is temporarily unavailable. Please try again later."},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+            raise
 
         # Process the Groq response
         bot_reply = groq_response.choices[0].message.content.strip()
@@ -166,7 +176,14 @@ class MakePostView(APIView):
         file = request.FILES.get('media')
         image = None
         video = None
-        print('the group is ',group_slug)
+        # `content` is a NOT NULL column; an empty submission used to reach
+        # Post.objects.create and blow up as a 500 IntegrityError instead of
+        # a 400 the form can show.
+        if not (content and str(content).strip()):
+            return Response(
+                {'error': 'Post content is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if file:
             if file.content_type.startswith('video/'):
                 video = file

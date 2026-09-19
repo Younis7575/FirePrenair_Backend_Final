@@ -326,6 +326,9 @@ def edu_parent_categories_api(request):
 
 
 class DigiParentCategoriesView(APIView):
+    # Public: the explore screen renders these before the user signs in.
+    permission_classes = [AllowAny]
+
     def get(self, request):
         categories = WorkCategory.objects.filter(parent=None)[:5]
         serializer = WorkCategorySerializer(categories, many=True)
@@ -349,88 +352,112 @@ def commu_parent_categories_api(request):
 
 
 
-# ------------------------- Legal Pages -------------------------@api_view(['GET'])
+# ------------------------- Legal Pages -------------------------
+# Every page below is public, read-only content: the Flutter app renders the
+# legal/company pages from the sign-up and login screens, before any token
+# exists, so each view opts out of the global IsAuthenticated default.
+
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def terms_of_use_api(request):
     return Response({"message": " Render to Terms of Use page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def license_agreement_api(request):
     return Response({"message": "Render to License Agreement page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def privacy_policy_api(request):
     return Response({"message": "Privacy Policy page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def copyright_info_api(request):
     return Response({"message": "Render to Copyright Info page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def cookies_api(request):
     return Response({"message": "Render to Cookies Policy page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def dmca_policy_api(request):
     return Response({"message": "Render to DMCA Policy page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def privacy_choice_policy_api(request):
     return Response({"message": "Render to Privacy Choice Policy page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def refund_policy_api(request):
     return Response({"message": "Render to Refund Policy page"})
 
 # ------------------------- Company Pages -------------------------
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def about_us_api(request):
     return Response({"message": "Render to About Us page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def contact_support_api(request):
     return Response({"message": "Render to Contact Support page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def help_support_api(request):
     return Response({"message": "Render to Help & Support page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def how_it_works_api(request):
     return Response({"message": "Render to How It Works page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def pricing_api(request):
     plans = PricingPlan.objects.all().order_by('price_monthly')
     serializer = PricingPlanSerializer(plans, many=True)
     return Response({"plans": serializer.data})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def fees_commisions_api(request):
     return Response({"message": "Render toFees & Commissions page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def faq_api(request):
     return Response({"message": "Render to FAQ page"})
 
 # ------------------------- Resources Pages -------------------------
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def training_api(request):
     return Response({"message": "Render to Training page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def digital_products_api(request):
     return Response({"message": "Render to Digital Products page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def affiliates_api(request):
     return Response({"message": "Render to Affiliates page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def partnerships_api(request):
     return Response({"message": "Render to Partnerships page"})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def community_api(request):
     return Response({"message": "Render to Community page"})
 
@@ -444,11 +471,13 @@ def custom_500_api(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def features_api(request):
     return Response({"message": "Render to Features page"}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def feature_detail_api(request):
     feature_pg = request.GET.get('feature')
     if not feature_pg:

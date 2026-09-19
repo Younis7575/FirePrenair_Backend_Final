@@ -1915,7 +1915,18 @@ def paypal_checkout_api(request, gig_slug, package_type):
         }]
     })
 
-    if payment.create():
+    try:
+        created = payment.create()
+    except paypalrestsdk.exceptions.UnauthorizedAccess:
+        # Bad/expired PAYPAL_CLIENT_* credentials raise inside the SDK and
+        # 500'd the checkout. Report it cleanly — this is an environment
+        # problem, not a user error.
+        return Response(
+            {"error": "Payment provider is not configured correctly. Contact the administrator."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    if created:
         # Redirect user to PayPal for approval
         approval_url = next((link.href for link in payment.links if link.rel == "approval_url"), None)
         if approval_url:
@@ -1923,7 +1934,7 @@ def paypal_checkout_api(request, gig_slug, package_type):
         else:
             return Response({"error": "Approval URL not found in PayPal response."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        return Response({"error": "Failed to create PayPal payment."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": payment.error.get('message', 'Failed to create PayPal payment.') if isinstance(payment.error, dict) else 'Failed to create PayPal payment.'}, status=status.HTTP_502_BAD_GATEWAY)
 
 
 class PayPalSuccessAPIView(APIView):
@@ -2485,7 +2496,9 @@ def user_chats_api(request):
             time = last_message.timestamp
         
         chats_with_last_message.append({
-            "chat_id": user_chat.id,
+            # PrivateChat's PK column is `slug`, not `id` — `.id` raised
+            # AttributeError and 500'd the whole chat list.
+            "chat_id": user_chat.pk,
             "user1_name": user_chat.user1.name,
             "user2_name": user_chat.user2.name,
             "last_message": last_message.content if last_message else None,

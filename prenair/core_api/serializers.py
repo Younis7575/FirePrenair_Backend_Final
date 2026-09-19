@@ -563,7 +563,12 @@ class TrafficLogSerializer(serializers.ModelSerializer):
         
 ####################################################33
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+# This file already aliases `CustomUser as User` at the top (line ~173).
+# Importing Django's auth.User here REBOUND that name, and because
+# work_prenair_views.py does `from .serializers import *`, every
+# get_object_or_404(User, ...) in that module silently started hitting the
+# missing auth_user table -> OperationalError 500s (offers, work chat).
+# Nothing below actually used Django's User, so the import is removed.
 from django.core.exceptions import ValidationError
 
 class CustomPasswordChangeSerializer(serializers.Serializer):

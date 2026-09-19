@@ -13,6 +13,13 @@ from .dashboard_views import *
 from .missing_urls import urlpatterns as missing_urlpatterns
 from .fcm_views import register_fcm_token, unregister_fcm_token, test_push_notification
 
+# `from .dashboard_views import *` re-exports its submit_for_approval_api
+# over the edu_prenair_views one; the edu route below then passed <slug:slug>
+# into a function that only accepted `course_slug` and every course submit
+# 500'd. Bind each route to the view module it was written for.
+from . import edu_prenair_views as _edu_views
+from . import dashboard_views as _dash_views
+
 urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
@@ -230,7 +237,7 @@ urlpatterns = [
     path("eduprenair/instructors/", InstructorsAPIView.as_view(), name="edu_instructors_api"),
     path("eduprenair/instructor/add-course/", add_course_api, name="edu_add_course_api"),
     path("eduprenair/instructor/courses/", my_courses_api, name="edu_my_courses_api"),
-    path("eduprenair/instructor/course/<slug:slug>/submit/", submit_for_approval_api, name="submit_for_approval_api"),
+    path("eduprenair/instructor/course/<slug:slug>/submit/", _edu_views.submit_for_approval_api, name="submit_for_approval_api"),
     path("eduprenair/instructor/course/<slug:course_slug>/add-module/", add_module_api, name="add_module_api"),
     path("eduprenair/instructor/course/module/<int:module_id>/add-lesson/", add_lesson_api, name="add_lesson_api"),
     path("eduprenair/instructor/course/<slug:slug>/delete/", delete_course_api, name="delete_course_api"),
@@ -361,7 +368,7 @@ urlpatterns = [
     path('dashboard/eduprenair/', dashboard_eduprenair_api, name='dashboard_eduprenair_api'),
     path('dashboard/eduprenair/manage_courses/', manage_courses_eduprenair_api, name='manage_courses_eduprenair_api'),
     path('dashboard/eduprenair/course_create/', course_create_eduprenair_api, name='course_create_eduprenair_api'),
-    path("dashboard/eduprenair/course_submit/<slug:course_slug>/", submit_for_approval_api, name="submit_for_approval_api"),
+    path("dashboard/eduprenair/course_submit/<slug:course_slug>/", _dash_views.submit_for_approval_api, name="submit_for_approval_api"),
     path("dashboard/eduprenair/course_edit/<slug:course_slug>/", course_edit_eduprenair_api, name="course_edit_eduprenair_api"),
     path("dashboard/course/delete/<slug:slug>/", delete_course_api, name="delete_course_api"),
     path('dashboard/eduprenair/course/<slug:course_slug>/add-module/', add_module_course_eduprenair_api, name='add_module_course_eduprenair_api'),

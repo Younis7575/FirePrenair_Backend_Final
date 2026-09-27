@@ -683,7 +683,12 @@ def delete_course_api(request, slug):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def course_detail_api(request, slug):
+    # The website's course_detail view has no @login_required — anyone can
+    # view a course page — and this already guards every request.user use
+    # behind is_authenticated, so it just fell back to the global
+    # IsAuthenticated and 401'd every logged-out visitor.
     course = get_object_or_404(Course, slug=slug)
 
     sub_description_html = markdown.markdown(course.description[0:100] + ". . . . .")

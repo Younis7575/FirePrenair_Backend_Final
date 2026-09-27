@@ -789,7 +789,12 @@ def edit_gig_api(request, slug):
     return Response({'status': 'error', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def gig_detail_api(request, slug):
+    # The website's gig_detail view has no @login_required — anyone can view
+    # a gig page. This view never touches request.user, so nothing here
+    # needed auth; it just fell back to the global IsAuthenticated and 401'd
+    # every logged-out visitor a gig card sent here.
     try:
         gig = Gig.objects.get(slug=slug)
     except Gig.DoesNotExist:

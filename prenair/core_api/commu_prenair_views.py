@@ -461,7 +461,7 @@ def _get_user_by_slug(slug):
     return user
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def profile_api(request, slug):
     user = _get_user_by_slug(slug)
     posts = Post.objects.filter(author=user, is_group_post=False).order_by('-created_at')
@@ -492,7 +492,7 @@ def profile_api(request, slug):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def profile_about_api(request, slug):
     user = _get_user_by_slug(slug)
     user_data = UserSerializer(user).data
@@ -501,7 +501,7 @@ def profile_about_api(request, slug):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def profile_groups_api(request, slug):
     user = _get_user_by_slug(slug)
     groups = Group.objects.filter(members=user)

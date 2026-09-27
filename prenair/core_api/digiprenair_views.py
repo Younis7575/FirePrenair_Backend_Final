@@ -363,7 +363,13 @@ def digi_sellers_api(request):
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def digi_product_api(request, slug):
+    # The website's digi_product view has no @login_required — anyone can
+    # view a product page. This view's own POST branch already 401s an
+    # anonymous reviewer itself, so AllowAny only opens up the GET a logged
+    # -out visitor needs; it was falling back to the global IsAuthenticated
+    # and 401'ing the product page for every visitor who hadn't signed in.
     product = get_object_or_404(Product, slug=slug)
     reviews = product.reviews.all()
 

@@ -2671,6 +2671,7 @@ def ai_chat_assist_api(request, chatSlug):
 # Get top-level categories
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_top_categories_api(request):
     try:
         top_categories = WorkCategory.objects.filter(parent__isnull=True)

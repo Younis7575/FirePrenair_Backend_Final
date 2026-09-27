@@ -351,6 +351,7 @@ urlpatterns = [
     path('dashboard/home/', dashboard_home_api, name='dashboard_home_api'),
     path('dashboard/notifications/', dashboard_notifications_api, name='dashboard_notifications_api'),
     path('dashboard/notifications/delete/<int:notification_id>/', delete_notification_api, name='delete_notification_api'),
+    path('dashboard/notifications/read/<int:notification_id>/', mark_dashboard_notification_read_api, name='mark_dashboard_notification_read_api'),
 
     path('dashboard/get-child-categories-digi/', get_child_categories_digi_api, name='get_child_categories_digi_api'),
 

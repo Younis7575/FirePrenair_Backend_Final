@@ -235,6 +235,12 @@ class DigiHomeAPIView(APIView):
         return Response(context)
 
 class DigiExploreAPIView(APIView):
+    # The website's `digi_explore` view has no @login_required — DigiPrenair's
+    # explore page is public. This view never touches request.user, so it can
+    # be public too; without this it fell back to the global IsAuthenticated
+    # and 401'd for every logged-out visitor.
+    permission_classes = [AllowAny]
+
     def get(self, request):
         search_term = request.GET.get("q")
         category_param = request.GET.get("params", "all")
@@ -312,6 +318,7 @@ def product_search_api_api(request):
     return Response({'results': results})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def digi_sellers_api(request):
     sellers = CustomUser.objects.filter(is_digi_seller=True)
 

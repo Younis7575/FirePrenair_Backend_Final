@@ -140,15 +140,25 @@ class CommuprenairChatbotView(APIView):
         return Response({"message": "Only POST requests are allowed."}, status=400)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def commu_prenair_home_api(request):
     """
     Home endpoint returning posts and user contacts.
+
+    The website's `home` view (commu_prenair/views.py) has no @login_required
+    either — CommuPrenair's feed is public — but it calls
+    `request.user.get_all_chats()` unconditionally, which only exists on
+    CustomUser and throws for an anonymous visitor. This view used to dodge
+    that by requiring auth outright (401 for every logged-out user instead of
+    a working public feed). Guard it instead: real contacts when logged in,
+    an empty list otherwise.
     """
     try:
         # Fetch the posts and user contacts
         posts = Post.objects.filter(is_group_post=False).order_by('-created_at')
-        user_contacts = request.user.get_all_chats()
+        user_contacts = (
+            request.user.get_all_chats() if request.user.is_authenticated else []
+        )
 
         # Serialize the data
         post_serializer = PostSerializer(posts, many=True)
@@ -669,6 +679,7 @@ def createe_group_api(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def group_list_api(request):
     category_id = request.GET.get('category')
     query = request.GET.get('q')

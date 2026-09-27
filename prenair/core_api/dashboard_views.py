@@ -372,6 +372,23 @@ def delete_notification_api(request, notification_id):
     return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@admin_not_allowed_api
+def mark_dashboard_notification_read_api(request, notification_id):
+    """Marks one dashboard notification read — for the app types that only
+    had a delete endpoint (EduPrenair, WorkPrenair), so tapping a
+    notification could only ever remove it, never just mark it read.
+    DigiPrenair and CommuPrenair have their own equivalents already.
+    """
+    notification = get_object_or_404(
+        Notification, id=notification_id, user=request.user
+    )
+    notification.is_read = True
+    notification.save(update_fields=['is_read'])
+    return Response({"message": "Notification marked as read"}, status=status.HTTP_200_OK)
+
+
 
 
 from rest_framework.decorators import api_view, permission_classes

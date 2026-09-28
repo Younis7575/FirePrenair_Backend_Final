@@ -1369,6 +1369,9 @@ from django.http import JsonResponse
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_dash_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     search_query = request.query_params.get("search", "")
     
     if search_query:
@@ -1395,6 +1398,9 @@ def admin_dash_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_online_users_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     search_query = request.query_params.get("search", "")
 
     if search_query:
@@ -1422,6 +1428,9 @@ def admin_online_users_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_stats_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     # Calculate all the statistics
     total_users = CustomUser.objects.all().count()
     total_withdraw_requests = WithdrawalRequest.objects.filter(status="COMPLETED").count()
@@ -1470,6 +1479,9 @@ def admin_stats_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def withdrawal_requests_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     pending_requests = WithdrawalRequest.objects.filter(
         status__in=["PENDING", "PROCESSING"]
     )
@@ -1483,6 +1495,9 @@ def withdrawal_requests_api(request):
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def withdraw_admin_detail_api(request, withdraw_id):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     withdraw_request = get_object_or_404(WithdrawalRequest, id=withdraw_id)
     
     if request.method == "PUT":
@@ -1555,6 +1570,9 @@ def withdraw_admin_detail_api(request, withdraw_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_traffic_logs_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     # Date filtering
     period = request.query_params.get('period', 'day')
     start_date = request.query_params.get('start_date')
@@ -1590,6 +1608,9 @@ def admin_traffic_logs_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def traffic_insights_json_api(request):
+    if request.user.role != 'admin' and not request.user.is_staff:
+        return Response({'error': 'Access Denied!'}, status=status.HTTP_403_FORBIDDEN)
+
     period = request.query_params.get('period', 'day')
     start_date = request.query_params.get('start_date')
     end_date = request.query_params.get('end_date')

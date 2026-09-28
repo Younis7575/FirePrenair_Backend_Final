@@ -450,6 +450,25 @@ def workprenair_notifications_api(request):
     })
 
 
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def workprenair_notification_detail_api(request, notification_id):
+    # The Flutter app's NotificationService posts here to mark one read, and
+    # deletes here to remove one — neither route existed, so both silently
+    # 404'd (mark-read is a no-op today since the list view above already
+    # marks everything read on fetch, but delete had no way to work at all).
+    notification = get_object_or_404(
+        Notification, id=notification_id, user=request.user, app_name='workprenair'
+    )
+
+    if request.method == 'DELETE':
+        notification.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    notification.is_read = True
+    notification.save()
+    return Response({"message": "Notification marked as read"})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

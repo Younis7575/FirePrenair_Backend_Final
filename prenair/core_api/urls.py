@@ -20,6 +20,17 @@ from .fcm_views import register_fcm_token, unregister_fcm_token, test_push_notif
 from . import edu_prenair_views as _edu_views
 from . import dashboard_views as _dash_views
 
+# Same shadowing bug, two more names: `get_child_categories_api` is defined
+# in commu_prenair_views, dashboard_views AND work_prenair_views (three
+# different signatures/models), and `paypal_checkout_api` in digiprenair_views
+# AND work_prenair_views. The last `import *` wins for the bare name, which
+# silently rebound routes below to a function with the wrong parameters —
+# every call 500'd (parent_id/gig_slug/package_type mismatch) or returned the
+# wrong model's data. Same fix: bind each route to its own module explicitly.
+from . import commu_prenair_views as _commu_views
+from . import work_prenair_views as _work_views
+from . import digiprenair_views as _digi_views
+
 urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
@@ -44,7 +55,7 @@ urlpatterns = [
 
     path('commuprenair/about/<str:slug>/', profile_about_api, name='commu_about_api'),
 
-    path('commuprenair/get-child-categories/', get_child_categories_api, name='get_child_categories_api'),
+    path('commuprenair/get-child-categories/', _commu_views.get_child_categories_api, name='get_child_categories_api'),
     path('commuprenair/get_group_categories_api/', get_group_categories_api, name='get_group_categories_api'),
 
     path('commuprenair/groups/', group_list_api, name='commu_groups_api'),
@@ -135,7 +146,7 @@ urlpatterns = [
     path("digiprenair/webhook_api/", my_stripe_webhook_api, name="stripe_webhook_api"),
 
     # PayPal payment
-    path("digiprenair/paypal/checkout_api/", paypal_checkout_api, name="paypal_checkout_api"),
+    path("digiprenair/paypal/checkout_api/", _digi_views.paypal_checkout_api, name="paypal_checkout_api"),
     path("digiprenair/paypal/success_api/", paypal_payment_success_api, name="paypal_payment_success_api"),
 
     # General pages
@@ -287,7 +298,7 @@ urlpatterns = [
     path('workprenair/message/<str:chatSlug>/', user_chat_api, name='user_chat_api'),
     path('workprenair/message/ai-suggestions/<str:chatSlug>/', ai_chat_assist_api, name='ai_chat_assist_api'),
 
-    path('workprenair/api/categories/<int:parent_id>/', get_child_categories_api, name='get_child_categories_api'),
+    path('workprenair/api/categories/<int:parent_id>/', _work_views.get_child_categories_api, name='get_child_categories_api'),
     path('workprenair/api/search_tags/', search_tags_api, name='search_tags_api'),
     path("workprenair/api/gig-tags/<str:gig_slug>/", gig_tags_api, name="gig_tags_api"),
     path('workprenair/api/create_tag/', create_tag_api, name='create_tag_api'),
@@ -327,7 +338,7 @@ urlpatterns = [
     path("workprenair/webhook/", StripeWebhookView.as_view(), name="stripe_work_order_webhook_api"),
 
     # PayPal
-    path("workprenair/paypal/checkout/<str:gig_slug>/<str:package_type>/", paypal_checkout_api, name="paypal_checkout_api"),
+    path("workprenair/paypal/checkout/<str:gig_slug>/<str:package_type>/", _work_views.paypal_checkout_api, name="paypal_checkout_api"),
     path("workprenair/paypal/success/", PayPalSuccessAPIView.as_view(), name="paypal_success_api"),
     path("workprenair/paypal/cancel/", paypal_cancel_api, name="paypal_cancel_api"),
 
@@ -344,6 +355,7 @@ urlpatterns = [
     path('workprenair/switch-profile/', toggle_profile_api, name='toggle_work_profile_api'),
 
     path('workprenair/workprenair_notifications/', workprenair_notifications_api, name='workprenair_notifications_api'),
+    path('workprenair/workprenair_notifications/<int:notification_id>/', _work_views.workprenair_notification_detail_api, name='workprenair_notification_detail_api'),
 
     ###################################################################----> dashboard <----################################################################33
 
@@ -365,7 +377,7 @@ urlpatterns = [
     path('dashboard/ebook_generation/', generate_ebook_api, name='generate_ebook_api'),
 
     # Eduprenair
-    path('dashboard/get-child-categories/', get_child_categories_api, name='get_child_categories_api'),
+    path('dashboard/get-child-categories/', _dash_views.get_child_categories_api, name='get_child_categories_api'),
     path('dashboard/eduprenair/', dashboard_eduprenair_api, name='dashboard_eduprenair_api'),
     path('dashboard/eduprenair/manage_courses/', manage_courses_eduprenair_api, name='manage_courses_eduprenair_api'),
     path('dashboard/eduprenair/course_create/', course_create_eduprenair_api, name='course_create_eduprenair_api'),

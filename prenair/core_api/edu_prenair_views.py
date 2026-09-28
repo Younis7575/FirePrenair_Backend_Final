@@ -494,6 +494,27 @@ def add_course_api(request):
     duration = request.data.get("duration")
     thumbnail = request.FILES.get("thumbnail")
 
+    # title/description/requirements/language/level are all NOT NULL on the
+    # Course model; a missing one used to reach Course.objects.create() and
+    # 500 with a raw IntegrityError instead of a normal validation response.
+    missing = [
+        name
+        for name, value in {
+            "title": title,
+            "category": category_id,
+            "description": description,
+            "requirements": requirements,
+            "language": language,
+            "level": level,
+        }.items()
+        if not value
+    ]
+    if missing:
+        return Response(
+            {"error": f"Missing required field(s): {', '.join(missing)}"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
         category = CourseCategory.objects.get(id=category_id)
 

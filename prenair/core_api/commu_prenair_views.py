@@ -785,8 +785,13 @@ def handle_friend_request_api(request, slug, action):
         return Response({'message': 'No friend request found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if action == 'accept':
-        Connection.objects.create(from_user=friend_request.from_user, to_user=friend_request.to_user)
-        Connection.objects.create(from_user=friend_request.to_user, to_user=friend_request.from_user)
+        # get_or_create, not create: a stale FriendRequest row (e.g. sent
+        # again after the two were already connected) crashed this with an
+        # unhandled UNIQUE-constraint IntegrityError instead of just
+        # accepting — Connection has no reason to reject an accept between
+        # two users who already have the row.
+        Connection.objects.get_or_create(from_user=friend_request.from_user, to_user=friend_request.to_user)
+        Connection.objects.get_or_create(from_user=friend_request.to_user, to_user=friend_request.from_user)
         Notification.objects.create(user=friend_request.from_user, message=f'{request.user.username} accepted your friend request', app_name='commuprenair')
         friend_request.delete()
         return Response({'message': 'Friend request accepted.'}, status=status.HTTP_200_OK)

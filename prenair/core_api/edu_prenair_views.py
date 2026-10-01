@@ -174,6 +174,18 @@ def edu_home_api(request):
                     "title": course.title,
                     "slug": course.slug,
                     "price": course.price,
+                    # The app's course card needs these to match the site's
+                    # (discount strikethrough, duration/lessons row, payment
+                    # type badge, rating) — none of this was here before.
+                    "discount_price": course.discount_price,
+                    "is_free": course.is_free,
+                    "monthly_subscription": course.monthly_subscription,
+                    "duration": course.duration,
+                    "level": course.level,
+                    "total_lessons": course.total_lessons(),
+                    "average_rating": course.average_rating(),
+                    "rating_count": course.all_ratings().count(),
+                    "category": course.category_l_1.name if course.category_l_1 else None,
                     "instructor": UserDataSerializer(course.instructor, context={"request": request}).data,
                     "thumbnail": request.build_absolute_uri(course.thumbnail.url) if course.thumbnail else None,
                 }

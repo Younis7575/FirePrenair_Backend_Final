@@ -185,6 +185,8 @@ def edu_home_api(request):
                     "total_lessons": course.total_lessons(),
                     "average_rating": course.average_rating(),
                     "rating_count": course.all_ratings().count(),
+                    "description": course.description,
+                    "enrolled_count": course.enrolled_students.count(),
                     "category": course.category_l_1.name if course.category_l_1 else None,
                     "instructor": UserDataSerializer(course.instructor, context={"request": request}).data,
                     "thumbnail": request.build_absolute_uri(course.thumbnail.url) if course.thumbnail else None,

@@ -2,7 +2,8 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .profiles_views import (LoginUserAPIView,RegisterUserAPIView,VerifyEmailAPIView,LogoutUserAPIView,
-    CreateCheckoutSessionAPIView,StripeWebhookAPIView,StripeBillingPortalAPIView,UpdateLanguageAPIView
+    CreateCheckoutSessionAPIView,StripeWebhookAPIView,StripeBillingPortalAPIView,UpdateLanguageAPIView,
+    GoogleLoginAPIView,AppleLoginAPIView
     )
 from .commu_prenair_views import *
 from .home_views import *
@@ -123,6 +124,8 @@ urlpatterns = [
     
     ######################################################  profiles APP VIEWS URLS ######################################################
     path('my_accounts/login/', LoginUserAPIView.as_view(), name='login_api'),
+    path('my_accounts/google-login/', GoogleLoginAPIView.as_view(), name='google_login_api'),
+    path('my_accounts/apple-login/', AppleLoginAPIView.as_view(), name='apple_login_api'),
     path('my_accounts/register/', RegisterUserAPIView.as_view(), name='register_api'),
     path('my_accounts/verify-email/', VerifyEmailAPIView.as_view(), name='verify_email_api'),
     path('my_accounts/logout/', LogoutUserAPIView.as_view(), name='logout_api'),

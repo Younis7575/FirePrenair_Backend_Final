@@ -23,6 +23,111 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 import stripe
+import jwt
+from jwt import PyJWKClient
+
+
+def _build_login_response(request, user, message, next_url=None):
+    """Shared by every login path (password, Google, Apple) so they all hand
+    the Flutter app the exact same shape — LocalStorage.saveLoginData on the
+    client parses this literal structure."""
+    login(request, user)
+
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+
+    response_data = {
+        'message': message,
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'name': user.name,
+            'username': user.username,
+            'role': user.role,
+            'slug': user.slug,
+            'profile_pic': user.profile_pic.url if user.profile_pic else None,
+            'is_edu_instructor': user.is_edu_instructor,
+            'is_work_freelancer': user.is_work_freelancer,
+            'is_digi_seller': user.is_digi_seller,
+            'is_corporate_client': user.is_corporate_client,
+            'is_staff': user.is_staff,
+            'country': user.country,
+            'language': user.language,
+            'timezone': user.timezone,
+        },
+        'tokens': {
+            'accessToken': access_token,
+            'refreshToken': str(refresh)
+        }
+    }
+
+    if next_url:
+        response_data['next_url'] = next_url
+
+    return Response(response_data, status=status.HTTP_200_OK)
+
+
+def _get_or_create_social_user(email, name, username_hint):
+    """Find the account a Google/Apple sign-in belongs to by email, or
+    create one. A social account never sets a password (password=None ->
+    an unusable one), so it can only ever log in via that same provider or
+    a password set later through 'forgot password'."""
+    email = email.strip().lower()
+    user = CustomUser.objects.filter(email__iexact=email).first()
+    if user:
+        return user, False
+
+    base_username = re.sub(r'[^a-zA-Z0-9_]', '', username_hint or email.split('@')[0])[:140]
+    if not base_username:
+        base_username = 'user'
+    username = base_username
+    suffix = 0
+    while CustomUser.objects.filter(username__iexact=username).exists():
+        suffix += 1
+        username = f"{base_username}{suffix}"
+
+    user = CustomUser.objects.create_user(
+        email=email,
+        password=None,
+        username=username,
+        name=name or base_username,
+        profile_pic='profile_pics/avatar.jpg',
+    )
+    return user, True
+
+
+def _verify_oidc_id_token(token, jwks_url, audiences, issuers):
+    """Verify an RS256 OpenID-Connect id token (Google's or Apple's) against
+    the provider's own published JWKS — no provider SDK needed since both
+    are plain signed JWTs. Raises on any failure; caller turns that into a
+    401."""
+    signing_key = PyJWKClient(jwks_url).get_signing_key_from_jwt(token)
+    payload = jwt.decode(
+        token,
+        signing_key.key,
+        algorithms=["RS256"],
+        audience=audiences,
+        options={"verify_iss": False},
+    )
+    if payload.get('iss') not in issuers:
+        raise jwt.InvalidIssuerError(f"Unexpected issuer: {payload.get('iss')!r}")
+    return payload
+
+
+def _google_audiences():
+    return [
+        aud for aud in (
+            getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None),
+            getattr(settings, 'GOOGLE_IOS_CLIENT_ID', None),
+            getattr(settings, 'GOOGLE_ANDROID_CLIENT_ID', None),
+        ) if aud
+    ]
+
+
+def _apple_audiences():
+    return [aud for aud in (getattr(settings, 'APPLE_SIGN_IN_CLIENT_ID', None),) if aud]
+
+
 # @method_decorator(csrf_exempt, name='dispatch')
 class LoginUserAPIView(APIView):
     permission_classes = [AllowAny]
@@ -43,43 +148,96 @@ class LoginUserAPIView(APIView):
 
         if user is None:
             raise AuthenticationFailed("Invalid email or password.")
-        
-        login(request, user)
 
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
+        return _build_login_response(
+            request,
+            user,
+            'You have successfully logged in.',
+            next_url=request.data.get('next'),
+        )
 
-        next_url = request.data.get('next', None)
-        response_data = {
-            'message': 'You have successfully logged in.',
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'name': user.name,
-                'username': user.username,
-                'role': user.role,
-                'slug': user.slug,
-                'profile_pic': user.profile_pic.url if user.profile_pic else None,
-                'is_edu_instructor': user.is_edu_instructor,
-                'is_work_freelancer': user.is_work_freelancer,
-                'is_digi_seller': user.is_digi_seller,
-                'is_corporate_client': user.is_corporate_client,
-                'is_staff': user.is_staff,
-                'country': user.country,
-                'language': user.language,
-                'timezone': user.timezone,
-            },
-            'tokens': {
-                'accessToken': access_token,
-                'refreshToken': str(refresh)
-            }
-        }
 
-        if next_url:
-            response_data['next_url'] = next_url
+class GoogleLoginAPIView(APIView):
+    """Native Google Sign-In for the mobile app. The Flutter app signs the
+    user in with the `google_sign_in` SDK and POSTs the resulting id_token
+    here — this is separate from the django-allauth browser flow used on
+    the website, which needs no API view of its own."""
+    permission_classes = [AllowAny]
 
-        return Response(response_data, status=status.HTTP_200_OK)
+    def post(self, request):
+        id_token = request.data.get('id_token') or request.data.get('idToken')
+        if not id_token:
+            return Response({"error": "id_token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        audiences = _google_audiences()
+        if not audiences:
+            return Response(
+                {"error": "Google sign-in is not configured on the server."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        try:
+            payload = _verify_oidc_id_token(
+                id_token,
+                jwks_url="https://www.googleapis.com/oauth2/v3/certs",
+                audiences=audiences,
+                issuers=("https://accounts.google.com", "accounts.google.com"),
+            )
+        except Exception:
+            return Response({"error": "Invalid or expired Google token."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        email = payload.get('email')
+        if not email or not payload.get('email_verified', False):
+            return Response({"error": "This Google account has no verified email."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user, _created = _get_or_create_social_user(
+            email=email,
+            name=payload.get('name'),
+            username_hint=payload.get('given_name') or email.split('@')[0],
+        )
+        return _build_login_response(request, user, 'You have successfully logged in.')
+
+
+class AppleLoginAPIView(APIView):
+    """Native Sign in with Apple for the mobile app. The Flutter app gets an
+    identity_token from `sign_in_with_apple` and POSTs it here; `full_name`
+    is optional and only ever sent by Apple on a user's very first
+    authorization, since Apple doesn't repeat it on later sign-ins."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        identity_token = request.data.get('identity_token') or request.data.get('identityToken')
+        if not identity_token:
+            return Response({"error": "identity_token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        audiences = _apple_audiences()
+        if not audiences:
+            return Response(
+                {"error": "Apple sign-in is not configured on the server."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        try:
+            payload = _verify_oidc_id_token(
+                identity_token,
+                jwks_url="https://appleid.apple.com/auth/keys",
+                audiences=audiences,
+                issuers=("https://appleid.apple.com",),
+            )
+        except Exception:
+            return Response({"error": "Invalid or expired Apple token."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        email = payload.get('email')
+        if not email:
+            return Response({"error": "This Apple account has no email on file."}, status=status.HTTP_400_BAD_REQUEST)
+
+        full_name = (request.data.get('full_name') or '').strip()
+        user, _created = _get_or_create_social_user(
+            email=email,
+            name=full_name or None,
+            username_hint=(full_name.split(' ')[0] if full_name else email.split('@')[0]),
+        )
+        return _build_login_response(request, user, 'You have successfully logged in.')
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutUserAPIView(APIView):

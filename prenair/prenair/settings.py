@@ -268,6 +268,19 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
+# Native Google Sign-In (mobile app), verified in GoogleLoginAPIView.
+# The Flutter app's google_sign_in plugin is configured with
+# serverClientId = SOCIAL_AUTH_GOOGLE_OAUTH2_KEY (the web client), so that
+# key alone covers it; the iOS/Android ones are only needed if a native
+# per-platform OAuth client is issued instead.
+GOOGLE_IOS_CLIENT_ID = os.getenv("GOOGLE_IOS_CLIENT_ID")
+GOOGLE_ANDROID_CLIENT_ID = os.getenv("GOOGLE_ANDROID_CLIENT_ID")
+
+# Native Sign in with Apple (mobile app), verified in AppleLoginAPIView.
+# Must be the app's iOS bundle identifier (the audience Apple puts on the
+# identity token for a native sign-in, as opposed to a web Services ID).
+APPLE_SIGN_IN_CLIENT_ID = os.getenv("APPLE_SIGN_IN_CLIENT_ID")
+
 # Social account adapter
 # SOCIALACCOUNT_ADAPTER = 'profiles.adapters.CustomSocialAccountAdapter'
 # SOCIALACCOUNT_PROVIDERS = {

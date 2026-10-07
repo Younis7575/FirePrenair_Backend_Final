@@ -111,7 +111,7 @@
                             <div class="instructor-list flex-fill">
                                 <div class="instructor-img">
                                     <a href="{% url 'edu_profile' instructor.slug %}">
-                                        <img class="img-fluid" alt="Img" src="{{instructor.profile_pic.url}}">
+                                        {% if instructor.profile_pic %}<img class="img-fluid" alt="Img" src="{{instructor.profile_pic.url}}">{% else %}<img class="img-fluid" alt="Img" src="{% static 'digi_prenair/img/avatar.png' %}">{% endif %}
                                     </a>
                                 </div>
                                 <div class="instructor-content">												

@@ -670,7 +670,11 @@
                 <div class="item-meta">
                   <span class="avatar box-26">
                     <a href="{% url 'digi_profile' slug=item.seller.slug %}">
+                      {% if item.seller.profile_pic %}
                       <img src="{{ item.seller.profile_pic.url }}" alt="{{ item.seller.username }}" />
+                      {% else %}
+                      <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ item.seller.username }}" />
+                      {% endif %}
                     </a>
                     {% if item.seller.digi_is_verified %}
                     <span class="verified">

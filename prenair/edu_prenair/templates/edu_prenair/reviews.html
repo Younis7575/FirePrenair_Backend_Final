@@ -67,7 +67,7 @@
 													<div class="review-user-info">
 														<div class="reviewer">
 															<div class="review-img">
-																<a href="javascript:void(0);"><img src="{{review.user.profile_pic.url}}" alt="img"></a>
+																<a href="javascript:void(0);">{% if review.user.profile_pic %}<img src="{{review.user.profile_pic.url}}" alt="img">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="img">{% endif %}</a>
 															</div>
 															<div class="reviewer-info">
 																<h6><a href="javascript:void(0);">{{review.user.name}}</a></h6>
@@ -131,7 +131,7 @@
 													<div class="review-user-info">
 														<div class="reviewer">
 															<div class="review-img">
-																<a href="javascript:void(0);"><img src="{{review.user.profile_pic.url}}" alt="img"></a>
+																<a href="javascript:void(0);">{% if review.user.profile_pic %}<img src="{{review.user.profile_pic.url}}" alt="img">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="img">{% endif %}</a>
 															</div>
 															<div class="reviewer-info">
 																<h6><a href="javascript:void(0);">{{review.user.name}}</a></h6>

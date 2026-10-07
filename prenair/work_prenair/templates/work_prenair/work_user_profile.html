@@ -309,7 +309,7 @@
                     <!-- Profile Header -->
                     <div class="profile-header flex flex-col lg:flex-row items-center gap-6">
                         <div class="avatar-container relative w-32 h-32 rounded-full overflow-hidden">
-                            <img src="{{user.profile_pic.url}}" alt="Profile" class="w-full h-full object-cover" />
+                            {% if user.profile_pic %}<img src="{{user.profile_pic.url}}" alt="Profile" class="w-full h-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="Profile" class="w-full h-full object-cover" />{% endif %}
                             <span class="absolute bottom-2 right-2 w-4 h-4 rounded-full border-2 border-white" 
                                   style="background-color: {{ user.is_online|yesno:'green,gray' }};"></span>
                         </div>
@@ -394,7 +394,7 @@
                             {% if user.is_work_freelancer and user_reviews_as_seller or user_reviews_as_client %}
                             {% for review in user_reviews_as_seller|default:user_reviews_as_client %}
                             <div class="review-card p-6 mb-4 bg-gray-50 rounded-lg flex gap-4">
-                                <img src="{{ review.user.profile_pic.url }}" alt="Reviewer" class="w-12 h-12 rounded-full" />
+                                {% if review.user.profile_pic %}<img src="{{ review.user.profile_pic.url }}" alt="Reviewer" class="w-12 h-12 rounded-full" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="Reviewer" class="w-12 h-12 rounded-full" />{% endif %}
                                 <div>
                                     <h4 class="text-lg font-semibold text-gray-800">{{ review.user.username }}</h4>
                                     <p class="text-sm text-gray-500">{{ review.created_at.date }}</p>

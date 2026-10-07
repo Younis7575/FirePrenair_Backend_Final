@@ -69,7 +69,11 @@
                         <div class="friends-list d-flex flex-wrap gap-2 align-items-center text-center">
                             <ul class="d-flex align-items-center justify-content-center">
                                 {% for friend in friends_in_group|slice:":6" %}
+                                {% if friend.profile_pic %}
                                 <li><img src="{{friend.profile_pic.url}}" alt="image" class="rounded" style="width: 21px; height: 21px;"></li>
+                                {% else %}
+                                <li><img src="{% static 'digi_prenair/img/avatar.png' %}" alt="image" class="rounded" style="width: 21px; height: 21px;"></li>
+                                {% endif %}
                                 {% endfor %}
                             </ul>
                             <span class="mdtxt d-center">{{friends_count}} Connections Have Joined</span>
@@ -95,8 +99,13 @@
                             <div class="col-xxl-8 col-xl-8 col-lg-12 d-flex flex-column gap-7">
                                 <div class="share-post d-flex gap-3 gap-sm-5 p-3 p-sm-5">
                                     <div class="profile-box">
+                                        {% if request.user.profile_pic %}
                                         <a href="#"><img src="{{request.user.profile_pic.url}}" style="width: 48px; height: 48px;"
                                                 class="max-un rounded" alt="icon"></a>
+                                        {% else %}
+                                        <a href="#"><img src="{% static 'digi_prenair/img/avatar.png' %}" style="width: 48px; height: 48px;"
+                                                class="max-un rounded" alt="icon"></a>
+                                        {% endif %}
                                     </div>
                                     <form action="{% url 'make_group_post' group.slug %}" method="post" enctype="multipart/form-data"
                                         class="w-100 position-relative">
@@ -192,7 +201,11 @@
                                                     <div class="profile-area d-center justify-content-between">
                                                         <div class="avatar-item d-flex gap-3 align-items-center">
                                                             <div class="avatar-item">
+                                                                {% if connection.profile_pic %}
                                                                 <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{{connection.profile_pic.url}}" alt="avatar">
+                                                                {% else %}
+                                                                <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                                                {% endif %}
                                                             </div>
                                                             <div class="info-area text-start">
                                                                 <h6 class="m-0"><a href="{% url 'commu_profile' connection.slug %}">{{connection.name}}</a></h6>
@@ -284,9 +297,15 @@
                                 <input type="hidden" name="group_slug" value="{{ group.slug }}">
                                     <div class="d-flex mb-5 gap-3">
                                         <div class="profile-box">
+                                            {% if request.user.profile_pic %}
                                             <a href="#"><img src="{{request.user.profile_pic.url}}"
                                                     style="width: 50px; height: 50px;" class="max-un rounded"
                                                     alt="icon"></a>
+                                            {% else %}
+                                            <a href="#"><img src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                    style="width: 50px; height: 50px;" class="max-un rounded"
+                                                    alt="icon"></a>
+                                            {% endif %}
                                         </div>
                                         <textarea name="content" cols="10" required rows="2"
                                             placeholder="Write something to Lerio.."></textarea>

@@ -1,4 +1,5 @@
 {% extends "dashboard/dashboard_base.html" %}
+{% load static %}
 {% block title %}Fireprenair | Dashboard - Product Reviews{% endblock title %}
 
 {% block extra_css %}
@@ -286,7 +287,11 @@
                             </div>
                             
                             <div class="reviewer-info">
+                                {% if review.user.profile_pic %}
                                 <img src="{{ review.user.profile_pic.url }}" alt="{{ review.user.username }}" class="reviewer-avatar">
+                                {% else %}
+                                <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ review.user.username }}" class="reviewer-avatar">
+                                {% endif %}
                                 <span class="reviewer-name">{{ review.user.username }}</span>
                             </div>
                             

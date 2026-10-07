@@ -236,7 +236,7 @@
                                             <div class="flex flex-wrap items-center gap-4 mt-2">
                                                 <a href="{% url 'work_user_profile' offer.recipient.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
                                                     <div class="avat relative flex-shrink-0 w-9 h-9">
-                                                        <img src="{{offer.recipient.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if offer.recipient.profile_pic %}<img src="{{offer.recipient.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% endif %}
                                                         {% if offer.recipient.is_online %}
                                                         <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                                         {% else %}
@@ -316,7 +316,7 @@
                                             <div class="flex flex-wrap items-center gap-4 mt-2">
                                                 <a href="{% url 'work_user_profile' offer.sender.username %}" class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
                                                     <div class="avat relative flex-shrink-0 w-9 h-9">
-                                                        <img src="{{offer.sender.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                        {% if offer.sender.profile_pic %}<img src="{{offer.sender.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% endif %}
                                                         {% if offer.recipient.is_online %}
                                                         <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                                         {% else %}

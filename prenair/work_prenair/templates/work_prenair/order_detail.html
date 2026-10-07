@@ -154,7 +154,7 @@
                             <ul class="list flex flex-col gap-6">
                                 {% for review in order.order_review.all %}
                                 <li class="review_item flex gap-5">
-                                    <img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />
+                                    {% if review.user.profile_pic %}<img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />{% endif %}
                                     <div class="review_content w-full">
                                         <div class="flex flex-wrap justify-between gap-6 gap-y-3 w-full">
                                             <div class="user_info">
@@ -184,7 +184,7 @@
                             <ul class="list flex flex-col gap-6">
                                 {% for review in order.order_review.all %}
                                 <li class="review_item flex gap-5">
-                                    <img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />
+                                    {% if review.user.profile_pic %}<img src="{{review.user.profile_pic.url}}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar/IMG-13" class="user_avatar w-15 h-15 flex-shrink-0 rounded-full" />{% endif %}
                                     <div class="review_content w-full">
                                         <div class="flex flex-wrap justify-between gap-6 gap-y-3 w-full">
                                             <div class="user_info">

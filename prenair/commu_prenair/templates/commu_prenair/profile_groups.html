@@ -39,7 +39,11 @@
                             <div class="friends-list d-center mt-3 gap-1 text-center">
                                 <ul class="d-center">
                                     {% for member in group.members.all|slice:":3" %}
+                                    {% if member.profile_pic %}
                                     <li><img src="{{member.profile_pic.url}}" alt="image"></li>
+                                    {% else %}
+                                    <li><img src="{% static 'digi_prenair/img/avatar.png' %}" alt="image"></li>
+                                    {% endif %}
                                     {% endfor %}
                                 </ul>
                                 <span class="smtxt m-0">{{group.members.count}} Member</span>

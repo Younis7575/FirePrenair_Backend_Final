@@ -25,7 +25,7 @@
                                     <ul>
                                         <li>
                                             <div class="post-author">
-                                                <a href="javascript:void(0);"><img src="{{blog.author.profile_pic.url}}" alt="Post Author">
+                                                <a href="javascript:void(0);">{% if blog.author.profile_pic %}<img src="{{blog.author.profile_pic.url}}" alt="Post Author">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="Post Author">{% endif %}
                                                     <span>{{blog.author.name}}</span></a>
                                             </div>
                                         </li>

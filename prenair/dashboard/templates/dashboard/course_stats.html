@@ -93,7 +93,11 @@ Manage Courses Eduprenair{% endblock title %} {% load static %} {% block extra_c
                 {% for student in students %}
                     <li class="item employers_item flex items-center justify-between gap-4 h-full p-6 rounded-lg bg-white shadow-md duration-300 hover:shadow-xl">
                         <a href="{% url 'edu_profile' student.user.slug %}" class="employers_item flex items-center gap-4 w-full">
+                            {% if student.user.profile_pic %}
                             <img src="{{ student.user.profile_pic.url }}" alt="profile-pic" class="flex-shrink-0 w-15 h-15" />
+                            {% else %}
+                            <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="profile-pic" class="flex-shrink-0 w-15 h-15" />
+                            {% endif %}
                             <div class="w-full">
                                 <strong class="employers_name text-title duration-300 hover:text-primary">
                                     {{ student.user.username }}

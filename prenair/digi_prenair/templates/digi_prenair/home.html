@@ -257,10 +257,17 @@
                     <span class="avatar box-26">
                       <a href="{% url 'digi_profile' item.seller.slug %}">
                         <!-- Use seller's slug here -->
+                        {% if item.seller.profile_pic %}
                         <img
                           src="{{ item.seller.profile_pic.url }}"
                           alt="{{ item.seller.username }}"
                         />
+                        {% else %}
+                        <img
+                          src="{% static 'digi_prenair/img/avatar.png' %}"
+                          alt="{{ item.seller.username }}"
+                        />
+                        {% endif %}
                       </a>
                       {% if item.seller.digi_is_verified %}
                       <span class="verified"
@@ -427,10 +434,17 @@
                 <div class="item-meta">
                   <span class="avatar box-26">
                     <a href="{% url 'digi_profile' slug=item.seller.slug %}">
+                      {% if item.seller.profile_pic %}
                       <img
                         src="{{ item.seller.profile_pic.url }}"
                         alt="{{ item.seller.username }}"
                       />
+                      {% else %}
+                      <img
+                        src="{% static 'digi_prenair/img/avatar.png' %}"
+                        alt="{{ item.seller.username }}"
+                      />
+                      {% endif %}
                     </a>
                     {% if item.seller.digi_is_verified %}
                     <span class="verified"
@@ -505,10 +519,17 @@
               <div class="seller-info">
                 <div class="avatar box-64">
                   <a href="{% url 'digi_profile' slug=seller.slug %}">
+                    {% if seller.profile_pic %}
                     <img
                       src="{{ seller.profile_pic.url }}"
                       alt="{{ seller.username }}"
                     />
+                    {% else %}
+                    <img
+                      src="{% static 'digi_prenair/img/avatar.png' %}"
+                      alt="{{ seller.username }}"
+                    />
+                    {% endif %}
                   </a>
                   {% if seller.digi_is_verified %}
                   <span class="verified">

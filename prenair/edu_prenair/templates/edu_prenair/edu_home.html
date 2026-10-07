@@ -218,8 +218,9 @@
 									<div class="product-content">
 										<div class="course-group d-flex">
 											<div class="course-group-img d-flex">
-												<a href="{% url 'edu_profile' course.instructor.slug %}"><img src="{{course.instructor.profile_pic.url}}"
-														alt="Img" class="img-fluid"></a>
+												<a href="{% url 'edu_profile' course.instructor.slug %}">{% if course.instructor.profile_pic %}<img src="{{course.instructor.profile_pic.url}}"
+														alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+														alt="Img" class="img-fluid">{% endif %}</a>
 												<div class="course-name">
 													<h4><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h4>
 													<p>Instructor</p>
@@ -377,7 +378,7 @@
 						<div class="instructors-widget">
 							<div class="instructors-img ">
 								<a href="{% url 'edu_profile' instructor.slug %}">
-									<img class="img-fluid" alt="Img" src="{{instructor.profile_pic.url}}">
+									{% if instructor.profile_pic %}<img class="img-fluid" alt="Img" src="{{instructor.profile_pic.url}}">{% else %}<img class="img-fluid" alt="Img" src="{% static 'digi_prenair/img/avatar.png' %}">{% endif %}
 								</a>
 							</div>
 							<div class="instructors-content text-center">

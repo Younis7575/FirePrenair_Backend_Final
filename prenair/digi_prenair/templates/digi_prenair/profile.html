@@ -75,7 +75,7 @@
     <div class="about-author-section container">
       <div class="profile-header-user-profile">
         <div class="avatar box-64 bordered">
-          <a href="{% url 'digi_profile' user.slug %}"><img src="{{ user.profile_pic.url }}" alt="{{ user.username }}'s avatar" onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'" /></a>
+          <a href="{% url 'digi_profile' user.slug %}">{% if user.profile_pic %}<img src="{{ user.profile_pic.url }}" alt="{{ user.username }}'s avatar" onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'" />{% else %}<img src="{% static 'digi_prenair/img/default-avatar.png' %}" alt="{{ user.username }}'s avatar" />{% endif %}</a>
 
           {% if user.digi_is_verified %}
           <span class="verified"
@@ -167,7 +167,11 @@
                         <div class="item-meta">
                           <span class="avatar box-26"
                             ><a href="{% url 'digi_profile' product.seller.slug %}">
+                              {% if product.seller.profile_pic %}
                               <img src="{{product.seller.profile_pic.url}}" alt="{{ product.seller.username }}" />
+                              {% else %}
+                              <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ product.seller.username }}" />
+                              {% endif %}
                               </a><span class="verified"
                               ><svg class="crumina-icon">
                                 <use

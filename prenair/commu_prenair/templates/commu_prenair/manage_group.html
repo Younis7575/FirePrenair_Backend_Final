@@ -96,7 +96,11 @@
                 <div class="single-box member-single p-5 d-flex align-items-baseline justify-content-between">
                     <div class="profile-item d-flex gap-3">
                         <div class="avatar position-relative">
+                            {% if member.user.profile_pic %}
                             <img class="avatar-img max-un rounded" src="{{ member.user.profile_pic.url }}" style="width: 48px; height: 48px;" alt="avatar">
+                            {% else %}
+                            <img class="avatar-img max-un rounded" src="{% static 'digi_prenair/img/avatar.png' %}" style="width: 48px; height: 48px;" alt="avatar">
+                            {% endif %}
                         </div>
                         <div class="text-area text-start">
                             <h6 class="m-0 mb-1"><a href="{% url 'commu_profile' member.user.slug %}">{{ member.user.name }}</a></h6>

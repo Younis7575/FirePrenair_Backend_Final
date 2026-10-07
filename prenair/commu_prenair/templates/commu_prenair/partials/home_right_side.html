@@ -26,14 +26,22 @@
                         <div class="single-single">
                             <div class="profile-pic d-flex gap-3 align-items-center">
                                 <div class="avatar">
+                                    {% if f_request.from_user.profile_pic %}
                                     <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{f_request.from_user.profile_pic.url}}" alt="avatar">
+                                    {% else %}
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                    {% endif %}
                                 </div>
                                 <div class="text-area">
                                     <a href="{% url 'commu_profile' f_request.from_user.slug %}"><h6 class="m-0">{{f_request.from_user.name}}</h6></a>
                                     <div class="friends-list d-flex gap-3 align-items-center text-center">
                                         <ul class="d-flex align-items-center justify-content-center">
                                             {% for connection in request.user|mutual_connections:f_request.from_user|slice:":3" %}
+                                            {% if friend.profile_pic %}
                                             <li><img src="{{ friend.profile_pic.url }}" alt="image"></li>
+                                            {% else %}
+                                            <li><img src="{% static 'digi_prenair/img/avatar.png' %}" alt="image"></li>
+                                            {% endif %}
                                             {% endfor %}
                                         </ul>
                                         <span class="mdtxt d-center">{{request.user|mutual_connections_count:f_request.from_user}} mutual friends</span>
@@ -67,8 +75,23 @@
                         <div class="profile-area d-center justify-content-between">
                             <div class="avatar-item d-flex gap-3 align-items-center">
                                 <div class="avatar-item">
+                                    {% if contact.user1 == request.user %}
+                                    {% if contact.user2.profile_pic %}
                                     <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
-                                    src="{% if contact.user1 == request.user %} {{ contact.user2.profile_pic.url }} {% else %} {{ contact.user1.profile_pic.url }} {% endif %}" alt="avatar">
+                                    src="{{ contact.user2.profile_pic.url }}" alt="avatar">
+                                    {% else %}
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                    src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                    {% endif %}
+                                    {% else %}
+                                    {% if contact.user1.profile_pic %}
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                    src="{{ contact.user1.profile_pic.url }}" alt="avatar">
+                                    {% else %}
+                                    <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                    src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                    {% endif %}
+                                    {% endif %}
                                 </div>
                                 <div class="info-area">
                                     <h6 class="m-0"><a href="#" class="mdtxt">{% if contact.user1 == request.user %} {{ contact.user2.name }} {% else %} {{ contact.user1.name }} {% endif %}</a></h6>

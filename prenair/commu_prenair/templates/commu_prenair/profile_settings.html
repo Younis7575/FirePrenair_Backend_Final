@@ -27,7 +27,11 @@
                                     <h6>Profile Image</h6>
                                 </div>
                                 <div class="profile-picture text-start">
+                                    {% if request.user.profile_pic %}
                                     <img class="preview-image w-100" src="{{ request.user.profile_pic.url }}" alt="Preview Image">
+                                    {% else %}
+                                    <img class="preview-image w-100" src="{% static 'digi_prenair/img/avatar.png' %}" alt="Preview Image">
+                                    {% endif %}
                                 </div>
                                 <div class="file-upload">
                                     <label class="file text-start mt-2">

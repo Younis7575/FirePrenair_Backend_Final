@@ -17,8 +17,12 @@
         <div class="profile-pic d-flex gap-2 align-items-center">
             
             <div class="position-relative">
+                {% if request.user.profile_pic %}
                 <img class="avatar-img max-un" src="{{request.user.profile_pic.url}}" style="width:50px; height:50px;" alt="avatar">
-                <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" 
+                {% else %}
+                <img class="avatar-img max-un" src="{% static 'digi_prenair/img/avatar.png' %}" style="width:50px; height:50px;" alt="avatar">
+                {% endif %}
+                <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white"
                              style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
             </div>
             <div class="text-area">

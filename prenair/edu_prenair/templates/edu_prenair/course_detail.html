@@ -551,7 +551,7 @@
 							<div class="instructor-wrap border-bottom-0 m-0">
 								<div class="about-instructor align-items-center">
 									<div class="abt-instructor-img">
-										<a href="instructor-profile.html"><img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid"></a>
+										<a href="instructor-profile.html">{% if course.instructor.profile_pic %}<img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="img" class="img-fluid">{% endif %}</a>
 									</div>
 									<div class="instructor-detail me-3">
 										<h5><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h5>
@@ -648,7 +648,7 @@
 									<div class="instructor-wrap">
 										<div class="about-instructor">
 											<div class="abt-instructor-img">
-												<a href="{% url 'edu_profile' course.instructor.slug %}"><img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid"></a>
+												<a href="{% url 'edu_profile' course.instructor.slug %}">{% if course.instructor.profile_pic %}<img src="{{course.instructor.profile_pic.url}}" alt="img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="img" class="img-fluid">{% endif %}</a>
 											</div>
 											<div class="instructor-detail">
 												<h5><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h5>
@@ -691,7 +691,7 @@
 									<div class="instructor-wrap">
 										<div class="about-instructor">
 											<div class="abt-instructor-img">
-												<a href="{% url 'edu_profile' rating.user.slug %}"><img src="{{rating.user.profile_pic.url}}" alt="img" class="img-fluid"></a>
+												<a href="{% url 'edu_profile' rating.user.slug %}">{% if rating.user.profile_pic %}<img src="{{rating.user.profile_pic.url}}" alt="img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="img" class="img-fluid">{% endif %}</a>
 											</div>
 											<div class="instructor-detail">
 												<h5><a href="{% url 'edu_profile' rating.user.slug %}">{{rating.user.name}}</a></h5>

@@ -486,7 +486,11 @@
 
                     <!-- Host Card -->
                     <div class="host-card">
+                        {% if event.creator.profile_pic %}
                         <img src="{{ event.creator.profile_pic.url }}" alt="{{ event.creator.username }}">
+                        {% else %}
+                        <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ event.creator.username }}">
+                        {% endif %}
                         <div>
                             <h6 class="mb-1">Hosted by {{ event.creator.username }}</h6>
                             <p class="text-muted mb-0">{{ event.created_at|timesince }} ago</p>

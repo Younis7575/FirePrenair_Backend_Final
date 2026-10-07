@@ -20,7 +20,11 @@
                      <div class="col-xl-4 col-sm-6 col-8">
                          <div class="single-box p-5">
                              <div class="avatar">
+                                 {% if connection.from_user.profile_pic %}
                                  <img class="avatar-img w-100" src="{{ connection.from_user.profile_pic.url }}" alt="avatar">
+                                 {% else %}
+                                 <img class="avatar-img w-100" src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                 {% endif %}
                              </div>
                              <a href="{% url 'commu_profile' connection.from_user.slug %}">
                                  <h6 class="m-0 mb-2 mt-3">{{ connection.from_user.name }}</h6>
@@ -28,7 +32,11 @@
                              <div class="friends-list d-center gap-1 text-center">
                                  <ul class="d-center">
                                      {% for friend in request.user|mutual_connections:connection.from_user|slice:":3" %}
+                                         {% if friend.profile_pic %}
                                          <li><img src="{{ friend.profile_pic.url }}" alt="image"></li>
+                                         {% else %}
+                                         <li><img src="{% static 'digi_prenair/img/avatar.png' %}" alt="image"></li>
+                                         {% endif %}
                                      {% endfor %}
                                  </ul>
                                  <span class="smtxt m-0">{{ request.user|mutual_connections_count:connection.from_user }} mutual friends</span>

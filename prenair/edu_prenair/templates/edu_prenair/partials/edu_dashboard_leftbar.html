@@ -5,8 +5,9 @@
         <div class="settings-menu">
             <div class="profile-bg">
                 <div class="profile-img">
-                    <a href="{% url 'edu_profile' request.user.slug %}"><img src="{{request.user.profile_pic.url}}"
-                            alt="Img"></a>
+                    <a href="{% url 'edu_profile' request.user.slug %}">{% if request.user.profile_pic %}<img src="{{request.user.profile_pic.url}}"
+                            alt="Img">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+                            alt="Img">{% endif %}</a>
                 </div>
             </div>
             <div class="profile-group">

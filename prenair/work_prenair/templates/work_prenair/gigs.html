@@ -277,7 +277,7 @@
                             <div class="service_more_info flex items-center justify-between gap-1 mt-4 pt-4 border-t border-line">
                                 <a href="{% url 'work_user_profile' gig.user.username %}" class="service_author flex items-center gap-2">
                                     <div class="avat relative flex-shrink-0 w-9 h-9">
-                                        <img src="{{gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-9 h-9 rounded-full object-cover" />
+                                        {% if gig.user.profile_pic %}<img src="{{gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-9 h-9 rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-9 h-9 rounded-full object-cover" />{% endif %}
                                         {% if gig.user.is_online %}
                                         <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                         {% else %}

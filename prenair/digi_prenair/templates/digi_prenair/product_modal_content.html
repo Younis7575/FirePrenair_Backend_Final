@@ -52,11 +52,18 @@
             <div class="product-author">
               <span class="avatar box-26">
                 <a href="{% url 'digi_profile' slug=product.seller.slug %}">
+                  {% if product.seller.profile_pic %}
                   <img
                     src="{{ product.seller.profile_pic.url }}"
                     alt="{{ product.seller.username }}'s profile image"
                     onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'"
                   />
+                  {% else %}
+                  <img
+                    src="{% static 'digi_prenair/img/default-avatar.png' %}"
+                    alt="{{ product.seller.username }}'s profile image"
+                  />
+                  {% endif %}
                 </a>
                 {% if product.seller.digi_is_verified %}
                 <span class="verified">
@@ -169,7 +176,11 @@
                             <a
                               href="{% url 'digi_profile' slug=review.user.slug %}"
                             >
+                              {% if review.user.profile_pic %}
                               <img src="{{ review.user.profile_pic.url }}" alt="" />
+                              {% else %}
+                              <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="" />
+                              {% endif %}
                             </a>
                             {% if review.user.digi_is_verified %}
                             <span class="verified"
@@ -319,11 +330,18 @@
               <div class="avatar box-64">
                 <a href="{% url 'digi_profile' product.seller.slug %}">
                   <!-- Dynamic seller profile link -->
+                  {% if product.seller.profile_pic %}
                   <img
                     src="{{ product.seller.profile_pic.url }}"
                     alt="{{ product.seller.username }}'s avatar"
                     onerror="this.onerror=null; this.src='{% static 'digi_prenair/img/default-avatar.png' %}'"
                   />
+                  {% else %}
+                  <img
+                    src="{% static 'digi_prenair/img/default-avatar.png' %}"
+                    alt="{{ product.seller.username }}'s avatar"
+                  />
+                  {% endif %}
                   {% if product.seller.digi_is_verified %}
                   <span class="verified">
                     <svg class="crumina-icon">
@@ -401,7 +419,11 @@
                             <div class="item-meta">
                                 <span class="avatar box-26">
                                     <a href="{% url 'digi_profile' item.seller.slug %}">
+                                        {% if item.seller.profile_pic %}
                                         <img src="{{ item.seller.profile_pic.url }}" alt="{{ item.seller.username }}" />
+                                        {% else %}
+                                        <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ item.seller.username }}" />
+                                        {% endif %}
                                         {% if item.seller.digi_is_verified %}
                                         <span class="verified">
                                             <svg class="crumina-icon">
@@ -456,7 +478,11 @@
                             <div class="item-meta">
                                 <span class="avatar box-26">
                                     <a href="{% url 'digi_profile' item.seller.slug %}">
+                                        {% if item.seller.profile_pic %}
                                         <img src="{{ item.seller.profile_pic.url }}" alt="{{ item.seller.username }}" />
+                                        {% else %}
+                                        <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="{{ item.seller.username }}" />
+                                        {% endif %}
                                         {% if item.seller.digi_is_verified %}
                                         <span class="verified">
                                             <svg class="crumina-icon">

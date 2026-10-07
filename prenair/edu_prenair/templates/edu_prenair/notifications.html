@@ -67,7 +67,7 @@
                                                 <div class="col-md-9">
                                                     <div class="notication-content">
                                                         <span>
-                                                            <img src="{{request.user.profile_pic.url}}" class="img-fluid" alt="img">
+                                                            {% if request.user.profile_pic %}<img src="{{request.user.profile_pic.url}}" class="img-fluid" alt="img">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" class="img-fluid" alt="img">{% endif %}
                                                         </span>
                                                         <div class="notication-info">
                                                             <p><span>Thompson</span> Hicks enroll a new course on Programming</p>

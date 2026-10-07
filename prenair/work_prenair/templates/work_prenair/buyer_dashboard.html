@@ -133,7 +133,7 @@
                                     <th scope="row" class="p-5 text-left">
                                         <div class="info flex items-center gap-3">
                                             <div class="avat relative flex-shrink-0 w-9 h-9">
-                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.profile_pic %}<img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% endif %}
                                                 {% if order.gig.user.is_online %}
                                                 <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                                 {% else %}
@@ -198,7 +198,7 @@
                                     <th scope="row" class="p-5 text-left">
                                         <div class="info flex items-center gap-3">
                                             <div class="avat relative flex-shrink-0 w-9 h-9">
-                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.profile_pic %}<img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% endif %}
                                                 {% if order.gig.user.is_online %}
                                                 <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                                 {% else %}
@@ -272,7 +272,7 @@
                                     <th scope="row" class="p-5 text-left">
                                         <div class="info flex items-center gap-3">
                                             <div class="avat relative flex-shrink-0 w-9 h-9">
-                                                <img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />
+                                                {% if order.gig.user.profile_pic %}<img src="{{order.gig.user.profile_pic.url}}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1" class="chat_avatar w-full h-full rounded-full object-cover" />{% endif %}
                                                 {% if order.gig.user.is_online %}
                                                 <span style="background-color: green;" class="chat_status absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green border-2 border-white"></span>
                                                 {% else %}

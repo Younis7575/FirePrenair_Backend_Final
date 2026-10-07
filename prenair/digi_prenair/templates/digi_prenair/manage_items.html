@@ -171,7 +171,11 @@
                 <div class="item-meta">
                   <span class="avatar box-26">
                     <a href="{% url 'digi_profile' product.seller.slug %}">
+                      {% if product.seller.profile_pic %}
                       <img src="{{ product.seller.profile_pic.url }}" alt="Avatar">
+                      {% else %}
+                      <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="Avatar">
+                      {% endif %}
                     </a>
                     <span class="verified">
                       <svg class="crumina-icon"><use xlink:href="#check-icon"></use></svg>

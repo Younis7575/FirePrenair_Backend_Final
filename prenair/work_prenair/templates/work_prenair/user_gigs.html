@@ -105,8 +105,9 @@
                                                 <div class="flex flex-wrap items-center gap-4 mt-2">
                                                     <a href="#"
                                                         class="employers flex items-center gap-2 text-secondary duration-300 hover:text-primary">
-                                                        <img src="{{gig.user.profile_pic.url}}" alt="company/1"
-                                                            class="flex-shrink-0 w-5 h-5" />
+                                                        {% if gig.user.profile_pic %}<img src="{{gig.user.profile_pic.url}}" alt="company/1"
+                                                            class="flex-shrink-0 w-5 h-5" />{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="company/1"
+                                                            class="flex-shrink-0 w-5 h-5" />{% endif %}
                                                         <span class="employers_name font-normal">Gig by
                                                             {{gig.user.name}}</span>
                                                     </a>

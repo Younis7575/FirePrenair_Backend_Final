@@ -21,9 +21,11 @@
             <div class="product-content">
                 <div class="course-group d-flex">
                     <div class="course-group-img d-flex">
-                        <a href="{% url 'edu_profile' enroll.course.instructor.slug %}"><img
+                        <a href="{% url 'edu_profile' enroll.course.instructor.slug %}">{% if enroll.course.instructor.profile_pic %}<img
                                 src="{{enroll.course.instructor.profile_pic.url}}" alt="Img"
-                                class="img-fluid"></a>
+                                class="img-fluid">{% else %}<img
+                                src="{% static 'digi_prenair/img/avatar.png' %}" alt="Img"
+                                class="img-fluid">{% endif %}</a>
                         <div class="course-name">
                             <h4><a href="{% url 'edu_profile' enroll.course.instructor.slug %}">{{enroll.course.instructor.name}}</a></h4>
                             <p>Instructor</p>

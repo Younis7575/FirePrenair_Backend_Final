@@ -328,6 +328,12 @@ class InstructorsAPIView(APIView):
                     "username": instructor.username,
                     # "slug": instructor.slug,
                     "profile_pic": request.build_absolute_uri(instructor.profile_pic.url) if instructor.profile_pic else None,
+                    # Same figures the website's instructors page shows.
+                    "edu_bio": instructor.edu_bio or "",
+                    "courses_count": instructor.edu_instrcutor_courses().count(),
+                    "hours": instructor.edu_instructor_courses_length(),
+                    "rating": instructor.instructor_courses_rating(),
+                    "categories": instructor.instructor_course_categories(),
                 }
                 for instructor in page
             ]

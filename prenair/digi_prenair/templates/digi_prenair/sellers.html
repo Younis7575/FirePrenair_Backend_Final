@@ -53,7 +53,11 @@
                     <div class="creator-info">
                         <div class="avatar box-64">
                             <a href="{% url 'digi_profile' seller.slug %}">
+                                {% if seller.profile_pic %}
                                 <img src="{{ seller.profile_pic.url }}" alt="avatar" />
+                                {% else %}
+                                <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar" />
+                                {% endif %}
                                 {% if seller.digi_is_verified %}
                                 <span class="verified">
                                     <svg class="crumina-icon">

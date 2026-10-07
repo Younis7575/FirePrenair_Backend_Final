@@ -1568,8 +1568,9 @@ color: #0045a0;
 									<div class="product-content">
 										<div class="course-group d-flex">
 											<div class="course-group-img d-flex">
-												<a href="{% url 'gig_detail' gig.slug %}"><img src="{{gig.user.profile_pic.url}}"
-														alt="Img" class="img-fluid">
+												<a href="{% url 'gig_detail' gig.slug %}">{% if gig.user.profile_pic %}<img src="{{gig.user.profile_pic.url}}"
+														alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+														alt="Img" class="img-fluid">{% endif %}
                             <!-- {% if gig.user.is_online %}
                             <span style="background-color: green; display: flex; position: absolute; top: 57%; left: 18%; border: 2px solid white; width: 11px; height: 11px;" class="rounded"></span>
                             {% else %}
@@ -1746,8 +1747,9 @@ color: #0045a0;
 									<div class="product-content">
 										<div class="course-group d-flex">
 											<div class="course-group-img d-flex">
-												<a href="{% url 'edu_profile' course.instructor.slug %}"><img src="{{course.instructor.profile_pic.url}}"
-														alt="Img" class="img-fluid"></a>
+												<a href="{% url 'edu_profile' course.instructor.slug %}">{% if course.instructor.profile_pic %}<img src="{{course.instructor.profile_pic.url}}"
+														alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+														alt="Img" class="img-fluid">{% endif %}</a>
 												<div class="course-name">
 													<h4><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h4>
 													<p>Instructor</p>
@@ -1917,8 +1919,9 @@ color: #0045a0;
 									<div class="product-content">
 										<div class="course-group d-flex">
 											<div class="course-group-img d-flex">
-												<a href="{% url 'digi_product' item.slug %}"><img src="{{item.seller.profile_pic.url}}"
-														alt="Img" class="img-fluid"></a>
+												<a href="{% url 'digi_product' item.slug %}">{% if item.seller.profile_pic %}<img src="{{item.seller.profile_pic.url}}"
+														alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+														alt="Img" class="img-fluid">{% endif %}</a>
 												<div class="course-name">
 													<h4><a href="{% url 'digi_profile' item.seller.slug %}">{{item.seller.username}}</a></h4>
 													<p>{{item.category.name}}</p>
@@ -2072,8 +2075,9 @@ color: #0045a0;
 									<div class="product-content">
 										<div class="course-group d-flex">
 											<div class="course-group-img d-flex">
-												<a href="{% url 'group_detail' group.slug %}"><img src="{{group.admin.profile_pic.url}}"
-														alt="Img" class="img-fluid"></a>
+												<a href="{% url 'group_detail' group.slug %}">{% if group.admin.profile_pic %}<img src="{{group.admin.profile_pic.url}}"
+														alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+														alt="Img" class="img-fluid">{% endif %}</a>
 												<div class="course-name">
 													<h4><a href="{% url 'group_detail' group.slug %}">{{group.admin.username}}</a></h4>
 													<p>{{group.category_l_1.name}}</p>

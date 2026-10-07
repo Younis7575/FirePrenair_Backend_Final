@@ -7,7 +7,11 @@
                 <div class="top-area py-4 d-center flex-wrap gap-3 justify-content-between align-items-start">
                     <div class="d-flex gap-3 align-items-center">
                         <div class="avatar-item p position-relative">
+                            {% if user.profile_pic %}
                             <img class="avatar-img max-un" style="width: 100px; height: 100px;" src="{{user.profile_pic.url}}" alt="avatar">
+                            {% else %}
+                            <img class="avatar-img max-un" style="width: 100px; height: 100px;" src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                            {% endif %}
                             {% if user.is_online %}
                             <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" 
                                      style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
@@ -21,7 +25,11 @@
                             <div class="friends-list d-flex flex-wrap gap-2 align-items-center text-center">
                                 <ul class="d-flex align-items-center justify-content-center">
                                     {% for person in user.user_connections|slice:":3" %}
+                                    {% if person.profile_pic %}
                                     <li><img src="{{person.profile_pic.url}}" alt="image" class="rounded" style="width: 15pxpx; height: 15px;"></li>
+                                    {% else %}
+                                    <li><img src="{% static 'digi_prenair/img/avatar.png' %}" alt="image" class="rounded" style="width: 15pxpx; height: 15px;"></li>
+                                    {% endif %}
                                     {% endfor %}
                                 </ul>
                                 <span class="mdtxt d-center">{{user.user_connections.count}} Followers</span>

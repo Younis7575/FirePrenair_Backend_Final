@@ -1,0 +1,11 @@
+HTTP POST /api/workprenair/gig/create/ 201 [0.05, 127.0.0.1:60504]
+Service Unavailable: /api/workprenair/paypal/checkout/pay-checkout-gig-dummy1-7afae51f-8058-4840-9e5d-7b65aafa3d02/basic/
+HTTP POST /api/workprenair/paypal/checkout/pay-checkout-gig-dummy1-7afae51f-8058-4840-9e5d-7b65aafa3d02/basic/ 503 [1.27, 127.0.0.1:60505]
+HTTP DELETE /api/workprenair/gig/pay-checkout-gig-dummy1-7afae51f-8058-4840-9e5d-7b65aafa3d02/delete/ 204 [0.01, 127.0.0.1:60509]
+Performing system checks...
+
+System check identified no issues (0 silenced).
+September 19, 2026 - 16:37:08
+Django version 5.1.2, using settings 'prenair.settings'
+Starting ASGI/Daphne version 4.1.2 development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.

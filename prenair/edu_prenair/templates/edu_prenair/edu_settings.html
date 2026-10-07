@@ -59,7 +59,7 @@
                                     <div class="course-group profile-upload-group mb-0 d-flex">
                                         <div class="course-group-img profile-edit-field d-flex align-items-center">
                                             <a href="{% url 'edu_profile' request.user.slug %}" class="profile-pic">
-                                                <img src="{{ user.profile_pic.url }}" alt="Img" class="img-fluid"> <!-- Display existing avatar -->
+                                                {% if user.profile_pic %}<img src="{{ user.profile_pic.url }}" alt="Img" class="img-fluid">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}" alt="Img" class="img-fluid">{% endif %} <!-- Display existing avatar -->
                                             </a>
                                             <div class="profile-upload-head">
                                                 <h4><a href="{% url 'edu_profile' request.user.slug %}">Your avatar</a></h4>

@@ -115,7 +115,11 @@
 
                 <!-- Username Section -->
                 <div class="username-section mt-6">
+                    {% if withdraw_request.user.profile_pic %}
                     <img src="{{ withdraw_request.user.profile_pic.url }}" alt="User Avatar">
+                    {% else %}
+                    <img src="{% static 'digi_prenair/img/avatar.png' %}" alt="User Avatar">
+                    {% endif %}
                     <div class="username-details">
                         <div class="username">{{ withdraw_request.user.username }}</div>
                         <div class="user-status">Location: {{ withdraw_request.user.country }}</div>

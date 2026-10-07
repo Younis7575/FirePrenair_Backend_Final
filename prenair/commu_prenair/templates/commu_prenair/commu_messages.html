@@ -30,8 +30,13 @@
                                 <div class="profile-area d-center justify-content-between">
                                     <div class="avatar-item d-flex mb-4 gap-3 align-items-center">
                                         <div class="avatar-item">
+                                            {% if request.user.profile_pic %}
                                             <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{request.user.profile_pic.url}}"
                                                 alt="avatar">
+                                            {% else %}
+                                            <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                alt="avatar">
+                                            {% endif %}
                                         </div>
                                         <div class="info-area">
                                             <h6 class="m-0">Your Chats</h6>
@@ -50,9 +55,27 @@
                                     <div class="text-start d-flex justify-content-between chat-single active p-4 mb-2">
                                         <div class="d-flex gap-2 align-items-center">
                                             <div class="avatar position-relative">
+                                                {% if chat.user1 == request.user %}
+                                                {% if chat.user2.profile_pic %}
                                                 <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
-                                                     src="{% if chat.user1 == request.user %} {{ chat.user2.profile_pic.url }} {% else %} {{ chat.user1.profile_pic.url }} {% endif %}"
+                                                     src="{{ chat.user2.profile_pic.url }}"
                                                      alt="avatar">
+                                                {% else %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                     alt="avatar">
+                                                {% endif %}
+                                                {% else %}
+                                                {% if chat.user1.profile_pic %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{{ chat.user1.profile_pic.url }}"
+                                                     alt="avatar">
+                                                {% else %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                     alt="avatar">
+                                                {% endif %}
+                                                {% endif %}
                                                      {% if chat.user1 == request.user %}
                                                      {% if chat.user2.is_online %}
                                                      <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>

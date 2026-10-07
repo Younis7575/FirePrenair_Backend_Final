@@ -64,8 +64,13 @@
                                 <div class="profile-area d-center justify-content-between">
                                     <div class="avatar-item d-flex mb-4 gap-3 align-items-center">
                                         <div class="avatar-item">
+                                            {% if request.user.profile_pic %}
                                             <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{{request.user.profile_pic.url}}"
                                                 alt="avatar">
+                                            {% else %}
+                                            <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;" src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                alt="avatar">
+                                            {% endif %}
                                         </div>
                                         <div class="info-area">
                                             <h6 class="m-0">Your Chats</h6>
@@ -84,9 +89,27 @@
                                     <div class="text-start d-flex justify-content-between chat-single active p-4 mb-2">
                                         <div class="d-flex gap-2 align-items-center">
                                             <div class="avatar position-relative">
+                                                {% if chat.user1 == request.user %}
+                                                {% if chat.user2.profile_pic %}
                                                 <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
-                                                     src="{% if chat.user1 == request.user %} {{ chat.user2.profile_pic.url }} {% else %} {{ chat.user1.profile_pic.url }} {% endif %}"
+                                                     src="{{ chat.user2.profile_pic.url }}"
                                                      alt="avatar">
+                                                {% else %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                     alt="avatar">
+                                                {% endif %}
+                                                {% else %}
+                                                {% if chat.user1.profile_pic %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{{ chat.user1.profile_pic.url }}"
+                                                     alt="avatar">
+                                                {% else %}
+                                                <img class="avatar-img max-un rounded" style="width: 48px; height: 48px;"
+                                                     src="{% static 'digi_prenair/img/avatar.png' %}"
+                                                     alt="avatar">
+                                                {% endif %}
+                                                {% endif %}
                                                      {% if chat.user1 == request.user %}
                                                      {% if chat.user2.is_online %}
                                                      <div class="position-absolute bottom-0 end-0  rounded-circle border border-2 border-white" style="width: 12px; height: 12px; background: rgb(10, 230, 10);"></div>
@@ -138,8 +161,13 @@
                     <div class="main">
                         <div class="chat-head py-4 px-5 d-center justify-content-between">
                             <div class="d-flex gap-4 align-items-center">
+                                {% if chat_with.profile_pic %}
                                 <img src="{{chat_with.profile_pic.url}}" style="width: 48px; height: 48px;"
                                     class="rounded" alt="image">
+                                {% else %}
+                                <img src="{% static 'digi_prenair/img/avatar.png' %}" style="width: 48px; height: 48px;"
+                                    class="rounded" alt="image">
+                                {% endif %}
                                 <div class="profile-status">
                                     <h5 class="m-0">
                                         <a href="{% url 'commu_profile' chat_with.slug %}" class="m-0">{{ chat_with.name}}</a>
@@ -163,13 +191,23 @@
                                     <span class="mdtxt">{{ msg.timestamp|date:"H:i" }}</span>
                                 </div>
                                 <div class="entete">
+                                    {% if request.user.profile_pic %}
                                     <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image"
                                         style="width: 48px; height: 48px;">
+                                    {% else %}
+                                    <img src="{% static 'digi_prenair/img/avatar.png' %}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                    {% endif %}
                                 </div>
                                 {% else %}
                                 <div class="entete">
+                                    {% if chat_with.profile_pic %}
                                     <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image"
                                         style="width: 48px; height: 48px;">
+                                    {% else %}
+                                    <img src="{% static 'digi_prenair/img/avatar.png' %}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                    {% endif %}
                                 </div>
                                 <div class="message">
                                     <p>{{ msg.content }}</p>
@@ -181,8 +219,13 @@
                                 {% if msg.file %}
                                 {% if msg.sender != request.user %}
                                 <div class="entete">
+                                    {% if chat_with.profile_pic %}
                                     <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image"
                                         style="width: 48px; height: 48px;">
+                                    {% else %}
+                                    <img src="{% static 'digi_prenair/img/avatar.png' %}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                    {% endif %}
                                 </div>
                                 {% endif %}
                                 <div class="file-message" style="background:#ff6f61;">
@@ -198,8 +241,13 @@
                                 </div>
                                 {% if msg.sender == request.user %}
                                 <div class="entete">
+                                    {% if request.user.profile_pic %}
                                     <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image"
                                         style="width: 48px; height: 48px;">
+                                    {% else %}
+                                    <img src="{% static 'digi_prenair/img/avatar.png' %}" class="rounded" alt="image"
+                                        style="width: 48px; height: 48px;">
+                                    {% endif %}
                                 </div>
                                 {% endif %}
                                 {% endif %}
@@ -370,10 +418,10 @@
                 <span class="mdtxt">${new Date().toLocaleTimeString()}</span>
             </div>
             <div class="entete">
-                <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+                <img src="{% if request.user.profile_pic %}{{ request.user.profile_pic.url }}{% else %}{% static 'digi_prenair/img/avatar.png' %}{% endif %}" class="rounded" alt="image" style="width: 48px; height: 48px;">
             </div>` : `
             <div class="entete">
-                <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+                <img src="{% if chat_with.profile_pic %}{{ chat_with.profile_pic.url }}{% else %}{% static 'digi_prenair/img/avatar.png' %}{% endif %}" class="rounded" alt="image" style="width: 48px; height: 48px;">
             </div>
             <div class="message">
                 <p>${message}</p>
@@ -392,7 +440,7 @@
         <li class="${isCurrentUser ? 'me' : 'you'}">
             ${!isCurrentUser ? `
             <div class="entete">
-                <img src="{{ chat_with.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+                <img src="{% if chat_with.profile_pic %}{{ chat_with.profile_pic.url }}{% else %}{% static 'digi_prenair/img/avatar.png' %}{% endif %}" class="rounded" alt="image" style="width: 48px; height: 48px;">
             </div>` : ''}
             <div class="file-message" style="background: #293f6c;">
                 <div class="file-info d-flex align-items-center">
@@ -407,7 +455,7 @@
             </div>
             ${isCurrentUser ? `
             <div class="entete">
-                <img src="{{ request.user.profile_pic.url }}" class="rounded" alt="image" style="width: 48px; height: 48px;">
+                <img src="{% if request.user.profile_pic %}{{ request.user.profile_pic.url }}{% else %}{% static 'digi_prenair/img/avatar.png' %}{% endif %}" class="rounded" alt="image" style="width: 48px; height: 48px;">
             </div>` : ''}
         </li>
     `;

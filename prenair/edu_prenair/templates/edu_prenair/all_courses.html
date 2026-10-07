@@ -340,9 +340,11 @@
 													<span class="d-inline-block average-rating"><span>5.0</span> ({{course.five_star_ratings.count}})</span>
 												</div>
 												<div class="course-group-img d-flex mb-3">
-													<a href="{% url 'edu_profile' course.instructor.slug %}"><img
+													<a href="{% url 'edu_profile' course.instructor.slug %}">{% if course.instructor.profile_pic %}<img
 															src="{{course.instructor.profile_pic.url}}" alt="Img"
-															class="img-fluid"></a>
+															class="img-fluid">{% else %}<img
+															src="{% static 'digi_prenair/img/avatar.png' %}" alt="Img"
+															class="img-fluid">{% endif %}</a>
 													<div class="course-name">
 														<h4><a href="{% url 'edu_profile' course.instructor.slug %}">{{course.instructor.name}}</a></h4>
 														<p>{{course.instructor.edu_bio | truncatechars:100}}</p>

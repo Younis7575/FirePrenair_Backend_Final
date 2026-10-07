@@ -61,9 +61,11 @@
                                 <!-- Current image display -->
                                 <div class="flex items-center mt-4 space-x-4">
                                     <p class="text-gray-600 text-sm font-medium">Current Image:</p>
-                                    <img src="{{ request.user.profile_pic.url }}" 
-                                         alt="Current Profile Image" 
-                                         class="w-32 h-32 rounded-full border border-gray-300 shadow-md">
+                                    {% if request.user.profile_pic %}<img src="{{ request.user.profile_pic.url }}"
+                                         alt="Current Profile Image"
+                                         class="w-32 h-32 rounded-full border border-gray-300 shadow-md">{% else %}<img src="{% static 'digi_prenair/img/avatar.png' %}"
+                                         alt="Current Profile Image"
+                                         class="w-32 h-32 rounded-full border border-gray-300 shadow-md">{% endif %}
                                 </div>
                             </div>
                             

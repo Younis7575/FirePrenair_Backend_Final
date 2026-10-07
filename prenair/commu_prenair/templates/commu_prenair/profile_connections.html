@@ -46,7 +46,11 @@
                                     <div class="profile-area d-center justify-content-between">
                                         <div class="avatar-item d-flex gap-3 align-items-center">
                                             <div class="avatar-item">
+                                                {% if connection.profile_pic %}
                                                 <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{{connection.profile_pic.url}}" alt="avatar">
+                                                {% else %}
+                                                <img class="avatar-img max-un rounded" style="width: 80px; height: 80px;" src="{% static 'digi_prenair/img/avatar.png' %}" alt="avatar">
+                                                {% endif %}
                                             </div>
                                             <div class="info-area text-start">
                                                 <h6 class="m-0"><a href="{% url 'commu_profile' connection.slug %}">{{connection.name}}</a></h6>

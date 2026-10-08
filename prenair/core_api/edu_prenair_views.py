@@ -344,6 +344,7 @@ class InstructorsAPIView(APIView):
                     "name": category.name,
                     # "slug": category.slug,
                     "parent_id": category.parent_id,
+                    "course_count": category.course_count(),
                 }
                 for category in categories
             ]
@@ -2018,3 +2019,17 @@ def become_instructor_api(request):
         {"detail": "Congratulations! Your instructor account has been approved."},
         status=status.HTTP_200_OK
     )
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def edu_child_categories_api(request, category_id):
+    """Sub-categories of an EduPrenair course category.
+
+    `eduprenair/get-child-categories/<id>/` used to resolve to the Commu
+    `get_subcategories_api` (same-named view imported later), which reads
+    Commu group categories, so the course form never got any sub-categories.
+    """
+    children = CourseCategory.objects.filter(parent_id=category_id).order_by("name")
+    return Response({
+        "categories": [{"id": c.id, "name": c.name or ""} for c in children]
+    })

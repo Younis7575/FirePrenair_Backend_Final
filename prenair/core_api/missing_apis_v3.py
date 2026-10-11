@@ -75,8 +75,7 @@ def forgot_password_api_v2(request):
         pass
 
     return Response({'success': True,
-                     'message': 'If an account exists for that email, you will receive password reset instructions shortly.',
-                     'uid': uid, 'token': tok})
+                     'message': 'If an account exists for that email, you will receive password reset instructions shortly.'})
 
 
 @api_view(['POST'])

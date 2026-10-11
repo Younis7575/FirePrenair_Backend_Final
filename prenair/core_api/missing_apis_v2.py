@@ -57,6 +57,49 @@ def leaderboard_dashboard_api(request):
             {'name': 'Maria Johnson', 'avg_rating': 4.8, 'review_count': 900},
             {'name': 'James Wilson', 'avg_rating': 4.7, 'review_count': 750}
         ],
+        # The rest of the website's leaderboard_dashboard context (the page
+        # renders these same sample rows; see home/views.py).
+        'country_sellers': [
+            {'country': 'United States', 'top_seller': 'Sophie Chen', 'total_earnings': 150000},
+            {'country': 'United Kingdom', 'top_seller': 'James Wilson', 'total_earnings': 120000},
+            {'country': 'Canada', 'top_seller': 'Elena Diaz', 'total_earnings': 80000},
+        ],
+        'country_products': [
+            {'seller__country': 'United States', 'top_product': 'SEO Masterclass', 'total_sales': 300},
+            {'seller__country': 'United Kingdom', 'top_product': 'Webinar Blueprint', 'total_sales': 250},
+            {'seller__country': 'Pakistan', 'top_product': 'Coding Template', 'total_sales': 200},
+        ],
+        'active_sellers': [
+            {'country': 'Canada', 'top_active': 'Elena Diaz', 'active_count': 50},
+            {'country': 'Pakistan', 'top_active': 'Zain Ali', 'active_count': 45},
+            {'country': 'Germany', 'top_active': 'Liam Smith', 'active_count': 40},
+        ],
+        'rising_creators': [
+            {'country': 'Australia', 'top_creator': 'Maria Johnson', 'growth_rate': 65},
+            {'country': 'Germany', 'top_creator': 'Liam Smith', 'growth_rate': 55},
+            {'country': 'France', 'top_creator': 'Sophie Martin', 'growth_rate': 45},
+        ],
+        'digi_sellers': [
+            {'name': 'Sophie Chen', 'digi_total_earnings': 90000, 'role': 'Digital Products'},
+            {'name': 'James Wilson', 'digi_total_earnings': 70000, 'role': 'Digital Products'},
+            {'name': 'Elena Diaz', 'digi_total_earnings': 50000, 'role': 'Digital Products'},
+        ],
+        'edu_products': [
+            {'title': 'Coding Bootcamp', 'instructor__name': 'Elena Diaz', 'avg_rating': 4.9},
+            {'title': 'Marketing Course', 'instructor__name': 'Alex Patel', 'avg_rating': 4.8},
+            {'title': 'Design Masterclass', 'instructor__name': 'Sophie Chen', 'avg_rating': 4.7},
+        ],
+        'work_growth': [
+            {'name': 'Maria Johnson', 'growth': 65, 'role': 'Freelance'},
+            {'name': 'Liam Smith', 'growth': 60, 'role': 'Freelance'},
+            {'name': 'Alex Patel', 'growth': 55, 'role': 'Freelance'},
+        ],
+        'commu_new': [
+            {'title': 'Webinar Series', 'instructor__name': 'Alex Patel', 'product_count': 10},
+            {'title': 'Coaching Program', 'instructor__name': 'Elena Diaz', 'product_count': 8},
+            {'title': 'Workshop Bundle', 'instructor__name': 'Sophie Chen', 'product_count': 6},
+        ],
+        'no_1_seller': (top_sellers[0] if top_sellers else None),
     })
 
 
@@ -214,9 +257,12 @@ def corporate_dashboard_api(request):
             'description': p.description,
             'category': p.get_category_display_label(),
             'budget': p.get_budget_display_label(),
+            'category_key': p.category,
+            'budget_key': p.budget,
             'status': p.status,
             'created_at': p.created_at,
         } for p in projects],
+        'user_name': request.user.name or request.user.username,
         'active_count': projects.filter(status='active').count(),
         'pending_count': projects.filter(status='pending').count(),
         'completed_count': projects.filter(status='completed').count(),
@@ -245,6 +291,8 @@ def blog_list_api(request):
             'name': p.author.name,
         },
         'category': p.category.name if p.category else None,
+        # website card text: content[:100] + "..."
+        'content_preview': (p.content or '')[:100],
     } for p in posts_list]
     categories = BlogCategory.objects.all()
     return Response({
@@ -277,6 +325,7 @@ def blog_detail_api(request, slug):
             'author': {
                 'username': post.author.username,
                 'name': post.author.name,
+                'profile_pic': post.author.profile_pic.url if getattr(post.author, 'profile_pic', None) else None,
             },
             'category': post.category.name if post.category else None,
         },
@@ -284,7 +333,16 @@ def blog_detail_api(request, slug):
             'title': rp.title,
             'slug': rp.slug,
             'featured_image': rp.featured_image.url if rp.featured_image else None,
+            'published_date': rp.published_date,
         } for rp in related_posts],
+        # Sidebar of blog_detail.html: recent posts + categories.
+        'recent_posts': [{
+            'title': rp.title,
+            'slug': rp.slug,
+            'featured_image': rp.featured_image.url if rp.featured_image else None,
+            'published_date': rp.published_date,
+        } for rp in BlogPost.objects.filter(published=True).exclude(id=post.id).order_by('-published_date')[:5]],
+        'categories': [{'id': c.id, 'name': c.name} for c in BlogCategory.objects.all()[:10]],
     })
 
 

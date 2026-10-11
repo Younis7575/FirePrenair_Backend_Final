@@ -120,6 +120,7 @@ urlpatterns = [
 
     # features
     path('home/features/', features_api, name='features_api'),
+    path('home/corporate-solutions/', corporate_solutions_api, name='corporate_solutions_api'),
     path('home/feature/', feature_detail_api, name='feature_detail_api'),   
     
     ######################################################  profiles APP VIEWS URLS ######################################################
@@ -158,6 +159,7 @@ urlpatterns = [
     path("digiprenair/logout_api/", logout_view_api, name="logout_api"),
     path("digiprenair/explore_api/", DigiExploreAPIView.as_view(), name="digi_explore_api"),
     path("digiprenair/sellers_api/", digi_sellers_api, name="digi_sellers_api"),
+    path("digiprenair/product-search/", product_search_api_api, name="digi_product_search_api"),
     path("digiprenair/product_api/<slug:slug>/", digi_product_api, name="digi_product_api"),
     path("digiprenair/profile_api/<slug:slug>/", digi_profile_api, name="digi_profile_api"),
 
@@ -288,6 +290,8 @@ urlpatterns = [
     path("eduprenair/paypal-success/<slug:course_slug>/", paypal_course_success_api, name="paypal_course_success_api"),
     path("eduprenair/eduprenair_chatbot/", eduprenair_chatbot_api, name="eduprenair_chatbot_view_api"),
     path("eduprenair/become-instructor/", become_instructor_api, name="become_instructor_api"),
+    path("eduprenair/notifications/", get_notifications_api, name="edu_notifications_api"),
+    path("eduprenair/course/lesson/generate_audio/", generate_audio_api, name="edu_generate_audio_api"),
     ###################################################----->workprenair<---------------------##############################################################
     path('workprenair/home/', work_home_api, name='work_home_api'),
     path('workprenair/buyer-dashboard/', buyer_dashboard_api, name='buyer_dashboard_api'),
@@ -322,11 +326,13 @@ urlpatterns = [
     # `workprenair/gig/<slug>/` — the form ApiEndpoints.workGigDetail builds,
     # and the one every sibling route uses — 404'd. Callers that still omit the
     # slash are redirected onto this by APPEND_SLASH.
+    # Literal before `gig/<slug>/`: otherwise "apply-suggestion" is read as a slug and
+    # the POST is answered 405 by gig_detail_api.
+    path('workprenair/gig/apply-suggestion/', apply_gig_ai_suggestion_api, name='apply_gig_ai_suggestion_api'),
     path('workprenair/gig/<str:slug>/', gig_detail_api, name='gig_detail_api'),
     path('workprenair/gig/<str:slug>/edit/', edit_gig_api, name='edit_gig_api'),
     path('workprenair/gig/<str:slug>/delete/', delete_gig_api, name='delete_gig_api'),
     path('workprenair/gig/optimize/<str:slug>/', optimize_gig_api, name='optimize_gig_api'),
-    path('workprenair/gig/apply-suggestion/', apply_gig_ai_suggestion_api, name='apply_gig_ai_suggestion_api'),
 
     path('workprenair/order/<str:order_slug>/', order_detail_api, name='order_detail_api'),
     path('workprenair/order/submit_requirements/<int:order_id>/', submit_requirements_api, name='submit_order_requirements_api'),
@@ -370,6 +376,7 @@ urlpatterns = [
     path('dashboard/home/', dashboard_home_api, name='dashboard_home_api'),
     path('dashboard/notifications/', dashboard_notifications_api, name='dashboard_notifications_api'),
     path('dashboard/notifications/delete/<int:notification_id>/', delete_notification_api, name='delete_notification_api'),
+    path('dashboard/notifications/read/all/', mark_all_dashboard_notifications_read_api, name='mark_all_dashboard_notifications_read_api'),
     path('dashboard/notifications/read/<int:notification_id>/', mark_dashboard_notification_read_api, name='mark_dashboard_notification_read_api'),
 
     path('dashboard/get-child-categories-digi/', get_child_categories_digi_api, name='get_child_categories_digi_api'),

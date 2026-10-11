@@ -87,6 +87,45 @@ import os
 # client = OpenAI(api_key=settings.OPENAI_API_KEY)
 client = Groq(api_key=settings.GROQ_API_KEY)
 
+
+
+_GROQ_FALLBACK_MODELS = ("llama-3.1-8b-instant", "llama-3.3-70b-versatile")
+
+
+def _groq_create(client_, **kwargs):
+    """chat.completions.create with the website's model first and, if Groq
+    rejects it (e.g. a retired model id, which `gpt-3.5-turbo` always is on a
+    Groq client), a current Groq model. Auth/quota errors are re-raised."""
+    try:
+        return client_.chat.completions.create(**kwargs)
+    except Exception as e:
+        msg = str(e)
+        if "invalid_api_key" in msg or "Invalid API Key" in msg:
+            raise
+        last = e
+        for m in _GROQ_FALLBACK_MODELS:
+            try:
+                return client_.chat.completions.create(**{**kwargs, "model": m})
+            except Exception as e2:
+                last = e2
+                if "invalid_api_key" in str(e2) or "Invalid API Key" in str(e2):
+                    raise
+        raise last
+
+
+def _json_from_llm(text):
+    """Models often wrap JSON in ```json fences; the website's json.loads
+    would 500 on that."""
+    t = (text or "").strip()
+    if t.startswith("```"):
+        t = t.strip("`")
+        if t.lower().startswith("json"):
+            t = t[4:]
+    start, end = t.find("{"), t.rfind("}")
+    if start != -1 and end != -1:
+        t = t[start:end + 1]
+    return json.loads(t)
+
 # Knowledge base for chatbot
 knowledge_base = {
     "eduprenair": {
@@ -130,7 +169,9 @@ def eduprenair_chatbot_api(request):
 
     # Interact with Groq API
     client = Groq(api_key=settings.GROQ_API_KEY)
-    groq_response = client.chat.completions.create(
+    try:
+        groq_response = _groq_create(
+        client,
         messages=[
             {
                 "role": "system",
@@ -147,7 +188,12 @@ def eduprenair_chatbot_api(request):
             {"role": "user", "content": user_message},
         ],
         model="llama3-8b-8192",
-    )
+        )
+    except Exception as e:
+        return Response(
+            {"message": "The assistant is unavailable right now. Please try again later.", "error": str(e)},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
 
     # Process the Groq response
     bot_reply = groq_response.choices[0].message.content.strip()
@@ -233,6 +279,8 @@ def edu_profile_api(request, slug):
             "edu_bio": profile.edu_bio,
             "is_edu_instructor": profile.is_edu_instructor,
             "profile_pic": profile.profile_pic.url if profile.profile_pic else None,
+            "created_at": profile.created_at,
+            "slug": profile.slug,
         }
     }
     return Response(context)
@@ -700,8 +748,8 @@ def mark_lesson_completed_api(request, lesson_slug, course_slug):
     enrollment = get_object_or_404(
         StudentEnrollment, user=request.user, course=course
     )
-    completed_lessons = enrollment.completed_lessons.all()
     enrollment.add_completed_lesson(lesson)
+    enrollment.refresh_from_db()
 
     total_lessons = course.modules.aggregate(total_lessons=models.Count("lessons"))[
         "total_lessons"
@@ -710,7 +758,7 @@ def mark_lesson_completed_api(request, lesson_slug, course_slug):
     return Response({
         "message": "Lesson marked as completed",
         "progress": enrollment.progress,
-        "completed_lessons": completed_lessons.count(),
+        "completed_lessons": enrollment.completed_lessons.count(),
         "is_completed": enrollment.is_completed,
         "total_lessons": total_lessons,
     })
@@ -722,6 +770,18 @@ def delete_course_api(request, slug):
     course = get_object_or_404(Course, slug=slug, instructor=request.user)
     course.delete()
     return Response({"message": "Course deleted successfully."}, status=status.HTTP_200_OK)
+
+
+def _course_first_video(request, course):
+    """Preview video shown on the course page (course.get_first_video)."""
+    try:
+        lesson = course.get_first_video()
+        if lesson and lesson.video:
+            return {"id": lesson.id, "slug": lesson.slug, "title": lesson.title,
+                    "url": request.build_absolute_uri(lesson.video.url)}
+    except Exception:
+        pass
+    return None
 
 
 @api_view(['GET'])
@@ -772,6 +832,10 @@ def course_detail_api(request, slug):
             "sub_description_html": sub_description_html,
             "price": course.price,
             "is_free": course.is_free,
+            "discount_price": course.discount_price,
+            "course_price": course.course_price(),
+            "monthly_subscription": course.monthly_subscription,
+            "category_l_2_name": course.category_l_2.name if course.category_l_2 else None,
             "level": course.level,
             "duration": course.duration,
             "language": course.language,
@@ -783,6 +847,10 @@ def course_detail_api(request, slug):
                 "name": course.instructor.name,
                 "slug": course.instructor.slug,
                 "profile_pic": request.build_absolute_uri(course.instructor.profile_pic.url) if course.instructor.profile_pic else None,
+                "edu_bio": course.instructor.edu_bio,
+                "courses_count": course.instructor.course_set.filter(is_published=True).count(),
+                "total_students": course.instructor.edu_instructor_total_students(),
+                "total_hours": course.instructor.edu_instructor_courses_length() if hasattr(course.instructor, "edu_instructor_courses_length") else None,
             },
             "student_count": course.enrolled_students.count(),
             "rating_avg": CourseRating.objects.filter(course=course).aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0,
@@ -790,6 +858,28 @@ def course_detail_api(request, slug):
         },
         "is_enrolled": bool(is_enrolled),
         "has_rated": has_rated,
+        "in_wishlist": bool(request.user.is_authenticated and CourseWishlist.objects.filter(user=request.user, course=course).exists()),
+        "is_instructor": bool(request.user.is_authenticated and request.user == course.instructor),
+        "total_lessons": course.total_lessons(),
+        "total_modules": course.modules.count(),
+        "categories": [c.name for c in (course.category_l_1, course.category_l_2, course.category_l_3) if c],
+        "first_video": _course_first_video(request, course),
+        "reviews": [
+            {
+                "id": r.id,
+                "rating": r.rating,
+                "review": r.review,
+                "created_at": r.created_at,
+                "user": {
+                    "id": r.user.id,
+                    "name": r.user.name,
+                    "slug": r.user.slug,
+                    "edu_bio": r.user.edu_bio,
+                    "profile_pic": request.build_absolute_uri(r.user.profile_pic.url) if r.user.profile_pic else None,
+                },
+            }
+            for r in CourseRating.objects.filter(course=course).select_related("user").order_by("-created_at")
+        ],
         "prev_course": {
             "slug": prev_course.slug,
             "title": prev_course.title
@@ -810,14 +900,54 @@ def course_content_api(request, slug):
     enrollment = get_object_or_404(StudentEnrollment, user=request.user, course=course)
 
     description_html = markdown.markdown(course.description)
+    completed = set(enrollment.completed_lessons.values_list("pk", flat=True))
 
-    
+    modules = []
+    for module in course.modules.all().prefetch_related("lessons"):
+        modules.append({
+            "id": module.pk,
+            "title": module.title,
+            "description": module.description,
+            "order": module.order,
+            "lessons": [
+                {
+                    "id": lesson.pk,
+                    "title": lesson.title,
+                    "slug": lesson.slug,
+                    "description": lesson.description,
+                    "order": lesson.order,
+                    "is_pdf": lesson.is_pdf(),
+                    "completed": lesson.pk in completed,
+                }
+                for lesson in module.lessons.all()
+            ],
+        })
+
     context = {
-        "course": course,
-        "enrollment": enrollment,
-        "modules": course.modules.all().prefetch_related('lessons'),
+        "course": {
+            "id": course.pk,
+            "title": course.title,
+            "slug": course.slug,
+            "description": course.description,
+            "duration": course.duration,
+            "level": course.level,
+            "category": course.category_l_1.name if course.category_l_1 else None,
+            "thumbnail": request.build_absolute_uri(course.thumbnail.url) if course.thumbnail else None,
+        },
+        "enrollment": {
+            "id": enrollment.id,
+            "progress": enrollment.progress,
+            "is_completed": enrollment.is_completed,
+            "completion_date": enrollment.completion_date,
+            "completed_lessons": sorted(completed),
+        },
+        "modules": modules,
         "progress": enrollment.progress,
-        "description_html": description_html
+        "description_html": description_html,
+        "quizzes": [
+            {"id": q.id, "title": q.title, "description": q.description}
+            for q in course.quizzes.filter(is_active=True).order_by("-created_at")[:20]
+        ],
     }
     return Response(context, status=status.HTTP_200_OK)
 
@@ -864,13 +994,16 @@ def view_lesson_api(request, lesson_slug):
             pdf_url = request.build_absolute_uri(lesson.video.url)
 
         return Response({
+            "type": "pdf",
             "pdf_url": pdf_url,
+            "title": lesson.title,
+            "description": lesson.description,
             "material": LessonSerializer(lesson).data
         })
     
     data = {
         'type': 'pdf' if lesson.is_pdf() else 'video',
-        'url': lesson.video.url,
+        'url': request.build_absolute_uri(lesson.video.url) if lesson.video else None,
         'title': lesson.title,
         'description': lesson.description
     }
@@ -906,7 +1039,8 @@ def generate_quiz_api(request, course_slug):
                 course_content += f"  Description: {lesson.description}\n"
     
     try:
-        response = client.chat.completions.create(
+        response = _groq_create(
+            client,
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -942,7 +1076,7 @@ def generate_quiz_api(request, course_slug):
             temperature=0.7
         )
         
-        quiz_data = json.loads(response.choices[0].message.content)
+        quiz_data = _json_from_llm(response.choices[0].message.content)
         quiz = Quiz.objects.create(
             course=course,
             title=quiz_data['title'],
@@ -1051,6 +1185,22 @@ def quiz_results_api(request, attempt_id):
     })
 
 
+def _certificate_font(names, size):
+    """The website asks PIL for arial.ttf / times.ttf, which only exist on
+    Windows/macOS boxes; on any other server every certificate failed with
+    "cannot open resource". Try common equivalents, then PIL's built-in
+    scalable font."""
+    for n in names:
+        try:
+            return ImageFont.truetype(n, size)
+        except (IOError, OSError):
+            continue
+    try:
+        return ImageFont.load_default(size)
+    except TypeError:  # Pillow < 10.1
+        return ImageFont.load_default()
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_certificate_api(request, course_slug):
@@ -1067,9 +1217,9 @@ def get_certificate_api(request, course_slug):
         img = Image.open(BytesIO(response.content))
         draw = ImageDraw.Draw(img)
 
-        font_name = ImageFont.truetype("arial.ttf", 100)
-        font_small = ImageFont.truetype("times.ttf", 40)
-        user_name = request.user.name
+        font_name = _certificate_font(("arial.ttf", "Arial.ttf", "DejaVuSans.ttf", "LiberationSans-Regular.ttf"), 100)
+        font_small = _certificate_font(("times.ttf", "Times New Roman.ttf", "DejaVuSerif.ttf", "LiberationSerif-Regular.ttf"), 40)
+        user_name = request.user.name or request.user.username
         draw.text((900, 650), user_name, fill="black", font=font_name, anchor="mm")
 
         completion_date = enrollment.completion_date.strftime("%B %d, %Y")
@@ -1093,6 +1243,8 @@ def get_certificate_api(request, course_slug):
 
         # Return as file response via REST framework
         return FileResponse(buffer, filename=f"{course_slug}_certificate.png", content_type="image/png")
+    except requests.RequestException as e:
+        return Response({"error": f"Could not fetch the certificate template: {str(e)}"}, status=status.HTTP_502_BAD_GATEWAY)
     except IOError as e:
         return Response({"error": f"Error processing image: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1105,8 +1257,14 @@ def post_review_api(request, slug):
     rating = request.data.get("rating")
     review_text = request.data.get("review_text", "").strip()
 
-    if not rating and review_text:
+    try:
+        rating = int(rating)
+    except (TypeError, ValueError):
+        rating = 0
+    if not rating or not review_text or not 1 <= rating <= 5:
         return Response({"error": "Please provide a rating and review text."}, status=status.HTTP_400_BAD_REQUEST)
+    if CourseRating.objects.filter(user=request.user, course=course).exists():
+        return Response({"error": "You have already rated this course."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Create course rating
     review = CourseRating.objects.create(
@@ -1187,7 +1345,8 @@ def analyze_review_api(request):
             "service/gig" if is_work_review else "course"
         )
 
-        response = client.chat.completions.create(
+        response = _groq_create(
+            client,
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -1195,7 +1354,7 @@ def analyze_review_api(request):
             ]
         )
         
-        analysis = json.loads(response.choices[0].message.content)
+        analysis = _json_from_llm(response.choices[0].message.content)
         return Response({'analysis': analysis})
     
     except Exception as e:
@@ -1274,7 +1433,21 @@ def order_history_api(request):
     )
     enrolls_year = StudentEnrollment.objects.filter(enrolled_date__year=today.year, user=request.user)
 
+    def _orders(qs):
+        return [
+            {
+                "id": e.id,
+                "course": CourseSerializer(e.course).data,
+                "enrolled_date": e.enrolled_date,
+                "price": e.course.price,
+            }
+            for e in qs
+        ]
+
     return Response({
+        "orders_today": _orders(enrolls_today),
+        "orders_month": _orders(enrolls_month),
+        "orders_year": _orders(enrolls_year),
         "enrolls_today": [CourseSerializer(enrollment.course).data for enrollment in enrolls_today],
         "enrolls_month": [CourseSerializer(enrollment.course).data for enrollment in enrolls_month],
         "enrolls_year": [CourseSerializer(enrollment.course).data for enrollment in enrolls_year],
@@ -1385,7 +1558,9 @@ def earnings_api(request):
             "username": instructor.username,
             "name": instructor.name,
             "edu_total_earnings": instructor.edu_total_earnings,
-            "available_earnings": instructor.available_earnings
+            "available_earnings": instructor.available_earnings,
+            "edu_instructor_total_students": instructor.edu_instructor_total_students(),
+            "instructor_courses_rating": instructor.instructor_courses_rating(),
         },
         "courses": CourseSerializer(courses, many=True).data
     })
@@ -2033,3 +2208,30 @@ def edu_child_categories_api(request, category_id):
     return Response({
         "categories": [{"id": c.id, "name": c.name or ""} for c in children]
     })
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_audio_api(request):
+    """POST eduprenair/course/lesson/generate_audio/ - the lesson page's
+    "Generate Audio" (edu_prenair.views.generate_speech) for the app."""
+    text = request.data.get('text', '')
+    gender = request.data.get('gender', 'male')
+    if not text:
+        return Response({'error': 'No text provided'}, status=status.HTTP_400_BAD_REQUEST)
+    voice_id = "21m00Tcm4TlvDq8ikWAM" if gender == 'female' else "JBFqnCBsd6RMkjVDRZzb"
+    try:
+        import os
+        from elevenlabs import ElevenLabs
+        client_ = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+        audio = client_.text_to_speech.convert(
+            text=text,
+            voice_id=voice_id,
+            model_id="eleven_multilingual_v2",
+            output_format="mp3_44100_128",
+        )
+        return HttpResponse(b"".join(audio) if not isinstance(audio, (bytes, bytearray)) else audio,
+                            content_type='audio/mpeg')
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

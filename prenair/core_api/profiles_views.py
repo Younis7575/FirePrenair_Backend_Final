@@ -785,14 +785,26 @@ class UpdateLanguageAPIView(APIView):
 
         if not lang:
             return Response({'error': 'language not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        # The site's UI languages plus the extra preferred-language codes the
+        # register form offers (de, ja, ru, ...), which are stored as given.
+        valid_languages = {c[0] for c in request.user._meta.get_field('language').choices}
+        valid_languages |= {'en', 'es', 'fr', 'de', 'zh', 'ja', 'ru', 'ar', 'pt',
+                            'hi', 'it', 'ko', 'tr', 'nl', 'pl'}
+        if lang not in valid_languages:
+            return Response({'error': 'Unsupported language.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Update the user's language preference
         request.user.language = lang
-        request.user.save()
+        request.user.save(update_fields=['language'])
 
         # Activate and set the language in session
-        activate(lang)
-        request.session["django_language"] = lang
+        from django.conf import settings as _settings
+        if lang in {c[0] for c in _settings.LANGUAGES}:
+            activate(lang)
+        try:
+            request.session["django_language"] = lang
+        except Exception:
+            pass
 
         return Response({
             'message': 'Language updated successfully!',

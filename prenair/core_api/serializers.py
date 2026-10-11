@@ -21,6 +21,31 @@ class UserSerializer(serializers.ModelSerializer):
 
     last_seen_text = serializers.SerializerMethodField()
 
+    # Government-ID and birth-date values are the owner's (and staff's) only;
+    # every other viewer — post authors, search results, profiles — used to
+    # receive them. The keys stay (clients read them) but are blanked.
+    _PRIVATE_FIELDS = ("identity_type", "identity_number", "date_of_birth", "age")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request") if hasattr(self, "context") else None
+        viewer = getattr(request, "user", None)
+        if viewer is not None and getattr(viewer, "is_authenticated", False):
+            allowed = (
+                viewer.pk == instance.pk
+                or getattr(viewer, "is_staff", False)
+                or getattr(viewer, "role", None) == "admin"
+            )
+        else:
+            # No request (internal use) keeps the old behaviour; an anonymous
+            # request is never the owner.
+            allowed = request is None
+        if not allowed:
+            for key in self._PRIVATE_FIELDS:
+                if key in data:
+                    data[key] = None
+        return data
+
     def get_last_seen_text(self, obj):
         # Same wording as the website's "Last seen:" line in private_chat.html.
         return obj.time_since_last_seen()
@@ -432,10 +457,35 @@ class CourseSerializer(serializers.ModelSerializer):
     category_l_1 = CourseCategorySerializer(read_only=True)
     category_l_2 = CourseCategorySerializer(read_only=True)
     category_l_3 = CourseCategorySerializer(read_only=True)
+    # Additive: the website's course card / course page show these (course_card.html).
+    total_lessons = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+    enrolled_count = serializers.SerializerMethodField()
+    sales_amount = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
         fields = '__all__'
-        
+
+    def get_total_lessons(self, obj):
+        return obj.total_lessons()
+
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+
+    def get_rating_count(self, obj):
+        return obj.courserating_set.count()
+
+    def get_enrolled_count(self, obj):
+        return obj.enrolled_students.count()
+
+    def get_sales_amount(self, obj):
+        try:
+            return float(obj.sales_amount())
+        except Exception:
+            return 0
+
 class ModuleSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     # module_lessons_eduprenair.html lists each module's lessons; kept flat
@@ -466,27 +516,57 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
+    # Additive: the dashboards render course cards / tables from the enrolment,
+    # but `course` is only the slug.
+    course_detail = serializers.SerializerMethodField()
+    completed_lesson_slugs = serializers.SerializerMethodField()
+
     class Meta:
         model = StudentEnrollment
         fields = '__all__'
 
+    def get_course_detail(self, obj):
+        return CourseSerializer(obj.course, context=self.context).data
+
+    def get_completed_lesson_slugs(self, obj):
+        return list(obj.completed_lessons.values_list('slug', flat=True))
+
 class CourseRatingSerializer(serializers.ModelSerializer):
     user=UserDataSerializer(read_only=True)
+    course_title = serializers.SerializerMethodField()
+    course_slug = serializers.SerializerMethodField()
+
     class Meta:
         model = CourseRating
         fields = '__all__'
 
+    def get_course_title(self, obj):
+        return obj.course.title
+
+    def get_course_slug(self, obj):
+        return obj.course.slug
+
 class CourseWishlistSerializer(serializers.ModelSerializer):
     user=UserDataSerializer(read_only=True)
+    course_detail = serializers.SerializerMethodField()
+
     class Meta:
         model = CourseWishlist
         fields = '__all__'
+
+    def get_course_detail(self, obj):
+        return CourseSerializer(obj.course, context=self.context).data
         
         
 class CourseAnnouncementSerializer(serializers.ModelSerializer):
+    course_title = serializers.SerializerMethodField()
+
     class Meta:
         model = CourseAnnouncement
         fields = '__all__'
+
+    def get_course_title(self, obj):
+        return obj.course.title
         
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
@@ -500,9 +580,28 @@ class QuizQuestionSerializer(serializers.ModelSerializer):
         
 class QuizAttemptSerializer(serializers.ModelSerializer):
     user=UserDataSerializer(read_only=True)
+    # Additive: quiz_results.html lists every answered question with the
+    # correct answer and explanation.
+    responses = serializers.SerializerMethodField()
+
     class Meta:
         model = QuizAttempt
         fields = '__all__'
+
+    def get_responses(self, obj):
+        out = []
+        for r in obj.quizquestionresponse_set.select_related('question').all():
+            q = r.question
+            out.append({
+                'id': r.id,
+                'question_id': q.id,
+                'question_text': q.question_text,
+                'selected_answer': r.selected_answer,
+                'is_correct': r.is_correct,
+                'correct_answer': q.correct_answer,
+                'explanation': q.explanation,
+            })
+        return out
 
 class QuizQuestionResponseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -941,11 +1040,14 @@ class GigCreateSerializer(serializers.ModelSerializer):
 
 class GigUpdateSerializer(GigCreateSerializer):  # Inherit the same fields
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tags', [])
+        # `None` (not []) when the request carried no tags: a PATCH that only
+        # changes the title used to wipe every tag off the gig.
+        tags = validated_data.pop('tags', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        instance.tags.set(tags)
+        if tags is not None:
+            instance.tags.set(tags)
         instance.save()
         return instance
 

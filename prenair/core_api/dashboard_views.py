@@ -72,15 +72,21 @@ def dashboard_home_api(request):
         "user": {
             "username": user.username,
             "email": user.email,
-            # Add other user fields as needed
+            # The Earnings counters of dashboard_home.html.
+            "amount_being_cleared": float(user.amount_being_cleared or 0),
+            "available_earnings": float(user.available_earnings or 0),
+            "total_earnings": float(user.total_earnings or 0),
+            "digi_total_earnings": float(user.digi_total_earnings or 0),
+            "edu_total_earnings": float(user.edu_total_earnings or 0),
+            "work_total_earnings": float(user.work_total_earnings or 0),
         },
         "withdraw_requests": [
             {
                 "id": request.id,
                 "amount": request.amount,
                 "status": request.status,
+                "payout_type": request.payout_type,
                 "created_at": request.created_at,
-                # Add other withdraw request fields as needed
             } for request in withdraw_requests
         ],
         "completion_percentage": completion_percentage,
@@ -110,6 +116,7 @@ def dashboard_notifications_api(request):
                 "message": notification.message,
                 "is_read": notification.is_read,
                 "created_at": notification.created_at,
+                "app_name": notification.app_name,
                 # Add other notification fields as needed
             } for notification in notifications_queryset
         ]
@@ -406,6 +413,21 @@ def delete_notification_api(request, notification_id):
     notification.delete()
 
     return Response({"message": "Notification deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@admin_not_allowed_api
+def mark_all_dashboard_notifications_read_api(request):
+    """Mark every notification of the caller read, or only one module's when
+    ``app_name`` (workprenair / eduprenair / digiprenair / commuprenair) is sent."""
+    qs = Notification.objects.filter(user=request.user, is_read=False)
+    app_name = request.data.get('app_name')
+    if app_name:
+        qs = qs.filter(app_name=app_name)
+    updated = qs.update(is_read=True)
+    return Response({"message": "Notifications marked as read", "updated": updated},
+                    status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -1276,29 +1298,86 @@ def dashboard_commuprenair_api(request):
     })
 
 
-@api_view(['GET', 'PUT'])
+_PROFILE_FORM_FIELDS = (
+    "name", "username", "phone_no", "bio", "date_of_birth", "country", "city",
+    "province", "postal_code", "customer_type", "company_name", "company_number",
+    "identity_type", "identity_number",
+)
+
+
+def _profile_payload(user, request):
+    pic = None
+    try:
+        pic = request.build_absolute_uri(user.profile_pic.url) if user.profile_pic else None
+    except Exception:
+        pic = None
+    profile = {f: getattr(user, f, None) for f in _PROFILE_FORM_FIELDS}
+    profile["date_of_birth"] = user.date_of_birth.isoformat() if user.date_of_birth else None
+    profile.update({"email": user.email, "profile_pic": pic, "language": user.language,
+                    "tax_number": user.tax_number})
+    return profile
+
+
+@api_view(['GET', 'PUT', 'POST'])
 @permission_classes([IsAuthenticated])
 def dashboard_edit_profile_api(request):
+    """Profile Settings (dashboard_edit_profile.html / ProfileUpdateForm).
+
+    The previous PUT ran the public ``UserSerializer`` with ``partial=True``,
+    which let any user flip ``is_edu_instructor``, ``featured_instructor``,
+    ``digi_is_verified``... on themselves and could not edit phone / postal
+    code / company number at all. Updates now go through the website's own
+    ``ProfileUpdateForm`` (same fields and validation). Fields that are not
+    sent keep their value, the username can only be changed once (what the
+    website's read-only input + ``is_username_changed`` flag mean), and
+    ``profile_pic`` may be uploaded (multipart).
+    """
+    from dashboard.forms import ProfileUpdateForm
+
     user = request.user
     is_username_changed = user.is_username_changed
 
-    if request.method == "PUT":
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            if 'username' in serializer.validated_data:
+    if request.method in ("PUT", "POST"):
+        data = request.data
+        merged = {}
+        for f in _PROFILE_FORM_FIELDS:
+            if f in data:
+                value = data.get(f)
+                merged[f] = "" if value is None else value
+            else:
+                current = getattr(user, f, None)
+                merged[f] = "" if current is None else (
+                    current.isoformat() if hasattr(current, "isoformat") else current)
+        if is_username_changed:
+            merged["username"] = user.username
+        files = {}
+        if "profile_pic" in request.FILES:
+            files["profile_pic"] = request.FILES["profile_pic"]
+        form = ProfileUpdateForm(merged, files, instance=user,
+                                 is_username_changed=is_username_changed)
+        if form.is_valid():
+            if "username" in form.changed_data:
                 user.is_username_changed = True
-            serializer.save()
+            form.save()
+            user.refresh_from_db()
             return Response({
                 "message": "Profile updated successfully!",
-                "user": serializer.data
+                "user": UserSerializer(user, context={"request": request}).data,
+                "profile": _profile_payload(user, request),
+                "is_username_changed": user.is_username_changed,
             }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        errors = {k: [str(e) for e in v] for k, v in form.errors.items()}
+        first = next(iter(errors.values()))[0] if errors else "Invalid data."
+        return Response({"error": first, "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
     # GET request
-    serializer = UserSerializer(user)
     return Response({
-        "user": serializer.data,
-        "is_username_changed": is_username_changed
+        "user": UserSerializer(user, context={"request": request}).data,
+        "profile": _profile_payload(user, request),
+        "is_username_changed": is_username_changed,
+        "identity_types": [{"value": v, "label": l} for v, l in user.IDENTITY_TYPE_CHOICES],
+        "customer_types": [{"value": v, "label": l} for v, l in user.CUSTOMER_TYPE],
+        "languages": [{"value": v, "label": l} for v, l in user._meta.get_field("language").choices],
     })
 
 

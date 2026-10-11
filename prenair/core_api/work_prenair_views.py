@@ -182,8 +182,18 @@ knowledge_base = {
 
 @csrf_exempt
 def workprenair_chatbot_view_api(request):
-    if request.method == 'POST':
-        user_message = request.POST.get('message', '').lower()
+    if request.method in ('POST', 'GET'):
+        # The website posts JSON, the first app build posted a form and later
+        # sent GET; accept all three so none of them gets "Only POST".
+        user_message = (request.POST.get('message') or request.GET.get('message') or '')
+        if not user_message:
+            try:
+                user_message = json.loads(request.body).get('message', '') or ''
+            except Exception:
+                user_message = ''
+        user_message = str(user_message).strip().lower()
+        if not user_message:
+            return JsonResponse({"message": "Please type a message."}, status=400)
         
         # Predefined responses for quick replies
         predefined_responses = {
@@ -502,12 +512,22 @@ def user_profile_api(request, username):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['PUT'])
+@api_view(['PUT', 'POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
-@parser_classes([MultiPartParser, FormParser])  # for handling file uploads
+@parser_classes([MultiPartParser, FormParser, JSONParser])  # file uploads + JSON
 def edit_profile_api(request):
     user = request.user
-    serializer = EditUserProfileSerializer(user, data=request.data, partial=True)
+    # The website form names the file input `image` while its view reads
+    # `profile_pic`; accept both, and drop blanks like the website does
+    # (an empty field keeps the current value).
+    data = {}
+    for key in ('name', 'work_bio', 'profile_pic'):
+        val = request.data.get(key)
+        if val not in (None, ''):
+            data[key] = val
+    if 'profile_pic' not in data and request.FILES.get('image'):
+        data['profile_pic'] = request.FILES['image']
+    serializer = EditUserProfileSerializer(user, data=data, partial=True)
 
     if serializer.is_valid():
         serializer.save()
@@ -824,9 +844,51 @@ def gig_detail_api(request, slug):
 
     serializer = GigSerializer(gig)
 
+    # --- Website gig_detail.html parity (additive keys) -------------------
+    # The page lists the gig's client reviews with an average + 1..5 star
+    # breakdown, the freelancer's other details and related gigs; none of it
+    # is a model field so GigSerializer never exposed it.
+    all_reviews = gig.gig_work_reviews.filter(is_client_review=True).select_related('user').order_by('-created_at')
+    review_count = all_reviews.count()
+    try:
+        page_size = max(1, min(int(request.query_params.get('review_page_size', 10)), 50))
+    except (TypeError, ValueError):
+        page_size = 10
+    paginator = Paginator(all_reviews, page_size)
+    try:
+        review_page = paginator.page(request.query_params.get('review_page', 1))
+    except (PageNotAnInteger, EmptyPage):
+        review_page = paginator.page(1)
+    rating_breakdown = {
+        str(star): (all_reviews.filter(rating=star).count() * 100.0 / review_count) if review_count else 0
+        for star in (5, 4, 3, 2, 1)
+    }
+    try:
+        description_html = markdown.markdown(gig.description or '')
+    except Exception:
+        description_html = gig.description or ''
+    related = Gig.objects.filter(category_level_1=gig.category_level_1).exclude(id=gig.id).order_by('-created_at')[:6] \
+        if gig.category_level_1_id else Gig.objects.none()
+    is_owner = bool(request.user.is_authenticated and request.user == gig.user)
+
     return Response({
         'status': 'success',
         'gig': serializer.data,
+        'reviews': ReviewSerializer(review_page.object_list, many=True).data,
+        'reviews_pagination': {
+            'page': review_page.number,
+            'page_size': page_size,
+            'total_pages': paginator.num_pages,
+            'count': review_count,
+            'has_next': review_page.has_next(),
+            'has_previous': review_page.has_previous(),
+        },
+        'review_count': review_count,
+        'average_rating': gig.gig_average_rating(),
+        'rating_breakdown': rating_breakdown,
+        'related_gigs': GigSerializer(related, many=True).data,
+        'description_html': description_html,
+        'is_owner': is_owner,
         'rating_range': list(range(1, 6)),
         'prev_gig': {
             'id': prev_gig.id,
@@ -2319,29 +2381,41 @@ class CustomOffersListAPIView(APIView):
             custom_offers_received = CustomOffer.objects.filter(recipient=user, is_declined=False)
 
         # Serialize the custom offers (sending only necessary fields for the API)
-        sent_offers = [{
-            "id": offer.id,
-            "sender": offer.sender.username,
-            "recipient": offer.recipient.username,
-            "description": offer.description,
-            "price": str(offer.price),
-            "created_at": offer.created_at,
-            "is_accepted": offer.is_accepted
-        } for offer in custom_offers_sent] if custom_offers_sent else []
+        def _offer_row(offer):
+            # Original keys first; the rest feeds the website's offer-details
+            # popup (gig, delivery time, status) and the "message" action.
+            gig = offer.gig
+            return {
+                "id": offer.id,
+                "sender": offer.sender.username,
+                "recipient": offer.recipient.username,
+                "description": offer.description,
+                "price": str(offer.price),
+                "created_at": offer.created_at,
+                "is_accepted": offer.is_accepted,
+                "title": offer.title,
+                "delivery_time": offer.delivery_time,
+                "is_declined": offer.is_declined,
+                "status": "Accepted" if offer.is_accepted else "Pending",  # same two labels the website shows
+                "sender_slug": offer.sender.slug,
+                "recipient_slug": offer.recipient.slug,
+                "sender_country": str(getattr(offer.sender, 'country', '') or ''),
+                "recipient_country": str(getattr(offer.recipient, 'country', '') or ''),
+                "gig_slug": gig.slug,
+                "gig_title": gig.title,
+                "gig_image": gig.image.url if gig.image else None,
+            }
 
-        received_offers = [{
-            "id": offer.id,
-            "sender": offer.sender.username,
-            "recipient": offer.recipient.username,
-            "description": offer.description,
-            "price": str(offer.price),
-            "created_at": offer.created_at,
-            "is_accepted": offer.is_accepted
-        } for offer in custom_offers_received] if custom_offers_received else []
+        sent_offers = [_offer_row(o) for o in custom_offers_sent] if custom_offers_sent else []
+        received_offers = [_offer_row(o) for o in custom_offers_received] if custom_offers_received else []
 
         return Response({
             "custom_offers_sent": sent_offers,
-            "custom_offers_received": received_offers
+            "custom_offers_received": received_offers,
+            # Additive: the website shows "Proposals Sent" to freelancers and
+            # "Proposals Received" to everyone else; an empty list alone can't
+            # tell the two apart.
+            "is_freelancer": bool(user.is_work_freelancer),
         }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -2350,12 +2424,24 @@ def create_offer_api(request):
         return JsonResponse({"message": "You must be a freelancer to send offers."}, status=400)
 
     if request.method == "POST":
-        gig_slug = request.POST.get('gig')
-        recipient_slug = request.POST.get('recipient')
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        price = request.POST.get('price')
-        delivery_time = request.POST.get('delivery_time')
+        # request.data (not request.POST): the app sends JSON, which
+        # request.POST never sees, so every offer 404'd on a blank gig slug.
+        gig_slug = request.data.get('gig')
+        recipient_slug = request.data.get('recipient')
+        title = request.data.get('title')
+        description = request.data.get('description')
+        price = request.data.get('price')
+        delivery_time = request.data.get('delivery_time')
+
+        if not all([gig_slug, recipient_slug, title, description, price, delivery_time]):
+            return JsonResponse({"message": "gig, recipient, title, description, price and delivery_time are required."}, status=400)
+        try:
+            if float(price) < 5:
+                return JsonResponse({"message": "Minimum price is $5."}, status=400)
+            if int(delivery_time) < 1:
+                return JsonResponse({"message": "Delivery time must be at least 1 day."}, status=400)
+        except (TypeError, ValueError):
+            return JsonResponse({"message": "price and delivery_time must be numbers."}, status=400)
 
         # Get the gig and recipient objects
         gig = get_object_or_404(Gig, slug=gig_slug, user=request.user)
@@ -2600,10 +2686,19 @@ def user_chat_api(request, chatSlug):
                 'sender': message.sender.username,
                 'receiver': message.receiver.username,
                 'is_read': message.is_read,
+                # Additive: the website's thread also shows attachments.
+                'id': message.id,
+                'file': message.file.url if message.file else None,
+                'file_name': message.file_name() if message.file else None,
             } for message in chat_messages],
             'other_user': {
                 'slug': other_user.slug,
-                'username': other_user.username
+                'username': other_user.username,
+                # Additive: header of the website's thread (avatar, name,
+                # presence).
+                'name': other_user.name,
+                'profile_pic': other_user.profile_pic.url if other_user.profile_pic else None,
+                'is_online': bool(getattr(other_user, 'is_online', False)),
             },
             'user_chats': chats_with_last_message
         }
@@ -2627,7 +2722,7 @@ def ai_chat_assist_api(request, chatSlug):
 
     try:
         # Parse request body
-        data = json.loads(request.body)
+        data = request.data
         context = data.get('context', '')
         recent_messages = data.get('recent_messages', [])
 
@@ -2665,7 +2760,9 @@ def ai_chat_assist_api(request, chatSlug):
         3. Would you be available for a quick call Wednesday afternoon to go over the revisions?"""
 
         # Call OpenAI API (assuming you have OpenAI client set up)
-        response = openai.ChatCompletion.create(
+        # `openai.ChatCompletion` was removed in openai>=1.0 (the module-level
+        # client above is the one every other view here uses).
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
@@ -2673,7 +2770,7 @@ def ai_chat_assist_api(request, chatSlug):
         )
         
         # Parse the response
-        raw_output = response.choices[0].message['content'].strip()
+        raw_output = response.choices[0].message.content.strip()
         suggestions = []
 
         for line in raw_output.split('\n'):

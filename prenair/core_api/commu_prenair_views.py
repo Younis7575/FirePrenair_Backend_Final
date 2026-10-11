@@ -92,7 +92,7 @@ class CommuprenairChatbotView(APIView):
         
         # Predefined responses for quick replies
         predefined_responses = {
-            "name": "I am your customer support assistant, here to help you with any questions about Workprenair.",
+            "name": "I am your customer support assistant, here to help you with any questions about Commuprenair.",
             "who_created_you": "I was created by the development team of Fireprenair.",
             "what_can_you_do": "I can help you navigate our platform, answer questions about our services, and provide consultation details.",
         }
@@ -102,31 +102,36 @@ class CommuprenairChatbotView(APIView):
             if key in user_message:
                 return Response({"message": response})
 
-        # Interact with Groq API for other responses
+        # Interact with Groq API for other responses. `llama3-8b-8192` has been
+        # retired by Groq, so fall through to current models; any failure is a
+        # 503 the chat widget can show, never a 500.
+        messages = [
+            {"role": "system", "content": json.dumps({
+                "knowledge_base": knowledge_base,
+                "instruction": "Please generate short, clear, and professional responses. "
+                               "Limit unnecessary details, ensure the tone is formal, and provide concise answers. "
+                               "Avoid elaboration and keep responses to the point. "
+                               "Give answer according to question."
+            })},
+            {"role": "user", "content": user_message},
+        ]
+        groq_response = None
         try:
             client = Groq(api_key=settings.GROQ_API_KEY)
-            groq_response = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": json.dumps({
-                        "knowledge_base": knowledge_base,
-                        "instruction": "Please generate short, clear, and professional responses. "
-                                       "Limit unnecessary details, ensure the tone is formal, and provide concise answers. "
-                                       "Avoid elaboration and keep responses to the point. "
-                                       "Give answer according to question."
-                    })},
-                    {"role": "user", "content": user_message},
-                ],
-                model="llama3-8b-8192",
+            for model in ("llama3-8b-8192", "llama-3.1-8b-instant", "llama-3.3-70b-versatile"):
+                try:
+                    groq_response = client.chat.completions.create(messages=messages, model=model)
+                    break
+                except Exception as model_error:  # noqa: BLE001
+                    if 'invalid_api_key' in str(model_error) or 'Invalid API Key' in str(model_error):
+                        raise
+        except Exception:  # noqa: BLE001
+            groq_response = None
+        if groq_response is None:
+            return Response(
+                {"message": "The assistant is temporarily unavailable. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        except Exception as e:
-            # An invalid/expired GROQ key must not 500 the chat widget; tell
-            # the user the assistant is temporarily unavailable.
-            if 'invalid_api_key' in str(e) or 'Invalid API Key' in str(e):
-                return Response(
-                    {"message": "The assistant is temporarily unavailable. Please try again later."},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
-            raise
 
         # Process the Groq response
         bot_reply = groq_response.choices[0].message.content.strip()
@@ -1026,7 +1031,12 @@ def mark_all_messages_notifications_as_read_api(request):
     Marks all message notifications as read for the authenticated user.
     """
     notifications = request.user.notifications.filter(app_name='commuprenair', is_message=True, is_read=False)
-    
+    # `scope=all` (the app's Commu notification list, "Mark all as read")
+    # marks every unread Commuprenair notification, not just chat messages.
+    scope = request.data.get('scope') if hasattr(request, 'data') else None
+    if scope == 'all':
+        notifications = request.user.notifications.filter(app_name='commuprenair', is_read=False)
+
     if notifications.exists():
         notifications.update(is_read=True)
         return Response({"message": "All message notifications marked as read."}, status=status.HTTP_200_OK)

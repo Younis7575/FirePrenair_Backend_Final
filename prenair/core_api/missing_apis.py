@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.utils.text import slugify
 from django.db.models import Q, Sum, Count
 from django.conf import settings
@@ -668,13 +669,48 @@ class LogoGenerationAPIView(APIView):
 
 
 class VideoGenerationAPIView(APIView):
+    """AI video generation (website `dashboard.views.generate_video`).
+
+    Body: `prompt` (required), `duration` (5/10/15), `style`, `seed`, `width`,
+    `height`. It runs the website view itself (same provider, same polling),
+    so the call blocks until the video is ready - up to five minutes - and
+    answers `{video_url, duration}` or `{error}`.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """Generate video - placeholder for future Leonardo/video API"""
-        prompt = request.data.get('prompt', '')
-        return Response({'message': 'Video generation endpoint ready. Configure video API provider.',
-                         'prompt': prompt})
+        import json as _json
+        from django.test import RequestFactory
+        from dashboard import views as _dash_views
+
+        prompt = (request.data.get('prompt') or '').strip()
+        if not prompt:
+            return Response({'error': 'Please enter a video description'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if len(prompt) > 4000:
+            return Response({'error': 'The description is limited to 4000 characters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            payload = {
+                'prompt': prompt,
+                'duration': int(request.data.get('duration', 5)),
+                'width': int(request.data.get('width', 1344)),
+                'height': int(request.data.get('height', 768)),
+                'style': request.data.get('style', 'cinematic') or 'cinematic',
+                'seed': int(request.data.get('seed', 0) or 0),
+            }
+        except (TypeError, ValueError):
+            return Response({'error': 'duration, width, height and seed must be numbers.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        inner = RequestFactory().post('/dashboard/generate-video/', data=payload)
+        inner.user = request.user
+        resp = _dash_views.generate_video(inner)
+        try:
+            body = _json.loads(resp.content)
+        except ValueError:
+            body = {'error': 'Unexpected response from the video service.'}
+        return Response(body, status=resp.status_code)
 
 
 class EbookGenerationAPIView(APIView):
@@ -716,25 +752,81 @@ class GeneratePdfAPIView(APIView):
 # WORK PRENAIR MISSING API ENDPOINTS
 # =============================================================================
 
+def _work_ai_client():
+    """The OpenAI client the website's work views use (gpt-3.5-turbo); the
+    Groq `llama3-8b-8192` model these two endpoints first shipped with has been
+    retired, which made both return 500."""
+    from . import work_prenair_views as _wv
+    return _wv.client
+
+
+def _loads_ai_json(text):
+    import re as _re
+    text = (text or '').strip()
+    if text.startswith('```'):
+        text = _re.sub(r'^```(?:json)?', '', text).rstrip('`').strip()
+    return json.loads(text)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def suggest_gig_pricing_api(request, slug):
-    """AI-suggested gig pricing"""
-    gig = get_object_or_404(Gig, slug=slug, user=request.user)
+    """AI pricing tips for one of the caller's gigs (website suggest_gig_pricing).
+
+    Returns the website's keys (`basic_suggestion`, `standard_suggestion`,
+    `premium_suggestion`, `bundles`, `explanations`) and, for older clients,
+    the same payload again under `suggestions`.
+    """
+    gig = get_object_or_404(Gig, slug=slug)
+    if gig.user != request.user:
+        return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
     try:
-        from groq import Groq
-        client = Groq(api_key=settings.GROQ_API_KEY)
-        prompt = f"Suggest pricing for a gig titled '{gig.title}' with description: {gig.description[:200]}. Current basic price: ${gig.basic_price}, standard: ${gig.standard_price}, premium: ${gig.premium_price}. Suggest improved pricing as JSON with keys: basic_price, standard_price, premium_price, reasoning."
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": "You are a pricing expert for freelance services. Respond with valid JSON only."},
-                {"role": "user", "content": prompt}
-            ],
-            model="llama3-8b-8192",
+        related = Gig.objects.filter(
+            Q(category_level_1=gig.category_level_1) |
+            Q(category_level_2=gig.category_level_2) |
+            Q(category_level_3=gig.category_level_3)
+        ).exclude(id=gig.id)
+
+        def _market(field):
+            vals = [getattr(g, field) for g in related if getattr(g, field)]
+            return {
+                'avg': float(sum(vals) / len(vals)) if vals else 0,
+                'min': float(min(vals)) if vals else 0,
+                'max': float(max(vals)) if vals else 0,
+            }
+        m = {k: _market(f'{k}_price') for k in ('basic', 'standard', 'premium')}
+        prompt = f"""
+        Act as a professional pricing strategist for freelancers. Analyze this gig's pricing and suggest optimizations:
+
+        Current Pricing:
+        - Basic: ${gig.basic_price} (Delivery: {gig.basic_delivery_time} days)
+        - Standard: ${gig.standard_price} (Delivery: {gig.standard_delivery_time} days)
+        - Premium: ${gig.premium_price} (Delivery: {gig.premium_delivery_time} days)
+
+        Market Data from similar gigs:
+        - Basic Package: Average ${m['basic']['avg']:.2f}, Range ${m['basic']['min']}-${m['basic']['max']}
+        - Standard Package: Average ${m['standard']['avg']:.2f}, Range ${m['standard']['min']}-${m['standard']['max']}
+        - Premium Package: Average ${m['premium']['avg']:.2f}, Range ${m['premium']['min']}-${m['premium']['max']}
+
+        Provide:
+        1. Specific price suggestions for each package (formatted as numbers only)
+        2. 3 service bundle ideas with pricing
+        3. Brief explanations for each suggestion
+
+        Return JSON format with keys:
+        'basic_suggestion', 'standard_suggestion', 'premium_suggestion',
+        'bundles', 'explanations'
+        """
+        response = _work_ai_client().chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1000,
         )
-        import json
-        result = json.loads(response.choices[0].message.content)
-        return Response({'suggestions': result})
+        result = _loads_ai_json(response.choices[0].message.content)
+        payload = dict(result)
+        payload['suggestions'] = result
+        return Response(payload)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -742,23 +834,55 @@ def suggest_gig_pricing_api(request, slug):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def generate_proposal_description_api(request):
-    """Generate proposal/gig description using AI"""
+    """AI proposal text for a custom offer (website generate_proposal_description).
+
+    Body: { prompt, gig_slug }. Freelancers only, and only for their own gig,
+    as on the website. `gig_title` (the first app build's key) is still
+    accepted when no gig_slug is sent.
+    """
     prompt = request.data.get('prompt', '')
+    gig_slug = request.data.get('gig_slug', '')
     gig_title = request.data.get('gig_title', '')
-    if not prompt and not gig_title:
-        return Response({'error': 'Prompt or gig_title is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not prompt or not (gig_slug or gig_title):
+        return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.is_work_freelancer:
+        return Response({'error': 'You are not authorized to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
 
     try:
-        from groq import Groq
-        client = Groq(api_key=settings.GROQ_API_KEY)
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": "You are an expert copywriter for freelancing platforms. Generate professional proposals/descriptions."},
-                {"role": "user", "content": prompt or f"Write a compelling gig description for: {gig_title}"}
-            ],
-            model="llama3-8b-8192",
+        if gig_slug:
+            gig = get_object_or_404(Gig, slug=gig_slug)
+            if gig.user != request.user:
+                return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+            service = f"""Service Being Offered: {gig.title}
+        Service Description: {gig.description}
+        Service Category: {gig.category_level_1}, {gig.category_level_2}, {gig.category_level_3}"""
+        else:
+            service = f"Service Being Offered: {gig_title}"
+        ai_prompt = f"""
+        Act as a professional freelance proposal writer. Generate a compelling project proposal description based on:
+
+        Client's Requirements: {prompt}
+        {service}
+
+        Guidelines:
+        - Keep it professional yet friendly
+        - Highlight key benefits for the client
+        - Mention relevant experience
+        - 300-500 characters
+        - Use bullet points if needed
+        - Focus on client outcomes
+
+        Return ONLY the proposal text without any formatting or markdown.
+        """
+        response = _work_ai_client().chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": ai_prompt}],
+            temperature=0.7,
+            max_tokens=500,
         )
-        return Response({'description': response.choices[0].message.content})
+        return Response({'description': response.choices[0].message.content.strip()})
+    except Http404:
+        raise
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -990,8 +1114,13 @@ def download_product_file_api(request, product_id):
                         status=status.HTTP_403_FORBIDDEN)
     if product.downloadable_file:
         from django.http import FileResponse
-        return FileResponse(product.downloadable_file.open(), as_attachment=True,
-                            filename=product.downloadable_file.name.split('/')[-1])
+        try:
+            return FileResponse(product.downloadable_file.open(), as_attachment=True,
+                                filename=product.downloadable_file.name.split('/')[-1])
+        except (FileNotFoundError, OSError):
+            # The row points at a file the storage no longer has.
+            return Response({'error': 'The file for this product is missing. Please contact the seller.'},
+                            status=status.HTTP_404_NOT_FOUND)
     return Response({'error': 'No file available for download.'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -1028,30 +1157,90 @@ def generate_digiprenair_upload_url_api(request):
 # DASHBOARD MISSING API ENDPOINTS
 # =============================================================================
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def my_referrals_api(request):
-    """Get referral information"""
-    referrals = CustomUser.objects.filter(referred_by=request.user)
-    data = [{
-        'id': u.id,
-        'username': u.username,
-        'name': u.name,
-        'email': u.email,
-        'created_at': u.created_at,
-    } for u in referrals]
-    return Response({
-        'referral_code': request.user.referral_code,
-        'referral_count': referrals.count(),
+    """My Referrals page (dashboard/my_referrals.html).
+
+    GET -> referral code/link, stats (total / active / success rate) and the
+    referred users. POST ``{referral_code}`` sets the code (the website's
+    form: 3-20 letters/digits, unique). Old keys (``referral_code``,
+    ``referral_count``, ``referrals``) are kept.
+    """
+    import re as _re
+    from django.db import IntegrityError, transaction
+
+    user = request.user
+    if request.method == 'POST':
+        code = str(request.data.get('referral_code') or '').strip()
+        if not code:
+            return Response({'error': 'Please enter a referral code.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not _re.match(r'^[A-Za-z0-9]+$', code):
+            return Response({'error': 'Referral code can only contain letters and numbers.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if len(code) < 3 or len(code) > 20:
+            return Response({'error': 'Referral code must be between 3 and 20 characters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                user.referral_code = code
+                user.save(update_fields=['referral_code'])
+        except IntegrityError:
+            user.refresh_from_db(fields=['referral_code'])
+            return Response({'error': 'This referral code is already taken. Please choose another one.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    referrals = CustomUser.objects.filter(referred_by=user).order_by('-created_at')
+    total = referrals.count()
+    active = referrals.filter(has_listed_and_sold=True).count()
+    rate = round((active / total) * 100, 1) if total else 0
+    link = (f"https://fireprenair.com/?register=true&referral_code={user.referral_code}"
+            if user.referral_code else None)
+    data = []
+    for u in referrals:
+        pic = None
+        try:
+            pic = request.build_absolute_uri(u.profile_pic.url) if u.profile_pic else None
+        except Exception:
+            pic = None
+        data.append({
+            'id': u.id,
+            'username': u.username,
+            'name': u.name,
+            'email': u.email,
+            'profile_pic': pic,
+            'created_at': u.created_at,
+            'has_listed_and_sold': u.has_listed_and_sold,
+        })
+    body = {
+        'referral_code': user.referral_code,
+        'referral_link': link,
+        'referral_count': total,
+        'total_referrals': total,
+        'active_referrals': active,
+        'success_rate': rate,
         'referrals': data,
-    })
+    }
+    if request.method == 'POST':
+        body['message'] = 'Your referral code has been set successfully!'
+    return Response(body)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def personal_access_token_api(request):
-    """Get or create personal access token"""
+    """Personal access token (dashboard/access_token.html).
+
+    GET gets or creates the caller's token; POST ``{regenerate: true}`` (the
+    website view's ``regenerate`` form field) deletes it and issues a new one.
+    """
     from rest_framework.authtoken.models import Token
+    if request.method == 'POST' and str(request.data.get('regenerate', '')).lower() in ('1', 'true', 'yes', 'on'):
+        Token.objects.filter(user=request.user).delete()
+        token = Token.objects.create(user=request.user)
+        return Response({'token': token.key, 'created': True,
+                         'message': 'Token regenerated successfully.'})
     token, created = Token.objects.get_or_create(user=request.user)
     return Response({'token': token.key, 'created': created})
 
@@ -1059,14 +1248,26 @@ def personal_access_token_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def verify_access_token_api(request):
-    """Verify a personal access token"""
+    """Verify a personal access token.
+
+    Only the caller's own token is confirmed (the previous version told any
+    signed-in user who owned an arbitrary token key). Also accepts the
+    website's ``Authorization: Token <key>`` form.
+    """
     from rest_framework.authtoken.models import Token
     token_key = request.data.get('token', '')
+    if not token_key:
+        header = request.headers.get('Authorization', '')
+        if header.startswith('Token '):
+            token_key = header.split(' ', 1)[1]
     try:
-        token = Token.objects.get(key=token_key)
-        return Response({'valid': True, 'user_id': token.user_id})
+        token = Token.objects.select_related('user').get(key=token_key)
     except Token.DoesNotExist:
-        return Response({'valid': False}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'valid': False, 'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+    if token.user_id != request.user.id:
+        return Response({'valid': False, 'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+    return Response({'valid': True, 'status': 'valid', 'user_id': token.user_id,
+                     'username': token.user.username, 'email': token.user.email})
 
 
 @api_view(['POST'])

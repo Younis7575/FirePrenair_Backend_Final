@@ -392,28 +392,33 @@ class DigiExploreAPIView(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def product_search_api_api(request):
-    search_term = request.GET.get('q') or request.GET.get('params')
-    products = Product.objects.all()
-    
+    """Live search suggestions (digi_prenair.views.product_search_api).
+
+    Same keys as the website (`results[]` with title, image, description,
+    price, discounted_price, url, slug). Unlike the website, an empty query
+    answers an empty list instead of the whole catalogue, and the five-result
+    cap always applies.
+    """
+    search_term = (request.GET.get('q') or request.GET.get('params') or '').strip()
+    results = []
     if search_term:
-        products = products.filter(
-            Q(title__icontains=search_term) | 
+        products = Product.objects.filter(
+            Q(title__icontains=search_term) |
             Q(description__icontains=search_term)
         )[:5]
-        
-    results = []
-    for product in products:
-        results.append({
-            'title': product.title,
-            'image': product.image.url if product.image else '',
-            'description': product.description[:100] + '...' if product.description else '',
-            'price': str(product.price),
-            'discounted_price': str(product.discounted_price),
-            'url': reverse('digi_product', kwargs={'slug': product.slug}),
-            'slug': product.slug
-        })
-        
+        for product in products:
+            results.append({
+                'title': product.title,
+                'image': product.image.url if product.image else '',
+                'description': product.description[:100] + '...' if product.description else '',
+                'price': str(product.price),
+                'discounted_price': str(product.discounted_price),
+                'url': reverse('digi_product', kwargs={'slug': product.slug}),
+                'slug': product.slug
+            })
+
     return Response({'results': results})
 
 @api_view(['GET'])

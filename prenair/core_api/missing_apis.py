@@ -790,8 +790,48 @@ class GenerateSpeechAPIView(APIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def generate_module_lessons_api(request, course_slug):
-    """AI-generate lessons for a module"""
+    """AI-generate a module with lessons.
+
+    Web contract (module_lessons_eduprenair.html): ``{description,
+    lesson_count}`` creates a Module (+ Lessons) on the course and answers
+    ``{"success": true, ...}``. The older ``{module_title, count}`` form still
+    returns just a lessons preview.
+    """
     course = get_object_or_404(Course, slug=course_slug, instructor=request.user)
+    description = request.data.get('description')
+    if description:
+        from django.db import transaction
+        try:
+            lesson_count = max(1, min(int(request.data.get('lesson_count', 1)), 4))
+        except (TypeError, ValueError):
+            lesson_count = 1
+        try:
+            from dashboard.views import client
+            last = Module.objects.filter(course=course).order_by('-order').first()
+            next_order = last.order + 1 if last else 1
+            prompt = (
+                "Create ONE course module with %d lessons from this course description:\n%s\n"
+                "Return strictly JSON: {\"module_title\":str,\"module_description\":str,"
+                "\"module_order\":%d,\"lessons\":[{\"title\":str,\"description\":str,\"order\":int}]}"
+                % (lesson_count, description, next_order)
+            )
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+            ai = json.loads(response.choices[0].message.content)
+            with transaction.atomic():
+                module = Module.objects.create(
+                    course=course, title=ai['module_title'],
+                    description=ai['module_description'], order=ai.get('module_order') or next_order)
+                for ld in ai['lessons']:
+                    Lesson.objects.create(
+                        module=module, title=ld['title'],
+                        description=ld.get('description', ''), order=ld['order'],
+                        slug=f"{slugify(ld['title'])}-{module.id}-{ld['order']}_{str(uuid.uuid4().int)[:6]}",
+                        video=None)
+            return Response({'success': True, 'module_id': module.id})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     module_title = request.data.get('module_title', '')
     count = int(request.data.get('count', 5))
 
@@ -1032,22 +1072,61 @@ def verify_access_token_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def analyze_student_progress_api(request):
-    """AI-analyze student progress"""
+    """AI-analyze student progress.
+
+    Web contract (dashboard_eduprenair.html "Analyze Progress"): body
+    ``{course_slug, user_id}`` -> ``{"analysis": {risk_prediction,
+    risk_percentage, strengths, improvements}}`` for the caller's own
+    enrollment. When the caller instructs the course the old aggregate keys
+    are returned as well.
+    """
     course_slug = request.data.get('course_slug', '')
-    course = get_object_or_404(Course, slug=course_slug, instructor=request.user)
-    enrollments = StudentEnrollment.objects.filter(course=course)
+    course = get_object_or_404(Course, slug=course_slug)
+    user_id = request.data.get('user_id')
+    if user_id not in (None, '') and str(user_id) != str(request.user.id):
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
-    total_students = enrollments.count()
-    avg_progress = sum(e.progress for e in enrollments) / total_students if total_students > 0 else 0
-    completed = enrollments.filter(is_completed=True).count()
+    data = {}
+    if course.instructor_id == request.user.id:
+        enrollments = StudentEnrollment.objects.filter(course=course)
+        total_students = enrollments.count()
+        avg_progress = sum(e.progress for e in enrollments) / total_students if total_students > 0 else 0
+        completed = enrollments.filter(is_completed=True).count()
+        data.update({
+            'course': course.title,
+            'total_students': total_students,
+            'average_progress': round(avg_progress, 2),
+            'completed_students': completed,
+            'completion_rate': round((completed / total_students * 100) if total_students > 0 else 0, 2),
+        })
 
-    return Response({
-        'course': course.title,
-        'total_students': total_students,
-        'average_progress': round(avg_progress, 2),
-        'completed_students': completed,
-        'completion_rate': round((completed / total_students * 100) if total_students > 0 else 0, 2),
-    })
+    enrollment = StudentEnrollment.objects.filter(user=request.user, course=course).first()
+    if enrollment is None and not data:
+        return Response({'error': 'You are not enrolled in this course.'},
+                        status=status.HTTP_404_NOT_FOUND)
+    if enrollment is not None:
+        progress = float(enrollment.progress or 0)
+        days = max((timezone.now() - enrollment.enrolled_date).days, 0)
+        risk = 0 if enrollment.is_completed else min(100, max(5, int(100 - progress + min(days, 30) / 2)))
+        level = 'Low' if risk <= 33 else ('Medium' if risk <= 66 else 'High')
+        strengths = []
+        improvements = []
+        if progress >= 50:
+            strengths.append('Steady progress: %d%% of the course completed.' % progress)
+        if enrollment.is_completed:
+            strengths.append('Completed the course.')
+        strengths.append('Enrolled %d day(s) ago and still engaged.' % days)
+        if progress < 100:
+            improvements.append('Finish the remaining lessons to reach 100%.')
+        improvements.append('Set aside a fixed study slot each week.')
+        improvements.append('Revisit completed lessons before the quiz.')
+        data['analysis'] = {
+            'risk_prediction': '%s dropout risk (%d%%)' % (level, risk),
+            'risk_percentage': risk,
+            'strengths': strengths[:3],
+            'improvements': improvements[:3],
+        }
+    return Response(data)
 
 
 @api_view(['GET'])

@@ -464,15 +464,33 @@ def image_generation_api(request):
             "authorization": f"Bearer {settings.LEONARDO_API_KEY}"
         }
         
-        # Step 1: Create generation job
+        # Step 1: Create generation job. The website posts width / height /
+        # mode; the app sends `size` ("1024x768") + mode. Both are honoured
+        # (defaults unchanged: 1024x768, quality).
+        width, height = 1024, 768
+        size = str(request.data.get("size") or "").replace("\u00d7", "x").strip("() ")
+        if "x" in size.lower():
+            try:
+                w_s, h_s = size.lower().split("x", 1)
+                width, height = int(w_s), int(h_s)
+            except ValueError:
+                pass
+        try:
+            width = int(request.data.get("width") or width)
+            height = int(request.data.get("height") or height)
+        except (TypeError, ValueError):
+            pass
+        if not (256 <= width <= 1536 and 256 <= height <= 1536):
+            width, height = 1024, 768
+        mode = request.data.get("mode") or "quality"
         payload = {
-            "alchemy": True,
-            "height": 768,
+            "alchemy": mode == "quality",
+            "height": height,
             "modelId": "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
             "num_images": 1, 
             "presetStyle": "DYNAMIC",
             "prompt": prompt,
-            "width": 1024
+            "width": width
         }
         
         post_response = requests.post(
@@ -712,11 +730,12 @@ def dashboard_eduprenair_api(request):
     # Serialize the data
     listed_courses_data = [
         {
-            "id": course.id,
+            "id": course.slug,  # Course pk is its slug (no integer id)
             "title": course.title,
             "slug": course.slug,
             "price": float(course.price) if course.price else 0,
             "enrollment_count": course.enrollment_count,
+            "duration": course.duration,
             "thumbnail": course.thumbnail.url if course.thumbnail else None,
             "created_at": course.created_at,
         } for course in listed_courses
@@ -724,12 +743,18 @@ def dashboard_eduprenair_api(request):
     
     enrolled_courses_data = [
         {
-            "id": enrollment.course.id,
+            "id": enrollment.course.slug,
             "title": enrollment.course.title,
             "slug": enrollment.course.slug,
             "instructor": enrollment.course.instructor.username,
             "thumbnail": enrollment.course.thumbnail.url if enrollment.course.thumbnail else None,
-            "enrolled_at": enrollment.enrolled_at,
+            # the template's own columns (progress / price / duration /
+            # enrolled date); `enrolled_at` kept for old clients.
+            "progress": float(enrollment.progress or 0),
+            "price": float(enrollment.course.price) if enrollment.course.price else 0,
+            "duration": enrollment.course.duration,
+            "enrolled_date": enrollment.enrolled_date,
+            "enrolled_at": getattr(enrollment, "enrolled_at", None) or enrollment.enrolled_date,
         } for enrollment in enrolled_courses
     ]
     
@@ -959,7 +984,7 @@ def add_module_course_eduprenair_api(request, course_slug):
         serializer = ModuleSerializer(modules, many=True)
         return Response({
             "course": {
-                "id": course.id,
+                "id": course.slug,
                 "title": course.title,
                 "slug": course.slug,
             },
@@ -1107,9 +1132,33 @@ def course_stats_api(request, course_slug):
     course_serializer = CourseSerializer(course)
     students_serializer = StudentEnrollmentSerializer(students, many=True)
     
+    ratings = CourseRating.objects.filter(course=course)
+    # Everything course_stats.html prints (additive keys).
+    stats = {
+        'total_students': students.count(),
+        'sales_amount': float(getattr(course, 'sales_amount', 0) or 0)
+        if not callable(getattr(course, 'sales_amount', None))
+        else float(course.sales_amount() or 0),
+        'total_reviews': ratings.count(),
+        'average_rating': course.average_rating(),
+    }
+    student_list = [{
+        'id': e.id,
+        'user_id': e.user_id,
+        'username': e.user.username,
+        'slug': e.user.slug,
+        'country': e.user.country,
+        'profile_pic': e.user.profile_pic.url if e.user.profile_pic else None,
+        'enrolled_date': e.enrolled_date,
+        'is_completed': e.is_completed,
+        'progress': float(e.progress or 0),
+    } for e in students.select_related('user')]
+
     return Response({
         'course': course_serializer.data,
         'students': students_serializer.data,
+        'stats': stats,
+        'student_list': student_list,
     })
 
 
@@ -1273,6 +1322,18 @@ def dashboard_change_password_api(request):
             return Response({"error": "New passwords don't match"}, 
                            status=status.HTTP_400_BAD_REQUEST)
         
+        # The website's PasswordChangeForm runs the project's password
+        # validators; do the same so the app cannot set a password the site
+        # would reject.
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        try:
+            validate_password(new_password, user)
+        except DjangoValidationError as exc:
+            return Response({"error": " ".join(exc.messages),
+                             "errors": list(exc.messages)},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # Change password
         user.set_password(new_password)
         user.save()
@@ -1766,7 +1827,19 @@ def payout_request_api(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
+    from dashboard.views_payouts import validate_payout_eligibility
+    kyc = validate_payout_eligibility(user)
+
     if request.method == "POST":
+        # The website refuses a payout until identity verification is
+        # complete (payout_request view); the API has to do the same.
+        if not kyc["can_request_payout"]:
+            return Response({
+                "error": "Please complete identity verification first.",
+                "can_request_payout": False,
+                "missing_fields": kyc["missing_fields"],
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         amount = request.data.get('amount')
         acc_type = request.data.get('account_type')
         
@@ -1827,7 +1900,66 @@ def payout_request_api(request):
     return Response({
         "available_earnings": user.available_earnings,
         "has_payoneer": user.payout_account.filter(type='Payoneer').exists(),
-        "has_paypal": user.payout_account.filter(type='Paypal').exists()
+        "has_paypal": user.payout_account.filter(type='Paypal').exists(),
+        "can_request_payout": kyc["can_request_payout"],
+        "missing_fields": kyc["missing_fields"],
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def validate_payout_eligibility_api(request):
+    """Mirror of `dashboard.views_payouts.validate_payout_api` for token auth."""
+    from dashboard.views_payouts import validate_payout_eligibility
+    return Response(validate_payout_eligibility(request.user))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_payout_identity_api(request):
+    """Mirror of `dashboard.views_payouts.save_identity_api` (the payout KYC
+    popup): identity_type, identity_number, identity_country, country, phone_no."""
+    from dashboard.models import KYCProfile
+    from dashboard.views_payouts import validate_payout_eligibility
+
+    data = request.data
+    user = request.user
+    if data.get('country'):
+        user.country = data['country']
+    if data.get('phone_no'):
+        user.phone_no = data['phone_no']
+    if data.get('identity_type'):
+        user.identity_type = data['identity_type']
+    if data.get('identity_number'):
+        user.identity_number = data['identity_number']
+
+    kyc_profile, _ = KYCProfile.objects.get_or_create(user=user)
+    if data.get('identity_type'):
+        kyc_profile.identity_type = data['identity_type']
+    if data.get('identity_number'):
+        kyc_profile.identity_number = data['identity_number']
+    if data.get('identity_country'):
+        kyc_profile.identity_country = data['identity_country']
+
+    errors = []
+    if not user.identity_type:
+        errors.append("Identity type is required")
+    if not user.identity_number:
+        errors.append("Identity number is required")
+    if not kyc_profile.identity_country:
+        errors.append("Identity country is required")
+    if errors:
+        return Response({"success": False, "errors": errors},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    user.save()
+    kyc_profile.save()
+    result = validate_payout_eligibility(user)
+    return Response({
+        "success": True,
+        "message": "Verification details saved successfully.",
+        "can_request_payout": result["can_request_payout"],
+        "missing_fields": result["missing_fields"],
     })
 
 

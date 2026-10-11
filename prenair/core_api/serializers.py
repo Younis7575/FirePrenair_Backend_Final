@@ -438,9 +438,26 @@ class CourseSerializer(serializers.ModelSerializer):
         
 class ModuleSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
+    # module_lessons_eduprenair.html lists each module's lessons; kept flat
+    # (no nested module) so it cannot recurse into LessonSerializer.
+    lessons = serializers.SerializerMethodField()
+
     class Meta:
         model = Module
         fields = '__all__'
+
+    def get_lessons(self, obj):
+        out = []
+        for l in obj.lessons.all():
+            try:
+                video = l.video.url if l.video else None
+            except Exception:
+                video = None
+            out.append({
+                'id': l.id, 'title': l.title, 'description': l.description,
+                'order': l.order, 'slug': l.slug, 'video': video,
+            })
+        return out
         
 class LessonSerializer(serializers.ModelSerializer):
     module = ModuleSerializer(read_only=True)

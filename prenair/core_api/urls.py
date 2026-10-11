@@ -412,6 +412,8 @@ urlpatterns = [
     path('dashboard/billing/', user_billings_api, name='billings_api'),
     path('dashboard/request-payout/', payout_request_api, name="payout_request_api"),
     path('dashboard/payout-settings/', payout_settings_api, name="payout_settings_api"),
+    path('dashboard/validate-payout/', validate_payout_eligibility_api, name="payout_validate_eligibility_api"),
+    path('dashboard/save-identity/', save_payout_identity_api, name="payout_save_identity_api"),
     path('dashboard/payment-history/', payment_history_api, name="payment_history_api"),
     path('dashboard/paypal-transfer/', paypal_manual_transfer_api, name="paypal_transfer_api"),
 

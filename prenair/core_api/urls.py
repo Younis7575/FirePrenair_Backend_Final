@@ -151,6 +151,7 @@ urlpatterns = [
     # PayPal payment
     path("digiprenair/paypal/checkout_api/", _digi_views.paypal_checkout_api, name="paypal_checkout_api"),
     path("digiprenair/paypal/success_api/", paypal_payment_success_api, name="paypal_payment_success_api"),
+    path("digiprenair/checkout_result_api/", digi_checkout_result_api, name="digi_checkout_result_api"),
 
     # General pages
     path("digiprenair/home/", DigiHomeAPIView.as_view(), name="digi_home_api"),
@@ -169,7 +170,10 @@ urlpatterns = [
     # Notifications
     path("digiprenair/notifications_api/", digi_notifications_api, name="digi_notifications_api"),
     path("digiprenair/notifications_api/read/<int:notification_id>/", mark_notification_as_read_api, name="mark_notification_as_read_api"),
-    path("digiprenair/notifications_api/delete/<int:notification_id>/", delete_notification_api, name="delete_notification_api"),
+    # Bound to this module's view: the bare name is shadowed by
+    # dashboard_views.delete_notification_api (`import *`), whose
+    # @admin_not_allowed_api turned this route into a 403 for admin accounts.
+    path("digiprenair/notifications_api/delete/<int:notification_id>/", _digi_views.delete_notification_api, name="delete_notification_api"),
     path("digiprenair/notifications_api/mark-all-read/", mark_all_notifications_as_read_api, name="mark_all_notifications_as_read_api"),
 
     # Profile

@@ -146,7 +146,18 @@ from digi_prenair.models import (
     OrderItem as DigiOrderItem,
 )
 from .serializers import ProductSerializer, NotificationSerializer
+# `from work_prenair.models import *` above shadows `Category` with the
+# WorkPrenair table, so the digi category lookups below returned the wrong
+# rows (always empty on a DigiPrenair-only dataset). Name the digi one.
+from digi_prenair.models import Category as DigiCategory
 import calendar
+
+
+def _digi_file_url(f):
+    try:
+        return f.url if f else None
+    except Exception:
+        return None
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -219,9 +230,18 @@ def dashboard_digiprenair_api(request):
             {
                 "id": sale.id,
                 "product_name": sale.product.title,
-                "price": float(sale.product.price),
+                # What the buyer actually paid for the line (the site's
+                # `sale.price`), not the product's current list price.
+                "price": float(sale.price),
                 "order_date": sale.order.created_at,
-                # Add other fields as needed
+                # Recent Sales "Buyer" column (dashboard_digiprenair.html).
+                "product_slug": sale.product.slug,
+                "product_image": _digi_file_url(sale.product.image),
+                "quantity": sale.quantity,
+                "buyer": sale.order.user.username,
+                "buyer_id": sale.order.user.id,
+                "buyer_name": sale.order.user.name or sale.order.user.username,
+                "buyer_profile_pic": _digi_file_url(sale.order.user.profile_pic),
             } for sale in recent_sales
         ],
         "orders": [
@@ -229,7 +249,23 @@ def dashboard_digiprenair_api(request):
                 "id": order.id,
                 "total": float(order.total_amount or 0),
                 "created_at": order.created_at,
-                # Add other fields as needed
+                # Recent Purchases "Item" / "Download" columns: one entry per
+                # purchased line, with the file link when the product has one.
+                "items": [
+                    {
+                        "id": oi.id,
+                        "product_id": oi.product.id,
+                        "product_title": oi.product.title,
+                        "product_slug": oi.product.slug,
+                        "product_image": _digi_file_url(oi.product.image),
+                        "price": float(oi.product.price),
+                        "quantity": oi.quantity,
+                        "file_url": _digi_file_url(oi.product.downloadable_file),
+                        "download_url": _digi_file_url(oi.product.downloadable_file),
+                        "has_download": bool(oi.product.downloadable_file),
+                    }
+                    for oi in order.order_items.select_related("product")
+                ],
             } for order in orders
         ],
         "chart_data": chart_data,
@@ -253,9 +289,9 @@ def dashboard_digiprenair_api(request):
 def get_child_categories_digi_api(request):
     parent_id = request.query_params.get("parent_id")
     if parent_id:
-        categories = Category.objects.filter(parent_id=parent_id)
+        categories = DigiCategory.objects.filter(parent_id=parent_id)
     else:
-        categories = Category.objects.none()
+        categories = DigiCategory.objects.none()
 
     category_data = [{"id": cat.id, "name": cat.name} for cat in categories]
     return Response({"categories": category_data}, status=status.HTTP_200_OK)
@@ -275,7 +311,7 @@ def upload_item_digiprenair_api(request):
         )
 
     if request.method == "GET":
-        categories = Category.objects.filter(parent=None)
+        categories = DigiCategory.objects.filter(parent=None)
         category_data = [{"id": cat.id, "name": cat.name} for cat in categories]
         return Response({"categories": category_data}, status=status.HTTP_200_OK)
     
@@ -330,7 +366,7 @@ def edit_item_digiprenair_api(request, slug):
 
     if request.method == "GET":
         serializer = ProductSerializer(product)
-        categories = Category.objects.filter(parent=None)
+        categories = DigiCategory.objects.filter(parent=None)
         category_data = [{"id": cat.id, "name": cat.name} for cat in categories]
         
         # Prepare category data for the frontend

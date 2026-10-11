@@ -330,9 +330,28 @@ class DigiParentCategoriesView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        categories = WorkCategory.objects.filter(parent=None)[:5]
-        serializer = WorkCategorySerializer(categories, many=True)
-        return Response(serializer.data)
+        # This class is DigiPrenair's; it served WorkPrenair's categories, whose
+        # ids mean nothing to a digi Product. Use the digi Category table.
+        from digi_prenair.models import Category as DigiCategory
+        categories = DigiCategory.objects.filter(parent=None)[:5]
+        data = [
+            {
+                'id': c.id,
+                'name': c.name,
+                'description': c.description or '',
+                'img': c.img.url if c.img else None,
+                'item_count': c.item_count,
+                'color': c.color,
+                'is_featured': c.is_featured,
+                'parent': c.parent_id,
+                'subcategories': [
+                    {'id': ch.id, 'name': ch.name}
+                    for ch in c.digi_subcategories.all()
+                ],
+            }
+            for c in categories
+        ]
+        return Response(data)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])

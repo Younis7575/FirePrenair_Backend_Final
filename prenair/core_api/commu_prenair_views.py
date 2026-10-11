@@ -161,9 +161,9 @@ def commu_prenair_home_api(request):
         )
 
         # Serialize the data
-        post_serializer = PostSerializer(posts, many=True)
+        post_serializer = PostSerializer(posts, many=True, context={'request': request})
         # user_contacts_serializer = UserDataSerializer(user_contacts, many=True)
-        user_contacts_serializer = PrivateChatSerializer(user_contacts, many=True)
+        user_contacts_serializer = PrivateChatSerializer(user_contacts, many=True, context={'request': request})
 
         # Return the data in a response
         return Response({
@@ -293,8 +293,10 @@ def make_group_post_api(request, slug):
 def post_detail_api(request, slug):
     try:
         post = get_object_or_404(Post, slug=slug)
-        post_data = PostSerializer(post).data
+        post_data = PostSerializer(post, context={'request': request}).data
         return Response(post_data, status=status.HTTP_200_OK)
+    except Http404:
+        raise
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -316,6 +318,8 @@ def delete_post_api(request, slug):
             post.video.delete(save=False)
         post.delete()
         return Response({"message": "Post deleted successfully."}, status=status.HTTP_200_OK)
+    except Http404:
+        raise
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -337,9 +341,10 @@ def add_comment_api(request, post_slug):
                 message=f'{request.user.username} commented on your post',
                 app_name='commuprenair'
             )
-        print(post_slug)
-        comment=CommentSerializer(comment).data
+        comment=CommentSerializer(comment, context={'request': request}).data
         return Response({'message': 'comment added','comment':comment},status=status.HTTP_201_CREATED)
+    except Http404:
+        raise
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -441,7 +446,14 @@ def get_likes_api(request, slug):
         for like in post.likes.all()
     ]
 
-    return Response({'liked_users': liked_users}, status=status.HTTP_200_OK)
+    # `like_count` / `liked` mirror what toggle_like returns, so a screen that
+    # loads likes first (group feed) can draw the count and the heart without
+    # counting the list itself.
+    return Response({
+        'liked_users': liked_users,
+        'like_count': len(liked_users),
+        'liked': post.likes.filter(user=request.user).exists(),
+    }, status=status.HTTP_200_OK)
 
 def _get_user_by_slug(slug):
     """Resolve a user from a URL segment that may be a slug or a username.
@@ -466,8 +478,9 @@ def profile_api(request, slug):
     user = _get_user_by_slug(slug)
     posts = Post.objects.filter(author=user, is_group_post=False).order_by('-created_at')
     
-    user_data = UserSerializer(user).data
-    posts_data = PostSerializer(posts, many=True).data
+    ctx = {'request': request}
+    user_data = PersonSerializer(user, context=ctx).data
+    posts_data = PostSerializer(posts, many=True, context=ctx).data
 
     # The website's profile header shows "<n> Followers" above a stack of the
     # first three connection avatars (see partials/profile_topbar.html). Only
@@ -475,9 +488,17 @@ def profile_api(request, slug):
     # second request just to draw the header.
     # A method, not a property — the template calls it implicitly, Python does not.
     connections = user.user_connections()
+    # profile_topbar.html picks Message / Withdraw / Accept Request / Remove
+    # Connection / Send Request from the viewer's relationship with this user.
+    # Top-level copies so the app does not have to dig into `user`.
     return Response({
         'user': user_data,
         'posts': posts_data,
+        'is_self': user_data['is_self'],
+        'is_connected': user_data['is_connected'],
+        'request_sent': user_data['request_sent'],
+        'request_received': user_data['request_received'],
+        'mutual_connections_count': user_data['mutual_connections_count'],
         'followers_count': connections.count(),
         'followers': [
             {
@@ -495,7 +516,7 @@ def profile_api(request, slug):
 @permission_classes([AllowAny])
 def profile_about_api(request, slug):
     user = _get_user_by_slug(slug)
-    user_data = UserSerializer(user).data
+    user_data = PersonSerializer(user, context={'request': request}).data
     
     return Response({'user': user_data})
 
@@ -506,8 +527,9 @@ def profile_groups_api(request, slug):
     user = _get_user_by_slug(slug)
     groups = Group.objects.filter(members=user)
     
-    user_data = UserSerializer(user).data
-    groups_data = GroupSerializer(groups, many=True).data
+    ctx = {'request': request}
+    user_data = PersonSerializer(user, context=ctx).data
+    groups_data = GroupSerializer(groups, many=True, context=ctx).data
     
     return Response({
         'user': user_data,
@@ -527,9 +549,10 @@ def group_detail_api(request, slug):
     friends_count = friends_in_group.count()
     posts = group.group_posts.all().order_by('-created_at')
     
-    group_data = GroupSerializer(group).data
-    posts_data = PostSerializer(posts, many=True).data
-    friends_data = UserSerializer(friends_in_group, many=True).data
+    ctx = {'request': request}
+    group_data = GroupSerializer(group, context=ctx).data
+    posts_data = PostSerializer(posts, many=True, context=ctx).data
+    friends_data = PersonSerializer(friends_in_group, many=True, context=ctx).data
     
     # The app has to decide which header actions to draw — Leave vs Join vs
     # "Requested", and whether to offer Manage Group — and none of that was
@@ -599,7 +622,7 @@ def manage_group_api(request, slug):
             return Response({'message': f'{member_request.user} declined.'})
     
     return Response({
-        'group': GroupSerializer(group).data,
+        'group': GroupSerializer(group, context={'request': request}).data,
         'member_requests': GroupMemberShipRequestsSerializer(member_requests, many=True).data,
         'query': query
     })
@@ -670,7 +693,7 @@ def createe_group_api(request):
         group.members.add(request.user)
         group.save()
         print(f'  Group created successfully: {group.slug}')
-        return Response({'message': 'Group created successfully.', 'group': GroupSerializer(group).data})
+        return Response({'message': 'Group created successfully.', 'group': GroupSerializer(group, context={'request': request}).data})
     except Exception as e:
         print(f'  ERROR creating group: {e}')
         import traceback
@@ -695,18 +718,31 @@ def group_list_api(request):
             Q(name__icontains=query) | Q(desc__icontains=query)
         )
         
-    return Response({'groups': GroupSerializer(groups, many=True).data})
+    return Response({'groups': GroupSerializer(groups, many=True, context={'request': request}).data})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def join_group_api(request, slug):
     group = get_object_or_404(Group, slug=slug)
+    if group.members.filter(id=request.user.id).exists():
+        return Response({'message': 'You are already a member of this group.',
+                         'is_member': True, 'is_pending': False})
     if not group.is_private:
         group.members.add(request.user)
-        return Response({'message': 'You have joined the group successfully!'})
+        return Response({'message': 'You have joined the group successfully!',
+                         'is_member': True, 'is_pending': False})
     
-    GroupMemberShipRequests.objects.create(group=group, user=request.user)
-    return Response({'message': 'Your request has been sent to the group admin.'})
+    # unique_together(group, user): asking twice used to be an unhandled
+    # IntegrityError (HTTP 500).
+    _, created = GroupMemberShipRequests.objects.get_or_create(group=group, user=request.user)
+    if created and group.admin_id and group.admin_id != request.user.id:
+        Notification.objects.create(
+            user=group.admin,
+            message=f'{request.user.username} requested to join {group.name}',
+            app_name='commuprenair',
+        )
+    return Response({'message': 'Your request has been sent to the group admin.',
+                     'is_member': False, 'is_pending': True})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -726,22 +762,20 @@ def profile_connections_api(request, slug):
     user = _get_user_by_slug(slug)
     query = request.GET.get('q', '')
     
-    connections_sent = User.objects.filter(connections_sent__to_user=user)
-    connections_received = User.objects.filter(connections_received__from_user=user)
-    
+    connections = user.user_connections().distinct()
     if query:
-        connections_sent = connections_sent.filter(Q(name__icontains=query) | Q(username__icontains=query))
-        connections_received = connections_received.filter(Q(name__icontains=query) | Q(username__icontains=query))
+        connections = connections.filter(Q(name__icontains=query) | Q(username__icontains=query))
     
-    connections = connections_sent.union(connections_received)
-    serializer = UserSerializer(connections, many=True)
+    # PersonSerializer adds the "N mutual friends" and the viewer's
+    # relationship with each person (profile_connections.html).
+    serializer = PersonSerializer(connections, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def connection_requests_api(request):
     friend_requests = FriendRequest.objects.filter(to_user=request.user)
-    serializer = FriendRequestSerializer(friend_requests, many=True)
+    serializer = FriendRequestSerializer(friend_requests, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -755,6 +789,8 @@ def send_friend_request_api(request, slug):
         
         if request.user == to_user:
             return Response({'message': 'You cannot send a friend request to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.is_already_connected(to_user):
+            return Response({'message': 'You are already connected.'}, status=status.HTTP_400_BAD_REQUEST)
         FriendRequest.objects.create(from_user=request.user, to_user=to_user)
         if to_user != request.user:
             Notification.objects.create(user=to_user, message=f'{request.user.username} sent you a friend request', app_name='commuprenair')
@@ -826,24 +862,32 @@ def search_people_api(request):
         if query:
             users = users.filter(Q(name__icontains=query) | Q(username__icontains=query))
         
-        serializer = UserSerializer(users, many=True)
+        serializer = PersonSerializer(users, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
-        return Response(e,status=500)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def profile_settings_api(request):
     user = request.user
-    user.name = request.data.get('name', user.name)
-    user.commu_bio = request.data.get('bio', user.commu_bio)
+    # Same rules as the website's profile_settings view: a blank field leaves
+    # the stored value alone (the app used to wipe the name/bio that way).
+    name = request.data.get('name')
+    bio = request.data.get('bio')
+    if name and str(name).strip():
+        user.name = str(name).strip()
+    if bio is not None and str(bio).strip():
+        user.commu_bio = str(bio).strip()
     
     if 'profile_pic' in request.FILES:
         user.profile_pic = request.FILES['profile_pic']
     
     user.save()
-    return Response({'message': 'Profile updated successfully.'}, status=status.HTTP_200_OK)
+    return Response({
+        'message': 'Profile updated successfully.',
+        'user': UserSerializer(user, context={'request': request}).data,
+    }, status=status.HTTP_200_OK)
 
 
 ############################################################################
@@ -880,10 +924,15 @@ def user_messages_api(request):
             last_message = user_chat.chat_messages.order_by('-timestamp').first()
             unread_count = user_chat.chat_messages.filter(is_read=False, receiver=request.user).count()
             
+            other = user_chat.user2 if user_chat.user1_id == request.user.id else user_chat.user1
             chat_data = {
-                "chat": PrivateChatSerializer(user_chat).data,
-                "last_message": MessageSerializer(last_message).data if last_message else None,
-                "unread_count": unread_count
+                "chat": PrivateChatSerializer(user_chat, context={'request': request}).data,
+                "last_message": MessageSerializer(last_message, context={'request': request}).data if last_message else None,
+                "unread_count": unread_count,
+                # The other participant, so the list can draw the name, avatar,
+                # online dot and "last seen" without working out which of
+                # user1/user2 is the caller (commu_messages.html does that).
+                "chat_with": UserDataSerializer(other, context={'request': request}).data,
             }
             chats_with_last_message.append(chat_data)
 
@@ -924,15 +973,19 @@ def private_chat_api(request, slug):
 
             return Response({"chat_slug": chat.slug}, status=status.HTTP_201_CREATED)
 
+        if request.user.id not in (chat.user1_id, chat.user2_id):
+            return Response({"error": "You are not part of this chat."},
+                            status=status.HTTP_403_FORBIDDEN)
+
         # Mark messages as read
         chat.chat_messages.filter(is_read=False, receiver=request.user).update(is_read=True)
 
         chat_messages = chat.chat_messages.all().order_by('timestamp')
-        serialized_messages = MessageSerializer(chat_messages, many=True).data
+        serialized_messages = MessageSerializer(chat_messages, many=True, context={'request': request}).data
 
         chat_with = chat.user1 if request.user != chat.user1 else chat.user2
         user=User.objects.get(id=chat_with.id)
-        userserializer=UserSerializer(user)
+        userserializer=UserSerializer(user, context={'request': request})
         response_data = {
             # "chat_with": {"id": chat_with.id, "username": chat_with.username, "slug": chat_with.slug},
             "chat_with": userserializer.data,

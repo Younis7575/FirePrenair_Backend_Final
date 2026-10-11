@@ -16,8 +16,14 @@ class UserSerializer(serializers.ModelSerializer):
             # The profile header draws a green/grey presence dot from this
             # (partials/profile_topbar.html); it was never serialised, so the
             # app had no way to render it.
-            "is_online",
+            "is_online", "last_seen", "last_seen_text",
         ]
+
+    last_seen_text = serializers.SerializerMethodField()
+
+    def get_last_seen_text(self, obj):
+        # Same wording as the website's "Last seen:" line in private_chat.html.
+        return obj.time_since_last_seen()
 
 class CustomUserSerializer(serializers.ModelSerializer):
     """Admin-facing user listing.
@@ -49,7 +55,115 @@ class UserDataSerializer(serializers.ModelSerializer):
             "country","city","province","language","timezone",
             "commu_bio","edu_bio","featured_instructor","work_bio","digi_average_rating",
             "is_work_freelancer","work_expertise","is_work_profile_approved","portfolio_link",
+            # Presence dot / "Last seen" in chat lists and headers (website:
+            # commu_messages.html, private_chat.html).
+            "is_online","last_seen","last_seen_text",
+            # Verified badge on product cards / seller rows (additive).
+            "digi_is_verified",
         ]
+
+    last_seen_text = serializers.SerializerMethodField()
+
+    def get_last_seen_text(self, obj):
+        return obj.time_since_last_seen()
+
+
+# ---------------------------------------------------------------------------
+# Relationship-aware people serializers.
+#
+# The website's people cards (search_people.html, connection_requests.html,
+# profile_connections.html, profile_topbar.html) show the avatars + number of
+# mutual connections and pick Message / Send Request / Withdraw / Accept /
+# Remove from the viewer's relationship with that person. The plain user
+# serializers carry none of it, so the app could not draw those cards. These
+# add the data (viewer = request.user from the serializer context).
+# ---------------------------------------------------------------------------
+def _connection_ids(user):
+    from commu_prenair.models import Connection
+    ids = set(Connection.objects.filter(from_user=user).values_list('to_user_id', flat=True))
+    ids |= set(Connection.objects.filter(to_user=user).values_list('from_user_id', flat=True))
+    return ids
+
+
+class RelationFieldsMixin(serializers.Serializer):
+    mutual_connections_count = serializers.SerializerMethodField()
+    mutual_connections = serializers.SerializerMethodField()
+    is_connected = serializers.SerializerMethodField()
+    request_sent = serializers.SerializerMethodField()
+    request_received = serializers.SerializerMethodField()
+    is_self = serializers.SerializerMethodField()
+    connections_count = serializers.SerializerMethodField()
+
+    def _viewer(self):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        return user if user is not None and user.is_authenticated else None
+
+    def _viewer_ids(self, viewer):
+        cache = self.context.setdefault('_viewer_conn_ids', {})
+        if viewer.id not in cache:
+            cache[viewer.id] = _connection_ids(viewer)
+        return cache[viewer.id]
+
+    def _mutual_ids(self, obj):
+        viewer = self._viewer()
+        if viewer is None or viewer.id == obj.id:
+            return []
+        return sorted(self._viewer_ids(viewer) & _connection_ids(obj))
+
+    def get_mutual_connections_count(self, obj):
+        return len(self._mutual_ids(obj))
+
+    def get_mutual_connections(self, obj):
+        users = CustomUser.objects.filter(id__in=self._mutual_ids(obj)[:3])
+        return [
+            {
+                'username': u.username,
+                'name': u.name,
+                'slug': u.slug,
+                'profile_pic': u.profile_pic.url if u.profile_pic else None,
+            }
+            for u in users
+        ]
+
+    def get_is_connected(self, obj):
+        viewer = self._viewer()
+        return bool(viewer and viewer.id != obj.id and obj.id in self._viewer_ids(viewer))
+
+    def get_request_sent(self, obj):
+        from commu_prenair.models import FriendRequest
+        viewer = self._viewer()
+        return bool(viewer and FriendRequest.objects.filter(from_user=viewer, to_user=obj).exists())
+
+    def get_request_received(self, obj):
+        from commu_prenair.models import FriendRequest
+        viewer = self._viewer()
+        return bool(viewer and FriendRequest.objects.filter(from_user=obj, to_user=viewer).exists())
+
+    def get_is_self(self, obj):
+        viewer = self._viewer()
+        return bool(viewer and viewer.id == obj.id)
+
+    def get_connections_count(self, obj):
+        return len(_connection_ids(obj))
+
+
+_RELATION_FIELDS = [
+    "mutual_connections_count", "mutual_connections", "is_connected",
+    "request_sent", "request_received", "is_self", "connections_count",
+]
+
+
+class PersonSerializer(RelationFieldsMixin, UserSerializer):
+    """Full user + relationship to the viewer (search, connections, profile)."""
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + _RELATION_FIELDS
+
+
+class PersonLiteSerializer(RelationFieldsMixin, UserDataSerializer):
+    """Light user + relationship to the viewer (connection-request senders)."""
+    class Meta(UserDataSerializer.Meta):
+        fields = UserDataSerializer.Meta.fields + _RELATION_FIELDS
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -110,9 +224,29 @@ class CommentSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     comments=CommentSerializer(many=True, read_only=True)
+    # The feed, profile and group posts all draw "N likes", the heart state and
+    # "N Comments" (website partials/post_card.html). None of it was serialised,
+    # so after a reload every post looked unliked with no counts.
+    like_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
         fields = '__all__'
+
+    def get_like_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user is None or not user.is_authenticated:
+            return False
+        return obj.likes.filter(user=user).exists()
+
+    def get_comment_count(self, obj):
+        return obj.comment_count()
         
 class GroupCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -124,9 +258,41 @@ class GroupSerializer(serializers.ModelSerializer):
     # `members` is a many-to-many; without many=True the serializer is handed
     # the related manager and blows up looking for `username` on it.
     members = UserDataSerializer(many=True, read_only=True)
+    # group_list.html / group_detail.html: "<n> Member", three member avatars,
+    # and View (member) vs Join (non-member) on each card.
+    member_count = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
+    is_admin = serializers.SerializerMethodField()
+    is_pending = serializers.SerializerMethodField()
+    category_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Group
         fields = '__all__'
+
+    def _viewer(self):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        return user if user is not None and user.is_authenticated else None
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+    def get_is_member(self, obj):
+        viewer = self._viewer()
+        return bool(viewer and obj.members.filter(id=viewer.id).exists())
+
+    def get_is_admin(self, obj):
+        viewer = self._viewer()
+        return bool(viewer and obj.admin_id == viewer.id)
+
+    def get_is_pending(self, obj):
+        viewer = self._viewer()
+        return bool(viewer and obj.group_membership_requests.filter(user=viewer).exists())
+
+    def get_category_name(self, obj):
+        cat = obj.category_l_1
+        return cat.name if cat else None
 
 class GroupMemberShipRequestsSerializer(serializers.ModelSerializer):
     user=UserDataSerializer(read_only=True)
@@ -143,7 +309,7 @@ class ConnectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FriendRequestSerializer(serializers.ModelSerializer):
-    from_user = UserDataSerializer(read_only=True)
+    from_user = PersonLiteSerializer(read_only=True)
     to_user = UserDataSerializer(read_only=True)
     class Meta:
         model = FriendRequest
@@ -348,6 +514,10 @@ class ProductSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request:
                 data['image'] = request.build_absolute_uri(instance.image.url)
+        # Card badge: the category's name/colour without a second lookup.
+        category = instance.category
+        data['category_name'] = category.name if category else None
+        data['category_color'] = category.color if category else None
         return data
 
 
@@ -359,9 +529,40 @@ class DigiProductReviewSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    # `product` stays the id (existing contract); the cart screens also need
+    # the product itself to show a title / image / price and to remove it by
+    # slug, which previously meant they could render nothing but an id.
+    product_details = serializers.SerializerMethodField(read_only=True)
+    line_total = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = CartItem
         fields = '__all__'
+
+    def get_product_details(self, obj):
+        product = obj.product
+        seller = product.seller
+        return {
+            'id': product.id,
+            'title': product.title,
+            'slug': product.slug,
+            'description': product.description,
+            'price': str(product.price),
+            'discounted_price': str(product.discounted_price),
+            'final_price': str(product.effective_price()),
+            'image': product.image.url if product.image else None,
+            'category_name': product.category.name if product.category else None,
+            'seller': {
+                'id': seller.id,
+                'username': seller.username,
+                'name': seller.name,
+                'slug': seller.slug,
+                'profile_pic': seller.profile_pic.url if seller.profile_pic else None,
+            },
+        }
+
+    def get_line_total(self, obj):
+        return float(obj.product.effective_price() * obj.quantity)
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -614,7 +815,10 @@ class ProductUploadSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "price",
+            "discounted_price",
             "category",
+            "category_l_2",
+            "category_l_3",
             "image",
             "files_included",
             "downloadable_file",
@@ -627,6 +831,10 @@ class ProductUploadSerializer(serializers.ModelSerializer):
             "softwares": {"help_text": "e.g., Photoshop, Illustrator"},
             "image": {"required": False},
             "downloadable_file": {"required": False},
+            "discounted_price": {"required": False},
+            # Product.save() dereferences category (item_count), so a missing
+            # one was a 500 instead of a 400.
+            "category": {"required": True, "allow_null": False},
         }
 
     def __init__(self, *args, **kwargs):
@@ -652,8 +860,19 @@ class BecomeSellerSerializer(serializers.Serializer):
         return value
     
     
+class CheckoutLineSerializer(serializers.Serializer):
+    """A PayPal line item as built by paypal_checkout_api (not a CartItem row:
+    CartItemSerializer demands cart/product ids, so every PayPal checkout
+    failed validation with a 400)."""
+    name = serializers.CharField()
+    sku = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
 class CheckoutSerializer(serializers.Serializer):
-    items = CartItemSerializer(many=True)
+    items = CheckoutLineSerializer(many=True)
     maintenance_fee = serializers.DecimalField(max_digits=10, decimal_places=2)
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2)
     

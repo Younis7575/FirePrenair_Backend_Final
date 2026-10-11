@@ -107,6 +107,73 @@ from rest_framework import status
 from django.contrib.auth import logout
 from rest_framework.permissions import AllowAny
 
+# `from .serializers import *` above re-exports work_prenair's Category, Order
+# and Review (serializers.py imports them last), which silently rebound these
+# names for every digi view below: categories came back empty, purchases
+# queried the wrong Order table, and `Category.objects` in the child-category
+# lookup returned WorkPrenair categories. Bind the DigiPrenair models last.
+from digi_prenair.models import (
+    Category, Product, Review, Cart, CartItem, Order, OrderItem, Project,
+)
+from django.db.models import Case, When, F, DecimalField
+from django.core import signing
+from django.http import HttpResponse
+from django.utils.html import escape
+
+
+def _file_url(f):
+    """URL of a File/ImageField value, or None when empty/unreadable."""
+    try:
+        return f.url if f else None
+    except Exception:
+        return None
+
+
+def _seller_payload(user, with_contact=False):
+    """UserSerializer data plus the figures the website's seller cards show.
+
+    All additive: every key UserSerializer already returned is untouched.
+    """
+    data = dict(UserSerializer(user).data)
+    products = Product.objects.filter(seller=user).order_by("-created_at")
+    previews = [_file_url(p.image) for p in products[:4]]
+    data.update({
+        "location": user.country or "",
+        "products_count": products.count(),
+        "digi_total_items": user.digi_total_items,
+        "digi_total_sales": user.digi_total_sales,
+        "joined_date": user.created_at.strftime("%B %d, %Y") if user.created_at else "",
+        "preview_images": [u for u in previews if u],
+    })
+    if with_contact:
+        data["email"] = user.email
+    return data
+
+
+def _order_item_payload(item):
+    """One purchased line: what the site's Purchases / dashboard tables show."""
+    product = item.product
+    file_url = _file_url(product.downloadable_file)
+    return {
+        "id": item.id,
+        "product_id": product.id,
+        "product_title": product.title,
+        "product_slug": product.slug,
+        "product_image": _file_url(product.image),
+        "product_price": float(product.price),
+        "category_name": product.category.name if product.category else None,
+        "seller_username": product.seller.username,
+        "quantity": item.quantity,
+        "price": float(item.price),
+        # The site links the file straight when there is one, else the
+        # product page; `download_endpoint` is the authenticated alternative.
+        "file_url": file_url,
+        "download_url": file_url,
+        "download_endpoint": f"/api/digiprenair/download-product/{product.id}/",
+        "has_download": bool(file_url),
+    }
+
+
 knowledge_base = {
     "digiprenair": {
         "description": (
@@ -229,7 +296,7 @@ class DigiHomeAPIView(APIView):
         context = {
             "categories": digiCategorySerializer(categories, many=True).data,
             "featured_items": ProductSerializer(featured_items, many=True).data,
-            "featured_sellers": UserSerializer(featured_sellers, many=True).data,
+            "featured_sellers": [_seller_payload(u) for u in featured_sellers],
             "newest_items": ProductSerializer(newest_items, many=True).data,
         }
         return Response(context)
@@ -255,8 +322,22 @@ class DigiExploreAPIView(APIView):
                 Q(category_l_3_id=category_id)
             )
 
-        if category_param != "all":
-            all_items = all_items.filter(category__slug=category_param)
+        # Category has no slug (this used to filter on `category__slug`, which
+        # raised FieldError -> 500 for any non-"all" `params`). The website
+        # filters on the id; a category name is accepted too.
+        if category_param and category_param != "all":
+            if str(category_param).isdigit():
+                all_items = all_items.filter(category__id=category_param)
+            else:
+                all_items = all_items.filter(category__name__iexact=category_param)
+
+        asset_types = [a for a in request.GET.getlist("asset_type") if str(a).isdigit()]
+        if asset_types:
+            all_items = all_items.filter(category__id__in=asset_types)
+
+        # The explore form sends these too; the page used to ignore them.
+        if request.GET.get("creator_type") == "verified-creators":
+            all_items = all_items.filter(seller__digi_is_verified=True)
 
         if search_term:
             all_items = all_items.filter(
@@ -264,12 +345,30 @@ class DigiExploreAPIView(APIView):
             )
 
         order = request.GET.get("order")
-        if order == "newest-to-oldest":
+        price = request.GET.get("price")
+        if price in ("lowest-to-highest", "highest-to-lowest"):
+            all_items = all_items.annotate(
+                _effective_price=Case(
+                    When(discounted_price__gt=0, then=F("discounted_price")),
+                    default=F("price"),
+                    output_field=DecimalField(),
+                )
+            ).order_by(
+                "_effective_price" if price == "lowest-to-highest" else "-_effective_price",
+                "-created_at",
+            )
+        elif order == "newest-to-oldest":
             all_items = all_items.order_by("-created_at")
         elif order == "oldest-to-newest":
             all_items = all_items.order_by("created_at")
+        else:
+            all_items = all_items.order_by("id")
 
-        paginator = Paginator(all_items, 10)
+        try:
+            per_page = min(max(int(request.GET.get("per_page", 10)), 1), 100)
+        except (TypeError, ValueError):
+            per_page = 10
+        paginator = Paginator(all_items, per_page)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
 
@@ -336,6 +435,8 @@ def digi_sellers_api(request):
         sellers = sellers.order_by("username")  # Order by name (A-Z)
     elif order == "order-by-registration-date":
         sellers = sellers.order_by("-digi_total_sales")  # Order by number of sales
+    else:
+        sellers = sellers.order_by("id")
 
     paginator = Paginator(sellers, 10)  # Show 10 sellers per page
     page_number = request.GET.get("page")
@@ -349,9 +450,20 @@ def digi_sellers_api(request):
             "country": seller.country,
             "digi_total_sales": seller.digi_total_sales,
             "digi_is_verified": seller.digi_is_verified,
+            # What the website's seller cards show (sellers.html).
+            "name": seller.name or seller.username,
+            "slug": seller.slug,
+            "profile_pic": _file_url(seller.profile_pic),
+            "digi_cover_photo": _file_url(seller.digi_cover_photo),
+            "digi_total_items": seller.digi_total_items,
+            "digi_average_rating": str(seller.digi_average_rating),
+            "digi_speciality": seller.digi_speciality,
         })
 
     return Response({
+        "count": paginator.count,
+        "has_next": page_obj.has_next(),
+        "has_previous": page_obj.has_previous(),
         "page_obj": sellers_data,
         "current_order": order,
         "current_verified": verified,
@@ -394,6 +506,9 @@ def digi_product_api(request, slug):
         
         if user_review_exists:
             return Response({'error': 'You have already reviewed this product.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if is_product_owner:
+            return Response({'error': 'You cannot review your own product.'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = DigiReviewSerializer(data=request.data)
         if serializer.is_valid():
@@ -453,6 +568,7 @@ def digi_product_api(request, slug):
         else:
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     # GET request part (return full product details)
+    seller = product.seller
     product_data = {
         "id": product.id,
         "title": product.title,
@@ -462,15 +578,36 @@ def digi_product_api(request, slug):
         "image_url": product.image.url if product.image else None,
         "seller_username": product.seller.username,
         "slug": product.slug,
+        # Extras the product page shows (product.html).
+        "category": product.category_id,
+        "category_name": product.category.name if product.category else None,
+        "rating": product.rating,
+        "likes": product.likes,
+        "item_sales": product.item_sales,
+        "files_included": product.files_included,
+        "softwares": product.softwares,
+        "size": product.size,
+        "created_at": product.created_at,
+        "updated_at": product.updated_at,
+        "seller_name": seller.name or seller.username,
+        "seller_slug": seller.slug,
+        "seller_profile_pic": _file_url(seller.profile_pic),
+        "seller_is_verified": seller.digi_is_verified,
     }
 
     reviews_data = []
-    for review in reviews:
+    for review in reviews.select_related("user"):
         reviews_data.append({
             "user": review.user.username,
             "rating": review.rating,
             "body": review.body,
             "created_at": review.created_at,
+            # Author avatar / link / badge (product.html review cards).
+            "id": review.id,
+            "title": review.title,
+            "user_slug": review.user.slug,
+            "user_profile_pic": _file_url(review.user.profile_pic),
+            "user_is_verified": review.user.digi_is_verified,
         })
 
     prev_product_data = {
@@ -515,7 +652,8 @@ def digi_profile_api(request, slug):
     page_obj = paginator.get_page(page_number)
 
     serialized_products = ProductSerializer(page_obj, many=True).data
-    seller_data = UserSerializer(seller).data
+    # profile.html also shows Joined / Country / Email.
+    seller_data = _seller_payload(seller, with_contact=True)
 
     response_data = {
         "seller": seller_data,
@@ -550,6 +688,7 @@ def digi_shoping_cart_api(request):
         "cart": serialized_cart,
         "cart_items": serialized_items,
         "total_price": total_price,
+        "item_count": sum(item.quantity for item in cart_items),
     }
 
     return Response(response_data, status=status.HTTP_200_OK)
@@ -651,8 +790,12 @@ def digi_notifications_api(request):
     results = []
     for notification in notifications:
         results.append({
+            # The read/delete routes are keyed on this; it was missing, so a
+            # client had no way to address a notification.
+            'id': notification.id,
             'message': notification.message,
             'created_at': notification.created_at.strftime("%B %d, %Y %H:%M"),
+            'created_at_iso': notification.created_at.isoformat(),
             'is_read': notification.is_read,
         })
 
@@ -710,15 +853,30 @@ def digi_profile_info_api(request):
     # GET request: Return user's profile information
     if request.method == 'GET':
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        data = dict(serializer.data)
+        # ProfileUpdateForm's phone and the one-time username field
+        # (profile_info.html) read these; neither was serialised.
+        data["email"] = user.email
+        data["phone_no"] = user.phone_no or ""
+        data["is_username_changed"] = user.is_username_changed
+        data["is_digi_seller"] = user.is_digi_seller
+        return Response(data)
 
     # PATCH request: Update the user's profile information
     if request.method == 'PATCH':
         serializer = ProfileUpdateSerializer(user, data=request.data, partial=True)
         
         if serializer.is_valid():
-            if 'username' in serializer.changed_data:
-                user.is_username_changed = True  # Handle custom logic if username is changed
+            # (`serializer.changed_data` is a Django-form attribute; a DRF
+            # serializer has none, so this PATCH always 500'd.)
+            new_username = serializer.validated_data.get('username')
+            if new_username and new_username != user.username:
+                if user.is_username_changed:
+                    return Response({
+                        'message': 'Please correct the errors below.',
+                        'errors': {'username': ['You can only change your username once.']},
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                user.is_username_changed = True
             serializer.save()
             return Response({
                 'message': 'Your profile has been updated successfully!'
@@ -790,7 +948,7 @@ def digi_dashboard_api(request):
             ).aggregate(total=Sum("order__total_amount"))["total"]
             or 0
         )
-        monthly_earnings.append(earnings)
+        monthly_earnings.append(float(earnings))
         months.append(month_start.strftime("%B %Y"))
 
     paginator = Paginator(recent_sales, 5)
@@ -798,21 +956,31 @@ def digi_dashboard_api(request):
     page_obj = paginator.get_page(page_number)
 
     data = {
+        "recent_sales": [
+            {
+                "id": item.id,
+                "product_title": item.product.title,
+                "product_slug": item.product.slug,
+                "product_image": _file_url(item.product.image),
+                "buyer": item.order.user.username,
+                "buyer_name": item.order.user.name or item.order.user.username,
+                "buyer_slug": item.order.user.slug,
+                "buyer_profile_pic": _file_url(item.order.user.profile_pic),
+                "quantity": item.quantity,
+                "price": float(item.price),
+                "total_amount": float(item.order.total_amount),
+                "order_date": item.order.created_at.strftime("%B %d, %Y"),
+            }
+            for item in page_obj
+        ],
+        "has_next": page_obj.has_next(),
+        "has_previous": page_obj.has_previous(),
         "total_items_listed": total_items_listed,
         "total_items_sold": total_items_sold,
         "total_sales_amount": total_sales_amount,
         "monthly_earnings": list(reversed(monthly_earnings)),  # Reverse to make chronological
         "months": list(reversed(months)),  # Reverse to make chronological
-        # "recent_sales": [
-        #     {
-        #         "product_title": item.product.title,
-        #         "quantity": item.quantity,
-        #         "total_amount": item.order.total_amount,
-        #         "order_date": item.order.created_at.strftime("%B %d, %Y"),
-        #     }
-        #     for item in page_obj
-        # ],
-        "page_number": page_number,
+        "page_number": page_obj.number,
         "total_pages": page_obj.paginator.num_pages,
     }
 
@@ -833,7 +1001,7 @@ def digi_upload_item_api(request):
         serializer = ProductUploadSerializer(data=request.data)
         if serializer.is_valid():
             product = serializer.save(seller=user)
-            return Response({"message": "Product uploaded successfully", "product_id": product.id}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Product uploaded successfully", "product_id": product.id, "slug": product.slug}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -860,11 +1028,18 @@ def edit_item_api(request, slug):
 
     product = get_object_or_404(Product, slug=slug)
 
-    serializer = ProductSerializer(product, data=request.data, partial=True)
+    # Any digi seller could previously rewrite anyone else's listing.
+    if product.seller_id != user.id:
+        raise PermissionDenied("You can only edit your own products.")
+
+    # ProductSerializer nests `seller` as a writable object, which breaks any
+    # multipart PATCH that touches the product; the upload serializer carries
+    # exactly the editable fields.
+    serializer = ProductUploadSerializer(product, data=request.data, partial=True)
 
     if serializer.is_valid():
         serializer.save()
-        return Response({"detail": "Product updated successfully!"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Product updated successfully!", "slug": product.slug}, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -874,20 +1049,35 @@ def edit_item_api(request, slug):
 @permission_classes([IsAuthenticated])
 def digi_purchases_api(request):
     user = request.user
-    orders = Order.objects.filter(user=user, is_paid=True)
-    
-    data = [
-        {
+    orders = (
+        Order.objects.filter(user=user, is_paid=True)
+        .order_by("-created_at")
+        .prefetch_related("order_items__product__category", "order_items__product__seller")
+    )
+
+    data = []
+    items = []
+    for order in orders:
+        status_label = "Paid" if order.is_paid else "Pending"
+        order_items = [_order_item_payload(i) for i in order.order_items.all()]
+        data.append({
             "order_id": order.id,
             "total_amount": order.total_amount,
             "created_at": order.created_at,
-            "status": "Paid" if order.is_paid else "Pending",
-            # you can expand more fields if you want
-        }
-        for order in orders
-    ]
-    
-    return Response({"orders": data})
+            "status": status_label,
+            # purchases.html: one row per item with image, title, category,
+            # seller, date, price and a download link.
+            "items": order_items,
+        })
+        for row in order_items:
+            items.append({
+                **row,
+                "order_id": order.id,
+                "created_at": order.created_at,
+                "status": status_label,
+            })
+
+    return Response({"orders": data, "items": items})
 
 
 
@@ -981,6 +1171,13 @@ def checkout_api(request):
     user = request.user
     cart_items = CartItem.objects.filter(cart__user=user)
 
+    # An empty cart used to open a Stripe session charging only the fee.
+    if not cart_items.exists():
+        return Response(
+            {"detail": "Your cart is empty."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     # Calculate total product price
     total_price = sum(
         item.product.effective_price() * item.quantity for item in cart_items
@@ -1013,10 +1210,14 @@ def checkout_api(request):
     })
 
     try:
-        success_url = request.build_absolute_uri(reverse("digi_purchases"))
-        cancel_url = request.build_absolute_uri(reverse("digi_shoping_cart"))
-        # success_url='Redirect to digi purchases'
-        # cancel_url='Redirect to digi shopping cart'
+        # The website's purchases/cart pages need a browser login the app user
+        # does not have, so land on a public "return to the app" page instead.
+        success_url = request.build_absolute_uri(
+            reverse("digi_checkout_result_api") + "?status=success"
+        )
+        cancel_url = request.build_absolute_uri(
+            reverse("digi_checkout_result_api") + "?status=cancelled"
+        )
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
@@ -1233,7 +1434,10 @@ def paypal_checkout_api(request):
     total_price = sum(
         item.product.effective_price() * item.quantity for item in cart_items
     )
-    maintenance_fee = total_price * Decimal("0.05")
+    # Quantised to cents: the raw product (e.g. 3.7500) carries four decimal
+    # places and CheckoutSerializer's 2dp DecimalFields rejected it, so every
+    # PayPal checkout answered 400.
+    maintenance_fee = (total_price * Decimal("0.05")).quantize(Decimal("0.01"))
     total_price_with_fee = total_price + maintenance_fee
 
     # Build item list for PayPal
@@ -1274,14 +1478,22 @@ def paypal_checkout_api(request):
             "payment_method": "paypal",
         },
         "redirect_urls": {
-            "return_url": request.build_absolute_uri(reverse("paypal_payment_success")),
-            "cancel_url": request.build_absolute_uri(reverse("digi_shoping_cart")),
+            # PayPal sends the buyer's browser here, which cannot carry the
+            # app's bearer token; a short-lived signed token names the user.
+            "return_url": request.build_absolute_uri(
+                reverse("paypal_payment_success_api")
+            ) + "?t=" + signing.dumps({"uid": user.id}, salt=_PAYPAL_RETURN_SALT),
+            "cancel_url": request.build_absolute_uri(
+                reverse("digi_checkout_result_api") + "?status=cancelled"
+            ),
         },
         "transactions": [
             {
-                "item_list": {"items": serializer.validated_data["items"]},
+                # The raw `items` (string prices): validated_data holds Decimals,
+                # which paypalrestsdk cannot JSON-encode.
+                "item_list": {"items": items},
                 "amount": {
-                    "total": f"{serializer.validated_data['total_price']:.2f}",
+                    "total": f"{total_price_with_fee:.2f}",
                     "currency": "USD",
                 },
                 "description": "Purchase from DigiPrenair",
@@ -1302,13 +1514,56 @@ def paypal_checkout_api(request):
 
 
 
+_PAYPAL_RETURN_SALT = "digiprenair-paypal-return"
+
+
+def _result_page(ok, message):
+    title = "Payment received" if ok else "Payment not completed"
+    return HttpResponse(
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        f"<title>{title}</title></head>"
+        "<body style='font-family:sans-serif;text-align:center;padding:48px 16px'>"
+        f"<h2>{title}</h2><p>{escape(message)}</p>"
+        "<p>You can close this page and return to the app.</p></body></html>",
+        status=200 if ok else 400,
+    )
+
+
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
+def digi_checkout_result_api(request):
+    """Public landing page the Stripe / PayPal browser flows return to."""
+    ok = request.GET.get("status") == "success"
+    return _result_page(
+        ok,
+        "Thank you! Your purchase is being processed." if ok
+        else "Checkout was cancelled and you were not charged.",
+    )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def paypal_payment_success_api(request):
     payment_id = request.GET.get("paymentId")
     payer_id = request.GET.get("PayerID")
 
+    # Browser return from PayPal: no bearer token, so the user comes from the
+    # signed `t` issued by paypal_checkout_api. An authenticated API caller
+    # (the old contract) still works unchanged.
+    from_browser = not request.user.is_authenticated
+    if from_browser:
+        try:
+            uid = signing.loads(
+                request.GET.get("t", ""), salt=_PAYPAL_RETURN_SALT, max_age=60 * 60
+            )["uid"]
+            request.user = CustomUser.objects.get(id=uid)
+        except Exception:
+            return _result_page(False, "This payment link is invalid or has expired.")
+
     if not payment_id or not payer_id:
+        if from_browser:
+            return _result_page(False, "Missing payment information.")
         return Response(
             {"error": "Missing payment information"},
             status=status.HTTP_400_BAD_REQUEST,
@@ -1444,11 +1699,15 @@ def paypal_payment_success_api(request):
 
         cart.items.all().delete()
 
+        if from_browser:
+            return _result_page(True, "Your payment was successful!")
         return Response(
             {"message": "Payment was successful!"},
             status=status.HTTP_200_OK,
         )
     else:
+        if from_browser:
+            return _result_page(False, "PayPal could not complete the payment.")
         return Response(
             {"error": payment.error},
             status=status.HTTP_400_BAD_REQUEST,

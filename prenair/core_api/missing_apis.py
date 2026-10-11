@@ -3,7 +3,8 @@ Missing REST API endpoints for FirePrenair.
 These endpoints exist as Django template views but had no API version.
 Added to support the Flutter mobile app.
 """
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -46,39 +47,105 @@ from dashboard.models import (
 # =============================================================================
 # COMMUPRENAIR EVENTS API ENDPOINTS
 # =============================================================================
+from django.utils.dateparse import parse_datetime as _parse_dt
+from django.db.models import Q as _Q
+
+
+def _bool(value, default=False):
+    """Form values arrive as strings ('true' / 'True' / 'on' / '1')."""
+    if value is None or value == '':
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ('true', '1', 'yes', 'on', 't')
+
+
+def _dt(value):
+    """Parse an ISO / datetime-local value; None when it is not a datetime."""
+    if not value:
+        return None
+    if hasattr(value, 'isoformat'):
+        return value
+    text = str(value).strip().replace(' ', 'T', 1) if 'T' not in str(value) else str(value).strip()
+    parsed = _parse_dt(text)
+    if parsed is None:
+        # 'YYYY-MM-DDTHH:MM' without seconds is accepted by parse_datetime;
+        # a bare date is not -- treat it as midnight.
+        from django.utils.dateparse import parse_date
+        d = parse_date(text[:10])
+        if d:
+            import datetime as _d
+            parsed = _d.datetime.combine(d, _d.time())
+    if parsed is not None and timezone.is_naive(parsed):
+        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+    return parsed
+
+
+def _pic(user):
+    return user.profile_pic.url if user and user.profile_pic else None
+
+
+def _event_dict(event, request, detail=False):
+    """One event, in the shape every events screen reads.
+
+    Adds what the website's event_list.html / event_detail.html show and the
+    app could not: the category (`category` id, `category_id`, `category_name`),
+    `created_at` ("<n> ago"), who is registered, and whether the caller is the
+    host (shows Edit). Existing keys are unchanged.
+    """
+    cat = event.category
+    attendees = list(event.attendees.all()[:8])
+    data = {
+        'id': event.id,
+        'title': event.title,
+        'description': event.description,
+        'start_time': event.start_time,
+        'end_time': event.end_time,
+        'is_virtual': event.is_virtual,
+        'virtual_link': event.virtual_link,
+        'location': event.location,
+        'event_image': event.event_image.url if event.event_image else None,
+        'slug': event.slug,
+        'attendee_count': event.attendees.count(),
+        'category': cat.id if cat else None,
+        'category_id': cat.id if cat else None,
+        'category_name': cat.name if cat else None,
+        'created_at': event.created_at,
+        'is_creator': event.creator_id == request.user.id,
+        'is_attending': event.attendees.filter(id=request.user.id).exists(),
+        'attendees': [
+            {'username': a.username, 'name': a.name, 'slug': a.slug, 'profile_pic': _pic(a)}
+            for a in attendees
+        ],
+    }
+    if detail:
+        creator = UserSerializer(event.creator, context={'request': request}).data
+        creator['profile_pic'] = _pic(event.creator)
+        data['creator'] = creator
+    else:
+        data['creator'] = {
+            'username': event.creator.username,
+            'name': event.creator.name,
+            'slug': event.creator.slug,
+            'profile_pic': _pic(event.creator),
+        }
+    return data
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def events_list_api(request):
-    """List all events"""
+    """List all events (?category=<id>&q=<text>, like the website's filters)."""
     events = Event.objects.all().order_by('-created_at')
     category_id = request.GET.get('category')
     if category_id:
         events = events.filter(category_id=category_id)
-    
-    paginator_data = []
-    for event in events:
-        paginator_data.append({
-            'id': event.id,
-            'title': event.title,
-            'description': event.description,
-            'start_time': event.start_time,
-            'end_time': event.end_time,
-            'is_virtual': event.is_virtual,
-            'virtual_link': event.virtual_link,
-            'location': event.location,
-            'event_image': event.event_image.url if event.event_image else None,
-            'slug': event.slug,
-            'attendee_count': event.attendees.count(),
-            'creator': {
-                'username': event.creator.username,
-                'name': event.creator.name,
-                'slug': event.creator.slug,
-                'profile_pic': event.creator.profile_pic.url if event.creator.profile_pic else None,
-            },
-            'is_attending': event.attendees.filter(id=request.user.id).exists(),
-        })
-    return Response({'events': paginator_data})
+    q = request.GET.get('q')
+    if q:
+        events = events.filter(
+            _Q(title__icontains=q) | _Q(description__icontains=q) | _Q(location__icontains=q)
+        )
+    return Response({'events': [_event_dict(e, request) for e in events]})
 
 
 @api_view(['POST'])
@@ -87,17 +154,25 @@ def create_event_api(request):
     """Create a new event"""
     title = request.data.get('title')
     description = request.data.get('description')
-    start_time = request.data.get('start_time')
-    end_time = request.data.get('end_time')
-    is_virtual = request.data.get('is_virtual', True)
-    virtual_link = request.data.get('virtual_link', '')
-    location = request.data.get('location', '')
-    category_id = request.data.get('category')
+    start_time = _dt(request.data.get('start_time'))
+    end_time = _dt(request.data.get('end_time'))
+    is_virtual = _bool(request.data.get('is_virtual'), True)
+    virtual_link = request.data.get('virtual_link') or None
+    location = request.data.get('location') or None
+    category_id = request.data.get('category') or None
     event_image = request.FILES.get('event_image')
 
-    if not all([title, description, start_time, end_time]):
+    if not (title and description and start_time and end_time):
         return Response({'error': 'Title, description, start_time, and end_time are required.'},
                         status=status.HTTP_400_BAD_REQUEST)
+    if end_time <= start_time:
+        return Response({'error': 'The event must end after it starts.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    category = None
+    if category_id:
+        category = Groupcategory.objects.filter(id=category_id).first()
+        if category is None:
+            return Response({'error': 'Invalid category.'}, status=status.HTTP_400_BAD_REQUEST)
 
     slug = slugify(title) + '-' + str(uuid.uuid4())[:6]
 
@@ -107,10 +182,10 @@ def create_event_api(request):
         creator=request.user,
         start_time=start_time,
         end_time=end_time,
-        is_virtual=bool(is_virtual),
-        virtual_link=virtual_link,
-        location=location,
-        category_id=category_id,
+        is_virtual=is_virtual,
+        virtual_link=virtual_link if is_virtual else None,
+        location=location if not is_virtual else (location or None),
+        category=category,
         event_image=event_image,
         slug=slug,
     )
@@ -131,21 +206,7 @@ def create_event_api(request):
 def event_detail_api(request, slug):
     """Get event detail"""
     event = get_object_or_404(Event, slug=slug)
-    return Response({
-        'id': event.id,
-        'title': event.title,
-        'description': event.description,
-        'start_time': event.start_time,
-        'end_time': event.end_time,
-        'is_virtual': event.is_virtual,
-        'virtual_link': event.virtual_link,
-        'location': event.location,
-        'event_image': event.event_image.url if event.event_image else None,
-        'slug': event.slug,
-        'attendee_count': event.attendees.count(),
-        'creator': UserSerializer(event.creator).data,
-        'is_attending': event.attendees.filter(id=request.user.id).exists(),
-    })
+    return Response(_event_dict(event, request, detail=True))
 
 
 @api_view(['POST'])
@@ -154,7 +215,9 @@ def join_event_api(request, slug):
     """Join an event"""
     event = get_object_or_404(Event, slug=slug)
     event.attendees.add(request.user)
-    return Response({'message': 'You have joined the event.'})
+    return Response({'message': 'You have joined the event.',
+                     'is_attending': True,
+                     'attendee_count': event.attendees.count()})
 
 
 @api_view(['POST'])
@@ -163,7 +226,9 @@ def leave_event_api(request, slug):
     """Leave an event"""
     event = get_object_or_404(Event, slug=slug)
     event.attendees.remove(request.user)
-    return Response({'message': 'You have left the event.'})
+    return Response({'message': 'You have left the event.',
+                     'is_attending': False,
+                     'attendee_count': event.attendees.count()})
 
 
 @api_view(['PUT', 'PATCH'])
@@ -175,41 +240,172 @@ def edit_event_api(request, slug):
         return Response({'error': 'Only the creator can edit this event.'},
                         status=status.HTTP_403_FORBIDDEN)
 
-    for field in ['title', 'description', 'start_time', 'end_time', 'is_virtual', 'virtual_link', 'location']:
-        if field in request.data:
+    for field in ['title', 'description']:
+        if field in request.data and str(request.data[field]).strip():
             setattr(event, field, request.data[field])
+    for field in ['start_time', 'end_time']:
+        if field in request.data and request.data[field]:
+            parsed = _dt(request.data[field])
+            if parsed is None:
+                return Response({'error': f'Invalid {field}.'}, status=status.HTTP_400_BAD_REQUEST)
+            setattr(event, field, parsed)
+    if event.end_time <= event.start_time:
+        return Response({'error': 'The event must end after it starts.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    if 'is_virtual' in request.data:
+        event.is_virtual = _bool(request.data['is_virtual'])
+    if 'virtual_link' in request.data:
+        event.virtual_link = request.data['virtual_link'] or None
+    if 'location' in request.data:
+        event.location = request.data['location'] or None
     if 'category' in request.data:
-        event.category_id = request.data['category']
+        cid = request.data['category']
+        if cid:
+            category = Groupcategory.objects.filter(id=cid).first()
+            if category is None:
+                return Response({'error': 'Invalid category.'}, status=status.HTTP_400_BAD_REQUEST)
+            event.category = category
+        else:
+            event.category = None
     if 'event_image' in request.FILES:
         event.event_image = request.FILES['event_image']
     event.save()
-    return Response({'message': 'Event updated successfully.'})
+    return Response({'message': 'Event updated successfully.',
+                     'event': _event_dict(event, request, detail=True)})
+
+
+def _ai_text(prompt, system=None):
+    """One completion for the AI event endpoint.
+
+    The website uses OpenAI (commu_prenair/views.py generate_ai_event); the
+    previous API view used a Groq model that no longer exists. Try OpenAI
+    first, then Groq. Kept as a module-level function so tests can stub it.
+    """
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+    last_error = None
+    if getattr(settings, 'OPENAI_API_KEY', None):
+        try:
+            from openai import OpenAI
+            resp = OpenAI(api_key=settings.OPENAI_API_KEY).chat.completions.create(
+                model="gpt-3.5-turbo", messages=messages, max_tokens=500)
+            return resp.choices[0].message.content
+        except Exception as e:  # noqa: BLE001
+            last_error = e
+    if getattr(settings, 'GROQ_API_KEY', None):
+        try:
+            from groq import Groq
+            resp = Groq(api_key=settings.GROQ_API_KEY).chat.completions.create(
+                messages=messages, model="llama-3.1-8b-instant")
+            return resp.choices[0].message.content
+        except Exception as e:  # noqa: BLE001
+            last_error = e
+    raise RuntimeError(str(last_error) if last_error else 'No AI provider is configured.')
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def generate_ai_event_api(request):
-    """Generate event details using AI (Groq)"""
-    prompt = request.data.get('prompt', '')
-    if not prompt:
-        return Response({'error': 'Prompt is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    """Create (or draft) an event from an idea, using AI.
 
+    Two shapes, because two clients use it:
+
+    * website / tablet dialog (multipart): `idea`, `start_time`, `end_time`,
+      `is_virtual` ('true'/'false'), `virtual_link`, `location`, `category`,
+      `event_image` -- the AI writes the title + description and the event is
+      CREATED, exactly like the website's generate_ai_event view. Responds
+      `{"success": true, "slug": ...}`.
+    * phone "Draft it" (JSON): `prompt` only -- nothing is created; the
+      generated fields come back as JSON for the create-event form.
+    """
+    idea = request.data.get('idea')
+    if not idea and request.data.get('prompt') and 'event_image' not in request.FILES \
+            and not request.data.get('start_time'):
+        return _ai_event_draft(request)
+    if not idea:
+        return Response({'success': False, 'error': 'Describe your event idea.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    start_time = _dt(request.data.get('start_time'))
+    end_time = _dt(request.data.get('end_time'))
+    if not (start_time and end_time):
+        return Response({'success': False, 'error': 'Start and end time are required.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    if end_time <= start_time:
+        return Response({'success': False, 'error': 'The event must end after it starts.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    event_image = request.FILES.get('event_image')
+    is_virtual = _bool(request.data.get('is_virtual'))
+    virtual_link = request.data.get('virtual_link') or ''
+    location = request.data.get('location') or ''
+    category_id = request.data.get('category') or None
+    category = None
+    if category_id:
+        category = Groupcategory.objects.filter(id=category_id).first()
+        if category is None:
+            return Response({'success': False, 'error': 'Invalid category.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    prompt = (
+        "Create a compelling event title and professional description based on:\n"
+        f"Idea: {idea}\nStart: {request.data.get('start_time')}\nEnd: {request.data.get('end_time')}\n"
+        f"Type: {'Virtual' if is_virtual else 'Physical'}\n"
+        "Format the title as the first line and description as markdown text following it. "
+        "Do not include any **** in title"
+    )
     try:
-        from groq import Groq
-        client = Groq(api_key=settings.GROQ_API_KEY)
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": "You are an event planning assistant. Generate event details as JSON with keys: title, description, start_time (ISO format), end_time (ISO format), location, is_virtual (bool)."},
-                {"role": "user", "content": prompt}
-            ],
-            model="llama3-8b-8192",
-        )
-        import markdown
-        from django.utils.safestring import mark_safe
-        result = json.loads(response.choices[0].message.content)
-        return Response(result)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        content = _ai_text(prompt) or ''
+    except Exception as e:  # noqa: BLE001
+        return Response({'success': False, 'error': f'AI service unavailable: {e}'},
+                        status=status.HTTP_502_BAD_GATEWAY)
+    lines = [ln for ln in content.strip().split('\n')]
+    title = (lines[0] if lines else '').replace('#', '').replace('*', '').strip()[:200]
+    description = '\n'.join(lines[1:]).strip()
+    if not title:
+        title = str(idea).strip()[:80]
+    if not description:
+        description = str(idea).strip()
+
+    event = Event.objects.create(
+        title=title,
+        description=description,
+        creator=request.user,
+        start_time=start_time,
+        end_time=end_time,
+        is_virtual=is_virtual,
+        virtual_link=virtual_link if is_virtual else None,
+        location=location if not is_virtual else None,
+        event_image=event_image,
+        category=category,
+        slug=slugify(title) + '-' + str(uuid.uuid4())[:6],
+    )
+    event.attendees.add(request.user)
+    return Response({'success': True, 'slug': event.slug, 'title': event.title,
+                     'message': 'Event created successfully.'},
+                    status=status.HTTP_201_CREATED)
+
+
+def _ai_event_draft(request):
+    prompt = request.data.get('prompt', '')
+    system = ("You are an event planning assistant. Reply with ONLY a JSON object with keys: "
+              "title, description, start_time (ISO format), end_time (ISO format), "
+              "location, is_virtual (bool).")
+    try:
+        text = _ai_text(prompt, system=system) or ''
+    except Exception as e:  # noqa: BLE001
+        return Response({'error': f'AI service unavailable: {e}'}, status=status.HTTP_502_BAD_GATEWAY)
+    # Models often wrap the JSON in prose or a code fence.
+    start, end = text.find('{'), text.rfind('}')
+    try:
+        result = json.loads(text[start:end + 1])
+    except Exception:  # noqa: BLE001
+        lines = text.strip().split('\n')
+        result = {'title': lines[0].replace('#', '').replace('*', '').strip(),
+                  'description': '\n'.join(lines[1:]).strip()}
+    return Response(result)
 
 
 # =============================================================================
@@ -645,27 +841,49 @@ def edit_lesson_api(request, lesson_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_to_project_api(request):
-    """Add product to project"""
+    """Add purchased items to a project (mirrors digi_prenair.views.add_to_project).
+
+    Body: `item_ids` (OrderItem ids) and either `project_id` or `project_name`
+    (+ optional `project_description`). `product_id` is also accepted and means
+    "the caller's purchased line(s) of that product". The old version tried to
+    create an OrderItem with no order, which violates NOT NULL and 500'd.
+    """
+    user = request.user
+    item_ids = request.data.get('item_ids') or []
     product_id = request.data.get('product_id')
-    project_name = request.data.get('project_name', '')
-    product = get_object_or_404(Product, id=product_id)
+    project_id = request.data.get('project_id')
+    project_name = (request.data.get('project_name') or '').strip()
 
-    project, created = Project.objects.get_or_create(
-        user=request.user,
-        name=project_name or 'My Project'
-    )
+    items = OrderItem.objects.filter(order__user=user, order__is_paid=True)
+    if item_ids:
+        items = items.filter(id__in=item_ids)
+    elif product_id:
+        items = items.filter(product_id=product_id)
+    else:
+        return Response({'success': False, 'message': 'Invalid request'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    if not items.exists():
+        return Response({'success': False,
+                         'message': 'You have not purchased that item.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
-    # Create order item for this product
-    order_item = OrderItem.objects.create(
-        order=None,
-        product=product,
-        quantity=1,
-        price=product.price,
-    )
-    project.order_items.add(order_item)
+    if project_id:
+        project = get_object_or_404(Project, id=project_id, user=user)
+    elif project_name:
+        project, _ = Project.objects.get_or_create(
+            user=user, name=project_name,
+            defaults={'description': request.data.get('project_description', '')},
+        )
+    else:
+        return Response({'success': False, 'message': 'Invalid request'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    project.order_items.add(*items)
     project.save()
 
-    return Response({'message': f'Product added to project "{project.name}".'},
+    return Response({'success': True,
+                     'message': f'Added to project "{project.name}".',
+                     'project_id': project.id},
                     status=status.HTTP_201_CREATED)
 
 
@@ -673,13 +891,20 @@ def add_to_project_api(request):
 @permission_classes([IsAuthenticated])
 def digi_projects_api(request):
     """List user's projects"""
-    projects = Project.objects.filter(user=request.user)
+    projects = Project.objects.filter(user=request.user).order_by('-updated_at')
     data = [{
         'id': p.id,
         'name': p.name,
         'description': p.description,
         'created_at': p.created_at,
+        'updated_at': p.updated_at,
         'items_count': p.order_items.count(),
+        # Product thumbnails on the project card.
+        'preview_images': [
+            oi.product.image.url
+            for oi in p.order_items.select_related('product')[:4]
+            if oi.product.image
+        ],
     } for p in projects]
     return Response({'projects': data})
 
@@ -690,10 +915,21 @@ def digi_project_detail_api(request, project_id):
     """Get project detail"""
     project = get_object_or_404(Project, id=project_id, user=request.user)
     items = OrderItemSerializer(project.order_items.all(), many=True).data
+    # Add product details next to the serializer's ids (additive).
+    by_id = {oi.id: oi for oi in project.order_items.select_related('product')}
+    for row in items:
+        oi = by_id.get(row['id'])
+        if oi:
+            row['product_title'] = oi.product.title
+            row['product_slug'] = oi.product.slug
+            row['product_image'] = oi.product.image.url if oi.product.image else None
+            row['file_url'] = oi.product.downloadable_file.url if oi.product.downloadable_file else None
     return Response({
         'id': project.id,
         'name': project.name,
         'description': project.description,
+        'created_at': project.created_at,
+        'updated_at': project.updated_at,
         'items': items,
     })
 

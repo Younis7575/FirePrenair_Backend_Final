@@ -29,6 +29,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close(code=4404)
             return
 
+        # Only the two participants may join a conversation; knowing the slug
+        # was enough to read and post in anyone's chat.
+        if self.user.id not in (self.chat.user1_id, self.chat.user2_id):
+            await self.close(code=4403)
+            return
+
         self.room_group_name = f'chat_{self.chat_slug}'
         
         await self.channel_layer.group_add(
@@ -74,7 +80,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_user_offline(self, user):
+        from django.utils.timezone import now
         user.is_online = False
+        # The website's chat header shows "Last seen: <time_since_last_seen>".
+        user.last_seen = now()
         user.save()
 
     async def receive(self, text_data):

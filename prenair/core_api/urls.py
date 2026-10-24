@@ -284,6 +284,7 @@ urlpatterns = [
     path("eduprenair/announcements/add/", add_announcement_api, name="add_edu_announcement_api"),
     path("eduprenair/announcements/<int:id>/delete/", delete_announcement_api, name="delete_edu_announcement_api"),
     path("eduprenair/earnings/", earnings_api, name="edu_earnings_api"),
+    path("eduprenair/course/<slug:course_slug>/enroll-free/", course_free_enroll_api, name="course_free_enroll_api"),
     path("eduprenair/course/<slug:course_slug>/checkout/", course_payment_view_api, name="course_checkout_api"),
     path("eduprenair/course-webhook/stripe/", stripe_webhook_api, name="course-stripe-webhook_api"),
     path("eduprenair/get-child-categories/<int:category_id>/", _edu_views.edu_child_categories_api, name="edu_child_categories_api"),

@@ -558,9 +558,18 @@ def add_course_api(request):
     requirements = request.data.get("requirements")
     language = request.data.get("language")
     price = request.data.get("price")
-    is_free = bool(request.data.get("is_free"))
+    # Multipart/JSON bodies carry "false" as a string, and bool("false") is True,
+    # which made every course created from the app free.
+    is_free = str(request.data.get("is_free", "")).strip().lower() in ("1", "true", "yes", "on")
+    monthly = str(request.data.get("monthly_subscription", "")).strip().lower() in ("1", "true", "yes", "on")
+    discount_price = request.data.get("discount_price")
     level = request.data.get("level")
     duration = request.data.get("duration")
+    # The model stores whole hours; accept "5", "5 hours" and the like instead
+    # of a 500 "expected a number".
+    import re as _re
+    _m = _re.search(r"\d+", str(duration or ""))
+    duration = int(_m.group()) if _m else None
     thumbnail = request.FILES.get("thumbnail")
 
     # title/description/requirements/language/level are all NOT NULL on the
@@ -575,6 +584,7 @@ def add_course_api(request):
             "requirements": requirements,
             "language": language,
             "level": level,
+            "duration (hours, a number)": duration,
         }.items()
         if not value
     ]
@@ -598,13 +608,26 @@ def add_course_api(request):
             description=description,
             requirements=requirements,
             language=language,
-            price=price if not is_free else 0,
+            price=0 if is_free else (price or 0),
+            discount_price=(
+                None if is_free or discount_price in (None, "", "0", "0.0", "0.00")
+                else discount_price
+            ),
+            monthly_subscription=False if is_free else monthly,
             is_free=is_free,
             level=level,
             duration=duration,
             thumbnail=thumbnail,
             is_published=False,
         )
+        for field, key in (("category_l_2", "category_l_2"), ("category_l_3", "category_l_3")):
+            cid = request.data.get(key)
+            if cid:
+                try:
+                    setattr(course, field, CourseCategory.objects.get(id=cid))
+                except (CourseCategory.DoesNotExist, ValueError):
+                    pass
+        course.save()
 
         return Response(
             {"message": "Course created successfully! Awaiting approval."},
@@ -1585,6 +1608,47 @@ def send_email(to_email, subject, html_content):
 
 
 # <---------------------------------------- Course Payments -------------------------------->
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def course_free_enroll_api(request, course_slug):
+    """POST eduprenair/course/<slug>/enroll-free/ — enrol in a free course.
+
+    Paid courses go through Stripe/PayPal and are enrolled by the payment
+    webhook; a free course has nothing to pay, so it is enrolled here directly
+    (same records the webhook creates).
+    """
+    course = get_object_or_404(Course, slug=course_slug)
+    if not course.is_free:
+        return Response(
+            {"error": "This course is not free. Please pay to enroll."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not course.is_published:
+        return Response(
+            {"error": "This course is not available yet."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if course.instructor_id == request.user.id:
+        return Response(
+            {"error": "You teach this course."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    enrollment, created = StudentEnrollment.objects.get_or_create(
+        user=request.user, course=course
+    )
+    course.enrolled_students.add(request.user)
+    if created:
+        Notification.objects.create(
+            user=course.instructor,
+            message=f"{request.user.username} has enrolled in your course {course.title}",
+            app_name="eduprenair",
+        )
+    return Response(
+        {"message": "You are enrolled.", "slug": course.slug, "already_enrolled": not created},
+        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+    )
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY

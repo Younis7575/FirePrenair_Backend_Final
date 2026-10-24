@@ -6,7 +6,7 @@
         <div class="product">
             <div class="product-img">
                 <a href="{% url "course_detail" enroll.course.slug %}">
-                    <img class="img-fluid" alt="Img" src="{{enroll.course.thumbnail.url}}">
+                    <img class="img-fluid" alt="Img" src="{{enroll.course.thumbnail_src}}">
                 </a>
                 {% if course.is_course_on_discount %}
 		    	<div class="price">

@@ -1732,7 +1732,7 @@ color: #0045a0;
 								<div class="product">
 									<div class="product-img">
 										<a href="{% url 'course_detail' course.slug %}">
-											<img class="img-fluid" alt="Img" src="{{course.thumbnail.url}}">
+											<img class="img-fluid" alt="Img" src="{{course.thumbnail_src}}">
 										</a>
 										{% if course.is_course_on_discount %}
 											<div class="price">

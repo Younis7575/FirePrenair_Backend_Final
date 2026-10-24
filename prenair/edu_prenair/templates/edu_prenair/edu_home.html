@@ -198,11 +198,11 @@
 									<div class="product-img">
 										{% if course|is_user_enrolled:request.user %}
 										<a href="{% url 'course_detail' course.slug %}">
-											<img class="img-fluid" alt="Img" src="{{course.thumbnail.url}}">
+											<img class="img-fluid" alt="Img" src="{{course.thumbnail_src}}">
 										</a>
 										{% else %}
 										<a href="{% url 'course_detail' course.slug %}" class="course-link">
-											<img class="img-fluid" alt="Img" src="{{course.thumbnail.url}}">
+											<img class="img-fluid" alt="Img" src="{{course.thumbnail_src}}">
 										</a>
 										{% endif %}
 										{% if course.is_course_on_discount %}

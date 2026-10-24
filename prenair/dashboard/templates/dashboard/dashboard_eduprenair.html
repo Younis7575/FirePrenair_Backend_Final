@@ -619,7 +619,7 @@ Eduprenair{% endblock title %} {% load static %}
                         class="avatar flex-shrink-0 w-20 h-15  overflow-hidden"
                       >
                         <img
-                          src="{{ course.thumbnail.url }}"
+                          src="{{ course.thumbnail_src }}"
                           alt="{{ course.title }}"
                           class="w-full h-full object-cover"
                         />
@@ -698,7 +698,7 @@ Eduprenair{% endblock title %} {% load static %}
                         href="{% url 'course_detail' course.course.slug %}" target="_blank"
                         class="avatar flex-shrink-0 w-20 h-15  overflow-hidden"
                       >
-                        <img src="{{ course.course.thumbnail.url }}" alt="{{ course.course.title }}" class="w-full h-full object-cover"/>
+                        <img src="{{ course.course.thumbnail_src }}" alt="{{ course.course.title }}" class="w-full h-full object-cover"/>
                       </a>
                       <a href="{% url 'course_detail' course.course.slug %}" class="block">
                         <strong class="candidates_name -style-1 heading6 duration-300 hover:text-primary">{{ course.course.title }}</strong>

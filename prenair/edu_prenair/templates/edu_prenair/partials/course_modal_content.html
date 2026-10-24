@@ -532,11 +532,11 @@
                                                             <i class="fa-solid fa-play"></i>
                                                         </div>
                                                     </div>
-                                                    <img style="border-radius: 10px;" src="{{ course.thumbnail.url }}" alt="Course Thumbnail" class="video-hero-thumbnail">
+                                                    <img style="border-radius: 10px;" src="{{ course.thumbnail_src }}" alt="Course Thumbnail" class="video-hero-thumbnail">
                                                 </div>
                                             {% else %}
                                                 <div class="video-thumbnail">
-                                                    <img style="border-radius: 10px;" src="{{ course.thumbnail.url }}" alt="Course Thumbnail">
+                                                    <img style="border-radius: 10px;" src="{{ course.thumbnail_src }}" alt="Course Thumbnail">
                                                 </div>
                                             {% endif %}
                                         {% endwith %}
@@ -618,7 +618,7 @@
                                         <div class="product">
                                             <div class="product-img">
                                                 <a href="{% url 'course_detail' course.slug %}" class="course-link">
-                                                    <img class="img-fluid" alt="Img" src="{{ course.thumbnail.url }}">
+                                                    <img class="img-fluid" alt="Img" src="{{ course.thumbnail_src }}">
                                                 </a>
                                                 <div class="price">
                                                     {% if course.is_course_on_discount %}

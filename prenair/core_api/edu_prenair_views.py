@@ -585,6 +585,7 @@ def add_course_api(request):
             "language": language,
             "level": level,
             "duration (hours, a number)": duration,
+            "thumbnail": thumbnail,
         }.items()
         if not value
     ]

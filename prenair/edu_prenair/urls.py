@@ -43,6 +43,7 @@ urlpatterns = [
 
     path("earnings/", earnings, name="edu_earnings"),
 
+    path("course/<slug:course_slug>/enroll-free/", course_free_enroll, name="course_free_enroll"),
     path("course/<slug:course_slug>/checkout/",course_payment_view, name="course_checkout",),
     path("course-webhook/stripe/", stripe_webhook, name="course-stripe-webhook"),
     path("get-child-categories/<int:category_id>/",get_subcategories,name="get_child_categories"),

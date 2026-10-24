@@ -804,11 +804,11 @@
 															<i style="padding-left: 0;" class="fa-solid fa-play"></i>
 														</div>
 													</div>
-													<img src="{{ course.thumbnail.url }}" alt="Course Thumbnail" class="video-hero-thumbnail">
+													<img src="{{ course.thumbnail_src }}" alt="Course Thumbnail" class="video-hero-thumbnail">
 												</div>
 												{% else %}
 													<div class="video-thumbnail">
-														<img src="{{ course.thumbnail.url }}" alt="Course Thumbnail">
+														<img src="{{ course.thumbnail_src }}" alt="Course Thumbnail">
 													</div>
 												{% endif %}
 											{% endwith %}
@@ -1027,6 +1027,11 @@
 
 
 	function openCheckoutPopup(courseSlug, courseTitle, coursePrice) {
+    // A free course has nothing to pay: enrol straight away.
+    if (parseFloat(coursePrice) === 0) {
+        window.location.href = `/eduprenair/course/${courseSlug}/enroll-free/`;
+        return;
+    }
     const stripeCheckoutUrl = `/eduprenair/course/${courseSlug}/checkout/`;
     const paypalCheckoutUrl = `/eduprenair/paypal-checkout/${courseSlug}/`;
 

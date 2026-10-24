@@ -81,6 +81,16 @@ class Course(models.Model):
         ).exclude(slug=self.slug).distinct()[:8]
 
     
+    @property
+    def thumbnail_src(self):
+        """Thumbnail URL for templates; a placeholder when no file was uploaded
+        (`thumbnail.url` raises ValueError on an empty file, which 500'd the
+        course page)."""
+        try:
+            return self.thumbnail.url if self.thumbnail else "/images/misc/placeholder.svg"
+        except ValueError:
+            return "/images/misc/placeholder.svg"
+
     def course_price(self):
         return self.discount_price if self.discount_price else self.price
     

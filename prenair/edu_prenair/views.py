@@ -1397,6 +1397,29 @@ from paypalrestsdk import Payment
 
 
 @login_required
+def course_free_enroll(request, course_slug):
+    """Enrol in a free course without going through a payment provider."""
+    course = get_object_or_404(Course, slug=course_slug)
+    if not course.is_free:
+        messages.warning(request, "This course is not free. Please pay to enroll.")
+        return redirect("course_detail", slug=course_slug)
+    if course.instructor_id == request.user.id:
+        return redirect("course_content", slug=course_slug)
+    enrollment, created = StudentEnrollment.objects.get_or_create(
+        user=request.user, course=course
+    )
+    course.enrolled_students.add(request.user)
+    if created:
+        Notification.objects.create(
+            user=course.instructor,
+            message=f"{request.user.username} has enrolled in your course {course.title}",
+            app_name="eduprenair",
+        )
+        messages.success(request, "You are enrolled. Happy learning!")
+    return redirect("course_content", slug=course_slug)
+
+
+@login_required
 def paypal_course_checkout(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug)
     if course.is_free:

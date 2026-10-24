@@ -34,7 +34,8 @@ from django.urls import reverse
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.decorators import parser_classes
 from .serializers import *
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view  # <-- Add this import
@@ -1001,6 +1002,63 @@ def private_chat_api(request, slug):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def private_chat_send_api(request, slug):
+    """
+    POST commuprenair/chat/<slug>/send/ — body `message` (text) and/or a
+    multipart `file`. The WebSocket consumer is the website's way to create
+    messages; this is the same thing over plain HTTP so the app can still send
+    when the socket cannot connect (it is also pushed to the room, so a peer
+    with a live socket sees it at once).
+    """
+    chat = PrivateChat.objects.filter(slug=slug).first()
+    if not chat:
+        return Response({"error": "Chat not found."}, status=status.HTTP_404_NOT_FOUND)
+    if request.user.id not in (chat.user1_id, chat.user2_id):
+        return Response({"error": "You are not part of this chat."},
+                        status=status.HTTP_403_FORBIDDEN)
+
+    text = (request.data.get('message') or '').strip()
+    upload = request.FILES.get('file')
+    if not text and not upload:
+        return Response({"error": "Nothing to send."}, status=status.HTTP_400_BAD_REQUEST)
+
+    receiver = chat.user2 if chat.user1_id == request.user.id else chat.user1
+    msg = Message.objects.create(
+        chat=chat,
+        sender=request.user,
+        receiver=receiver,
+        content=text if not upload else '',
+        file=upload if upload else None,
+    )
+
+    try:
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        layer = get_channel_layer()
+        if layer is not None:
+            event = (
+                {'type': 'file_message', 'file_name': msg.file.url}
+                if upload else
+                {'type': 'chat_message', 'message': msg.content}
+            )
+            event.update({
+                'sender': request.user.username,
+                'id': msg.id,
+                'timestamp': msg.timestamp.isoformat(),
+            })
+            async_to_sync(layer.group_send)(f'chat_{chat.slug}', event)
+    except Exception:
+        pass  # the message is saved; live delivery is best-effort
+
+    return Response(
+        MessageSerializer(msg, context={'request': request}).data,
+        status=status.HTTP_201_CREATED,
+    )
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

@@ -78,6 +78,7 @@ urlpatterns = [
 
     path("commuprenair/chat/", user_messages_api, name="commu_messages_api"),
     path('commuprenair/chat/<str:slug>/', private_chat_api, name='private_chat_api'),
+    path('commuprenair/chat/<str:slug>/send/', private_chat_send_api, name='private_chat_send_api'),
 
     path('commuprenair/sub-child-categories/<int:category_id>/', get_subcategories_api, name='get_subcategories_api'),
 

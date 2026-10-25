@@ -214,6 +214,23 @@ if [ -d "$NGINX_SRC" ] && [ -n "$NGINX_SITE" ] && [ -f "$NGINX_SITE" ]; then
   fi
 fi
 
+# ── 6d. Optional secrets pushed from GitHub ──────────────────────────────────
+# GEMINI_API_KEY (repository secret) is written into the server's .env so the
+# site's "Generate with AI" runs on Gemini. The value is never echoed. Remove
+# or change the secret in GitHub and the next deploy updates the line.
+ENV_FILE="$DJANGO_DIR/.env"
+if [ -n "${GEMINI_API_KEY:-}" ] && [ -f "$ENV_FILE" ]; then
+  log "Updating GEMINI_API_KEY in .env"
+  TMP_ENV="$(mktemp)"
+  grep -v '^GEMINI_API_KEY=' "$ENV_FILE" > "$TMP_ENV" || true
+  printf 'GEMINI_API_KEY=%s\n' "$GEMINI_API_KEY" >> "$TMP_ENV"
+  chmod --reference="$ENV_FILE" "$TMP_ENV" 2>/dev/null || chmod 600 "$TMP_ENV"
+  cat "$TMP_ENV" > "$ENV_FILE"
+  rm -f "$TMP_ENV"
+elif [ -n "${GEMINI_API_KEY:-}" ]; then
+  log "WARNING: GEMINI_API_KEY is set but $ENV_FILE does not exist — not written"
+fi
+
 # ── 7. Restart and verify ────────────────────────────────────────────────────
 log "Restarting $SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"

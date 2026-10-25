@@ -144,7 +144,12 @@ jobs:
       - name: Deploy over SSH
         if: steps.preflight.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          # Optional repository secret. When set, deploy.sh writes it into the
+          # server's .env (the value never appears in the repo or the logs).
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
+          envs: GEMINI_API_KEY
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}

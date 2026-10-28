@@ -129,11 +129,21 @@ def workprenair_chatbot_view(request):
 
 
 def work_home(request):
-    web_dev_gigs = Gig.objects.filter(category_level_1__name='Programming & Tech')[:8]
-    design_gigs = Gig.objects.filter(category_level_1__name='Graphics & Design')[:8]
-    ai_gigs = Gig.objects.filter(category_level_1__name='AI')[:8]
-    writing_gigs = Gig.objects.filter(category_level_1__name='Writing')[:8]
-    marketing_gigs = Gig.objects.filter(category_level_1__name='Digital Marketing')[:8]
+    # Every card renders the seller and the category: without these each gig
+    # costs several extra queries, which over the production database's
+    # latency made this page take tens of seconds.
+    def gigs_in(name):
+        return (
+            Gig.objects.filter(category_level_1__name=name)
+            .select_related('user', 'user__badge', 'category_level_1', 'category_level_2', 'category_level_3')
+            .prefetch_related('tags')[:8]
+        )
+
+    web_dev_gigs = gigs_in('Programming & Tech')
+    design_gigs = gigs_in('Graphics & Design')
+    ai_gigs = gigs_in('AI')
+    writing_gigs = gigs_in('Writing')
+    marketing_gigs = gigs_in('Digital Marketing')
 
     top_categories = Category.objects.filter(is_featured=True, parent=None)
 

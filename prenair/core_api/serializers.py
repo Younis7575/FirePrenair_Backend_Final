@@ -713,11 +713,21 @@ class WorkCategorySerializer(serializers.ModelSerializer):
 
 class CategoryWithSubcategoriesSerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
-    gig_count = serializers.ReadOnlyField()
+    gig_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Category
         fields = ['id', 'name', 'description', 'parent', 'is_featured', 'img', 'gig_count', 'subcategories']
+
+    @staticmethod
+    def _count(obj):
+        # work_home_api annotates `gig_total` so the counts cost no queries;
+        # any other caller falls back to the model method.
+        total = getattr(obj, 'gig_total', None)
+        return total if total is not None else obj.gig_count()
+
+    def get_gig_count(self, obj):
+        return self._count(obj)
     
     def get_subcategories(self, obj):
         # Get all subcategories for this category
@@ -726,10 +736,10 @@ class CategoryWithSubcategoriesSerializer(serializers.ModelSerializer):
             'id': sub.id,
             'name': sub.name,
             'description': sub.description,
-            'parent': sub.parent.id,
+            'parent': sub.parent_id,
             'is_featured': sub.is_featured,
             'img': sub.img.url if sub.img else None,
-            'gig_count': sub.gig_count(),
+            'gig_count': self._count(sub),
         } for sub in subcategories]
 
 

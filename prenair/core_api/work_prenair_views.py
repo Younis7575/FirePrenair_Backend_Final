@@ -54,7 +54,7 @@ import json
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from profiles.models import Notification
 
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.db.models.functions import ExtractMonth, ExtractYear
 from calendar import month_name
 from django.utils.timezone import now, timedelta
@@ -300,9 +300,24 @@ def work_home_api(request):
         for gig in gigs.exclude(pk__in=picked_ids)[: HOME_GIGS_LIMIT - len(picked)]:
             picked.append(gig)
 
-    top_categories = Category.objects.filter(
-        is_featured=True, parent=None
-    ).prefetch_related('subcategories')
+    # One annotated query per level instead of three COUNT(*) per category
+    # (~70 round trips): against the production database each one is a
+    # network hop, which made this endpoint take over 30s.
+    gig_total = (
+        Count('gigs_level_1', distinct=True)
+        + Count('gigs_level_2', distinct=True)
+        + Count('gigs_level_3', distinct=True)
+    )
+    top_categories = (
+        Category.objects.filter(is_featured=True, parent=None)
+        .annotate(gig_total=gig_total)
+        .prefetch_related(
+            Prefetch(
+                'subcategories',
+                queryset=Category.objects.annotate(gig_total=gig_total),
+            )
+        )
+    )
 
     return Response({
         'all_gigs': GigSerializer(picked, many=True).data,
@@ -631,7 +646,7 @@ def gigs_api(request):
         location_filter = request.GET.get('location', '').strip()
         sort_by = request.GET.get('sort_by', 'relevance')
 
-        gigs = Gig.objects.all()
+        gigs = Gig.objects.select_related('user').prefetch_related('tags')
 
         # Filtering by keyword
         if keyword:

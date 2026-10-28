@@ -107,6 +107,19 @@ def _as_completion(text, model):
     )
 
 
+def _brief(exc):
+    resp = getattr(exc, "response", None)
+    text = ""
+    if resp is not None:
+        try:
+            text = resp.json().get("error", {}).get("message", "") or resp.text[:200]
+        except Exception:
+            text = (getattr(resp, "text", "") or "")[:200]
+    key = os.environ.get("GEMINI_API_KEY", "")
+    out = (text or str(exc))[:300]
+    return out.replace(key, "***") if key else out
+
+
 def _wrap(original):
     def create(self, *args, **kwargs):
         if os.environ.get("GEMINI_API_KEY", "").strip() and not args:
@@ -132,6 +145,16 @@ def _wrap(original):
                     return _as_completion(text, kwargs.get("model", "gemini"))
                 except Exception as exc:  # fall back to Groq / OpenAI
                     logger.warning("Gemini failed (%s); using the original AI client", exc)
+                    try:
+                        return original(self, *args, **kwargs)
+                    except Exception as fallback_exc:
+                        # Say why Gemini was not used as well: otherwise only
+                        # the fallback's "Invalid API Key" reaches the app and
+                        # hides the real cause.
+                        raise RuntimeError(
+                            "Gemini failed: %s | Fallback AI failed: %s"
+                            % (_brief(exc), _brief(fallback_exc))
+                        ) from fallback_exc
         return original(self, *args, **kwargs)
 
     create._gemini_wrapped = True
